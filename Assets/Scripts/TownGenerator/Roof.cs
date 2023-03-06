@@ -17,8 +17,6 @@ public class Roof : MonoBehaviour
     [SerializeField] private GameObject m_SupportBeamPrefab;
     [SerializeField] private Material m_RoofTileMaterial;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
-
-
     public float Height => m_Height;
     public RoofType FrameType => m_FrameType;
     public Material RoofTileMaterial => m_RoofTileMaterial;
@@ -168,9 +166,6 @@ public class Roof : MonoBehaviour
         GameObject tiles = new GameObject("Tiles");
         tiles.transform.SetParent(transform, false);
 
-        //Vector2 externalOffset = -m_ColourPalette.GetColorCoordinateByName("Roof_Tile_2").uv;
-        //Vector2 internalOffset = -m_ColourPalette.GetColorCoordinateByName("Wall_0").uv;
-
         for (int i = 0; i < supportBeams.Length; i++)
         {
             int next = controlPointsArray.GetNextControlPoint(i);
@@ -189,13 +184,11 @@ public class Roof : MonoBehaviour
     {
         Vector3[] controlPointsArray = m_ControlPoints.ToArray();
 
-        GameObject roofFrame = new GameObject("Mansard Roof Frame");
+        GameObject roofFrame = new ("Mansard Roof Frame");
         roofFrame.transform.SetParent(transform, false);
 
-        GameObject tiles = new GameObject("Mansard Roof Tiles");
+        GameObject tiles = new ("Mansard Roof Tiles");
         tiles.transform.SetParent(transform, false);
-
-        //Vector3[] newPillarTops = new Vector3[controlPointsArray.Length];
 
         List<Extrudable> supportPoints = new();
         Vector3[] startPositions = new Vector3[controlPointsArray.Length];
@@ -213,7 +206,7 @@ public class Roof : MonoBehaviour
 
             if (!controlPointsArray.IsPointInsidePolygon(pos))
             {
-                pos = -pos;
+                pos = controlPointsArray[i] - c;
             }
 
             startPositions[i] = pos + (Vector3.up * m_Height);
@@ -222,11 +215,7 @@ public class Roof : MonoBehaviour
         for (int i = 0; i < controlPointsArray.Length; i++)
         {
             Beam beam = Beam.Create(m_SupportBeamPrefab, transform).Build(startPositions[i], controlPointsArray[i], 1);
-
-            //Extrudable a = ConstructSingleSupport(startPositions[i], controlPointsArray[i], 1);
-
             beam.transform.SetParent(roofFrame.transform, true);
-            //newPillarTops[i] = a.transform.localPosition;
             supportPoints.Add(beam);
         }
 
@@ -234,12 +223,8 @@ public class Roof : MonoBehaviour
         {
             int next = controlPointsArray.GetNextControlPoint(i);
             Beam beam = Beam.Create(m_SupportBeamPrefab, transform).Build(supportPoints[i].transform.localPosition, supportPoints[next].transform.localPosition, 0);
-            //Extrudable connector = ConstructSingleSupport(supportPoints[i].transform.localPosition, supportPoints[next].transform.localPosition, 0);
             beam.transform.SetParent(roofFrame.transform, true);
         }
-
-        //Vector2 externalOffset = -m_ColourPalette.GetColorCoordinateByName("Roof_Tile_2").uv;
-        //Vector2 internalOffset = -m_ColourPalette.GetColorCoordinateByName("Wall_0").uv;
 
         for (int i = 0; i < supportPoints.Count; i++)
         {
@@ -250,7 +235,6 @@ public class Roof : MonoBehaviour
             RoofTile roofTile = tile.AddComponent<RoofTile>().Initialize(extrudables, true);
             roofTile.transform.SetParent(tiles.transform, true);
             roofTile.SetMaterial(m_RoofTileMaterial);
-            //roofTile.SetUVOffset(internalOffset, externalOffset);
             roofTile.StartConstruction();
 
         }
@@ -269,9 +253,6 @@ public class Roof : MonoBehaviour
 
             GameObject tiles = new GameObject("Tiles");
             tiles.transform.SetParent(transform, false);
-
-            //Vector2 externalOffset = -m_ColourPalette.GetColorCoordinateByName("Roof_Tile_2").uv;
-            //Vector2 internalOffset = -m_ColourPalette.GetColorCoordinateByName("Wall_0").uv;
 
             List<RoofTile> roofTiles = new ();
 
