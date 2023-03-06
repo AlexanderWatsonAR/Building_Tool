@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8815db44b3d82a9428d1380c72306de9, type: 3}
+  m_Name: Building Colour Palette
+  m_EditorClassIdentifier: 
+  ColourExtractor: {fileID: 11400000, guid: 83f5541364dbcce47a2280b7e5c4055e, type: 2}
+  colourCoordinates:
+  - color: {r: 0.64705884, g: 0.3254902, b: 0.23137257, a: 0}
+    uv: {x: 0.812, y: 0.511}
+    name: Roof_Tile_2
+  - color: {r: 0.86274517, g: 0.8235295, b: 0.68235296, a: 0}
+    uv: {x: 0.915, y: 0.967}
+    name: Wall_0
+  - color: {r: 0.60784316, g: 0.49411768, b: 0.3529412, a: 0}
+    uv: {x: 0.99, y: 0.503}
+    name: Wood_2
+  - color: {r: 0.5137255, g: 0.4156863, b: 0.29803923, a: 0}
+    uv: {x: 0.99, y: 0.457}
+    name: Wood_3
+  - color: {r: 0.41960788, g: 0.34117648, b: 0.24705884, a: 0}
+    uv: {x: 0.99, y: 0.405}
+    name: Wood_4
