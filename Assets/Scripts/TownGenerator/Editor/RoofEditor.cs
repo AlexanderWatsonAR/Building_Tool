@@ -20,25 +20,42 @@ public class RoofEditor : Editor
         EditorGUILayout.ObjectField(serializedObject.FindProperty("m_SupportBeamPrefab"));
         EditorGUILayout.ObjectField(serializedObject.FindProperty("m_RoofTileMaterial"));
 
-        int index = serializedObject.FindProperty("m_FrameType").intValue;
+        SerializedProperty frameType = serializedObject.FindProperty("m_FrameType");
+
+        int index = 0;
+        int value = (int) frameType.GetEnumValue<RoofType>();
+        string frameName = frameType.GetEnumName<RoofType>();
 
         int[] frames = roof.AvailableRoofFrames();
-        string[] allOptions = serializedObject.FindProperty("m_FrameType").enumDisplayNames; // "Open Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
+        string[] allOptions = frameType.enumNames;
+        string[] allOptionsDisplay = frameType.enumDisplayNames; // "Open Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
         string[] options = new string[frames.Length];
+        string[] optionsDisplay = new string[frames.Length];
 
-        for(int i = 0; i < frames.Length; i++)
+        for (int i = 0; i < frames.Length; i++)
         {
+            optionsDisplay[i] = allOptionsDisplay[frames[i]];
             options[i] = allOptions[frames[i]];
+
+            if (frames[i] == value)
+            {
+                index = i;
+            }
         }
 
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Frame Type");
 
-        int frameIndex = EditorGUILayout.Popup(index, options);
-        //serializedObject.FindProperty("m_FrameType").SetEnumValue((RoofType)frames[frameIndex]); // grabs the current index from the frames array.
-        EditorGUILayout.EndHorizontal();
+        if (index == -1)
+        {
+            index = 0;
+        }
 
-        //EditorGUILayout.PropertyField(serializedObject.FindProperty("m_FrameType"));
+        int frameIndex = EditorGUILayout.Popup(index, optionsDisplay);
+
+        frameType.SetEnumValue((RoofType)frames[frameIndex]);
+
+        EditorGUILayout.EndHorizontal();
         EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
 
         float roofHeight = serializedObject.FindProperty("m_Height").floatValue;
