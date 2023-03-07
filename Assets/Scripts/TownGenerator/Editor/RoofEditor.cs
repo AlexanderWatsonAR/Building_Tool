@@ -56,7 +56,20 @@ public class RoofEditor : Editor
         frameType.SetEnumValue((RoofType)frames[frameIndex]);
 
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
+
+        if(frameType.enumValueIndex == (int)RoofType.Dormer || frameType.enumValueIndex == (int)RoofType.Mansard)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardHeight"));
+        }
+
+        if(frameType.enumValueIndex != (int)RoofType.Mansard)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
+        }
+
+
+        float mansardRoofHeight = serializedObject.FindProperty("m_MansardHeight").floatValue;
+        float mansardheight = roof.MansardHeight;
 
         float roofHeight = serializedObject.FindProperty("m_Height").floatValue;
         float height = roof.Height;
@@ -67,6 +80,7 @@ public class RoofEditor : Editor
         if (serializedObject.ApplyModifiedProperties())
         {
             if (height != roofHeight ||
+                mansardheight != mansardRoofHeight ||
                 type != roofType)
             {
                 if (roof.TryGetComponent(out Building building))

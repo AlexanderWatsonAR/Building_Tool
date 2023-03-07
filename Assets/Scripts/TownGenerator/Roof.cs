@@ -5,18 +5,21 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
-using static UnityEngine.UI.GridLayoutGroup;
 using UnityEngine.ProBuilder.Shapes;
+using Rando = UnityEngine.Random;
 
 [System.Serializable]
 public class Roof : MonoBehaviour
 {
-    [SerializeField] private float m_Height;
+    [SerializeField] private float m_Height, m_MansardHeight;
     [SerializeField] private RoofType m_FrameType;
     [SerializeField] private GameObject m_CentreBeamPrefab;
     [SerializeField] private GameObject m_SupportBeamPrefab;
     [SerializeField] private Material m_RoofTileMaterial;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
+    [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
+
+    public float MansardHeight => m_MansardHeight;
     public float Height => m_Height;
     public RoofType FrameType => m_FrameType;
     public Material RoofTileMaterial => m_RoofTileMaterial;
@@ -28,9 +31,11 @@ public class Roof : MonoBehaviour
     public Roof Initialize(Roof roof, IEnumerable<Vector3> controlPoints)
     {
         m_Height = roof.Height;
+        m_MansardHeight = roof.MansardHeight;
         m_FrameType = roof.FrameType;
         m_RoofTileMaterial = roof.RoofTileMaterial;
         m_ControlPoints = controlPoints.ToArray();
+        m_OriginalControlPoints = m_ControlPoints;
         m_CentreBeamPrefab = roof.CentreBeamPrefab;
         m_SupportBeamPrefab = roof.SupportBeamPrefab;
         return this;
@@ -103,27 +108,32 @@ public class Roof : MonoBehaviour
     {
         Deconstruct();
 
+        m_ControlPoints = m_OriginalControlPoints;
+
         switch (m_FrameType)
         {
             case RoofType.OpenGable:
-                BuildOpenGableFrame();
+                BuildOpenGable();
                 break;
             case RoofType.Mansard:
-                BuildMansardFrame();
+                BuildMansard();
+                break;
+            case RoofType.Flat:
+                BuildFlat();
                 break;
             case RoofType.Dormer:
-                BuildMansardFrame();
-                BuildOpenGableFrame();
+                BuildMansard();
+                BuildOpenGable();
                 break;
             case RoofType.MShaped:
-                BuildMFrame();
+                BuildM();
                 break;
             case RoofType.Pyramid:
-                BuildPyramidFrame();
+                BuildPyramid();
                 break;
             case RoofType.PyramidHip:
-                BuildMansardFrame();
-                BuildPyramidFrame();
+                BuildMansard();
+                BuildPyramid();
                 break;
 
         }
@@ -131,7 +141,7 @@ public class Roof : MonoBehaviour
         return this;
     }
 
-    private void BuildPyramidFrame()
+    private void BuildPyramid()
     {
         Vector3[] controlPointsArray = m_ControlPoints.ToArray();
 
@@ -173,14 +183,14 @@ public class Roof : MonoBehaviour
             Extrudable[] extrudes = { supportBeams[i], supportBeams[next] };
 
             GameObject tile = new GameObject("Tile " + i.ToString());
-            RoofTile roofTile = tile.AddComponent<RoofTile>().Initialize(extrudes, true).Extend(false, true, false, false);
+            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudes).Extend(false, true, false, false);
             roofTile.transform.SetParent(tiles.transform, true);
             roofTile.SetMaterial(m_RoofTileMaterial);
             roofTile.StartConstruction();
         }
     }
 
-    private void BuildMansardFrame()
+    private void BuildMansard()
     {
         Vector3[] controlPointsArray = m_ControlPoints.ToArray();
 
@@ -209,7 +219,7 @@ public class Roof : MonoBehaviour
                 pos = controlPointsArray[i] - c;
             }
 
-            startPositions[i] = pos + (Vector3.up * m_Height);
+            startPositions[i] = pos + (Vector3.up * m_MansardHeight);
         }
 
         for (int i = 0; i < controlPointsArray.Length; i++)
@@ -232,7 +242,7 @@ public class Roof : MonoBehaviour
             Extrudable[] extrudables = { supportPoints[i], supportPoints[next] };
             GameObject tile = new GameObject("Tile " + i.ToString());
 
-            RoofTile roofTile = tile.AddComponent<RoofTile>().Initialize(extrudables, true);
+            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudables, true);
             roofTile.transform.SetParent(tiles.transform, true);
             roofTile.SetMaterial(m_RoofTileMaterial);
             roofTile.StartConstruction();
@@ -242,7 +252,7 @@ public class Roof : MonoBehaviour
         m_ControlPoints = startPositions;
     }
 
-    private void BuildOpenGableFrame()
+    private void BuildOpenGable()
     {
         Vector3[] controlPointsArray = m_ControlPoints.ToArray();
 
@@ -254,7 +264,7 @@ public class Roof : MonoBehaviour
             GameObject tiles = new GameObject("Tiles");
             tiles.transform.SetParent(transform, false);
 
-            List<RoofTile> roofTiles = new ();
+            List<Tile> roofTiles = new ();
 
             // I should probably write code comments.
 
@@ -299,8 +309,8 @@ public class Roof : MonoBehaviour
                             extruder.transform.SetParent(roofFrame.transform, true);
                         }
 
-                        roofTiles.Add(new GameObject("First Tile").AddComponent<RoofTile>().Initialize(firstSupportBeamSet, true).Extend(false, true, true, true));
-                        roofTiles.Add(new GameObject("Second Tile").AddComponent<RoofTile>().Initialize(secondSupportBeamSet).Extend(false, true, true, true));
+                        roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstSupportBeamSet, true).Extend(false, true, true, true));
+                        roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondSupportBeamSet).Extend(false, true, true, true));
                     }
                     break;
                 case 3:
@@ -383,10 +393,10 @@ public class Roof : MonoBehaviour
                             extruder.transform.SetParent(roofFrame.transform, true);
                         }
 
-                        roofTiles.Add(new GameObject("First Tile").AddComponent<RoofTile>().Initialize(first, true).Extend(false, true, true, false));
-                        roofTiles.Add(new GameObject("Second Tile").AddComponent<RoofTile>().Initialize(second).Extend(false, true, true, false));
-                        roofTiles.Add(new GameObject("Third Tile").AddComponent<RoofTile>().Initialize(third).Extend(false, true, true, false));
-                        roofTiles.Add(new GameObject("Fourth Tile").AddComponent<RoofTile>().Initialize(fourth, true).Extend(false, true, true, false));
+                        roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(first, true).Extend(false, true, true, false));
+                        roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(second).Extend(false, true, true, false));
+                        roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(third).Extend(false, true, true, false));
+                        roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourth, true).Extend(false, true, true, false));
 
                         // Suspend construction if the centre beam is being reshaped.
                         firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
@@ -515,11 +525,11 @@ public class Roof : MonoBehaviour
                                 extruder.transform.SetParent(roofFrame.transform, true);
                             }
 
-                            roofTiles.Add(new GameObject("First Tile").AddComponent<RoofTile>().Initialize(firstBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Second Tile").AddComponent<RoofTile>().Initialize(secondBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Third Tile").AddComponent<RoofTile>().Initialize(thirdBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<RoofTile>().Initialize(fourthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<RoofTile>().Initialize(fifthBeams).Extend(false, true, true, true));
+                            roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams, true).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, true));
 
                             // Suspend construction if the centre beam is being reshaped.
                             firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
@@ -621,18 +631,18 @@ public class Roof : MonoBehaviour
                                 extruder.transform.SetParent(roofFrame.transform, true);
                             }
 
-                            roofTiles.Add(new GameObject("First Tile").AddComponent<RoofTile>().Initialize(firstBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Second Tile").AddComponent<RoofTile>().Initialize(secondBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Third Tile").AddComponent<RoofTile>().Initialize(thirdBeams, true).Extend(false, true, false, false));
-                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<RoofTile>().Initialize(fourthBeams).Extend(false, true, false, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<RoofTile>().Initialize(fifthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<RoofTile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams, true).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, false, false));
+                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, false, false));
+                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
                         }
                     }
                     break;
             }
 
-            foreach (RoofTile roofTile in roofTiles)
+            foreach (Tile roofTile in roofTiles)
             {
                 roofTile.transform.SetParent(tiles.transform, false);
                 roofTile.SetMaterial(m_RoofTileMaterial);
@@ -647,7 +657,7 @@ public class Roof : MonoBehaviour
     /// <summary>
     /// Only for a 4 walled building.
     /// </summary>
-    private void BuildMFrame()
+    private void BuildM()
     {
         Vector3[] controlPointsArray = m_ControlPoints.ToArray();
         if (controlPointsArray.Length == 4)
@@ -691,13 +701,33 @@ public class Roof : MonoBehaviour
             mPointsB = tempB;
 
             m_ControlPoints = mPointsA;
-            BuildOpenGableFrame();
+            BuildOpenGable();
             m_ControlPoints = mPointsB;
-            BuildOpenGableFrame();
+            BuildOpenGable();
 
             m_ControlPoints = controlPointsArray; // Reset. // Any reason to do this?
 
         }
+    }
+
+    /// <summary>
+    /// Finds an avialable roof frame & sets the height to 0.
+    /// </summary>
+    private void BuildFlat()
+    {
+        m_Height = 0;
+        int[] available = AvailableRoofFrames();
+
+        RoofType random = (RoofType) Rando.Range(0, available.Length);
+
+        while(random == RoofType.Flat || random == RoofType.Mansard)
+        {
+            random = (RoofType)Rando.Range(0, available.Length);
+        }
+
+        m_FrameType = random;
+
+        ConstructFrame();
     }
 
     private void Deconstruct()
@@ -721,53 +751,4 @@ public class Roof : MonoBehaviour
             Deconstruct();
         }
     }
-
-    private Extrudable ConstructSingleSupport(Vector3 startPosition, Vector3 endPosition, int steps)
-    {
-        ProBuilderMesh beam = ShapeGenerator.CreateShape(ShapeType.Sprite);
-        //beam.GetComponent<MeshRenderer>().sharedMaterial = m_ColourSwatchMaterial;
-        beam.transform.SetParent(transform, false);
-        beam.transform.localPosition = startPosition;
-        float distance = Vector3.Distance(startPosition, endPosition);
-        beam.transform.forward = Vector3Extensions.GetDirectionToTarget(beam.transform.localPosition, endPosition);
-        beam.transform.eulerAngles += (Vector3.right * 90);
-
-        steps = steps == 0 ? Mathf.FloorToInt(distance / 5) : steps;
-
-        Extrudable extrusion = beam.AddComponent<Extrudable>();
-        extrusion.Extrude(beam.faces, ExtrudeMethod.FaceNormal, distance, steps);
-
-        //Vector2 woodOffset = -m_ColourPalette.GetColorCoordinateByName("Wood_3").uv;
-
-        //beam.SetMeshColour(woodOffset);
-
-        beam.ToMesh();
-        beam.Refresh();
-
-        return extrusion;
-    }
-
-    private Extrudable[] ConstructMultipleSupports(Vector3[] startPositions, Vector3 a, Vector3 b, int steps)
-    {
-        List<Extrudable> extrudables = new List<Extrudable>();
-
-        float index = 0;
-        float count = (float)startPositions.Length / (startPositions.Length - 1);
-
-        for (int i = 0; i < startPositions.Length; i++)
-        {
-            float t = index / (float)startPositions.Length;
-            index += count;
-
-            Vector3 endPosition = Vector3.Lerp(a, b, t);
-
-            Vector3 start = transform.InverseTransformPoint(startPositions[i]);
-
-            Extrudable extrudable = ConstructSingleSupport(start, endPosition, steps);
-
-            extrudables.Add(extrudable);
-        }
-        return extrudables.ToArray();
-    }
-
 }

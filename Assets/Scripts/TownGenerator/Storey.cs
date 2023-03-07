@@ -86,7 +86,7 @@ public class Storey : MonoBehaviour
     {
         Vector3[] controlPointsArray = m_ControlPoints.ToArray();
 
-        GameObject walls = new GameObject("Walls");
+        GameObject walls = new ("Walls");
         walls.transform.SetParent(transform, false);
 
         for (int i = 0; i < controlPointsArray.Length; i++)
@@ -98,12 +98,12 @@ public class Storey : MonoBehaviour
 
             float distance = Vector3.Distance(a, b);
 
-            GameObject aWall = new GameObject("Wall");
-            aWall.transform.SetParent(transform, true);
-            aWall.transform.localPosition = controlPointsArray[i];
-            aWall.transform.forward = aWall.transform.localPosition.GetDirectionToTarget(controlPointsArray[next]);
-            aWall.AddComponent<Wall>().Initialize(m_WallOutlinePrefab, distance).Build();
-            aWall.transform.SetParent(walls.transform, true);
+            GameObject wall = new ("Wall");
+            wall.transform.SetParent(transform, true);
+            wall.transform.localPosition = controlPointsArray[i];
+            wall.transform.forward = wall.transform.localPosition.GetDirectionToTarget(controlPointsArray[next]);
+            wall.AddComponent<Wall>().Initialize(m_WallOutlinePrefab, distance).Build();
+            wall.transform.SetParent(walls.transform, true);
         }
     }
 
