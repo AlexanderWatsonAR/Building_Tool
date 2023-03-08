@@ -18,7 +18,6 @@ public class Roof : MonoBehaviour
     [SerializeField] private Material m_RoofTileMaterial;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
-
     public float MansardHeight => m_MansardHeight;
     public float Height => m_Height;
     public RoofType FrameType => m_FrameType;
@@ -636,7 +635,21 @@ public class Roof : MonoBehaviour
                             roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, false, false));
                             roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, false, false));
                             roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
+                            roofTiles.Add(new GameObject("Sixth Tile").AddComponent<Tile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
+
+                            firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
+                            firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
+                            secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
+                            secondBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
+                            thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
+                            thirdBeam.OnConnectorBeginReshape += roofTiles[5].SuspendConstruction;
+
+                            firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
+                            firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
+                            secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
+                            secondBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
+                            thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
+                            thirdBeam.OnConnectorEndReshape += roofTiles[5].StartConstruction;
                         }
                     }
                     break;

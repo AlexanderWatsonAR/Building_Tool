@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder;
-using UnityEngine.Rendering;
+using ProMaths = UnityEngine.ProBuilder.Math;
 using System.Linq;
 using Unity.VisualScripting;
 
@@ -17,10 +17,18 @@ public class Tile : MonoBehaviour
     [SerializeField, HideInInspector] private Vector2 m_ExternalSideOffset, m_InternalSideOffset;
     [SerializeField, HideInInspector] private ProBuilderMesh m_External, m_Internal;
     [SerializeField, HideInInspector] private List<List<Vector3>> m_VerticesData;
-    
+    [SerializeField] private float m_Extend;
+
+    public float ExtendDistance => m_Extend;
+    public bool ExtendHeightBeginning => m_ExtendHeightBeginning;
+    public bool ExtendHeightEnd => m_ExtendHeightEnd;
+    public bool ExtendWidthBeginning => m_ExtendWidthBeginning;
+    public bool ExtendWidthEnd => m_ExtendWidthEnd;
+
 
     public Tile Initialize(Extrudable[] extrudables, bool flipFace = false)
     {
+        m_Extend = 1;
         m_SuspendConstruction = false;
         m_Extrudables = extrudables;  
         m_FlipFace = flipFace;
@@ -58,7 +66,12 @@ public class Tile : MonoBehaviour
     public void StartConstruction()
     {
         if(!m_SuspendConstruction)
+        {
+            ResetToDefault();
+            TransformData();
+            Extend(m_ExtendHeightBeginning, m_ExtendHeightEnd, m_ExtendWidthBeginning, m_ExtendWidthEnd);
             ConstructTile();
+        }
     }
 
     public void StartConstruction(object sender, System.EventArgs e)
@@ -95,10 +108,7 @@ public class Tile : MonoBehaviour
         if(m_SuspendConstruction)
             return;
 
-        ResetToDefault();
-        TransformData();
-        Extend(m_ExtendHeightBeginning, m_ExtendHeightEnd, m_ExtendWidthBeginning, m_ExtendWidthEnd);
-        ConstructTile();
+        StartConstruction();
     }
 
     public void ResetToDefault()
@@ -144,44 +154,78 @@ public class Tile : MonoBehaviour
 
         if (heightBeginning)
         {
-            for (int i = 0; i < m_VerticesData.Count; i++)
+            List<Vector3> startEnd = new (2);
+
+            int count = m_VerticesData.Count;
+            int incriment = count - 1;
+
+            for (int i = 0; i < count; i += incriment)
             {
                 Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[i][1], m_VerticesData[i][0]);
-                m_VerticesData[i].Insert(0, m_VerticesData[i][0] + (dir * 0.75f));
+                startEnd.Add(m_VerticesData[i][0] + (dir * m_Extend));
+            }
+
+            Vector3[] data = Vector3Extensions.LerpCollection(startEnd[0], startEnd[1], count).ToArray();
+
+            for (int i = 0; i < data.Length; i ++)
+            {
+                m_VerticesData[i].Insert(0, data[i]);
             }
         }
         if (heightEnd)
         {
-            for(int i = 0; i < m_VerticesData.Count; i++)
+            List<Vector3> startEnd = new(2);
+
+            int count = m_VerticesData.Count;
+            int incriment = count - 1;
+
+            for (int i = 0; i < count; i += incriment)
             {
                 Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[i][^2], m_VerticesData[i][^1]);
-                m_VerticesData[i].Add(m_VerticesData[i][^1] + (dir * 0.75f));
+                startEnd.Add(m_VerticesData[i][^1] + (dir * m_Extend));
+            }
+
+            Vector3[] data = Vector3Extensions.LerpCollection(startEnd[0], startEnd[1], count).ToArray();
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                m_VerticesData[i].Add(data[i]);
             }
         }
         if(widthBeginning)
         {
-            List<Vector3> extension = new (m_VerticesData[0].Count);
+            List<Vector3> startEnd = new(2);
 
-            for (int i = 0; i < extension.Capacity; i++)
+            int count = m_VerticesData[0].Count;
+            int incriment = count - 1;
+
+            for (int i = 0; i < count; i += incriment)
             {
                 Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[1][i], m_VerticesData[0][i]);
-                extension.Add(m_VerticesData[0][i] + (dir * 0.75f));
+                startEnd.Add(m_VerticesData[0][i] + (dir * m_Extend));
             }
 
-            m_VerticesData.Insert(0, extension);
+            List<Vector3> data = Vector3Extensions.LerpCollection(startEnd[0], startEnd[1], count).ToList();
 
+            m_VerticesData.Insert(0, data);
         }
         if(widthEnd)
         {
-            List<Vector3> extension = new(m_VerticesData[0].Count);
+            List<Vector3> startEnd = new(2);
 
-            for (int i = 0; i < extension.Capacity; i++)
+            int count = m_VerticesData[0].Count;
+            int incriment = count - 1;
+
+            for (int i = 0; i < count; i += incriment)
             {
                 Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[^2][i], m_VerticesData[^1][i]);
-                extension.Add(m_VerticesData[^1][i] + (dir * 0.75f));
+                startEnd.Add(m_VerticesData[^1][i] + (dir * m_Extend));
             }
 
-            m_VerticesData.Add(extension);
+            List<Vector3> data = Vector3Extensions.LerpCollection(startEnd[0], startEnd[1], count).ToList();
+            
+
+            m_VerticesData.Add(data);
         }
 
         return this;
@@ -247,11 +291,15 @@ public class Tile : MonoBehaviour
 
         //tile.SetMeshColour(m_ExternalSideOffset);
 
-        outside.Extrude(outside.faces, ExtrudeMethod.FaceNormal, 0);
+        // TODO: Instead of extrude & translate verts, extrude & scale.
+ 
+        outside.Extrude(outside.faces, ExtrudeMethod.FaceNormal, 0.25f); // TODO: The .25 value should be editable in the inspector.
 
-        float tileHeight = 0.25f;
+        float tileHeight = 0.2f; // magic // value needs calculating
 
-        outside.TranslateVertices(externalFaces[0].distinctIndexes, Vector3.up * tileHeight);
+        //outside.TranslateVertices(externalFaces[0].distinctIndexes, Vector3.up * tileHeight);
+        // TODO: Sometimes we need to scale on the x & not the z. How do we work out when to do that?
+        outside.ScaleVertices(externalFaces[0].distinctIndexes, TransformPoint.Middle, new Vector3(1, 1 + tileHeight, 1 + tileHeight));
 
         outside.ToMesh();
         outside.Refresh();

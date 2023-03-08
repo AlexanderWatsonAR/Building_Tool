@@ -412,6 +412,28 @@ public static class Extensions
         }
     }
 
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 scale)
+    {
+        Vector3[] positions = proBuilderMesh.positions.ToArray();
+        List<Vector3> selectedVerts = new List<Vector3>();
+
+        foreach (int i in indices)
+        {
+            selectedVerts.Add(positions[i]);
+        }
+
+        Vector3 scalePoint = transformPoint.PointToVector3(selectedVerts);
+
+        int[] indicesArray = indices.ToArray();
+        for (int i = 0; i < selectedVerts.Count; i++)
+        {
+            Vector3 point = selectedVerts[i] - scalePoint;
+            Vector3 v =   Vector3.Scale(point, scale) + scalePoint;
+            Vector3 offset = v - selectedVerts[i];
+            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
+        }
+    }
+
     public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 eulerAngle)
     {
         Vector3[] positions = proBuilderMesh.positions.ToArray();
