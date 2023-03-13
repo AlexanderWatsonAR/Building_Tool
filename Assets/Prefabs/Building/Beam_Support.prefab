@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 2605441610374558999}
   - component: {fileID: 874586631560353223}
   - component: {fileID: 2408455654844051375}
-  - component: {fileID: 1827165493458685117}
   m_Layer: 0
   m_Name: Beam_Support
   m_TagString: Untagged
@@ -205,57 +204,3 @@ MonoBehaviour:
   m_TransformCurve: {fileID: 0}
   m_StartPosition: {x: 0, y: 0, z: 0}
   m_EndPosition: {x: 0, y: 0, z: 0}
---- !u!114 &1827165493458685117
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5353111450000941970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7874a51862d04b742be59c8740c35ee7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_TransformCurveData:
-  - m_AnimationCurve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0.9169988
-        outSlope: 0.9169988
-        tangentMode: 34
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0.33333334
-      - serializedVersion: 3
-        time: 0.48366427
-        value: 0.44351956
-        inSlope: -2.0743365
-        outSlope: -2.0743365
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0.060413312
-      - serializedVersion: 3
-        time: 0.99531066
-        value: 0.39073634
-        inSlope: -0.10316348
-        outSlope: -0.10316348
-        tangentMode: 34
-        weightedMode: 0
-        inWeight: 0.33333334
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    m_TransformMultiplier: 0.2
-    m_TransformType: 0
-    m_RotationAxis: 0
-    m_TranslationAxis: 0
-    m_TransformPoint: 0
-  m_ProBuilderMesh: {fileID: 610336387517793883}
-  m_Extrudable: {fileID: 2408455654844051375}
-  m_IsInitialized: 1

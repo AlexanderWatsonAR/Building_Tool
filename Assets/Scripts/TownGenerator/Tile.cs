@@ -7,6 +7,9 @@ using UnityEngine.ProBuilder;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using System.Linq;
 using Unity.VisualScripting;
+using System.ComponentModel;
+using UnityEngine.UI;
+using UnityEditor;
 
 public class Tile : MonoBehaviour
 {
@@ -17,9 +20,10 @@ public class Tile : MonoBehaviour
     [SerializeField, HideInInspector] private Vector2 m_ExternalSideOffset, m_InternalSideOffset;
     [SerializeField, HideInInspector] private ProBuilderMesh m_External, m_Internal;
     [SerializeField, HideInInspector] private List<List<Vector3>> m_VerticesData;
-    [SerializeField] private float m_Extend;
+    [SerializeField] private float m_Extend, m_Height;
 
     public float ExtendDistance => m_Extend;
+    public float Height => m_Height;
     public bool ExtendHeightBeginning => m_ExtendHeightBeginning;
     public bool ExtendHeightEnd => m_ExtendHeightEnd;
     public bool ExtendWidthBeginning => m_ExtendWidthBeginning;
@@ -29,6 +33,7 @@ public class Tile : MonoBehaviour
     public Tile Initialize(Extrudable[] extrudables, bool flipFace = false)
     {
         m_Extend = 1;
+        m_Height = 0.25f;
         m_SuspendConstruction = false;
         m_Extrudables = extrudables;  
         m_FlipFace = flipFace;
@@ -284,37 +289,48 @@ public class Tile : MonoBehaviour
 
         Face[] externalFaces = new Face[] { new Face(triangles) };
 
-        ProBuilderMesh outside = ProBuilderMesh.Create(vertices, externalFaces);
-
-        outside.transform.SetParent(transform, true);
-        outside.GetComponent<MeshRenderer>().sharedMaterial = m_Material;
-
-        //tile.SetMeshColour(m_ExternalSideOffset);
-
-        // TODO: Instead of extrude & translate verts, extrude & scale.
- 
-        outside.Extrude(outside.faces, ExtrudeMethod.FaceNormal, 0.25f); // TODO: The .25 value should be editable in the inspector.
-
-        float tileHeight = 0.2f; // magic // value needs calculating
-
-        //outside.TranslateVertices(externalFaces[0].distinctIndexes, Vector3.up * tileHeight);
-        // TODO: Sometimes we need to scale on the x & not the z. How do we work out when to do that?
-        outside.ScaleVertices(externalFaces[0].distinctIndexes, TransformPoint.Middle, new Vector3(1, 1 + tileHeight, 1 + tileHeight));
-
-        outside.ToMesh();
-        outside.Refresh();
-
         ProBuilderMesh inside = ProBuilderMesh.Create(vertices, new Face[] { new Face(triangles.Reverse()) });
-        inside.transform.SetParent(outside.transform, true);
+        
         inside.GetComponent<MeshRenderer>().sharedMaterial = m_Material;
-
-        Normals.CalculateNormals(inside);
-
-        //mesh.SetMeshColour(m_InternalSideOffset);
 
         inside.ToMesh();
         inside.Refresh();
 
+        ProBuilderMesh outside = ProBuilderMesh.Create(vertices, externalFaces);
+
+        outside.transform.SetParent(transform, true);
+        outside.GetComponent<MeshRenderer>().sharedMaterial = m_Material;
+        //Vector3 faceNormal = ProBuilderExtensions.FaceNormal(outside, outside.faces[0]);
+
+        outside.Extrude(outside.faces, ExtrudeMethod.FaceNormal, m_Height);
+        //outside.TranslateVertices(outside.faces[0].distinctIndexes, faceNormal * m_Height);
+
+        Vector3 scale = Vector3.zero;
+        Vector3 centre = ProBuilderExtensions.FaceCentre(outside, externalFaces[0]);
+
+        for (int i = 0; i < externalFaces[0].distinctIndexes.Count; i++)
+        {
+            if (!m_FlipFace)
+            {
+                Vector3 normal = outside.normals[externalFaces[0].distinctIndexes[i]];
+                normal = Quaternion.Euler(0, 180, 0) * normal;
+                scale = Vector3.one + (normal * m_Height);
+            }
+            else
+            {
+                scale = Vector3.one + (outside.normals[i] * m_Height);
+            }
+
+            outside.ScaleVertices(new int[] { externalFaces[0].distinctIndexes[i] }, centre, scale);
+        }
+
+        outside.ToMesh();
+        outside.Refresh();
+
+        inside.transform.SetParent(outside.transform, true);
+
+        m_External = outside;
+        m_Internal = inside;
         //gameObject.AddComponent<MeshFilter>();
         //gameObject.AddComponent<MeshRenderer>();
         //new MeshImporter(gameObject).Import();
@@ -328,6 +344,38 @@ public class Tile : MonoBehaviour
         //    DestroyImmediate(outside);
         //    DestroyImmediate(inside);
         //}
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(m_External == null)
+        {
+            return;
+        }
+
+        Vector3[] externalWorldVerts = m_External.VerticesInWorldSpace();
+
+        List<Vector3> points = new List<Vector3>();
+        int count = m_External.faces[0].distinctIndexes.Count;
+
+        for (int i = 0; i < count; i++)
+        {
+            points.Add(externalWorldVerts[m_External.faces[0].distinctIndexes[i]]);
+        }
+
+        if (points == null)
+            return;
+
+        if (m_Internal.normals == null)
+            return;
+
+        Vector3 centre = ProMaths.Average(points);
+        Vector3 normal = ProMaths.Average(m_Internal.normals);
+
+        Handles.DoPositionHandle(centre, Quaternion.LookRotation(-normal));
+        //Handles.DrawSolidDisc(centre, normal, .5f);
+
 
     }
 }

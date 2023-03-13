@@ -390,75 +390,6 @@ public static class Extensions
         proBuilderMesh.Refresh();
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, float scale)
-    {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach(int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        Vector3 scalePoint = transformPoint.PointToVector3(selectedVerts);
-
-        int[] indicesArray = indices.ToArray();
-        for(int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 point = selectedVerts[i] - scalePoint;
-            Vector3 v = (point * scale) + scalePoint;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-    }
-
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 scale)
-    {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach (int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        Vector3 scalePoint = transformPoint.PointToVector3(selectedVerts);
-
-        int[] indicesArray = indices.ToArray();
-        for (int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 point = selectedVerts[i] - scalePoint;
-            Vector3 v =   Vector3.Scale(point, scale) + scalePoint;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-    }
-
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 eulerAngle)
-    {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach (int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        // The rotation point.
-        //Vector3 centrePoint = UnityEngine.ProBuilder.Math.Average(selectedVerts);
-
-        Vector3 rotatePoint = transformPoint.PointToVector3(selectedVerts);
-
-        int[] indicesArray = indices.ToArray();
-        for (int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 v = Quaternion.Euler(eulerAngle) * (selectedVerts[i] - rotatePoint) + rotatePoint;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-    }
-
-
     /// <summary>
     /// Calculates where the transform point is in relation to the vertices.
     /// </summary>
@@ -576,7 +507,7 @@ public static class Extensions
     /// </summary>
     /// <param name="vertices"></param>
     /// <returns></returns>
-    public static Vector3 CalculatePolygonFaceNormal(IEnumerable<Vector3> vertices)
+    public static Vector3 CalculatePolygonFaceNormal(this IEnumerable<Vector3> vertices)
     {
         Vector3[] verts = vertices.ToArray();
         Vector3 faceNormal = Vector3.zero;
@@ -601,7 +532,7 @@ public static class Extensions
     /// <param name="vertices"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static Vector3 CalculateTriangleNormal(IEnumerable<Vector3> vertices)
+    public static Vector3 CalculateTriangleNormal(this IEnumerable<Vector3> vertices)
     { 
         Vector3[] verticesArray = vertices.ToArray();
 
@@ -623,7 +554,7 @@ public static class Extensions
     /// </summary>
     /// <param name="vertices"></param>
     /// <returns></returns>
-    public static Vector3[] CreatePolygon(IEnumerable<Vector3> vertices)
+    public static Vector3[] CreatePolygon(this IEnumerable<Vector3> vertices)
     {
         Vector3 normal = CalculateTriangleNormal(vertices);
 
