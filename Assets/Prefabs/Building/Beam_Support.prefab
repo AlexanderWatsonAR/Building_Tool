@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2605441610374558999}
   - component: {fileID: 874586631560353223}
   - component: {fileID: 2408455654844051375}
-  - component: {fileID: 6472532611013306101}
+  - component: {fileID: 3750211785544905602}
   m_Layer: 0
   m_Name: Beam_Support
   m_TagString: Untagged
@@ -205,7 +205,7 @@ MonoBehaviour:
   m_TransformCurve: {fileID: 0}
   m_StartPosition: {x: 0, y: 0, z: 0}
   m_EndPosition: {x: 0, y: 0, z: 0}
---- !u!114 &6472532611013306101
+--- !u!114 &3750211785544905602
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -251,7 +251,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    m_TransformMultiplier: 0.25
+    m_TransformMultiplier: 0.2
     m_TransformType: 0
     m_RotationAxis: 0
     m_TranslationAxis: 0
