@@ -23,11 +23,15 @@ public class TileEditor : Editor
 
         SerializedProperty extend = serializedObject.FindProperty("m_Extend");
         SerializedProperty height = serializedObject.FindProperty("m_Height");
-        
+        SerializedProperty scale = serializedObject.FindProperty("m_Scale");
+
+        EditorGUI.BeginChangeCheck();
+
         EditorGUILayout.PropertyField(extend);
         EditorGUILayout.PropertyField(height);
+        EditorGUILayout.PropertyField(scale);
 
-        if(extend.floatValue < 0)
+        if (extend.floatValue < 0)
             extend.floatValue = 0;
 
         if(height.floatValue < 0)
@@ -35,11 +39,18 @@ public class TileEditor : Editor
 
         float extendTile = tile.ExtendDistance;
         float heightTile = tile.Height;
+        float scaleTile = tile.Scale;
+
+        if(EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Tile Property data changed");
+        }
 
         if (serializedObject.ApplyModifiedProperties())
         {
             if(extend.floatValue != extendTile ||
-               height.floatValue != heightTile)
+               height.floatValue != heightTile ||
+               scale.floatValue != scaleTile)
             {
                 if(tiles.Length > 1)
                 {

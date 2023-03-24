@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.ProBuilder;
+using UnityEngine.Rendering;
+using UnityEngine.UI;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class ProBuilderExtensions
@@ -107,9 +109,49 @@ public static class ProBuilderExtensions
         {
             Vector3 point = selectedVerts[i] - transformPoint;
             Vector3 v = Vector3.Scale(point, scale) + transformPoint;
+            //positions[indicesArray[i]] = point + v;
             Vector3 offset = v - selectedVerts[i];
             proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
         }
+
+        //proBuilderMesh.RebuildWithPositionsAndFaces(positions, proBuilderMesh.faces);
+        //proBuilderMesh.ToMesh();
+        //proBuilderMesh.Refresh();
+
+
+        //proBuilderMesh.transform.TransformVertex(Vertex vertex)
+    }
+
+    public static void ScaleVerticesAlt(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Vector3 scale)
+    {
+        // TODO: check if more cost effective than other scale funcs.
+
+        Vertex[] points = proBuilderMesh.GetVertices();
+        List<Vector3> selectedVerts = new List<Vector3>();
+
+        foreach (int i in indices)
+        {
+            selectedVerts.Add(points[i].position);
+        }
+
+        int[] indicesArray = indices.ToArray();
+        for (int i = 0; i < selectedVerts.Count; i++)
+        {
+            Vector3 point = selectedVerts[i] - transformPoint;
+            Vector3 v = Vector3.Scale(point, scale) + transformPoint;
+            points[indicesArray[i]].position = v;
+
+            List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { indicesArray[i] });
+
+            for (int j = 0; j < shared.Count; j++)
+            {
+                points[shared[j]].position = v;
+            }
+        }
+
+        proBuilderMesh.SetVertices(points);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
     }
 
     public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 scale)
@@ -125,9 +167,36 @@ public static class ProBuilderExtensions
         Vector3 scalePoint = transformPoint.PointToVector3(selectedVerts);
 
         ScaleVertices(proBuilderMesh, indices, scalePoint, scale);
+        
+    }
+    public static void ScaleFace(this ProBuilderMesh proBuilderMesh, Face face, float scaleFactor)
+    {
+        int[] indices = face.distinctIndexes.ToArray();
+
+        Vector3[] positions = proBuilderMesh.positions.ToArray();
+        List<Vector3> selectedVerts = new();
+
+        foreach (int i in indices)
+        {
+            selectedVerts.Add(positions[i]);
+        }
+
+        Vector3 facePosition = proBuilderMesh.FaceCentre(face);
+        Vector3 faceNormal = proBuilderMesh.FaceNormal(face);
+
+        for (int i = 0; i < selectedVerts.Count; i++)
+        {
+            Vector3 vertex = selectedVerts[i];
+            float distanceToFace = Vector3.Dot(vertex - facePosition, faceNormal);
+            float scale = scaleFactor + distanceToFace;
+            Vector3 scaledVertex = facePosition + (vertex - facePosition) * scale;
+            Vector3 offset = scaledVertex - vertex;
+            proBuilderMesh.TranslateVertices(new int[] { indices[i] }, offset);
+        }
+
+
 
     }
-
     public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, Vector3 transformPoint, Quaternion rotation)
     {
         RotateVertices(proBuilderMesh, edges, transformPoint, rotation.eulerAngles);
@@ -274,5 +343,27 @@ public static class ProBuilderExtensions
         Vector3 faceCentre = ProMaths.Average(facePoints);
 
         return faceCentre;
+    }
+
+    public static Vector3[] Positions(this Vertex[] vertices)
+    {
+        Vector3[] positions = new Vector3[vertices.Length];
+
+        for(int i = 0; i < vertices.Length; i++)
+        {
+            positions[i] = vertices[i].position;
+        }
+        return positions;
+    }
+
+    public static Vector3[] Normals(this Vertex[] vertices)
+    {
+        Vector3[] normals = new Vector3[vertices.Length];
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            normals[i] = vertices[i].normal;
+        }
+        return normals;
     }
 }

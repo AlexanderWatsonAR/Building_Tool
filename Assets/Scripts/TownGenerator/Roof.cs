@@ -6,20 +6,31 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.Shapes;
+using UnityEngine.UIElements;
 using Rando = UnityEngine.Random;
+using ProMaths = UnityEngine.ProBuilder.Math;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 [System.Serializable]
 public class Roof : MonoBehaviour
 {
     [SerializeField] private float m_Height, m_MansardHeight;
+    [SerializeField] private float m_MansardScale;
     [SerializeField] private RoofType m_FrameType;
     [SerializeField] private GameObject m_CentreBeamPrefab;
     [SerializeField] private GameObject m_SupportBeamPrefab;
     [SerializeField] private Material m_RoofTileMaterial;
+    [SerializeField] private float m_TileHeight, m_TileExtend;
+    [SerializeField] private bool m_TileFlipFace;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
+
+    public float MansardScale => m_MansardScale;
     public float MansardHeight => m_MansardHeight;
     public float Height => m_Height;
+    public float TileHeight => m_TileHeight;
+    public float TileExtend => m_TileExtend;
+    public bool TileFlipFace => m_TileFlipFace;
     public RoofType FrameType => m_FrameType;
     public Material RoofTileMaterial => m_RoofTileMaterial;
     public GameObject SupportBeamPrefab => m_SupportBeamPrefab;
@@ -27,16 +38,28 @@ public class Roof : MonoBehaviour
 
     public IEnumerable<Vector3> ControlPoints => m_ControlPoints;
 
+    public event Action<Roof> OnAnyRoofChange; // Building should sub to this.
+
+    public void OnAnyRoofChange_Invoke()
+    {
+        OnAnyRoofChange?.Invoke(this);
+    }
+
     public Roof Initialize(Roof roof, IEnumerable<Vector3> controlPoints)
     {
         m_Height = roof.Height;
         m_MansardHeight = roof.MansardHeight;
+        m_MansardScale = roof.MansardScale;
         m_FrameType = roof.FrameType;
         m_RoofTileMaterial = roof.RoofTileMaterial;
         m_ControlPoints = controlPoints.ToArray();
         m_OriginalControlPoints = m_ControlPoints;
         m_CentreBeamPrefab = roof.CentreBeamPrefab;
         m_SupportBeamPrefab = roof.SupportBeamPrefab;
+        m_TileHeight = roof.TileHeight;
+        m_TileExtend = roof.TileExtend;
+        m_TileFlipFace = roof.TileFlipFace;
+
         return this;
     }
     /// <summary>
@@ -147,7 +170,7 @@ public class Roof : MonoBehaviour
         GameObject roofFrame = new GameObject("Pyramid Roof Frame");
         roofFrame.transform.SetParent(transform, false);
 
-        Vector3 middle = UnityEngine.ProBuilder.Math.Average(controlPointsArray);
+        Vector3 middle = ProMaths.Average(controlPointsArray);
         middle += (Vector3.up * m_Height);
 
         int steps = Mathf.FloorToInt(Vector3.Distance(controlPointsArray[0], controlPointsArray[1]) / 5);
@@ -185,6 +208,8 @@ public class Roof : MonoBehaviour
             Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudes).Extend(false, true, false, false);
             roofTile.transform.SetParent(tiles.transform, true);
             roofTile.SetMaterial(m_RoofTileMaterial);
+            roofTile.SetHeight(m_TileHeight);
+            roofTile.SetExtendDistance(m_TileExtend);
             roofTile.StartConstruction();
         }
     }
@@ -220,6 +245,15 @@ public class Roof : MonoBehaviour
 
             startPositions[i] = pos + (Vector3.up * m_MansardHeight);
         }
+        float scale = m_MansardScale - 1;
+        // Scale
+        Vector3 transformPoint = ProMaths.Average(startPositions);
+        for (int i = 0; i < startPositions.Length; i++)
+        {
+            Vector3 point = startPositions[i] - transformPoint;
+            Vector3 v = (point * scale) + transformPoint;
+            startPositions[i] = point + v;
+        }
 
         for (int i = 0; i < controlPointsArray.Length; i++)
         {
@@ -241,9 +275,11 @@ public class Roof : MonoBehaviour
             Extrudable[] extrudables = { supportPoints[i], supportPoints[next] };
             GameObject tile = new GameObject("Tile " + i.ToString());
 
-            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudables, true);
+            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudables).Extend(false, true, false, false);
             roofTile.transform.SetParent(tiles.transform, true);
             roofTile.SetMaterial(m_RoofTileMaterial);
+            roofTile.SetHeight(m_TileHeight);
+            roofTile.SetExtendDistance(m_TileExtend);
             roofTile.StartConstruction();
 
         }
@@ -265,8 +301,11 @@ public class Roof : MonoBehaviour
 
             List<Tile> roofTiles = new ();
 
-            // I should probably write code comments.
-
+            int supportSteps = 1;
+            int centreSteps = 1;
+            bool doesSupportHaveTC = m_SupportBeamPrefab.TryGetComponent(out TransformCurve tc);
+            bool doesCentreHaveTC = m_CentreBeamPrefab.TryGetComponent(out TransformCurve tc1);
+            
             switch (oneLine.Length)
             {
                 case 2:
@@ -275,13 +314,20 @@ public class Roof : MonoBehaviour
                         Vector3 start = oneLine[0] + (Vector3.up * m_Height);
                         Vector3 end = oneLine[1] + (Vector3.up * m_Height);
 
-                        Beam centreBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, end, 10);
+                        float distance = Vector3.Distance(start, end);
+                        int possibleSteps = Mathf.FloorToInt(distance);
+
+                        if(doesCentreHaveTC)
+                            centreSteps = possibleSteps;
+
+                        Beam centreBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, end, centreSteps);
                         centreBeam.transform.SetParent(roofFrame.transform, true);
 
                         Vector3[] localCentreBeamPoints = transform.InverseTransformPoints(centreBeam.ExtrusionPositions).ToArray();
 
-                        float distance = Vector3.Distance(start, end);
-                        int steps = Mathf.FloorToInt(distance / 5);
+                        if (doesSupportHaveTC)
+                            supportSteps = possibleSteps;
+
                         int size = localCentreBeamPoints.Length;
 
                         Beam[] firstSupportBeamSet = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
@@ -294,8 +340,8 @@ public class Roof : MonoBehaviour
                         {
                             Connector connector = new (new Beam[]
                             { 
-                                firstSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsA[i], steps),
-                                secondSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsB[i], steps)
+                                firstSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsA[i], supportSteps),
+                                secondSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsB[i], supportSteps)
                             });
 
                             centreBeam.AddConnector(connector);
@@ -333,9 +379,15 @@ public class Roof : MonoBehaviour
                         float distanceA = Vector3.Distance(start, mid);
                         float distanceB = Vector3.Distance(mid, end);
                         float average = (distanceA + distanceB) * 0.5f;
-                        int steps = Mathf.FloorToInt(average);
+                        int possibleSteps = Mathf.FloorToInt(average);
 
-                        Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, mid, steps);
+                        if (doesCentreHaveTC)
+                            centreSteps = possibleSteps;
+
+                        if (doesSupportHaveTC)
+                            supportSteps = possibleSteps;
+
+                        Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, mid, centreSteps);
                         firstBeam.transform.SetParent(roofFrame.transform, true);
 
                         int size = firstBeam.ExtrusionPositions.Length;
@@ -352,14 +404,14 @@ public class Roof : MonoBehaviour
                         {
                             Connector connector = new(new Beam[]
                             {
-                                first[i].Build(localFirstBeamPoints[i], endPointsA[i], steps),
-                                second[i].Build(localFirstBeamPoints[i], endPointsB[i], steps)
+                                first[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
+                                second[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
                             });
 
                             firstBeam.AddConnector(connector);
                         }
                         
-                        Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(end, mid, steps);
+                        Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(end, mid, centreSteps);
                         secondBeam.transform.SetParent(roofFrame.transform, true);
 
                         Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
@@ -374,8 +426,8 @@ public class Roof : MonoBehaviour
                         {
                             Connector connector = new(new Beam[]
                             {
-                                third[i].Build(localSecondBeamPoints[i], endPointsC[i], steps),
-                                fourth[i].Build(localSecondBeamPoints[i], endPointsD[i], steps)
+                                third[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
+                                fourth[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
                             });
 
                             secondBeam.AddConnector(connector);
@@ -423,7 +475,16 @@ public class Roof : MonoBehaviour
                         float distanceC = Vector3.Distance(third, fourth);
                         float average = (distanceA + distanceB + distanceC) * 0.333333f;
 
-                        int steps = Mathf.FloorToInt(average); // multiply it by something? a 0 to 1 value, maybe? something specified by the player/dev.
+                        int possibleSteps = Mathf.FloorToInt(average);
+
+                        if (doesCentreHaveTC)
+                            centreSteps = possibleSteps;
+
+                        if (doesSupportHaveTC)
+                            supportSteps = possibleSteps;
+
+
+                        //steps = Mathf.FloorToInt(average); // multiply it by something? a 0 to 1 value, maybe? something specified by the player/dev.
 
                         if (m_ControlPoints.IsPolygonTShaped(out int[] tPointIndices))
                         {
@@ -435,7 +496,7 @@ public class Roof : MonoBehaviour
                             int tPoint1Next = m_ControlPoints.GetNextControlPoint(tPointIndices[1]);
                             int tPoint1Next1 = m_ControlPoints.GetNextControlPoint(tPoint1Next);
 
-                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, fourth, steps);
+                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, fourth, centreSteps);
                             int size = firstBeam.ExtrusionPositions.Length;
                             Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
 
@@ -450,15 +511,15 @@ public class Roof : MonoBehaviour
                             {
                                 Connector connector = new(new Beam[]
                                 {
-                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], steps),
-                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], steps)
+                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
+                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
                                 });
 
                                 firstBeam.AddConnector(connector);
                             }
                             // Centre beams
-                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, fourth, steps);
-                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(third, fourth, steps);
+                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, fourth, centreSteps);
+                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(third, fourth, centreSteps);
 
                             Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
                             Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
@@ -472,8 +533,8 @@ public class Roof : MonoBehaviour
 
                             for (int i = 0; i < size-1; i++)
                             {
-                                thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], steps);
-                                fourthBeams[i].Build(localThirdBeamPoints[i], endPointsD[i], steps);
+                                thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps);
+                                fourthBeams[i].Build(localThirdBeamPoints[i], endPointsD[i], supportSteps);
                             }
 
                             localSecondBeamPoints = localSecondBeamPoints[..^1];
@@ -484,7 +545,7 @@ public class Roof : MonoBehaviour
 
                             for(int i = 0; i < longPoints.Length; i++)
                             {
-                                fifthBeams[i].Build(longPoints[i], endPointsE[i], steps);
+                                fifthBeams[i].Build(longPoints[i], endPointsE[i], supportSteps);
                             }
 
                             for (int i = 0; i < localSecondBeamPoints.Length; i++)
@@ -556,9 +617,9 @@ public class Roof : MonoBehaviour
                             int twoPointNext = m_ControlPoints.GetNextControlPoint(onePointNext);
                             int threePointNext = m_ControlPoints.GetNextControlPoint(twoPointNext);
 
-                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, second, steps);
-                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, third, steps);
-                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(fourth, third, steps);
+                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, second, centreSteps);
+                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, third, centreSteps);
+                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(fourth, third, centreSteps);
 
                             int size = firstBeam.ExtrusionPositions.Length;
                             Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
@@ -586,16 +647,16 @@ public class Roof : MonoBehaviour
                                 {
                                     Connector connectorA = new(new Beam[]
                                     {
-                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], steps),
-                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], steps)
+                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
+                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
                                     });
 
                                     firstBeam.AddConnector(connectorA);
 
                                     Connector connectorB = new(new Beam[]
                                     {
-                                    thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], steps),
-                                    fourthBeams[i].Build(localSecondBeamPoints[i], endPointsD[i], steps)
+                                    thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
+                                    fourthBeams[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
                                     });
 
                                     secondBeam.AddConnector(connectorB);
@@ -603,8 +664,8 @@ public class Roof : MonoBehaviour
 
                                 Connector connectorC = new(new Beam[]
                                 {
-                                    fifthBeams[i].Build(localThirdBeamPoints[i], endPointsE[i], steps),
-                                    sixthBeams[i].Build(localThirdBeamPoints[i], endPointsF[i], steps)
+                                    fifthBeams[i].Build(localThirdBeamPoints[i], endPointsE[i], supportSteps),
+                                    sixthBeams[i].Build(localThirdBeamPoints[i], endPointsF[i], supportSteps)
                                 });
 
                                 thirdBeam.AddConnector(connectorC);
@@ -659,6 +720,8 @@ public class Roof : MonoBehaviour
             {
                 roofTile.transform.SetParent(tiles.transform, false);
                 roofTile.SetMaterial(m_RoofTileMaterial);
+                roofTile.SetHeight(m_TileHeight);
+                roofTile.SetExtendDistance(m_TileExtend);
                 //roofTile.SetUVOffset(internalOffset, externalOffset);
                 roofTile.StartConstruction();
             }

@@ -15,6 +15,7 @@ public class Polytool : MonoBehaviour
 {
     [SerializeField] private List<Vector3> m_ControlPoints; // world points.
     [SerializeField] private bool m_IsDrawing;
+    [SerializeField] private bool m_Show;
 
     public List<Vector3> ControlPoints => m_ControlPoints;
     public List<Vector3> LocalControlPoints
@@ -84,7 +85,7 @@ public class Polytool : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if (m_ControlPoints == null)
+        if (m_ControlPoints == null || m_Show == false)
             return;
         foreach (Vector3 controlPoint in m_ControlPoints)
         {

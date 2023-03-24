@@ -67,7 +67,16 @@ public class Building : MonoBehaviour
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
         roofGO.AddComponent<Roof>().Initialize(roof, m_BuildingPolytool.ControlPoints).ConstructFrame();
+        roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
+    }
+
+    private void Building_OnAnyRoofChange(Roof obj)
+    {
+        if (m_Roof == null && m_BuildingPolytool == null)
+            return;
+
+        m_Roof.Initialize(obj, m_BuildingPolytool.ControlPoints);
     }
 
     public void RevertToPolyshape()

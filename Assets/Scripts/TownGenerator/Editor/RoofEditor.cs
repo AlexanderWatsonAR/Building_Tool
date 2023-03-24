@@ -60,6 +60,7 @@ public class RoofEditor : Editor
         if(frameType.enumValueIndex == (int)RoofType.Dormer || frameType.enumValueIndex == (int)RoofType.Mansard)
         {
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardHeight"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardScale"));
         }
 
         if(frameType.enumValueIndex != (int)RoofType.Mansard)
@@ -67,6 +68,19 @@ public class RoofEditor : Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
         }
 
+        EditorGUILayout.LabelField("Tile");
+
+        SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
+        SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
+
+        float tHeight = roof.TileHeight;
+        float tExtend = roof.TileExtend;
+
+        EditorGUILayout.PropertyField(tileExtend);
+        EditorGUILayout.PropertyField(tileHeight);
+
+        float mansardRoofScale = serializedObject.FindProperty("m_MansardScale").floatValue;
+        float mansardScale = roof.MansardScale;
 
         float mansardRoofHeight = serializedObject.FindProperty("m_MansardHeight").floatValue;
         float mansardheight = roof.MansardHeight;
@@ -81,7 +95,10 @@ public class RoofEditor : Editor
         {
             if (height != roofHeight ||
                 mansardheight != mansardRoofHeight ||
-                type != roofType)
+                type != roofType ||
+                tHeight != tileHeight.floatValue ||
+                tExtend != tileExtend.floatValue ||
+                mansardScale != mansardRoofScale)
             {
                 if (roof.TryGetComponent(out Building building))
                 {
@@ -90,6 +107,7 @@ public class RoofEditor : Editor
                 else
                 {
                     roof.ConstructFrame();
+                    roof.OnAnyRoofChange_Invoke();
                 }
             }
         }
