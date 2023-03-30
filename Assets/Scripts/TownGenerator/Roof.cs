@@ -14,14 +14,16 @@ using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 [System.Serializable]
 public class Roof : MonoBehaviour
 {
-    [SerializeField] private float m_Height, m_MansardHeight;
-    [SerializeField] private float m_MansardScale;
+    [SerializeField] private float m_Height, m_MansardHeight, m_MansardScale;
     [SerializeField] private RoofType m_FrameType;
     [SerializeField] private GameObject m_CentreBeamPrefab;
     [SerializeField] private GameObject m_SupportBeamPrefab;
     [SerializeField] private Material m_RoofTileMaterial;
+
+    // Tile Data
     [SerializeField] private float m_TileHeight, m_TileExtend;
     [SerializeField] private bool m_TileFlipFace;
+
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
 

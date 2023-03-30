@@ -238,36 +238,28 @@ public class Tile : MonoBehaviour
         }
         if(widthBeginning)
         {
-            List<Vector3> startEnd = new(2);
+            List<Vector3> data = new List<Vector3>();
 
             int count = m_VerticesData[0].Count;
-            int incriment = count - 1;
 
-            for (int i = 0; i < count; i += incriment)
+            for (int i = 0; i < count; i ++)
             {
                 Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[1][i], m_VerticesData[0][i]);
-                startEnd.Add(m_VerticesData[0][i] + (dir * m_Extend));
+                data.Add(m_VerticesData[0][i] + (dir * m_Extend));
             }
-
-            List<Vector3> data = Vector3Extensions.LerpCollection(startEnd[0], startEnd[1], count).ToList();
 
             m_VerticesData.Insert(0, data);
         }
         if(widthEnd)
         {
-            List<Vector3> startEnd = new(2);
+            List<Vector3> data = new List<Vector3>();
 
             int count = m_VerticesData[0].Count;
-            int incriment = count - 1;
-
-            for (int i = 0; i < count; i += incriment)
+            for (int i = 0; i < count; i++)
             {
                 Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[^2][i], m_VerticesData[^1][i]);
-                startEnd.Add(m_VerticesData[^1][i] + (dir * m_Extend));
+                data.Add(m_VerticesData[^1][i] + (dir * m_Extend));
             }
-
-            List<Vector3> data = Vector3Extensions.LerpCollection(startEnd[0], startEnd[1], count).ToList();
-            
 
             m_VerticesData.Add(data);
         }
