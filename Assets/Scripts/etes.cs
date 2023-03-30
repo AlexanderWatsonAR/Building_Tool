@@ -24,14 +24,7 @@ public class etes : MonoBehaviour
     {
         polytool = GetComponent<Polytool>();
 
-        //if (!polytool.IsClockwiseAlternative())
-        //{
-        //    IEnumerable<Vector3> reverseControlPoints = polytool.ControlPoints;
-        //    reverseControlPoints = reverseControlPoints.Reverse();
-        //    polytool.SetControlPoints(reverseControlPoints);
-        //}
-
-        if (polytool.LocalControlPoints.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
+        if (polytool.IsDescribableInOneLine(out Vector3[] oneLine))
         {
             foreach(Vector3 line in oneLine)
             {

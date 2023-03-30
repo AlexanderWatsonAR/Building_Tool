@@ -19,7 +19,19 @@ public class Polytool : MonoBehaviour
     [SerializeField] private bool m_IsDrawing;
     [SerializeField] private bool m_Show;
 
-    public List<Vector3> ControlPoints => m_ControlPoints;
+    public List<Vector3> ControlPoints
+    {
+        get 
+        {
+            if(!IsClockwiseAlternative(m_ControlPoints))
+            {
+                m_ControlPoints.Reverse();
+            }
+
+            return m_ControlPoints;
+        }
+    }
+
     public List<Vector3> LocalControlPoints
     {
         get
