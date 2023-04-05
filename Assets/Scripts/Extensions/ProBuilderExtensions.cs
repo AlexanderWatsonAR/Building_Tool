@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
-using UnityEngine.Rendering;
-using UnityEngine.UI;
 using ProMaths = UnityEngine.ProBuilder.Math;
+using Edge = UnityEngine.ProBuilder.Edge;
 
 public static class ProBuilderExtensions
 {
@@ -312,6 +312,93 @@ public static class ProBuilderExtensions
             proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
         }
     }
+    /// <summary>
+    /// 0 = top left. 1 = top right. 2 = bottom right. 3 = bottom left
+    /// </summary>
+    /// <param name="face"></param>
+    /// <returns></returns>
+    public static int[] CornerPositions(this ProBuilderMesh proBuilderMesh, Face face)
+    {
+        if(face.distinctIndexes.Count < 4)
+            return new int[0];
+
+        Vertex[] positions = proBuilderMesh.GetVertices();
+
+        Vector3 first = positions[face.distinctIndexes[0]].position;
+
+        float minY = first.y;
+        float maxY = minY;
+
+        for(int i = 0; i < face.distinctIndexes.Count; i++)
+        {
+            Vector3 point = positions[face.distinctIndexes[i]].position;
+            minY = point.y < minY ? point.y : minY;
+            maxY = point.y > maxY ? point.y : maxY;
+        }
+
+        //Vector3 rightDirection = Vector3.Cross(normal, Vector3.up);
+        //Vector3 leftDirection = -rightDirection;
+        //Vector3 upDirection = Vector3.up;
+        //Vector3 downDirection = Vector3.down;
+
+        Vector3 centre = proBuilderMesh.FaceCentre(face);
+
+        List<int> unorderedCorners = new List<int>();
+        float delta = 0.02f;
+
+        for (int i = 0; i < face.distinctIndexes.Count; i++)
+        {
+            Vertex point = positions[face.distinctIndexes[i]];
+
+            float y = point.position.y;
+
+            if (Mathf.Abs(y - minY) <= delta || Mathf.Abs(y - maxY) <= delta)
+            {
+                unorderedCorners.Add(face.distinctIndexes[i]);
+            }
+        }
+
+        return unorderedCorners.ToArray();
+
+        //for(int i = 0; i < unorderedCorners.Count; i++)
+        //{
+        //    Vertex point = positions[unorderedCorners[i]];
+
+        //    if (point.position.y > centre.y)
+        //    {
+        //        topCorners.Add(unorderedCorners[i]);
+        //    }
+        //    else
+        //    {
+        //        bottomCorners.Add(unorderedCorners[i]);
+        //    }
+        //}
+
+
+
+        //Vector3 topLeft = positions[topCorners[0]].position;
+        //Vector3 topRight = positions[topCorners[1]].position;
+
+        //float distance = Vector3.Distance(topLeft, topRight);
+
+        //if (topLeft + rightDirection * distance != topRight)
+        //{
+        //    topLeft = topRight;
+        //    topCorners[0] = topCorners[1];
+        //}
+
+        //Vector3 bottomLeft = positions[bottomCorners[0]].position;
+        //Vector3 bottomRight = positions[bottomCorners[1]].position;
+
+        //distance = Vector3.Distance(bottomLeft, bottomRight);
+
+        //if (bottomLeft + rightDirection * distance != bottomRight)
+        //{
+        //    bottomLeft = bottomRight;
+        //    bottomCorners[0] = bottomCorners[1];
+        //}
+
+    }
 
     public static Vector3 FaceCentre(this ProBuilderMesh proBuilderMesh, Face face)
     {
@@ -365,5 +452,16 @@ public static class ProBuilderExtensions
             normals[i] = vertices[i].normal;
         }
         return normals;
+    }
+
+    public static Vector3 CalculateNormal(Vector3 p0, Vector3 p1, Vector3 p2)
+    {
+        // Calculate the cross product of two edges of the surface to find the normal vector
+        Vector3 edge1 = p1 - p0;
+        Vector3 edge2 = p2 - p0;
+        Vector3 normal = Vector3.Cross(edge1, edge2).normalized;
+
+        // Return the normal vector
+        return normal;
     }
 }

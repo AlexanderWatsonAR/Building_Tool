@@ -11,13 +11,15 @@ public class WallTestEditor : Editor
         serializedObject.Update();
         WallTest wallTest = (WallTest)target;
 
-        SerializedProperty WallWidth = serializedObject.FindProperty("m_Width");
-        SerializedProperty WallHeight = serializedObject.FindProperty("m_Height");
-        SerializedProperty Material = serializedObject.FindProperty("m_Material");
+        SerializedProperty wallWidth = serializedObject.FindProperty("m_Width");
+        SerializedProperty wallHeight = serializedObject.FindProperty("m_Height");
+        SerializedProperty polyToolHole = serializedObject.FindProperty("m_HolePolytool");
+        SerializedProperty material = serializedObject.FindProperty("m_Material");
 
-        EditorGUILayout.PropertyField(WallWidth);
-        EditorGUILayout.PropertyField(WallHeight);
-        EditorGUILayout.PropertyField(Material);
+        EditorGUILayout.PropertyField(wallWidth);
+        EditorGUILayout.PropertyField(wallHeight);
+        EditorGUILayout.PropertyField(polyToolHole);
+        EditorGUILayout.PropertyField(material);
 
         if (GUILayout.Button("Do Wall Test"))
         {
@@ -29,8 +31,8 @@ public class WallTestEditor : Editor
 
         if(serializedObject.ApplyModifiedProperties())
         {
-            if (WallWidth.floatValue != width ||
-                WallHeight.floatValue != height)
+            if (wallWidth.floatValue != width ||
+                wallHeight.floatValue != height)
             {
                 wallTest.CreateWallOutline();
             }
