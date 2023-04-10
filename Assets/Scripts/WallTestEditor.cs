@@ -11,14 +11,24 @@ public class WallTestEditor : Editor
         serializedObject.Update();
         WallTest wallTest = (WallTest)target;
 
-        SerializedProperty wallWidth = serializedObject.FindProperty("m_Width");
+        SerializedProperty wallDepth = serializedObject.FindProperty("m_Depth");
         SerializedProperty wallHeight = serializedObject.FindProperty("m_Height");
-        SerializedProperty polyToolHole = serializedObject.FindProperty("m_HolePolytool");
+        SerializedProperty holeHeight = serializedObject.FindProperty("m_HoleHeight");
+        SerializedProperty holeWidth = serializedObject.FindProperty("m_HoleWidth");
+        SerializedProperty holeRotation = serializedObject.FindProperty("m_HoleRotation");
+        SerializedProperty holeColumns = serializedObject.FindProperty("m_HoleColumns");
+        SerializedProperty holeRows = serializedObject.FindProperty("m_HoleRows");
         SerializedProperty material = serializedObject.FindProperty("m_Material");
 
-        EditorGUILayout.PropertyField(wallWidth);
+        EditorGUILayout.LabelField("Wall");
+        EditorGUILayout.PropertyField(wallDepth);
         EditorGUILayout.PropertyField(wallHeight);
-        EditorGUILayout.PropertyField(polyToolHole);
+        EditorGUILayout.LabelField("Hole");
+        EditorGUILayout.PropertyField(holeHeight);
+        EditorGUILayout.PropertyField(holeWidth);
+        EditorGUILayout.PropertyField(holeRotation);
+        EditorGUILayout.PropertyField(holeColumns);
+        EditorGUILayout.PropertyField(holeRows);
         EditorGUILayout.PropertyField(material);
 
         if (GUILayout.Button("Do Wall Test"))
@@ -26,13 +36,23 @@ public class WallTestEditor : Editor
             wallTest.CreateWallOutline();
         }
 
-        float width = wallTest.Width;
+        float depth = wallTest.Depth;
         float height = wallTest.Height;
+        float hHeight = wallTest.HoleHeight;
+        float hWidth = wallTest.HoleWidth;
+        float hRotation = wallTest.HoleRotation;
+        int hRows = wallTest.HoleRows;
+        int hColumns = wallTest.HoleColumns;
 
-        if(serializedObject.ApplyModifiedProperties())
+        if (serializedObject.ApplyModifiedProperties())
         {
-            if (wallWidth.floatValue != width ||
-                wallHeight.floatValue != height)
+            if (wallDepth.floatValue != depth ||
+                wallHeight.floatValue != height ||
+                holeHeight.floatValue != hHeight ||
+                holeWidth.floatValue != hWidth ||
+                holeRotation.floatValue != hRotation ||
+                holeColumns.intValue != hColumns ||
+                holeRows.intValue != hRows)
             {
                 wallTest.CreateWallOutline();
             }

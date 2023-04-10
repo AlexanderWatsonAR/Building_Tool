@@ -34,8 +34,11 @@ public static class Vector3Extensions
     /// <param name="b"></param>
     /// <param name="numberOfSamples"></param>
     /// <returns></returns>
-    public static IEnumerable<Vector3> LerpCollection(Vector3 a, Vector3 b, int numberOfSamples)
+    public static Vector3[] LerpCollection(Vector3 a, Vector3 b, int numberOfSamples)
     {
+        if (numberOfSamples < 2)
+            numberOfSamples = 2;
+
         Vector3[] samplePoints = new Vector3[numberOfSamples];
 
         float index = 0;
