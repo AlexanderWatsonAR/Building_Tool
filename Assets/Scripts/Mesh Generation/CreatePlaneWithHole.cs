@@ -46,17 +46,22 @@ public static class CreatePlaneWithHole
 
         List<Vector3[]> controlPointsGrid = new List<Vector3[]>();
         List<Vector3[]> holePointsGrid = new List<Vector3[]>();
-        List<int[]> indexGrid = new List<int[]>();
+        List<int[]> cIndexGrid = new List<int[]>();
         int start = 0;
 
         for (int i = 0; i < leftPoints.Length; i++)
         {
             controlPointsGrid.Add(Vector3Extensions.LerpCollection(leftPoints[i], rightPoints[i], pointsWide));
-            holePointsGrid.Add(Vector3Extensions.LerpCollection(leftPoints[i], rightPoints[i], pointsWide));
-            indexGrid.Add(Enumerable.Range(start, leftPoints.Length).ToArray());
 
-            start += leftPoints.Length;
+            cIndexGrid.Add(new int[pointsWide]);
+            cIndexGrid[i][0] = i;
+
+            for (int j = 1; j < cIndexGrid[0].Length; j++)
+            {
+                cIndexGrid[i][j] = cIndexGrid[i][j-1] + pointsHigh;
+            }
         }
+
         //Array.Copy(vertices, holeVertices, count);
 
         // Hole Transformations
@@ -64,10 +69,15 @@ public static class CreatePlaneWithHole
         {
             for (int j = 0; j < rows; j++)
             {
-                Vector3 bl = controlPointsGrid[i][j];
-                Vector3 tl = controlPointsGrid[i + 1][j];
-                Vector3 tr = controlPointsGrid[i + 1][j + 1];
-                Vector3 br = controlPointsGrid[i][j + 1];
+                // bl = 0 + 0
+                // tl = 0 + columns
+                // tr = 0 + pointsHigh + 1;
+                // br = 0 + pointsHigh
+
+                Vector3 bl = controlPointsGrid[j][i];
+                Vector3 tl = controlPointsGrid[j + 1][i];
+                Vector3 tr = controlPointsGrid[j + 1][i + 1];
+                Vector3 br = controlPointsGrid[j][i + 1];
 
                 Vector3 bottomLeft = new Vector3(bl.x, bl.y, bl.z);
                 Vector3 topLeft = new Vector3(tl.x, tl.y, tl.z);
@@ -85,10 +95,7 @@ public static class CreatePlaneWithHole
                     hole[k] = v;
                 }
 
-                holePointsGrid[i][j] = hole[0];
-                holePointsGrid[i + 1][j] = hole[1];
-                holePointsGrid[i + 1][j + 1] = hole[2];
-                holePointsGrid[i][j + 1] = hole[3];
+                holePointsGrid.Add(hole);
             }
         }
         {
@@ -122,15 +129,31 @@ public static class CreatePlaneWithHole
 
         int count = 0;
         Vector3[] vertices = new Vector3[pointsWide * pointsHigh];
-        Vector3[] holeVertices = new Vector3[vertices.Length];
+        Vector3[] holeVertices = new Vector3[holePointsGrid.Count * holePointsGrid[0].Length];
 
         // 2D to 1D
         for (int i = 0; i < pointsWide; i++)
         {
             for (int j = 0; j < pointsHigh; j++)
             {
-                vertices[count] = controlPointsGrid[i][j];
-                holeVertices[count] = holePointsGrid[i][j];
+                vertices[count] = controlPointsGrid[j][i];
+                count++;
+            }
+        }
+
+        List<int[]> hIndexGrid = new List<int[]>();
+        
+         int hCount = 0;
+
+        for (int i = 0; i < holePointsGrid.Count; i++)
+        {
+            hIndexGrid.Add(Enumerable.Range(count, holePointsGrid[i].Length).ToArray());
+
+            for(int j = 0; j < holePointsGrid[i].Length; j++)
+            {
+                holeVertices[hCount] = holePointsGrid[i][j];
+                //hIndexGrid.Add()
+                hCount++;
                 count++;
             }
         }
@@ -139,21 +162,27 @@ public static class CreatePlaneWithHole
 
         List<int> triangles = new List<int>();
 
+        List<Face> faces = new List<Face>();
+
+        hCount = 0;
+
         for (int i = 0; i < columns; i++)
         {
             for (int j = 0; j < rows; j++)
             {
                 int[] tris = new int[24];
 
-                int cBottomLeft = indexGrid[i][j];
-                int cTopLeft = indexGrid[i + 1][j];
-                int cTopRight = indexGrid[i + 1][j + 1];
-                int cBottomRight = indexGrid[i][j + 1];
+                int cBottomLeft = cIndexGrid[j][i];
+                int cTopLeft = cIndexGrid[j + 1][i];
+                int cTopRight = cIndexGrid[j + 1][i + 1];
+                int cBottomRight = cIndexGrid[j][i + 1];
 
-                int hBottomLeft = indexGrid[i][j] + count;
-                int hTopLeft = indexGrid[i + 1][j] + count;
-                int hTopRight = indexGrid[i + 1][j + 1] + count;
-                int hBottomRight = indexGrid[i][j + 1] + count;
+                int[] hIndices = hIndexGrid[hCount];
+
+                int hBottomLeft = hIndices[0];
+                int hTopLeft = hIndices[1];
+                int hTopRight = hIndices[2];
+                int hBottomRight = hIndices[3];
 
                 // Faces
                 // Left
@@ -186,6 +215,9 @@ public static class CreatePlaneWithHole
                 tris[23] = hBottomRight;
 
                 triangles.AddRange(tris);
+                faces.Add(new Face(tris));
+
+                hCount++;
             }
         }
 
@@ -246,7 +278,8 @@ public static class CreatePlaneWithHole
             triangles = triangles.Reverse<int>().ToList();
         }
 
-        ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create(allVerts, new Face[] { new Face(triangles) });
+        //ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create(allVerts, faces);
+         ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create(allVerts, new Face[] { new Face(triangles) });
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
 

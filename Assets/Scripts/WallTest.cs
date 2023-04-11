@@ -125,11 +125,11 @@ public class WallTest : MonoBehaviour
             ProBuilderMesh proBuilderMesh = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
             proBuilderMesh.name = "Wall " + i.ToString();
 
-            //ProBuilderMesh inside = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
-            //inside.ToMesh();
-            //inside.Refresh();
+            ProBuilderMesh inside = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
+            inside.ToMesh();
+            inside.Refresh();
 
-            //proBuilderMesh.Extrude(new Face[] { proBuilderMesh.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
+            proBuilderMesh.Extrude(new Face[] { proBuilderMesh.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
 
             if(i == 0)
                 proBuilderMesh.SetSelectedFaces(new Face[] { proBuilderMesh.faces[0] });
@@ -186,14 +186,14 @@ public class WallTest : MonoBehaviour
                 firstFacePoints.Add(positions[indices[j]].position);
             }
 
-            proBuilderMesh.AddComponent<TheWall>().Init(firstFacePoints);
+            proBuilderMesh.AddComponent<TheWall>().Init(proBuilderMesh);
 
             proBuilderMesh.SetVertices(positions);
             proBuilderMesh.ToMesh();
             proBuilderMesh.Refresh();
 
-            //inside.GetComponent<Renderer>().sharedMaterial = m_Material;
-            //inside.transform.SetParent(proBuilderMesh.transform, true);
+            inside.GetComponent<Renderer>().sharedMaterial = m_Material;
+            inside.transform.SetParent(proBuilderMesh.transform, true);
 
             //proBuilderMesh.AddComponent<MeshCollider>().convex = true;
         }

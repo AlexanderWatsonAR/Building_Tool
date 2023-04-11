@@ -10,14 +10,15 @@ using UnityEngine.UIElements;
 
 public class TheWall : MonoBehaviour
 {
+    [SerializeField, HideInInspector] private ProBuilderMesh m_WallMesh;
     [SerializeField] private Vector3[] m_Points; // control points.
     [SerializeField] private float m_Height, m_Width, m_Depth;
     [SerializeField] private List<Vector3> m_Holes;
     [SerializeField] private bool m_FlipFace;
 
-    public void Init(IEnumerable<Vector3> points)
+    public void Init(ProBuilderMesh wallMesh)
     {
-        m_Points = points.ToArray();
+        m_Points = wallMesh.positions.ToArray();
     }
 
     private void OnDrawGizmosSelected()
