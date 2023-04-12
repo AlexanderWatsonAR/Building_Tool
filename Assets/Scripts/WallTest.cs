@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.ProBuilder;
@@ -24,6 +25,8 @@ public class WallTest : MonoBehaviour
     private List<TheWall> m_Walls;
     private Polytool m_Polytool;
     private List<IList<Vector3>> m_Holes;
+    private List<Vector3> m_insidePoints;
+    private List<Vector3> m_Directions;
 
     public float Depth => m_Depth;
     public float Height => m_Height;
@@ -79,126 +82,83 @@ public class WallTest : MonoBehaviour
             insidePoints[i] += scalingDirections[i] * w;
         }
 
-        //m_Holes = new List<IList<Vector3>>();
-
-        //for (int i = 0; i < controlPoints.Count; i++) 
-        //{
-        //    List<Vector3> holePoints = new List<Vector3>(new Vector3[4]);
-        //    int next = m_Polytool.GetNextPoint(i);
-
-        //    Vector3 bottomHeight = Vector3.up * (m_Height * 0.5f);
-        //    Vector3 topHeight = Vector3.up * (m_Height * 0.75f);
-
-        //    Vector3 topLeft = Vector3.Lerp(insidePoints[i], insidePoints[next], 0.5f);
-        //    Vector3 topRight = Vector3.Lerp(insidePoints[i], insidePoints[next], 0.6f);
-        //    Vector3 bottomRight = topRight;
-        //    Vector3 bottomLeft = topLeft;
-
-        //    topLeft += bottomHeight;
-        //    topRight += bottomHeight;
-        //    bottomRight += topHeight;
-        //    bottomLeft += topHeight;
-
-        //    holePoints[0] = bottomLeft;
-        //    holePoints[1] = topLeft;
-        //    holePoints[2] = topRight;
-        //    holePoints[3] = bottomRight;
-
-        //    m_Holes.Add(holePoints);
-        //}
-
-
         Vector3 h = m_Height * Vector3.up;
+
+        m_Directions = new List<Vector3>();
+        m_insidePoints = insidePoints;
 
         // Construct the walls 
         for (int i = 0; i < controlPoints.Count; i++)
         {
-            // Something to think about.
-            // How to constrain the hole points to within the bounds of the wall.
+            int oneNext = m_Polytool.GetNextPoint(i);
+            Vector3 oneNextInside = insidePoints[oneNext];
 
-            Vector3 nextInside = insidePoints[m_Polytool.GetNextPoint(i)];
-
-            Vector3[] points = new Vector3[] { insidePoints[i], insidePoints[i] + h, nextInside + h, nextInside };
+            Vector3[] points = new Vector3[] { insidePoints[i], insidePoints[i] + h, oneNextInside + h, oneNextInside };
 
             Vector3 scale = new Vector3(m_HoleWidth, m_HoleHeight, m_HoleWidth);
 
-            ProBuilderMesh proBuilderMesh = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
-            proBuilderMesh.name = "Wall " + i.ToString();
+            ProBuilderMesh outside = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
+            outside.name = "Wall " + i.ToString();
 
             ProBuilderMesh inside = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
             inside.ToMesh();
             inside.Refresh();
 
-            proBuilderMesh.Extrude(new Face[] { proBuilderMesh.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
+            outside.Extrude(new Face[] { outside.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
+            outside.GetComponent<Renderer>().sharedMaterial = m_Material;
+            outside.transform.SetParent(transform, true);
 
-            if(i == 0)
-                proBuilderMesh.SetSelectedFaces(new Face[] { proBuilderMesh.faces[0] });
+            outside.AddComponent<TheWall>().Init(outside);
 
-            Vertex[] positions = proBuilderMesh.GetVertices();
-            Vector3 nextControlPoint = controlPoints[m_Polytool.GetNextPoint(i)];
-            Vector3[] outsidePoints = new Vector3[] { controlPoints[i], controlPoints[i] + h, nextControlPoint + h, nextControlPoint };
-
-            if (false)
-            {
-                int[] cornerIndices = proBuilderMesh.CornerPositions(proBuilderMesh.faces[0]);
-
-                for (int j = 0; j < cornerIndices.Length; j++)
-                {
-                    int index = cornerIndices[j];
-                    Vector3 a = positions[index].position;
-
-                    int realIndex = 0;
-                    float distance = Vector3.Distance(a, outsidePoints[realIndex]);
-
-                    for (int k = 0; k < outsidePoints.Length; k++)
-                    {
-                        float tempDistance = Vector3.Distance(a, outsidePoints[k]);
-
-                        if (tempDistance <= distance)
-                        {
-                            distance = tempDistance;
-                            realIndex = k;
-                        }
-                    }
-
-                    positions[index].position = outsidePoints[realIndex];
-
-                    List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { index });
-
-                    for (int k = 0; k < shared.Count; k++)
-                    {
-                        positions[shared[k]].position = outsidePoints[realIndex];
-                    }
-
-                }
-            }
-
-            proBuilderMesh.GetComponent<Renderer>().sharedMaterial = m_Material;
-            proBuilderMesh.transform.SetParent(transform, true);
-
-            List<Vector3> firstFacePoints = new List<Vector3>();
-
-            int[] indices = proBuilderMesh.faces[0].distinctIndexes.ToArray();
-            Array.Sort(indices);
-
-            for (int j = 0; j < indices.Length; j++)
-            {
-                firstFacePoints.Add(positions[indices[j]].position);
-            }
-
-            proBuilderMesh.AddComponent<TheWall>().Init(proBuilderMesh);
-
-            proBuilderMesh.SetVertices(positions);
-            proBuilderMesh.ToMesh();
-            proBuilderMesh.Refresh();
+            outside.ToMesh();
+            outside.Refresh();
 
             inside.GetComponent<Renderer>().sharedMaterial = m_Material;
-            inside.transform.SetParent(proBuilderMesh.transform, true);
+            inside.transform.SetParent(outside.transform, true);
+
+
+
+            // Add corner posts
+            int onePrevious = m_Polytool.GetPreviousPoint(i);
+            Vector3 onePreviousInside = insidePoints[onePrevious];
+
+            Vector3 dir = insidePoints[i].GetDirectionToTarget(oneNextInside);
+            Vector3 cross = Vector3.Cross(Vector3.up, dir) * m_Depth;
+
+            Vector3 dir1 = insidePoints[i].GetDirectionToTarget(onePreviousInside);
+            Vector3 cross1 = Vector3.Cross(dir1, Vector3.up) * m_Depth;
+
+            m_Directions.Add(cross1);
+
+            Vector3 zero = controlPoints[i];
+            Vector3 one = insidePoints[i] + cross;
+            Vector3 two = insidePoints[i];
+            Vector3 three = insidePoints[i] + cross1;
+
+            ProBuilderMesh post = ProBuilderMesh.Create();
+            post.name = "Corner";
+            post.CreateShapeFromPolygon(new Vector3[] { zero, one, two, three }, m_Height, false);
+
+            post.GetComponent<Renderer>().sharedMaterial = m_Material;
+            post.transform.SetParent(outside.transform, true);
+
+            post.ToMesh();
+            post.Refresh();
+
+
 
             //proBuilderMesh.AddComponent<MeshCollider>().convex = true;
         }
 
 
+    }
+
+    private void OnDrawGizmos()
+    {
+        for(int i = 0; i < m_insidePoints.Count; i++)
+        {
+            Handles.DoPositionHandle(m_insidePoints[i], Quaternion.LookRotation(m_Directions[i], Vector3.up));
+        }
     }
 
     private void Deconstruct()

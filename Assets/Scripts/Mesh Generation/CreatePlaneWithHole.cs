@@ -10,7 +10,6 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class CreatePlaneWithHole
 {
-    
     public static ProBuilderMesh Create(IEnumerable<Vector3> controlPoints, Vector3 offset, float angle, Vector3 scale, int columns, int rows, bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();
@@ -37,7 +36,6 @@ public static class CreatePlaneWithHole
             return quad;
         }
 
-        // int numberOfPoints = 2 + (6 * columns);
         int pointsWide =  columns + 1;
         int pointsHigh = rows + 1;
 
@@ -47,7 +45,6 @@ public static class CreatePlaneWithHole
         List<Vector3[]> controlPointsGrid = new List<Vector3[]>();
         List<Vector3[]> holePointsGrid = new List<Vector3[]>();
         List<int[]> cIndexGrid = new List<int[]>();
-        int start = 0;
 
         for (int i = 0; i < leftPoints.Length; i++)
         {
@@ -62,17 +59,11 @@ public static class CreatePlaneWithHole
             }
         }
 
-        //Array.Copy(vertices, holeVertices, count);
-
         // Hole Transformations
         for (int i = 0; i < columns; i++)
         {
             for (int j = 0; j < rows; j++)
             {
-                // bl = 0 + 0
-                // tl = 0 + columns
-                // tr = 0 + pointsHigh + 1;
-                // br = 0 + pointsHigh
 
                 Vector3 bl = controlPointsGrid[j][i];
                 Vector3 tl = controlPointsGrid[j + 1][i];
@@ -97,34 +88,6 @@ public static class CreatePlaneWithHole
 
                 holePointsGrid.Add(hole);
             }
-        }
-        {
-            //for (int i = 0; i < (vertices.Length - rows - 1); i++)
-            //{
-            //    if ((i + 1) % columns == 0)
-            //        continue;
-
-            //    int a = i;
-            //    int b = i + rows;
-            //    int c = i + rows + 1;
-            //    int d = i + 1;
-
-            //    Vector3[] hole = new Vector3[] { vertices[a] , vertices[b] , vertices[c] , vertices[d] };
-            //    Vector3 tPoint = ProMaths.Average(hole);
-
-            //    for (int j = 0; j < hole.Length; j++)
-            //    {
-            //        // Scale
-            //        Vector3 point = hole[j] - tPoint;
-            //        Vector3 v3 = Vector3.Scale(point, scale) + tPoint;
-            //        hole[j] = v3;
-            //    }
-
-            //    holeVertices[a] = hole[0];
-            //    holeVertices[b] = hole[1];
-            //    holeVertices[c] = hole[2];
-            //    holeVertices[d] = hole[3];
-            //}
         }
 
         int count = 0;
@@ -221,58 +184,6 @@ public static class CreatePlaneWithHole
             }
         }
 
-        {
-            //for (int i = 0; i < (vertices.Length - rows - 1); i++)
-            //{
-            //    if ((i + 1) % columns == 0)
-            //        continue;
-
-            //    int[] tris = new int[24];
-
-            //    int cBottomLeft = i;
-            //    int cTopLeft = i + rows;
-            //    int cTopRight = i + rows + 1;
-            //    int cBottomRight = i + 1;
-
-            //    int hBottomLeft = cBottomLeft + count;
-            //    int hTopLeft = cTopLeft + count;
-            //    int hTopRight = cTopRight + count;
-            //    int hBottomRight = cBottomRight + count;
-
-            //    // Left
-            //    tris[0] = cBottomLeft;
-            //    tris[1] = cTopLeft;
-            //    tris[2] = hBottomLeft;
-            //    tris[3] = hBottomLeft;
-            //    tris[4] = cTopLeft;
-            //    tris[5] = hTopLeft;
-            //    // Top
-            //    tris[6] = hTopLeft;
-            //    tris[7] = cTopLeft;
-            //    tris[8] = cTopRight;
-            //    tris[9] = cTopRight;
-            //    tris[10] = hTopRight;
-            //    tris[11] = hTopLeft;
-            //    // Right
-            //    tris[12] = cTopRight;
-            //    tris[13] = cBottomRight;
-            //    tris[14] = hTopRight;
-            //    tris[15] = hTopRight;
-            //    tris[16] = cBottomRight;
-            //    tris[17] = hBottomRight;
-            //    // Bottom
-            //    tris[18] = hBottomRight;
-            //    tris[19] = cBottomRight;
-            //    tris[20] = cBottomLeft;
-            //    tris[21] = cBottomLeft;
-            //    tris[22] = hBottomLeft;
-            //    tris[23] = hBottomRight;
-
-            //    triangles.AddRange(tris);
-            //}
-        }
-
-
         if (flipFace)
         {
             triangles = triangles.Reverse<int>().ToList();
@@ -284,89 +195,6 @@ public static class CreatePlaneWithHole
         proBuilderMesh.Refresh();
 
         return proBuilderMesh;
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //Vector3 transformPoint = ProMaths.Average(cps);
-        //Vector3[] holePositions = cps;
-
-        //Vector3 dir = cps[0].GetDirectionToTarget(cps[3]);
-        //Vector3 forward = Vector3.Cross(Vector3.up, dir);
-
-
-        //for (int i = 0; i < holePositions.Length; i++)
-        //{
-        //    // Scale
-        //    Vector3 point = holePositions[i] - transformPoint;
-        //    Vector3 v = Vector3.Scale(point, scale) + transformPoint;
-        //    holePositions[i] = v;
-
-        //    // Rotation
-        //    Vector3 localEulerAngles = forward * angle;
-        //    Vector3 v1 = Quaternion.Euler(localEulerAngles) * (holePositions[i] - transformPoint) + transformPoint;
-        //    offset = v1 - holePositions[i];
-        //    holePositions[i] += offset;
-
-        //    positions[i + 4] = holePositions[i];
-        //}
-
-        ////int cBottomLeft = i;
-        ////int cTopLeft = i + rows;
-        ////int cTopRight = i + rows + 1;
-        ////int cBottomRight = i + 1;
-
-        //int cBottomLeft = 0;
-        //int cTopLeft = 1;
-        //int cTopRight = 2;
-        //int cBottomRight = 3;
-
-        //int hBottomLeft = 4;
-        //int hTopLeft = 5;
-        //int hTopRight = 6;
-        //int hBottomRight = 7;
-
-        //List<int> triangles = new List<int>(new int[24]);
-
-        //// Left
-        //triangles[0] = cBottomLeft;
-        //triangles[1] = cTopLeft;
-        //triangles[2] = hBottomLeft;
-        //triangles[3] = hBottomLeft;
-        //triangles[4] = cTopLeft;
-        //triangles[5] = hTopLeft;
-        //// Top
-        //triangles[6] = hTopLeft;
-        //triangles[7] = cTopLeft;
-        //triangles[8] = cTopRight;
-        //triangles[9] = cTopRight;
-        //triangles[10] = hTopRight;
-        //triangles[11] = hTopLeft;
-        //// Right
-        //triangles[12] = cTopRight;
-        //triangles[13] = cBottomRight;
-        //triangles[14] = hTopRight;
-        //triangles[15] = hTopRight;
-        //triangles[16] = cBottomRight;
-        //triangles[17] = hBottomRight;
-        //// Bottom
-        //triangles[18] = hBottomRight;
-        //triangles[19] = cBottomRight;
-        //triangles[20] = cBottomLeft;
-        //triangles[21] = cBottomLeft;
-        //triangles[22] = hBottomLeft;
-        //triangles[23] = hBottomRight;
-
-
     }
 
 }
