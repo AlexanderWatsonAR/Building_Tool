@@ -87,13 +87,62 @@ public class WallTest : MonoBehaviour
         m_Directions = new List<Vector3>();
         m_insidePoints = insidePoints;
 
+        //GameObject corners = new GameObject("Wall Corners");
+        //corners.transform.SetParent(transform, true);
+
         // Construct the walls 
         for (int i = 0; i < controlPoints.Count; i++)
         {
             int oneNext = m_Polytool.GetNextPoint(i);
-            Vector3 oneNextInside = insidePoints[oneNext];
+            int onePrevious = m_Polytool.GetPreviousPoint(i);
 
-            Vector3[] points = new Vector3[] { insidePoints[i], insidePoints[i] + h, oneNextInside + h, oneNextInside };
+            Vector3 nextControlPoint = controlPoints[oneNext];
+
+            Vector3 oneNextInside = insidePoints[oneNext];
+            Vector3 onePreviousInside = insidePoints[onePrevious];
+
+            Vector3 nextForward = insidePoints[i].GetDirectionToTarget(oneNextInside);
+            Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_Depth;
+
+            Vector3 previousForward = insidePoints[i].GetDirectionToTarget(onePreviousInside);
+            Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_Depth;
+
+            Vector3 bottomLeft = insidePoints[i];
+            Vector3 topLeft = bottomLeft + h;
+            Vector3 bottomRight = oneNextInside;
+            Vector3 topRight = bottomRight + h;
+
+
+            // Post Points
+            Vector3 zero = controlPoints[i];
+            Vector3 one = insidePoints[i] + nextRight;
+            Vector3 two = insidePoints[i];
+            Vector3 three = insidePoints[i] + previousRight;
+
+            bool isConcave = m_Polytool.IsConcave(out int[] concavePoints);
+
+            if (isConcave)
+            {
+                for (int j = 0; j < concavePoints.Length; j++)
+                {
+                    if (concavePoints[j] == oneNext)
+                    {
+                        bottomRight = nextControlPoint - nextRight;
+                        topRight = bottomRight + h;
+                    }
+
+                    if (concavePoints[j] == i)
+                    {
+                        bottomLeft = controlPoints[i] - nextRight;
+                        topLeft = bottomLeft + h;
+
+                        one = controlPoints[i] - nextRight;
+                        three = controlPoints[i] - previousRight;
+                    }
+                }
+            }
+
+            Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
 
             Vector3 scale = new Vector3(m_HoleWidth, m_HoleHeight, m_HoleWidth);
 
@@ -116,36 +165,16 @@ public class WallTest : MonoBehaviour
             inside.GetComponent<Renderer>().sharedMaterial = m_Material;
             inside.transform.SetParent(outside.transform, true);
 
-
-
-            // Add corner posts
-            int onePrevious = m_Polytool.GetPreviousPoint(i);
-            Vector3 onePreviousInside = insidePoints[onePrevious];
-
-            Vector3 dir = insidePoints[i].GetDirectionToTarget(oneNextInside);
-            Vector3 cross = Vector3.Cross(Vector3.up, dir) * m_Depth;
-
-            Vector3 dir1 = insidePoints[i].GetDirectionToTarget(onePreviousInside);
-            Vector3 cross1 = Vector3.Cross(dir1, Vector3.up) * m_Depth;
-
-            m_Directions.Add(cross1);
-
-            Vector3 zero = controlPoints[i];
-            Vector3 one = insidePoints[i] + cross;
-            Vector3 two = insidePoints[i];
-            Vector3 three = insidePoints[i] + cross1;
-
             ProBuilderMesh post = ProBuilderMesh.Create();
             post.name = "Corner";
             post.CreateShapeFromPolygon(new Vector3[] { zero, one, two, three }, m_Height, false);
 
             post.GetComponent<Renderer>().sharedMaterial = m_Material;
-            post.transform.SetParent(outside.transform, true);
 
             post.ToMesh();
             post.Refresh();
 
-
+            post.transform.SetParent(outside.transform, true);
 
             //proBuilderMesh.AddComponent<MeshCollider>().convex = true;
         }

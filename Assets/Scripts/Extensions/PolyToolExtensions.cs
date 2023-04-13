@@ -258,7 +258,7 @@ public static class PolyToolExtensions
 
     public static bool IsPolygonEShaped(this IEnumerable<Vector3> controlPoints, out int[] ePointsIndices)
     {
-        int[] indices = controlPoints.GetConvexIndexPoints();
+        int[] indices = controlPoints.GetConcaveIndexPoints();
         ePointsIndices = new int[4];
 
         Vector3[] controlPointsArray = controlPoints.ToArray();
@@ -310,7 +310,7 @@ public static class PolyToolExtensions
 
     public static bool IsPolygonPlusShaped(this IEnumerable<Vector3> controlPoints, out int[] plusPointIndices)
     {
-        int[] indices = GetConvexIndexPoints(controlPoints);
+        int[] indices = GetConcaveIndexPoints(controlPoints);
         plusPointIndices = new int[4];
 
         Vector3[] controlPointsArray = controlPoints.ToArray();
@@ -342,7 +342,7 @@ public static class PolyToolExtensions
 
     public static bool IsPolygonNShaped(this IEnumerable<Vector3> controlPoints, out int[] nPointIndices)
     {
-        int[] indices = GetConvexIndexPoints(controlPoints);
+        int[] indices = GetConcaveIndexPoints(controlPoints);
         nPointIndices = new int[2];
 
         Vector3[] controlPointsArray = controlPoints.ToArray();
@@ -361,7 +361,7 @@ public static class PolyToolExtensions
 
     public static bool IsPolygonMShaped(this IEnumerable<Vector3> controlPoints, out int[] mPointIndices)
     {
-        int[] indices = GetConvexIndexPoints(controlPoints);
+        int[] indices = GetConcaveIndexPoints(controlPoints);
         mPointIndices = new int[3];
 
         Vector3[] controlPointsArray = controlPoints.ToArray();
@@ -425,7 +425,7 @@ public static class PolyToolExtensions
         return true;
     }
 
-    private static int[] GetConvexIndexPoints(this IEnumerable<Vector3> controlPoints)
+    private static int[] GetConcaveIndexPoints(this IEnumerable<Vector3> controlPoints)
     {
         Vector3[] controlPointsArray = controlPoints.ToArray();
         Vector3[] nextForward = new Vector3[controlPointsArray.Length];
@@ -505,6 +505,21 @@ public static class PolyToolExtensions
 
         return index + previous;
     }
+
+    public static bool IsConcave(this Polytool polyTool, out int[] concavePoints)
+    {
+        concavePoints = GetConcaveIndexPoints(polyTool.ControlPoints);
+
+        return concavePoints.Length > 0;
+    }
+
+    public static bool IsPolygonConcave(this IEnumerable<Vector3> controlPoints, out int[] concavePoints)
+    {
+        concavePoints = GetConcaveIndexPoints(controlPoints);
+
+        return concavePoints.Length > 0;
+    }
+
 
     /// <summary>
     /// If true, out returns a 1D representation of the polyshape.
