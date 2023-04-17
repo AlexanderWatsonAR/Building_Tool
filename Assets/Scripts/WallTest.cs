@@ -36,8 +36,12 @@ public class WallTest : MonoBehaviour
     public int HoleRows => m_HoleRows;
     public int HoleColumns => m_HoleColumns;
 
+    
+
     public void CreateWallOutline()
     {
+        //ShapeGenerator
+
         Deconstruct();
         m_Polytool = GetComponent<Polytool>();
 
@@ -87,8 +91,11 @@ public class WallTest : MonoBehaviour
         m_Directions = new List<Vector3>();
         m_insidePoints = insidePoints;
 
-        //GameObject corners = new GameObject("Wall Corners");
-        //corners.transform.SetParent(transform, true);
+        GameObject walls = new GameObject("Walls");
+        walls.transform.SetParent(transform, true);
+
+        GameObject corners = new GameObject("Wall Corners");
+        corners.transform.SetParent(walls.transform, true);
 
         // Construct the walls 
         for (int i = 0; i < controlPoints.Count; i++)
@@ -111,7 +118,6 @@ public class WallTest : MonoBehaviour
             Vector3 topLeft = bottomLeft + h;
             Vector3 bottomRight = oneNextInside;
             Vector3 topRight = bottomRight + h;
-
 
             // Post Points
             Vector3 zero = controlPoints[i];
@@ -144,26 +150,28 @@ public class WallTest : MonoBehaviour
 
             Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
 
+
             Vector3 scale = new Vector3(m_HoleWidth, m_HoleHeight, m_HoleWidth);
 
-            ProBuilderMesh outside = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
+            ProBuilderMesh outside = MeshMaker.HoleGrid(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
             outside.name = "Wall " + i.ToString();
 
-            ProBuilderMesh inside = CreatePlaneWithHole.Create(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
+            ProBuilderMesh inside = MeshMaker.HoleGrid(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
             inside.ToMesh();
             inside.Refresh();
 
             outside.Extrude(new Face[] { outside.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
             outside.GetComponent<Renderer>().sharedMaterial = m_Material;
-            outside.transform.SetParent(transform, true);
+            outside.transform.SetParent(walls.transform, true);
 
-            outside.AddComponent<TheWall>().Init(outside);
-
+            //outside.AddComponent<TheWall>().Init(outside);
+            CombineMeshes.Combine(new ProBuilderMesh[] { outside, inside }, outside);
             outside.ToMesh();
             outside.Refresh();
 
-            inside.GetComponent<Renderer>().sharedMaterial = m_Material;
-            inside.transform.SetParent(outside.transform, true);
+            DestroyImmediate(inside.gameObject);
+            //inside.GetComponent<Renderer>().sharedMaterial = m_Material;
+            //inside.transform.SetParent(outside.transform, true);
 
             ProBuilderMesh post = ProBuilderMesh.Create();
             post.name = "Corner";
@@ -174,7 +182,7 @@ public class WallTest : MonoBehaviour
             post.ToMesh();
             post.Refresh();
 
-            post.transform.SetParent(outside.transform, true);
+            post.transform.SetParent(corners.transform, true);
 
             //proBuilderMesh.AddComponent<MeshCollider>().convex = true;
         }

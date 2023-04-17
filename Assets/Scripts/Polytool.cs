@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 using UEColor = UnityEngine.Color;
 using UnityEngine.ProBuilder;
 using System;
-using UnityEngine.UIElements;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -18,6 +17,8 @@ public class Polytool : MonoBehaviour
     [SerializeField] private List<Vector3> m_ControlPoints; // world points.
     [SerializeField] private bool m_IsDrawing;
     [SerializeField] private bool m_Show;
+
+    public event Action<List<Vector3>> OnControlPointsChanged;
 
     public List<Vector3> ControlPoints
     {
@@ -92,11 +93,12 @@ public class Polytool : MonoBehaviour
     public void SetControlPoints(IEnumerable<Vector3> controlPoints)
     {
         m_ControlPoints = controlPoints.ToList();
+        OnControlPointsChanged?.Invoke(ControlPoints);
     }
 
-    public void SetControlPoints(List<Vector3> controlPoints)
+    public void SetControlPoints(IList<Vector3> controlPoints)
     {
-        m_ControlPoints = controlPoints;
+        SetControlPoints(controlPoints);
     }
 
     public void AddControlPoint(Vector3 controlPoint)
@@ -150,19 +152,21 @@ public class Polytool : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         if (m_ControlPoints == null || m_Show == false)
             return;
         
         for (int i = 0; i < LocalControlPoints.Count; i++)
         {
-            if (i == 0)
-                Handles.color = UEColor.red;
-            else
+            //if (i == 0)
+            //    Handles.color = UEColor.red;
+            //else
                 Handles.color = UEColor.white;
 
-            Handles.DotHandleCap(-1, LocalControlPoints[i], Quaternion.identity, 0.1f, Event.current.type);
+            float size = UnityEditor.HandleUtility.GetHandleSize(m_ControlPoints[i]) * 0.04f;
+
+            Handles.DotHandleCap(i, LocalControlPoints[i], Quaternion.identity, size, Event.current.type);
         }
 
         if (m_ControlPoints.Count <= 1)

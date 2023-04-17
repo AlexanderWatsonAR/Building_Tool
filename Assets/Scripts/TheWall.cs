@@ -10,15 +10,49 @@ using UnityEngine.UIElements;
 
 public class TheWall : MonoBehaviour
 {
-    [SerializeField, HideInInspector] private ProBuilderMesh m_WallMesh;
-    [SerializeField] private Vector3[] m_Points; // control points.
-    [SerializeField] private float m_Height, m_Width, m_Depth;
-    [SerializeField] private List<Vector3> m_Holes;
-    [SerializeField] private bool m_FlipFace;
+    [SerializeField, HideInInspector] private Vector3[] m_Points; // control points.
 
-    public void Init(ProBuilderMesh wallMesh)
+    [SerializeField, Range(0, 5)] private float m_Columns, m_Rows;
+    [SerializeField, HideInInspector] private float m_Height, m_Depth;
+    [SerializeField] Material m_Material;
+
+    List<IWallElement> m_WallElements;
+
+    public TheWall Initialize(IEnumerable<Vector3> controlPoints)
     {
-        m_Points = wallMesh.positions.ToArray();
+        m_Points = controlPoints.ToArray();
+        return this;
+    }
+
+    public TheWall Build()
+    {
+        if (m_WallElements.Count == 0 || m_Columns == 0 || m_Rows == 0)
+        {
+            ProBuilderMesh outside = MeshMaker.Cube(m_Points, m_Depth);
+            outside.name = "Outside";
+            outside.GetComponent<Renderer>().material = m_Material;
+            outside.transform.SetParent(transform, true);
+
+            ProBuilderMesh inside = MeshMaker.Quad(m_Points, true);
+            inside.name = "Inside";
+            inside.GetComponent<Renderer>().material = m_Material;
+            inside.transform.SetParent(outside.transform, true);
+
+            return this;
+        }
+
+        //for(int i = 0; i < m_WallElements.Count; i++)
+        //{
+        //    for(int j = 0; j < m_Columns; j++)
+        //    {
+        //        for(int k = 0; k < m_Rows; k++)
+        //        {
+
+        //        }
+        //    }
+        //}
+
+        return this;
     }
 
     private void OnDrawGizmosSelected()
