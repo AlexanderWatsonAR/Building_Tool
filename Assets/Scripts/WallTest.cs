@@ -36,8 +36,6 @@ public class WallTest : MonoBehaviour
     public int HoleRows => m_HoleRows;
     public int HoleColumns => m_HoleColumns;
 
-    
-
     public void CreateWallOutline()
     {
         //ShapeGenerator
@@ -150,26 +148,30 @@ public class WallTest : MonoBehaviour
 
             Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
 
+            GameObject wall = new GameObject("Wall " + i.ToString(), typeof(TheWall));
+            wall.transform.SetParent(walls.transform, true);
+            wall.GetComponent<TheWall>().Initialize(points, m_Depth, m_Material).Build();
+            
 
-            Vector3 scale = new Vector3(m_HoleWidth, m_HoleHeight, m_HoleWidth);
+            //Vector3 scale = new Vector3(m_HoleWidth, m_HoleHeight, m_HoleWidth);
 
-            ProBuilderMesh outside = MeshMaker.HoleGrid(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
-            outside.name = "Wall " + i.ToString();
+            //ProBuilderMesh outside = MeshMaker.HoleGrid(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows);
+            //outside.name = "Wall " + i.ToString();
 
-            ProBuilderMesh inside = MeshMaker.HoleGrid(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
-            inside.ToMesh();
-            inside.Refresh();
+            //ProBuilderMesh inside = MeshMaker.HoleGrid(points, Vector3.zero, m_HoleRotation, scale, m_HoleColumns, m_HoleRows, true);
+            //inside.ToMesh();
+            //inside.Refresh();
 
-            outside.Extrude(new Face[] { outside.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
-            outside.GetComponent<Renderer>().sharedMaterial = m_Material;
-            outside.transform.SetParent(walls.transform, true);
+            //outside.Extrude(new Face[] { outside.faces[0] }, ExtrudeMethod.FaceNormal, m_Depth);
+            //outside.GetComponent<Renderer>().sharedMaterial = m_Material;
+            //outside.transform.SetParent(walls.transform, true);
 
-            //outside.AddComponent<TheWall>().Init(outside);
-            CombineMeshes.Combine(new ProBuilderMesh[] { outside, inside }, outside);
-            outside.ToMesh();
-            outside.Refresh();
+            ////outside.AddComponent<TheWall>().Init(outside);
+            //CombineMeshes.Combine(new ProBuilderMesh[] { outside, inside }, outside);
+            //outside.ToMesh();
+            //outside.Refresh();
 
-            DestroyImmediate(inside.gameObject);
+            //DestroyImmediate(inside.gameObject);
             //inside.GetComponent<Renderer>().sharedMaterial = m_Material;
             //inside.transform.SetParent(outside.transform, true);
 

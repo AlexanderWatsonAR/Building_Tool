@@ -11,6 +11,28 @@ using UnityEngine.ProBuilder.Shapes;
 
 public static class Extensions
 {
+    public static void DeleteChildren(this Transform transform)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            GameObject child = transform.GetChild(i).gameObject;
+
+            if (Application.isEditor)
+            {
+                UnityEngine.Object.DestroyImmediate(child);
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(child);
+            }
+
+        }
+
+        if (transform.childCount > 0)
+        {
+            DeleteChildren(transform);
+        }
+    }
 
     public static Vector3 CheckAxis(this Axis direction)
     {

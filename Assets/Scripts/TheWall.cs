@@ -1,58 +1,119 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
+using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 public class TheWall : MonoBehaviour
 {
     [SerializeField, HideInInspector] private Vector3[] m_Points; // control points.
-
-    [SerializeField, Range(0, 5)] private float m_Columns, m_Rows;
+    [SerializeField, HideInInspector] private Vector3[,] m_SubPoints; // Grid points, based on control points, columns & rows.
+    [SerializeField, Range(1, 10)] private int m_Columns, m_Rows;
     [SerializeField, HideInInspector] private float m_Height, m_Depth;
     [SerializeField] Material m_Material;
 
-    List<IWallElement> m_WallElements;
+    ProBuilderMesh[,] m_WallSections;
 
-    public TheWall Initialize(IEnumerable<Vector3> controlPoints)
+    private Vector3[,] SubPoints
     {
+        get
+        {
+            if (m_Columns <= 0 && m_Rows <= 0) return null;
+
+            if (m_SubPoints == null)
+                m_SubPoints = CalculateGrid(m_Points, m_Columns, m_Rows);
+
+            if (m_SubPoints.GetLength(0) == m_Columns &&
+                m_SubPoints.GetLength(1) == m_Rows)
+                return m_SubPoints;
+
+
+            m_SubPoints = CalculateGrid(m_Points, m_Columns, m_Rows);
+
+            return m_SubPoints;
+        }
+    }
+
+    public int Columns => m_Columns;
+    public int Rows => m_Rows;
+
+    public TheWall Initialize(IEnumerable<Vector3> controlPoints, float depth, Material material)
+    {
+        m_Columns = 1;
+        m_Rows = 1;
+        m_Depth = depth;
+        m_Material = material;
         m_Points = controlPoints.ToArray();
+        m_WallSections = new ProBuilderMesh[m_Columns, m_Rows];
+
         return this;
     }
 
     public TheWall Build()
     {
-        if (m_WallElements.Count == 0 || m_Columns == 0 || m_Rows == 0)
+        Vector3[,] subPoints = SubPoints;
+        
+
+        transform.DeleteChildren();
+
+        for (int i = 0; i < m_Columns; i++)
         {
-            ProBuilderMesh outside = MeshMaker.Cube(m_Points, m_Depth);
-            outside.name = "Outside";
-            outside.GetComponent<Renderer>().material = m_Material;
-            outside.transform.SetParent(transform, true);
+            for (int j = 0; j < m_Rows; j++)
+            {
+                Vector3 first = subPoints[i + 0, j + 0];
+                Vector3 second = subPoints[i + 0, j + 1];
+                Vector3 third = subPoints[i + 1, j + 1];
+                Vector3 fourth = subPoints[i + 1, j + 0];
 
-            ProBuilderMesh inside = MeshMaker.Quad(m_Points, true);
-            inside.name = "Inside";
-            inside.GetComponent<Renderer>().material = m_Material;
-            inside.transform.SetParent(outside.transform, true);
+                Vector3[] points = new Vector3[] { first, second, third, fourth };
 
-            return this;
+                ProBuilderMesh wallSection = ProBuilderMesh.Create();
+                wallSection.name = "Wall Section " + i.ToString() + " " + j.ToString();
+                wallSection.GetComponent<Renderer>().sharedMaterial = m_Material;
+                wallSection.transform.SetParent(transform, true);
+                wallSection.AddComponent<WallSection>().Initialize(points, m_Depth).Build();
+                
+                //m_WallSections[i,j] = wallSection;
+                
+                //ProBuilderMesh cube = MeshMaker.Cube(points, m_Depth);
+                //cube.name = "Cube: " + i.ToString() + " " + j.ToString();
+                //cube.GetComponent<Renderer>().material = m_Material;
+                //cube.transform.SetParent(transform, true);
+
+                //Vector3[] verts = cube.positions.ToArray();
+
+                //m_WallElements.Add(verts);
+            }
         }
 
-        //for(int i = 0; i < m_WallElements.Count; i++)
-        //{
-        //    for(int j = 0; j < m_Columns; j++)
-        //    {
-        //        for(int k = 0; k < m_Rows; k++)
-        //        {
-
-        //        }
-        //    }
-        //}
-
         return this;
+    }
+
+    private Vector3[,] CalculateGrid(Vector3[] controlPoints, int cols, int rows)
+    {
+        Vector3[,] calculateGrid = new Vector3[cols + 1, rows + 1];
+
+        Vector3[] leftPoints = Vector3Extensions.LerpCollection(controlPoints[0], controlPoints[1], rows + 1).ToArray(); // row start points
+        Vector3[] rightPoints = Vector3Extensions.LerpCollection(controlPoints[3], controlPoints[2], rows + 1).ToArray(); // row end points
+
+        for (int i = 0; i < m_Rows + 1; i++)
+        {
+            Vector3[] points = Vector3Extensions.LerpCollection(leftPoints[i], rightPoints[i], cols + 1);
+
+            for (int j = 0; j < points.Length; j++)
+            {
+                calculateGrid[j, i] = points[j];
+            }
+        }
+
+        return calculateGrid;
     }
 
     private void OnDrawGizmosSelected()
@@ -60,31 +121,43 @@ public class TheWall : MonoBehaviour
         if (m_Points == null)
             return;
 
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 18;
-        style.normal.textColor = Color.red;
+        Handles.DrawAAPolyLine(m_Points);
+        Handles.DrawAAPolyLine(m_Points[0], m_Points[^1]);
 
-        //for (int i = 0; i < m_Holes.Count; i++)
-        //{
-        //    Handles.Label(m_Holes[i], i.ToString(), style);
-        //}
-
-        //style.normal.textColor = Color.black;
-
-        for (int i = 0; i < m_Points.Length; i++)
+        if (m_Rows != 0 && m_Columns != 0)
         {
-            Handles.Label(m_Points[i] + transform.localPosition, i.ToString(), style);
+            Vector3[,] subPoints = SubPoints; // cols by rows
+
+            for (int i = 0; i < m_Columns; i++)
+            {
+                for (int j = 0; j < m_Rows; j++)
+                {
+                    Vector3 first = subPoints[i + 0, j + 0];
+                    Vector3 second = subPoints[i + 0, j + 1];
+                    Vector3 third = subPoints[i + 1, j + 1];
+                    Vector3 fourth = subPoints[i + 1, j + 0];
+
+                    Handles.DrawAAPolyLine(first, second, third, fourth);
+
+                }
+            }
         }
 
-        //Vector3 dirA = m_Holes[0].GetDirectionToTarget(m_Holes[1]);
-        //Vector3 dirB = m_Holes[3].GetDirectionToTarget(m_Holes[2]);
-        //Vector3 dir = dirA + dirB;
-        //Vector3 centre = (m_Holes[0] + m_Holes[1]) / 2;
-        //Vector3 forward = Vector3.Cross(Vector3.up, dir);
+        //GUIStyle style = new GUIStyle();
+        //style.fontSize = 18;
+        //style.normal.textColor = Color.red;
 
-        //Vector3[] points = new Vector3[] { centre, Vector3.Scale(centre, forward) };
+        //for (int i = 0; i < m_WallSections.Count; i++)
+        //{
+        //    Vector3[] points = m_WallSections[i];
 
-        //Handles.DrawDottedLine(centre, centre + forward, 0.1f);
+        //    for (int j = 0; j < points.Length; j++)
+        //    {
+        //        Handles.Label(points[j], j.ToString(), style);
+        //    }
+            
+        //}
+
 
     }
 }

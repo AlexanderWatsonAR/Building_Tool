@@ -13,15 +13,47 @@ public static class MeshMaker
 {
     public static ProBuilderMesh Cube(IEnumerable<Vector3> controlPoints, float depth, bool flipFace = false)
     {
-        ProBuilderMesh cube = Quad(controlPoints, flipFace);
-        cube.Extrude(new Face[] { cube.faces[0] }, ExtrudeMethod.FaceNormal, depth);
+        // TODO: Add other faces.
+        // Issue: faces with shared triangles see to mess up.
+
+        Vector3[] points = controlPoints.ToArray();
+        if (controlPoints.ToArray().Length != 4)
+            return null;
+
+        Vector3 forward = points[0].GetDirectionToTarget(points[3]);
+        Vector3 right = Vector3.Cross(Vector3.up, forward) * depth;
+
+        Vector3[] vertices = new Vector3[8];
+
+        vertices[0] = points[0] + right;
+        vertices[1] = points[3] + right;
+        vertices[2] = points[3];
+        vertices[3] = points[0];
+
+        vertices[4] = points[1] + right;
+        vertices[5] = points[2] + right;
+        vertices[6] = points[2];
+        vertices[7] = points[1];
+
+        List<SharedVertex> shared = new List<SharedVertex>();
+        
+
+        Face[] faces = new Face[] { new Face(new int[] { 0, 4, 1, 1, 4, 5 }), // Front
+                                    new Face(new int[] { 2, 6, 7, 7, 3, 2 })}; // Back
+
+        ProBuilderMesh cube = ProBuilderMesh.Create(vertices, faces);
+
         cube.ToMesh();
         cube.Refresh();
+
         return cube;
     }
 
     public static ProBuilderMesh Quad (IEnumerable<Vector3> controlPoints, bool flipFace = false)
     {
+        if (controlPoints.ToArray().Length != 4)
+            return null;
+
         int[] tris = new int[6];
         tris[0] = 0;
         tris[1] = 1;
