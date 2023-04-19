@@ -13,11 +13,21 @@ public class WallSectionEditor : Editor
         serializedObject.Update();
         WallSection section = (WallSection)target;
 
-        SerializedProperty columns = serializedObject.FindProperty("m_WindowColumns");
-        SerializedProperty rows = serializedObject.FindProperty("m_WindowRows");
-        SerializedProperty height = serializedObject.FindProperty("m_WindowHeight");
-        SerializedProperty width = serializedObject.FindProperty("m_WindowWidth");
         SerializedProperty element = serializedObject.FindProperty("m_WallElement");
+
+        // Door
+        SerializedProperty doorColumns = serializedObject.FindProperty("m_DoorColumns");
+        SerializedProperty doorRows = serializedObject.FindProperty("m_DoorRows");
+        SerializedProperty doorHeight = serializedObject.FindProperty("m_PedimentHeight");
+        SerializedProperty doorWidth = serializedObject.FindProperty("m_SideWidth");
+        // End Door
+
+        // Window
+        SerializedProperty winColumns = serializedObject.FindProperty("m_WindowColumns");
+        SerializedProperty winRows = serializedObject.FindProperty("m_WindowRows");
+        SerializedProperty winHeight = serializedObject.FindProperty("m_WindowHeight");
+        SerializedProperty winWidth = serializedObject.FindProperty("m_WindowWidth");
+        // End Window
 
         EditorGUILayout.PropertyField(element);
 
@@ -26,22 +36,37 @@ public class WallSectionEditor : Editor
             case WallElement.Wall:
                 break;
             case WallElement.Door:
+                EditorGUILayout.LabelField("Number of Doors");
+                EditorGUILayout.IntSlider(doorColumns, 1, 10, "Columns");
+                EditorGUILayout.IntSlider(doorRows, 1, 10, "Rows");
+                EditorGUILayout.LabelField("Size");
+                EditorGUILayout.PropertyField(doorHeight);
+                EditorGUILayout.PropertyField(doorWidth);
                 break;
             case WallElement.Window:
                 EditorGUILayout.LabelField("Number of Windows");
-                EditorGUILayout.IntSlider(columns, 1, 10, "Columns");
-                EditorGUILayout.IntSlider(rows, 1, 10, "Rows");
+                EditorGUILayout.IntSlider(winColumns, 1, 10, "Columns");
+                EditorGUILayout.IntSlider(winRows, 1, 10, "Rows");
                 EditorGUILayout.LabelField("Size");
-                EditorGUILayout.Slider(height, 0, 1, "Height");
-                EditorGUILayout.Slider(width, 0, 1, "Width");
+                EditorGUILayout.Slider(winHeight, 0, 1, "Height");
+                EditorGUILayout.Slider(winWidth, 0, 1, "Width");
                 break;
         }
 
         WallElement wallElement = section.WallElement;
+        // Window
         int wColumns = section.WindowColumns;
         int wRows = section.WindowRows;
         float wHeight = section.WindowHeight;
         float wWidth = section.WindowWidth;
+        // End Window
+
+        // Door
+        int dColumns = section.DoorColumns;
+        int dRows = section.DoorRows;
+        float dHeight = section.PedimentHeight;
+        float dWidth = section.SideWidth;
+
 
         if (serializedObject.ApplyModifiedProperties())
         {
@@ -50,10 +75,18 @@ public class WallSectionEditor : Editor
                 section.Build();
             }
 
-            if(columns.intValue != wColumns ||
-               rows.intValue != wRows ||
-               height.floatValue != wHeight ||
-               width.floatValue != wWidth)
+            if(winColumns.intValue != wColumns ||
+               winRows.intValue != wRows ||
+               winHeight.floatValue != wHeight ||
+               winWidth.floatValue != wWidth)
+            {
+                section.Build();
+            }
+
+            if (doorColumns.intValue != dColumns ||
+               doorRows.intValue != dRows ||
+               doorHeight.floatValue != dHeight ||
+               doorWidth.floatValue != dWidth)
             {
                 section.Build();
             }

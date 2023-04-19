@@ -15,6 +15,7 @@ public class TheWallEditor : Editor
         SerializedProperty rows = serializedObject.FindProperty("m_Rows");
         SerializedProperty material = serializedObject.FindProperty("m_Material");
 
+        EditorGUILayout.LabelField("Wall Sections Layout");
         EditorGUILayout.PropertyField(columns);
         EditorGUILayout.PropertyField(rows);
         EditorGUILayout.PropertyField(material);

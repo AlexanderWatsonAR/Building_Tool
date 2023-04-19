@@ -143,20 +143,7 @@ public class TheWall : MonoBehaviour
             }
         }
 
-        //GUIStyle style = new GUIStyle();
-        //style.fontSize = 18;
-        //style.normal.textColor = Color.red;
 
-        //for (int i = 0; i < m_WallSections.Count; i++)
-        //{
-        //    Vector3[] points = m_WallSections[i];
-
-        //    for (int j = 0; j < points.Length; j++)
-        //    {
-        //        Handles.Label(points[j], j.ToString(), style);
-        //    }
-            
-        //}
 
 
     }

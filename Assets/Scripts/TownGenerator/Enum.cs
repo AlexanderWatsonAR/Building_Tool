@@ -23,5 +23,5 @@ public enum TransformType
 
 public enum WallElement
 {
-    Wall, Door, Window
+    Wall, Door, Window, Empty
 }
