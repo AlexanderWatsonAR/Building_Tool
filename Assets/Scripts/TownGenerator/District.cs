@@ -21,14 +21,14 @@ public class District : MonoBehaviour
                 {
                     house = transform.GetChild(i).AddComponent<Building>();
                     house.SetBuildingMaterials(Pillar, WallOutline, Wood);
-                    house.Construct();
+                    house.Build();
 
                 }
                 else
                 {
                     house = transform.GetChild(i).GetComponent<Building>();
                     house.SetBuildingMaterials(Pillar, WallOutline, Wood); // To be Removed
-                    house.Construct();
+                    house.Build();
                 }
             }
         }

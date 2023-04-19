@@ -10,14 +10,27 @@ public class WallEditor : Editor
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
+        Wall wall = (Wall)target;
 
-        EditorGUILayout.ObjectField(serializedObject.FindProperty("m_WallOutlinePrefab"));
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("m_WallLength"));
+        SerializedProperty columns = serializedObject.FindProperty("m_Columns");
+        SerializedProperty rows = serializedObject.FindProperty("m_Rows");
+        SerializedProperty material = serializedObject.FindProperty("m_Material");
+
+        EditorGUILayout.LabelField("Wall Sections Layout");
+        EditorGUILayout.PropertyField(columns);
+        EditorGUILayout.PropertyField(rows);
+        EditorGUILayout.PropertyField(material);
+
+        int wColumns = wall.Columns;
+        int wRows = wall.Rows;
 
         if (serializedObject.ApplyModifiedProperties())
         {
-            Wall wall = (Wall)serializedObject.targetObject;
-            wall.Initialize(wall).Build();
+            if (columns.intValue != wColumns ||
+                rows.intValue != wRows)
+            {
+                wall.Build();
+            }
         }
     }
 }

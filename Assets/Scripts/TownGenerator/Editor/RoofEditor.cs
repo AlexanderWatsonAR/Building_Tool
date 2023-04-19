@@ -102,7 +102,7 @@ public class RoofEditor : Editor
             {
                 if (roof.TryGetComponent(out Building building))
                 {
-                    building.Construct();
+                    building.Build();
                 }
                 else
                 {

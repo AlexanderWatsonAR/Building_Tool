@@ -18,7 +18,7 @@ public class Building : MonoBehaviour
     [SerializeField, HideInInspector] private bool m_HasConstructed;
 
     protected Polytool m_BuildingPolytool;
-    protected Storey[] m_Storeys;
+    protected List<Storey> m_Storeys;
     protected Roof m_Roof;
 
     public bool HasConstructed => m_HasConstructed;
@@ -35,13 +35,40 @@ public class Building : MonoBehaviour
         //m_ColourSwatchMaterial = colourSwatchMaterial;
     }
 
-    public void Construct()
+    private void Reset()
     {
-        Deconstruct();
+        Initialize();
+    }
 
-        m_Storeys = GetComponents<Storey>();
+    public Building Initialize()
+    {
+        m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
         m_BuildingPolytool = GetComponent<Polytool>();
+
+        if(m_Storeys == null)
+        {
+            m_Storeys.Add(gameObject.AddComponent<Storey>());
+        }
+
+        if(m_Roof == null)
+        {
+            m_Roof = gameObject.AddComponent<Roof>();
+        }
+
+        foreach(Storey storey in m_Storeys)
+        {
+            storey.SetControlPoints(m_BuildingPolytool.ControlPoints);
+        }
+
+        m_Roof.SetControlPoints(m_BuildingPolytool.ControlPoints);
+
+        return this;
+    }
+
+    public Building Build()
+    {
+        transform.DeleteChildren();
 
         if (!m_BuildingPolytool.IsClockwise())
         {
@@ -52,13 +79,13 @@ public class Building : MonoBehaviour
 
         Vector3 pos = Vector3.zero;
 
-        for (int i = 0; i < m_Storeys.Length; i++)
+        for (int i = 0; i < m_Storeys.Count; i++)
         {
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]).Contruct(m_BuildingPolytool.ControlPoints);
-            pos += storey.TopCentre;
+            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]).Build();
+            pos += (Vector3.up * storey.WallHeight);
         }
 
         Roof roof = GetComponent<Roof>();
@@ -69,6 +96,7 @@ public class Building : MonoBehaviour
         roofGO.AddComponent<Roof>().Initialize(roof, m_BuildingPolytool.ControlPoints).ConstructFrame();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
+        return this;
     }
 
     private void Building_OnAnyRoofChange(Roof obj)
@@ -81,31 +109,8 @@ public class Building : MonoBehaviour
 
     public void RevertToPolyshape()
     {
-        Deconstruct();
+        transform.DeleteChildren();
         m_HasConstructed = false;
     }
-
-    private void Deconstruct()
-    {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            GameObject child = transform.GetChild(i).gameObject;
-            if (Application.isEditor)
-            {
-                DestroyImmediate(child);
-            }
-            else
-            {
-                Destroy(child);
-            }
-
-        }
-
-        if (transform.childCount > 0)
-        {
-            Deconstruct();
-        }
-    }
-    
 
 }

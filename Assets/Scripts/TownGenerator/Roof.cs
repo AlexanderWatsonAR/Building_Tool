@@ -40,6 +40,11 @@ public class Roof : MonoBehaviour
 
     public IEnumerable<Vector3> ControlPoints => m_ControlPoints;
 
+    public void SetControlPoints(IEnumerable<Vector3> controlPoints)
+    {
+        m_ControlPoints = controlPoints.ToArray();
+    }
+
     public event Action<Roof> OnAnyRoofChange; // Building should sub to this.
 
     public void OnAnyRoofChange_Invoke()

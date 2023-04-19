@@ -17,7 +17,7 @@ public class BuildingEditor : Editor
         if(GUILayout.Button("Build"))
         {
             //buildingScript.Construct();
-            buildingScript.Construct();
+            buildingScript.Build();
         }
 
         if (GUILayout.Button("Reset"))
