@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.PackageManager;
-using UnityEditor.ProBuilder;
 using UnityEngine;
 using UnityEngine.InputSystem.HID;
 using UnityEngine.ProBuilder;
@@ -14,6 +11,28 @@ using UnityEngine.ProBuilder.Shapes;
 
 public static class Extensions
 {
+    public static void DeleteChildren(this Transform transform)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            GameObject child = transform.GetChild(i).gameObject;
+
+            if (Application.isEditor)
+            {
+                UnityEngine.Object.DestroyImmediate(child);
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(child);
+            }
+
+        }
+
+        if (transform.childCount > 0)
+        {
+            DeleteChildren(transform);
+        }
+    }
 
     public static Vector3 CheckAxis(this Axis direction)
     {
@@ -390,53 +409,6 @@ public static class Extensions
         proBuilderMesh.Refresh();
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, float scale)
-    {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach(int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        Vector3 scalePoint = transformPoint.PointToVector3(selectedVerts);
-
-        int[] indicesArray = indices.ToArray();
-        for(int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 point = selectedVerts[i] - scalePoint;
-            Vector3 v = (point * scale) + scalePoint;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-    }
-
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 eulerAngle)
-    {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach (int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        // The rotation point.
-        //Vector3 centrePoint = UnityEngine.ProBuilder.Math.Average(selectedVerts);
-
-        Vector3 rotatePoint = transformPoint.PointToVector3(selectedVerts);
-
-        int[] indicesArray = indices.ToArray();
-        for (int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 v = Quaternion.Euler(eulerAngle) * (selectedVerts[i] - rotatePoint) + rotatePoint;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-    }
-
-
     /// <summary>
     /// Calculates where the transform point is in relation to the vertices.
     /// </summary>
@@ -554,7 +526,7 @@ public static class Extensions
     /// </summary>
     /// <param name="vertices"></param>
     /// <returns></returns>
-    public static Vector3 CalculatePolygonFaceNormal(IEnumerable<Vector3> vertices)
+    public static Vector3 CalculatePolygonFaceNormal(this IEnumerable<Vector3> vertices)
     {
         Vector3[] verts = vertices.ToArray();
         Vector3 faceNormal = Vector3.zero;
@@ -579,7 +551,7 @@ public static class Extensions
     /// <param name="vertices"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static Vector3 CalculateTriangleNormal(IEnumerable<Vector3> vertices)
+    public static Vector3 CalculateTriangleNormal(this IEnumerable<Vector3> vertices)
     { 
         Vector3[] verticesArray = vertices.ToArray();
 
@@ -601,7 +573,7 @@ public static class Extensions
     /// </summary>
     /// <param name="vertices"></param>
     /// <returns></returns>
-    public static Vector3[] CreatePolygon(IEnumerable<Vector3> vertices)
+    public static Vector3[] CreatePolygon(this IEnumerable<Vector3> vertices)
     {
         Vector3 normal = CalculateTriangleNormal(vertices);
 

@@ -86,6 +86,7 @@ public class Extrudable : MonoBehaviour
         }
 
         m_ProBuilderMesh = m_ProBuilderMesh != null ? m_ProBuilderMesh : GetComponent<ProBuilderMesh>();
+
         m_IsInitialized = true;
     }
 
@@ -115,6 +116,13 @@ public class Extrudable : MonoBehaviour
         if(!m_IsInitialized)
             this.Initialize();
         return Extrude(m_ProBuilderMesh.faces, method, distance, 0);
+    }
+
+    public List<int[]> Extrude(ExtrudeMethod method, float distance, int steps)
+    {
+        if (!m_IsInitialized)
+            this.Initialize();
+        return Extrude(m_ProBuilderMesh.faces, method, distance, steps);
     }
 
     public List<int[]> Extrude(IEnumerable<Face> faces, ExtrudeMethod method, float distance)

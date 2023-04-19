@@ -56,7 +56,34 @@ public class RoofEditor : Editor
         frameType.SetEnumValue((RoofType)frames[frameIndex]);
 
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
+
+        if(frameType.enumValueIndex == (int)RoofType.Dormer || frameType.enumValueIndex == (int)RoofType.Mansard)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardHeight"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardScale"));
+        }
+
+        if(frameType.enumValueIndex != (int)RoofType.Mansard)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
+        }
+
+        EditorGUILayout.LabelField("Tile");
+
+        SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
+        SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
+
+        float tHeight = roof.TileHeight;
+        float tExtend = roof.TileExtend;
+
+        EditorGUILayout.PropertyField(tileExtend);
+        EditorGUILayout.PropertyField(tileHeight);
+
+        float mansardRoofScale = serializedObject.FindProperty("m_MansardScale").floatValue;
+        float mansardScale = roof.MansardScale;
+
+        float mansardRoofHeight = serializedObject.FindProperty("m_MansardHeight").floatValue;
+        float mansardheight = roof.MansardHeight;
 
         float roofHeight = serializedObject.FindProperty("m_Height").floatValue;
         float height = roof.Height;
@@ -67,7 +94,11 @@ public class RoofEditor : Editor
         if (serializedObject.ApplyModifiedProperties())
         {
             if (height != roofHeight ||
-                type != roofType)
+                mansardheight != mansardRoofHeight ||
+                type != roofType ||
+                tHeight != tileHeight.floatValue ||
+                tExtend != tileExtend.floatValue ||
+                mansardScale != mansardRoofScale)
             {
                 if (roof.TryGetComponent(out Building building))
                 {
@@ -76,6 +107,7 @@ public class RoofEditor : Editor
                 else
                 {
                     roof.ConstructFrame();
+                    roof.OnAnyRoofChange_Invoke();
                 }
             }
         }

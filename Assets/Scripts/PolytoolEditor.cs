@@ -34,6 +34,10 @@ public class PolytoolEditor : Editor
         {
             Selection.selectionChanged -= OnSelectionChanged;
             Debug.Log("Stop Draw");
+            if(!polytool.IsClockwiseAlternative())
+            {
+                polytool.ReverseControlPoints();
+            }
             serializedObject.FindProperty("m_IsDrawing").boolValue = false;
         }
         

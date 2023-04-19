@@ -20,3 +20,8 @@ public enum TransformType
 {
     Translation, Rotation, Scale
 }
+
+public enum WallElement
+{
+    Wall, Door, Window, Empty
+}
