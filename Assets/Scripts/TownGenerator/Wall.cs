@@ -19,6 +19,7 @@ public class Wall : MonoBehaviour
     [SerializeField] private Vector3 m_OriginalLocalPosition;
     [SerializeField] private Vector3 m_OriginalLocalEuler;
     [SerializeField] private GameObject m_Wall;
+    private TransformCurve m_Curve;
 
     public GameObject WallOutlinePrefab => m_WallOutlinePrefab;
     public float WallLength => m_WallLength;
@@ -42,6 +43,7 @@ public class Wall : MonoBehaviour
         m_Wall = Instantiate(wallOutlinePrefab);
         m_WallOutlinePrefab = wallOutlinePrefab;
         m_WallLength = wallLength;
+        m_Curve = GetComponent<TransformCurve>();
 
         if(!m_HasInitialized)
         {
@@ -79,9 +81,11 @@ public class Wall : MonoBehaviour
 
     private void ExtrudeOutline(Extrudable extrudable)
     {
-        extrudable.Extrude(ExtrudeMethod.FaceNormal, m_WallLength);
+        int steps = m_Curve != null ? 0 : 1;
 
-        if (GetComponent<TransformCurve>() != null)
+        extrudable.Extrude(ExtrudeMethod.FaceNormal, m_WallLength, steps);
+
+        if (steps == 0)
             extrudable.GetComponent<TransformCurve>().Reshape();
 
     }

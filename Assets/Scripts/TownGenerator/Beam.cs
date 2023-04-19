@@ -75,6 +75,13 @@ public class Beam : Extrudable
 
         return this;
     }
+
+    public Beam Build(Vector3 startPosition, Vector3 endPosition, bool drawFromDefault = false)
+    {
+        int steps = Mathf.FloorToInt(Vector3.Distance(startPosition, endPosition));
+        return Build(startPosition, endPosition, steps, drawFromDefault);
+    }
+
     /// <summary>
     /// Instantiates a new beam object. Building a beam (I.E. Extruding) is done by calling build.
     /// </summary>
