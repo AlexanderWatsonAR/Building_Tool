@@ -16,13 +16,17 @@ public class Roof : MonoBehaviour
 {
     [SerializeField] private float m_Height, m_MansardHeight, m_MansardScale;
     [SerializeField] private RoofType m_FrameType;
-    [SerializeField] private GameObject m_CentreBeamPrefab;
-    [SerializeField] private GameObject m_SupportBeamPrefab;
-    [SerializeField] private Material m_RoofTileMaterial;
+
+    [SerializeField]
+    private GameObject m_SupportBeamPrefab;
+    [SerializeField]
+    private GameObject m_CentreBeamPrefab;
 
     // Tile Data
-    [SerializeField] private float m_TileHeight, m_TileExtend;
+    [SerializeField, Range(0, 10)] private float m_TileHeight;
+    [SerializeField, Range(0, 10)] private float m_TileExtend;
     [SerializeField] private bool m_TileFlipFace;
+    [SerializeField] private Material m_RoofTileMaterial;
     // End Tile
 
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
@@ -53,17 +57,36 @@ public class Roof : MonoBehaviour
         OnAnyRoofChange?.Invoke(this);
     }
 
-    public Roof Initialize(Roof roof, IEnumerable<Vector3> controlPoints)
+    private void Reset()
+    {
+        Initialize();
+    }
+
+    public Roof Initialize()
+    {
+        m_Height = 3;
+        m_MansardHeight = 1;
+        m_MansardScale = 1;
+        m_FrameType = RoofType.Pyramid;
+        m_RoofTileMaterial = BuiltinMaterials.defaultMaterial;
+        m_ControlPoints = null;
+        m_OriginalControlPoints = m_ControlPoints;
+        m_TileHeight = 1;
+        m_TileExtend = 0.2f;
+        m_TileFlipFace = false;
+
+        return this;
+    }
+
+    public Roof Initialize(Roof roof)
     {
         m_Height = roof.Height;
         m_MansardHeight = roof.MansardHeight;
         m_MansardScale = roof.MansardScale;
         m_FrameType = roof.FrameType;
         m_RoofTileMaterial = roof.RoofTileMaterial;
-        m_ControlPoints = controlPoints.ToArray();
+        m_ControlPoints = roof.ControlPoints.ToArray();
         m_OriginalControlPoints = m_ControlPoints;
-        m_CentreBeamPrefab = roof.CentreBeamPrefab;
-        m_SupportBeamPrefab = roof.SupportBeamPrefab;
         m_TileHeight = roof.TileHeight;
         m_TileExtend = roof.TileExtend;
         m_TileFlipFace = roof.TileFlipFace;
@@ -87,7 +110,7 @@ public class Roof : MonoBehaviour
         int Pyramid = (int)RoofType.Pyramid;
         int PyramidHip = (int)RoofType.PyramidHip;
 
-        switch (ControlPoints.Count())
+        switch (m_ControlPoints.Length)
         {
             case 4:
                 return new int[] { OpenGable, Mansard, Flat, Dormer, MShaped, Pyramid, PyramidHip };
@@ -134,9 +157,9 @@ public class Roof : MonoBehaviour
         }
     }
 
-    public Roof ConstructFrame()
+    public Roof BuildFrame()
     {
-        Deconstruct();
+        transform.DeleteChildren();
 
         m_ControlPoints = m_OriginalControlPoints;
 
@@ -173,53 +196,27 @@ public class Roof : MonoBehaviour
 
     private void BuildPyramid()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
-
         GameObject roofFrame = new GameObject("Pyramid Roof Frame");
         roofFrame.transform.SetParent(transform, false);
 
-        Vector3 middle = ProMaths.Average(controlPointsArray);
+        Vector3 middle = ProMaths.Average(m_ControlPoints);
         middle += (Vector3.up * m_Height);
 
-        int steps = Mathf.FloorToInt(Vector3.Distance(controlPointsArray[0], controlPointsArray[1]) / 5);
+        Vector3 scale = Vector3.one * 0.2f;
 
-        for (int i = 1; i < controlPointsArray.Length; i++)
+        for(int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int next = controlPointsArray.GetNextControlPoint(i);
+            Vector3 forward = middle.GetDirectionToTarget(m_ControlPoints[i]);
+            float distance = Vector3.Distance(middle, m_ControlPoints[i]);
+            scale = new Vector3(scale.x, scale.y, distance);
 
-            int tempSteps = Mathf.FloorToInt(Vector3.Distance(controlPointsArray[i], controlPointsArray[next]) / 5);
-
-            if (tempSteps > steps)
-            {
-                steps = tempSteps;
-            }
+            ProBuilderMesh beam = ShapeGenerator.GenerateCube(PivotLocation.Center, scale);
+            beam.transform.SetParent(transform, false);
+            beam.transform.localPosition = middle + (forward * (distance/2));
+            beam.transform.forward = forward;
+            beam.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
         }
 
-        Beam[] supportBeams = new Beam[controlPointsArray.Length];
-
-        for(int i = 0; i < supportBeams.Length; i++)
-        {
-            supportBeams[i] = Beam.Create(m_SupportBeamPrefab, transform).Build(middle, controlPointsArray[i], steps);
-            supportBeams[i].transform.SetParent(roofFrame.transform, true);
-        }
-
-        GameObject tiles = new GameObject("Tiles");
-        tiles.transform.SetParent(transform, false);
-
-        for (int i = 0; i < supportBeams.Length; i++)
-        {
-            int next = controlPointsArray.GetNextControlPoint(i);
-
-            Extrudable[] extrudes = { supportBeams[i], supportBeams[next] };
-
-            GameObject tile = new GameObject("Tile " + i.ToString());
-            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudes).Extend(false, true, false, false);
-            roofTile.transform.SetParent(tiles.transform, true);
-            roofTile.SetMaterial(m_RoofTileMaterial);
-            roofTile.SetHeight(m_TileHeight);
-            roofTile.SetExtendDistance(m_TileExtend);
-            roofTile.StartConstruction();
-        }
     }
 
     private void BuildMansard()
@@ -811,7 +808,7 @@ public class Roof : MonoBehaviour
 
         m_FrameType = random;
 
-        ConstructFrame();
+        BuildFrame();
     }
 
     private void Deconstruct()

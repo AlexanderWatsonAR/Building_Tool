@@ -267,7 +267,6 @@ public static class PolyToolExtensions
             return false;
 
         // Organise points.
-
         for(int i = 0; i < indices.Length; i++)
         {
             int oneNext = controlPoints.GetNextControlPoint(indices[i]);
@@ -529,35 +528,40 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static bool IsDescribableInOneLine(this Polytool polyTool, out Vector3[] oneLine)
     {
-        List<Vector3> controlPoints = polyTool.ControlPoints;
+        return IsPolygonDescribableInOneLine(polyTool.ControlPoints, out oneLine);
+    }
+
+    public static bool IsPolygonDescribableInOneLine(this IEnumerable<Vector3> controlPoints, out Vector3[] oneLine)
+    {
+        List<Vector3> points = controlPoints.ToList();
         oneLine = new Vector3[0];
 
-        if (controlPoints.Count % 2 != 0)
+        if (points.Count % 2 != 0)
             return false;
-
-        switch (controlPoints.Count)
+        
+        switch (points.Count)
         {
             case 4:
                 oneLine = new Vector3[2];
-                oneLine[0] = Vector3.Lerp(controlPoints[0], controlPoints[1], 0.5f);
-                oneLine[1] = Vector3.Lerp(controlPoints[2], controlPoints[3], 0.5f);
+                oneLine[0] = Vector3.Lerp(points[0], points[1], 0.5f);
+                oneLine[1] = Vector3.Lerp(points[2], points[3], 0.5f);
                 return true;
             case 6:
                 oneLine = new Vector3[3];
                 int index;
 
-                if (polyTool.IsLShaped(out index))
+                if (points.IsPolygonLShaped(out index))
                 {
-                    int onePointNext = polyTool.GetNextPoint(index);
-                    int twoPointNext = polyTool.GetNextPoint(onePointNext);
-                    int threePointNext = polyTool.GetNextPoint(twoPointNext);
+                    int onePointNext = points.GetNextControlPoint(index);
+                    int twoPointNext = points.GetNextControlPoint(onePointNext);
+                    int threePointNext = points.GetNextControlPoint(twoPointNext);
 
-                    int onePointPrevious = polyTool.GetPreviousPoint(index);
-                    int twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
+                    int onePointPrevious = points.GetPreviousControlPoint(index);
+                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
 
-                    oneLine[0] = Vector3.Lerp(controlPoints[onePointNext], controlPoints[twoPointNext], 0.5f);
-                    oneLine[1] = Vector3.Lerp(controlPoints[index], controlPoints[threePointNext], 0.5f);
-                    oneLine[2] = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[index], points[threePointNext], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
                     return true;
                 }
                 break;
@@ -567,37 +571,37 @@ public static class PolyToolExtensions
 
                 Vector3 start = Vector3.zero, second = Vector3.zero, third = Vector3.zero, last = Vector3.zero;
 
-                if (polyTool.IsTShaped(out indices))
+                if (points.IsPolygonTShaped(out indices))
                 {
-                    int onePointNext = polyTool.GetNextPoint(indices[0]);
-                    int twoPointNext = polyTool.GetNextPoint(onePointNext);
+                    int onePointNext = points.GetNextControlPoint(indices[0]);
+                    int twoPointNext = points.GetNextControlPoint(onePointNext);
 
-                    int onePointPrevious = polyTool.GetPreviousPoint(indices[0]);
-                    int twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
+                    int onePointPrevious = points.GetPreviousControlPoint(indices[0]);
+                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
 
-                    start = Vector3.Lerp(controlPoints[onePointNext], controlPoints[twoPointNext], 0.5f);
-                    second = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
+                    start = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
+                    second = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
 
-                    onePointNext = polyTool.GetNextPoint(indices[1]);
-                    twoPointNext = polyTool.GetNextPoint(onePointNext);
+                    onePointNext = points.GetNextControlPoint(indices[1]);
+                    twoPointNext = points.GetNextControlPoint(onePointNext);
 
-                    third = Vector3.Lerp(controlPoints[onePointNext], controlPoints[twoPointNext], 0.5f);
+                    third = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
                     last = Vector3.Lerp(second, third, 0.5f);
                 }
-                if (polyTool.IsUShaped(out indices))
+                if (points.IsPolygonUShaped(out indices))
                 {
-                    int onePointPrevious = polyTool.GetPreviousPoint(indices[0]);
-                    int twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
-                    int threePointPrevious = polyTool.GetPreviousPoint(twoPointPrevious);
+                    int onePointPrevious = points.GetPreviousControlPoint(indices[0]);
+                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
+                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
 
-                    int onePointNext = polyTool.GetNextPoint(indices[1]);
-                    int twoPointNext = polyTool.GetNextPoint(onePointNext);
-                    int threePointNext = polyTool.GetNextPoint(twoPointNext);
+                    int onePointNext = points.GetNextControlPoint(indices[1]);
+                    int twoPointNext = points.GetNextControlPoint(onePointNext);
+                    int threePointNext = points.GetNextControlPoint(twoPointNext);
 
-                    start = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
-                    second = Vector3.Lerp(controlPoints[indices[0]], controlPoints[threePointPrevious], 0.5f);
-                    third = Vector3.Lerp(controlPoints[indices[1]], controlPoints[threePointNext], 0.5f);
-                    last = Vector3.Lerp(controlPoints[onePointNext], controlPoints[twoPointNext], 0.5f);
+                    start = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
+                    second = Vector3.Lerp(points[indices[0]], points[threePointPrevious], 0.5f);
+                    third = Vector3.Lerp(points[indices[1]], points[threePointNext], 0.5f);
+                    last = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
                 }
 
                 oneLine[0] = start;
@@ -606,115 +610,105 @@ public static class PolyToolExtensions
                 oneLine[3] = last;
                 return true;
             case 10:
-                if (polyTool.IsNShaped(out int[] nPointIndices))
+                if (points.IsPolygonNShaped(out int[] nPointIndices))
                 {
                     oneLine = new Vector3[6];
-                    int onePointPrevious = polyTool.GetPreviousPoint(nPointIndices[0]);
-                    int twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
-                    int threePointPrevious = polyTool.GetPreviousPoint(twoPointPrevious);
+                    int onePointPrevious = points.GetPreviousControlPoint(nPointIndices[0]);
+                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
+                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
 
-                    int onePointNext = polyTool.GetNextPoint(nPointIndices[1]);
+                    int onePointNext = points.GetNextControlPoint(nPointIndices[1]);
 
-                    oneLine[0] = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(controlPoints[nPointIndices[0]], controlPoints[threePointPrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(controlPoints[nPointIndices[0]], controlPoints[onePointNext], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[nPointIndices[0]], points[threePointPrevious], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[nPointIndices[0]], points[onePointNext], 0.5f);
 
-                    onePointPrevious = polyTool.GetPreviousPoint(nPointIndices[1]);
-                    twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
-                    threePointPrevious = polyTool.GetPreviousPoint(twoPointPrevious);
+                    onePointPrevious = points.GetPreviousControlPoint(nPointIndices[1]);
+                    twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
+                    threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
 
-                    onePointNext = polyTool.GetNextPoint(nPointIndices[0]);
+                    onePointNext = points.GetNextControlPoint(nPointIndices[0]);
 
-                    oneLine[3] = Vector3.Lerp(controlPoints[nPointIndices[1]], controlPoints[onePointNext], 0.5f);
-                    oneLine[4] = Vector3.Lerp(controlPoints[nPointIndices[1]], controlPoints[threePointPrevious], 0.5f);
-                    oneLine[5] = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[nPointIndices[1]], points[onePointNext], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[nPointIndices[1]], points[threePointPrevious], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
                     return true;
                 }
 
                 return false;
             case 12:
-                if (polyTool.IsEShaped(out int[] ePointIndices))
+                if (points.IsPolygonEShaped(out int[] ePointIndices))
                 {
                     oneLine = new Vector3[6];
-                    int onePointPrevious = polyTool.GetPreviousPoint(ePointIndices[0]);
-                    int twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
-                    int threePointPrevious = polyTool.GetPreviousPoint(twoPointPrevious);
+                    int onePointPrevious = points.GetPreviousControlPoint(ePointIndices[0]);
+                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
+                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
 
-                    int onePointNext = polyTool.GetNextPoint(ePointIndices[3]);
-                    int twoPointNext = polyTool.GetNextPoint(onePointNext);
-                    int threePointNext = polyTool.GetNextPoint(twoPointNext);
+                    int onePointNext = points.GetNextControlPoint(ePointIndices[3]);
+                    int twoPointNext = points.GetNextControlPoint(onePointNext);
+                    int threePointNext = points.GetNextControlPoint(twoPointNext);
 
-                    oneLine[0] = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(controlPoints[ePointIndices[0]], controlPoints[threePointPrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(controlPoints[ePointIndices[3]], controlPoints[threePointNext], 0.5f);
-                    oneLine[3] = Vector3.Lerp(controlPoints[onePointNext], controlPoints[twoPointNext], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[ePointIndices[0]], points[threePointPrevious], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[ePointIndices[3]], points[threePointNext], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
                     oneLine[4] = Vector3.Lerp(oneLine[1], oneLine[2], 0.5f);
 
-                    onePointPrevious = polyTool.GetPreviousPoint(ePointIndices[2]);
-                    twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
+                    onePointPrevious = points.GetPreviousControlPoint(ePointIndices[2]);
+                    twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
 
-                    oneLine[5] = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
                     return true;
                 }
 
-                if (polyTool.IsPlusShaped(out int[] plusPointIndices))
+                if (points.IsPolygonPlusShaped(out int[] plusPointIndices))
                 {
                     oneLine = new Vector3[5];
 
                     for (int i = 0; i < plusPointIndices.Length; i++)
                     {
-                        int onePointNext = polyTool.GetNextPoint(plusPointIndices[i]);
-                        int twoPointNext = polyTool.GetNextPoint(onePointNext);
-                        oneLine[i] = Vector3.Lerp(controlPoints[onePointNext], controlPoints[twoPointNext], 0.5f);
+                        int onePointNext = points.GetNextControlPoint(plusPointIndices[i]);
+                        int twoPointNext = points.GetNextControlPoint(onePointNext);
+                        oneLine[i] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
                     }
 
-                    Vector3[] plusPoints = new Vector3[] { controlPoints[plusPointIndices[0]],
-                        controlPoints[plusPointIndices[1]],
-                        controlPoints[plusPointIndices[2]],
-                        controlPoints[plusPointIndices[3]] };
+                    Vector3[] plusPoints = new Vector3[] { points[plusPointIndices[0]],
+                        points[plusPointIndices[1]],
+                        points[plusPointIndices[2]],
+                        points[plusPointIndices[3]] };
 
                     oneLine[4] = ProMaths.Average(plusPoints);
                     return true;
                 }
 
-                if (polyTool.IsMShaped(out int[] mPointIndices))
+                if (points.IsPolygonMShaped(out int[] mPointIndices))
                 {
                     oneLine = new Vector3[7];
-                    int onePointPrevious = polyTool.GetPreviousPoint(mPointIndices[0]);
-                    int twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
-                    int threePointPrevious = polyTool.GetPreviousPoint(twoPointPrevious);
-                    int fourPointPrevious = polyTool.GetPreviousPoint(threePointPrevious);
+                    int onePointPrevious = points.GetPreviousControlPoint(mPointIndices[0]);
+                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
+                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
+                    int fourPointPrevious = points.GetPreviousControlPoint(threePointPrevious);
 
-                    int onePointNext = polyTool.GetNextPoint(mPointIndices[0]);
+                    int onePointNext = points.GetNextControlPoint(mPointIndices[0]);
 
-                    oneLine[0] = Vector3.Lerp(controlPoints[onePointPrevious], controlPoints[twoPointPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(controlPoints[mPointIndices[0]], controlPoints[threePointPrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(controlPoints[mPointIndices[0]], controlPoints[fourPointPrevious], 0.5f);
-                    oneLine[3] = Vector3.Lerp(controlPoints[mPointIndices[1]], controlPoints[onePointNext], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[mPointIndices[0]], points[threePointPrevious], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[mPointIndices[0]], points[fourPointPrevious], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[mPointIndices[1]], points[onePointNext], 0.5f);
 
-                    onePointPrevious = polyTool.GetPreviousPoint(mPointIndices[1]);
-                    twoPointPrevious = polyTool.GetPreviousPoint(onePointPrevious);
-                    threePointPrevious = polyTool.GetPreviousPoint(twoPointPrevious);
-                    fourPointPrevious = polyTool.GetPreviousPoint(threePointPrevious);
+                    onePointPrevious = points.GetPreviousControlPoint(mPointIndices[1]);
+                    twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
+                    threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
+                    fourPointPrevious = points.GetPreviousControlPoint(threePointPrevious);
 
-                    oneLine[4] = Vector3.Lerp(controlPoints[mPointIndices[2]], controlPoints[onePointPrevious], 0.5f);
-                    oneLine[5] = Vector3.Lerp(controlPoints[mPointIndices[2]], controlPoints[twoPointPrevious], 0.5f);
-                    oneLine[6] = Vector3.Lerp(controlPoints[threePointPrevious], controlPoints[fourPointPrevious], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[mPointIndices[2]], points[onePointPrevious], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[mPointIndices[2]], points[twoPointPrevious], 0.5f);
+                    oneLine[6] = Vector3.Lerp(points[threePointPrevious], points[fourPointPrevious], 0.5f);
                     return true;
                 }
                 return false;
         }
 
         return false;
-    }
-
-    public static bool IsPolygonDescribableInOneLine(this IEnumerable<Vector3> controlPoints, out Vector3[] oneLine)
-    {
-        oneLine = new Vector3[0];
-        return false;
-        //Polytool polyTool = new Polytool();
-        //polyTool.SetControlPoints(controlPoints);
-
-        //return IsDescribableInOneLine(polyTool, out oneLine);
     }
 }

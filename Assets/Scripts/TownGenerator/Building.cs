@@ -46,6 +46,13 @@ public class Building : MonoBehaviour
         m_Roof = GetComponent<Roof>();
         m_BuildingPolytool = GetComponent<Polytool>();
 
+        if (!m_BuildingPolytool.IsClockwise())
+        {
+            IEnumerable<Vector3> reverseControlPoints = m_BuildingPolytool.ControlPoints;
+            reverseControlPoints.Reverse();
+            m_BuildingPolytool.SetControlPoints(reverseControlPoints);
+        }
+
         if(m_Storeys == null)
         {
             m_Storeys.Add(gameObject.AddComponent<Storey>());
@@ -75,13 +82,6 @@ public class Building : MonoBehaviour
 
         Initialize();
 
-        if (!m_BuildingPolytool.IsClockwise())
-        {
-            IEnumerable<Vector3> reverseControlPoints = m_BuildingPolytool.ControlPoints;
-            reverseControlPoints.Reverse();
-            m_BuildingPolytool.SetControlPoints(reverseControlPoints);
-        }
-
         Vector3 pos = Vector3.zero;
 
         for (int i = 0; i < m_Storeys.Count; i++)
@@ -98,18 +98,18 @@ public class Building : MonoBehaviour
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(roof, m_BuildingPolytool.ControlPoints).ConstructFrame();
+        roofGO.AddComponent<Roof>().Initialize(roof).BuildFrame();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
         return this;
     }
 
-    private void Building_OnAnyRoofChange(Roof obj)
+    private void Building_OnAnyRoofChange(Roof roof)
     {
         if (m_Roof == null && m_BuildingPolytool == null)
             return;
 
-        m_Roof.Initialize(obj, m_BuildingPolytool.ControlPoints);
+        m_Roof.Initialize(roof);
     }
 
     public void RevertToPolyshape()

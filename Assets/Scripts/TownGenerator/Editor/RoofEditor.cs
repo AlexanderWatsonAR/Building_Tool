@@ -106,7 +106,7 @@ public class RoofEditor : Editor
                 }
                 else
                 {
-                    roof.ConstructFrame();
+                    roof.BuildFrame();
                     roof.OnAnyRoofChange_Invoke();
                 }
             }

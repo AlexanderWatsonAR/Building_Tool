@@ -55,7 +55,7 @@ public class Storey : MonoBehaviour
 
     private void Reset()
     {
-        Initialize(-1, null, 4, 1, null, 0.1f, null, 0.5f, 0.5f, null);
+        Initialize(-1, null, 3, 0.5f, null, 0.1f, null, 0.5f, 0.5f, null);
     }
 
     public Storey Initialize(Storey storey)
