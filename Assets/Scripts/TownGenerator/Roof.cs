@@ -23,6 +23,7 @@ public class Roof : MonoBehaviour
     // Tile Data
     [SerializeField] private float m_TileHeight, m_TileExtend;
     [SerializeField] private bool m_TileFlipFace;
+    // End Tile
 
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;

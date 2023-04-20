@@ -56,9 +56,12 @@ public class Building : MonoBehaviour
             m_Roof = gameObject.AddComponent<Roof>();
         }
 
+        int count = 0;
         foreach(Storey storey in m_Storeys)
         {
             storey.SetControlPoints(m_BuildingPolytool.ControlPoints);
+            storey.SetID(count);
+            count++;
         }
 
         m_Roof.SetControlPoints(m_BuildingPolytool.ControlPoints);
@@ -69,6 +72,8 @@ public class Building : MonoBehaviour
     public Building Build()
     {
         transform.DeleteChildren();
+
+        Initialize();
 
         if (!m_BuildingPolytool.IsClockwise())
         {
