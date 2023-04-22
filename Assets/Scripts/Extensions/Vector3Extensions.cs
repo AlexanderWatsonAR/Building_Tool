@@ -21,7 +21,12 @@ public static class Vector3Extensions
 
         return Mathf.Abs(dz) >= allowedDifference;
     }
-
+    /// <summary>
+    /// Returns a normalized vector to the target.
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="targetPosition"></param>
+    /// <returns></returns>
     public static Vector3 GetDirectionToTarget(this Vector3 position, Vector3 targetPosition)
     {
         return (targetPosition - position).normalized;

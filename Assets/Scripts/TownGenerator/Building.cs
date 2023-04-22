@@ -20,8 +20,10 @@ public class Building : MonoBehaviour
     protected Polytool m_BuildingPolytool;
     protected List<Storey> m_Storeys;
     protected Roof m_Roof;
+    private bool hasInitialized;
 
     public bool HasConstructed => m_HasConstructed;
+    public Vector3[] ControlPoints => m_BuildingPolytool.ControlPoints.ToArray();
 
     public void SetBuildingMaterials(GameObject pillarPrefab, GameObject wallOutlinePrefab, Material colourSwatchMaterial)
     {
@@ -42,6 +44,9 @@ public class Building : MonoBehaviour
 
     public Building Initialize()
     {
+        if (hasInitialized)
+            return this;
+
         m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
         m_BuildingPolytool = GetComponent<Polytool>();
@@ -72,6 +77,8 @@ public class Building : MonoBehaviour
         }
 
         m_Roof.SetControlPoints(m_BuildingPolytool.ControlPoints);
+
+        hasInitialized = true;
 
         return this;
     }

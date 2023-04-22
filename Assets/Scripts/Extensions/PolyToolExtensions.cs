@@ -302,19 +302,19 @@ public static class PolyToolExtensions
         return true;
     }
 
-    public static bool IsPlusShaped(this Polytool polyTool, out int[] plusPointIndices)
+    public static bool IsXShaped(this Polytool polyTool, out int[] xPointIndices)
     {
-        return IsPolygonPlusShaped(polyTool.ControlPoints, out plusPointIndices);
+        return IsPolygonXShaped(polyTool.ControlPoints, out xPointIndices);
     }
 
-    public static bool IsPolygonPlusShaped(this IEnumerable<Vector3> controlPoints, out int[] plusPointIndices)
+    public static bool IsPolygonXShaped(this IEnumerable<Vector3> controlPoints, out int[] xPointIndices)
     {
         int[] indices = GetConcaveIndexPoints(controlPoints);
-        plusPointIndices = new int[4];
+        xPointIndices = new int[4];
 
         Vector3[] controlPointsArray = controlPoints.ToArray();
         
-        if (controlPointsArray.Length != 12 | indices.Length != plusPointIndices.Length)
+        if (controlPointsArray.Length != 12 | indices.Length != xPointIndices.Length)
             return false;
 
         //
@@ -323,10 +323,10 @@ public static class PolyToolExtensions
            Mathf.Abs(indices[2] - indices[3]) == 3 &&
            Mathf.Abs(indices[3] - indices[0]) == 9)
         {
-            plusPointIndices[0] = indices[0];
-            plusPointIndices[1] = indices[1];
-            plusPointIndices[2] = indices[2];
-            plusPointIndices[3] = indices[3];
+            xPointIndices[0] = indices[0];
+            xPointIndices[1] = indices[1];
+            xPointIndices[2] = indices[2];
+            xPointIndices[3] = indices[3];
             return true;
         }
 
@@ -424,33 +424,87 @@ public static class PolyToolExtensions
         return true;
     }
 
-    private static int[] GetConcaveIndexPoints(this IEnumerable<Vector3> controlPoints)
+    public static int[] GetConcaveIndexPoints(this IEnumerable<Vector3> controlPoints)
     {
-        Vector3[] controlPointsArray = controlPoints.ToArray();
-        Vector3[] nextForward = new Vector3[controlPointsArray.Length];
-        Vector3[] previousForward = new Vector3[controlPointsArray.Length];
-        Vector3[] inbetweenForward = new Vector3[controlPointsArray.Length];
+        Vector3[] points = controlPoints.ToArray();
 
         List<int> indices = new List<int>();
 
-        for (int i = 0; i < controlPointsArray.Length; i++)
+        for (int i = 0; i < points.Length; i++)
         {
-            int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
-            int nextPoint = controlPointsArray.GetNextControlPoint(i);
+            int previousPoint = points.GetPreviousControlPoint(i);
+            int nextPoint = points.GetNextControlPoint(i);
 
-            nextForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
-            inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
+            Vector3 nextForward = Vector3Extensions.GetDirectionToTarget(points[i], points[nextPoint]);
+            Vector3 previousForward = Vector3Extensions.GetDirectionToTarget(points[i], points[previousPoint]);
+            Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
 
-            Vector3 a = controlPointsArray[i] + inbetweenForward[i];
+            Vector3 a = points[i] + inbetweenForward;
 
-            if (!controlPointsArray.IsPointInsidePolygon(a))
+            if (!points.IsPointInsidePolygon(a))
             {
                 indices.Add(i);
             }
         }
 
         return indices.ToArray();
+    }
+
+    public static int[] GetConvexIndexPoints(this IEnumerable<Vector3> controlPoints)
+    {
+        int[] concavePoints = GetConcaveIndexPoints(controlPoints);
+        if(concavePoints.Length == 0)
+            return concavePoints;
+
+        int[] indices = Enumerable.Range(0, controlPoints.Count()).ToArray();
+        indices = indices.Except(concavePoints).ToArray();
+        return indices;
+    }
+
+    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> controlPoints, float scaleFactor)
+    {
+        Vector3[] points = controlPoints.ToArray();
+        int[] concavePoints = GetConcaveIndexPoints(controlPoints);
+
+        if(concavePoints.Length == 0)
+        {
+            Vector3 centre = ProMaths.Average(points);
+
+            for(int i = 0; i < points.Length; i++)
+            {
+                Vector3 point = points[i] - centre;
+                Vector3 v = point * scaleFactor + centre;
+                points[i] = v;
+            }
+            return points;
+        }
+
+        // Start Concave Polygon Scaling.
+        for(int i = 0; i < points.Length; i++ )
+        {
+            int previousPoint = points.GetPreviousControlPoint(i);
+            int nextPoint = points.GetNextControlPoint(i);
+
+            Vector3 nextForward = Vector3Extensions.GetDirectionToTarget(points[i], points[nextPoint]);
+            Vector3 previousForward = Vector3Extensions.GetDirectionToTarget(points[i], points[previousPoint]);
+            Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
+
+            Vector3 pos = points[i] + inbetweenForward;
+
+            if (!points.IsPointInsidePolygon(pos))
+            {
+                pos = points[i] - (inbetweenForward * scaleFactor);
+            }
+            else
+            {
+                pos = points[i] + (inbetweenForward * scaleFactor);
+            }
+
+            points[i] = pos;
+        }
+        // End Concave Polygon Scaling.
+
+        return points;
     }
 
     /// <summary>
@@ -661,7 +715,7 @@ public static class PolyToolExtensions
                     return true;
                 }
 
-                if (points.IsPolygonPlusShaped(out int[] plusPointIndices))
+                if (points.IsPolygonXShaped(out int[] plusPointIndices))
                 {
                     oneLine = new Vector3[5];
 

@@ -14,34 +14,54 @@ using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 [System.Serializable]
 public class Roof : MonoBehaviour
 {
-    [SerializeField] private float m_Height, m_MansardHeight, m_MansardScale;
     [SerializeField] private RoofType m_FrameType;
 
-    [SerializeField]
     private GameObject m_SupportBeamPrefab;
-    [SerializeField]
     private GameObject m_CentreBeamPrefab;
 
     // Tile Data
     [SerializeField, Range(0, 10)] private float m_TileHeight;
     [SerializeField, Range(0, 10)] private float m_TileExtend;
     [SerializeField] private bool m_TileFlipFace;
-    [SerializeField] private Material m_RoofTileMaterial;
+    [SerializeField] private Material m_TileMaterial;
+    public float TileHeight => m_TileHeight;
+    public float TileExtend => m_TileExtend;
+    public bool TileFlipFace => m_TileFlipFace;
+    public Material TileMaterial => m_TileMaterial;
     // End Tile
+
+    // Beam
+    [SerializeField, Range(0.01f, 10)] private float m_BeamWidth, m_BeamDepth;
+    [SerializeField, Range(0, 1)] private float m_SupportBeamDensity;
+    [SerializeField] private Material m_BeamMaterial;
+    public float BeamWidth => m_BeamWidth;
+    public float BeamDepth => m_BeamDepth;
+    public float SupportBeamDensity => m_SupportBeamDensity;
+    public Material BeamMaterial => m_BeamMaterial;
+    //End Beam
+
+    // Mansard
+    [SerializeField, Range(-10, 10)] private float m_MansardHeight;
+    [SerializeField, Range(-10, 10)] private float m_MansardScale;
+    public float MansardScale => m_MansardScale;
+    public float MansardHeight => m_MansardHeight;
+    // End Mansard
+
+    // Pyramid
+    [SerializeField, Range(-10, 10)] private float m_PyramidHeight;
+    public float PyramidHeight => m_PyramidHeight;
+    // End Pyramid
+
+    // Gable 
+    [SerializeField, Range(-10, 10)] private float m_GableHeight;
+    public float GableHeight => m_GableHeight;
+    // End Gable
 
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
 
-    public float MansardScale => m_MansardScale;
-    public float MansardHeight => m_MansardHeight;
-    public float Height => m_Height;
-    public float TileHeight => m_TileHeight;
-    public float TileExtend => m_TileExtend;
-    public bool TileFlipFace => m_TileFlipFace;
     public RoofType FrameType => m_FrameType;
-    public Material RoofTileMaterial => m_RoofTileMaterial;
-    public GameObject SupportBeamPrefab => m_SupportBeamPrefab;
-    public GameObject CentreBeamPrefab => m_CentreBeamPrefab;
+
 
     public IEnumerable<Vector3> ControlPoints => m_ControlPoints;
 
@@ -64,32 +84,47 @@ public class Roof : MonoBehaviour
 
     public Roof Initialize()
     {
-        m_Height = 3;
+        m_GableHeight = 1;
+        m_PyramidHeight = 1;
         m_MansardHeight = 1;
         m_MansardScale = 1;
         m_FrameType = RoofType.Pyramid;
-        m_RoofTileMaterial = BuiltinMaterials.defaultMaterial;
-        m_ControlPoints = null;
-        m_OriginalControlPoints = m_ControlPoints;
+        m_BeamDepth = 0.2f;
+        m_BeamWidth = 0.2f;
+        m_SupportBeamDensity = 0.5f;
+        m_BeamMaterial = BuiltinMaterials.defaultMaterial;
         m_TileHeight = 1;
         m_TileExtend = 0.2f;
         m_TileFlipFace = false;
+        m_TileMaterial = BuiltinMaterials.defaultMaterial;
+
+        if (TryGetComponent(out Building building))
+        {
+            m_ControlPoints = building.ControlPoints;
+            m_OriginalControlPoints = m_ControlPoints;
+        }
 
         return this;
     }
 
     public Roof Initialize(Roof roof)
     {
-        m_Height = roof.Height;
+        m_GableHeight = roof.GableHeight;
+        m_PyramidHeight = roof.PyramidHeight;
         m_MansardHeight = roof.MansardHeight;
         m_MansardScale = roof.MansardScale;
         m_FrameType = roof.FrameType;
-        m_RoofTileMaterial = roof.RoofTileMaterial;
+        m_BeamDepth = roof.BeamDepth;
+        m_BeamWidth = roof.m_BeamWidth;
+        m_SupportBeamDensity = roof.SupportBeamDensity;
+        m_BeamMaterial = roof.m_BeamMaterial;
+
         m_ControlPoints = roof.ControlPoints.ToArray();
         m_OriginalControlPoints = m_ControlPoints;
         m_TileHeight = roof.TileHeight;
         m_TileExtend = roof.TileExtend;
         m_TileFlipFace = roof.TileFlipFace;
+        m_TileMaterial = roof.TileMaterial;
 
         return this;
     }
@@ -123,7 +158,7 @@ public class Roof : MonoBehaviour
             case 6:
                 if (m_ControlPoints.IsPolygonLShaped(out _))
                 {
-                    if(m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
+                    if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
                     {
                         return new int[] { OpenGable, Mansard, Flat, Dormer, Pyramid, PyramidHip };
                     }
@@ -142,7 +177,7 @@ public class Roof : MonoBehaviour
                 }
                 return new int[] { Mansard, Flat };
             case 8:
-                if(m_ControlPoints.IsPolygonTShaped(out _) || m_ControlPoints.IsPolygonUShaped(out _))
+                if (m_ControlPoints.IsPolygonTShaped(out _) || m_ControlPoints.IsPolygonUShaped(out _))
                 {
                     if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
                     {
@@ -200,102 +235,58 @@ public class Roof : MonoBehaviour
         roofFrame.transform.SetParent(transform, false);
 
         Vector3 middle = ProMaths.Average(m_ControlPoints);
-        middle += (Vector3.up * m_Height);
+        middle += (Vector3.up * m_PyramidHeight);
 
-        Vector3 scale = Vector3.one * 0.2f;
-
-        for(int i = 0; i < m_ControlPoints.Length; i++)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            Vector3 forward = middle.GetDirectionToTarget(m_ControlPoints[i]);
-            float distance = Vector3.Distance(middle, m_ControlPoints[i]);
-            scale = new Vector3(scale.x, scale.y, distance);
-
-            ProBuilderMesh beam = ShapeGenerator.GenerateCube(PivotLocation.Center, scale);
-            beam.transform.SetParent(transform, false);
-            beam.transform.localPosition = middle + (forward * (distance/2));
-            beam.transform.forward = forward;
-            beam.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
+            ProBuilderMesh beam = GenerateBeam(middle, m_ControlPoints[i]);
+            beam.transform.SetParent(roofFrame.transform, true);
         }
 
+    }
+
+    private ProBuilderMesh GenerateBeam(Vector3 start, Vector3 end)
+    {
+        Vector3 forward = start.GetDirectionToTarget(end);
+        float distance = Vector3.Distance(start, end);
+        Vector3 scale = new Vector3(m_BeamWidth, m_BeamDepth, distance);
+
+        ProBuilderMesh beam = ShapeGenerator.GenerateCube(PivotLocation.Center, scale);
+        beam.name = "Beam";
+        beam.transform.SetParent(transform, false);
+        beam.transform.localPosition = start + (forward * (distance / 2));
+        beam.transform.forward = forward;
+        beam.GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
+        return beam;
     }
 
     private void BuildMansard()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
-
-        GameObject roofFrame = new ("Mansard Roof Frame");
+        GameObject roofFrame = new("Mansard Roof Frame");
         roofFrame.transform.SetParent(transform, false);
 
-        GameObject tiles = new ("Mansard Roof Tiles");
-        tiles.transform.SetParent(transform, false);
+        Vector3[] scaledControlPoints = PolyToolExtensions.ScalePolygon(m_ControlPoints, MansardScale);
 
-        List<Extrudable> supportPoints = new();
-        Vector3[] startPositions = new Vector3[controlPointsArray.Length];
-
-        for (int i = 0; i < startPositions.Length; i++)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
-            int nextPoint = controlPointsArray.GetNextControlPoint(i);
+            scaledControlPoints[i] += (Vector3.up * m_MansardHeight);
 
-            Vector3 a = controlPointsArray[i].GetDirectionToTarget(controlPointsArray[nextPoint]);
-            Vector3 b = controlPointsArray[i].GetDirectionToTarget(controlPointsArray[previousPoint]);
-            Vector3 c = Vector3.Lerp(a, b, 0.5f);
-
-            Vector3 pos = controlPointsArray[i] + c;
-
-            if (!controlPointsArray.IsPointInsidePolygon(pos))
-            {
-                pos = controlPointsArray[i] - c;
-            }
-
-            startPositions[i] = pos + (Vector3.up * m_MansardHeight);
-        }
-        float scale = m_MansardScale - 1;
-        // Scale
-        Vector3 transformPoint = ProMaths.Average(startPositions);
-        for (int i = 0; i < startPositions.Length; i++)
-        {
-            Vector3 point = startPositions[i] - transformPoint;
-            Vector3 v = (point * scale) + transformPoint;
-            startPositions[i] = point + v;
-        }
-
-        for (int i = 0; i < controlPointsArray.Length; i++)
-        {
-            Beam beam = Beam.Create(m_SupportBeamPrefab, transform).Build(startPositions[i], controlPointsArray[i], 1);
-            beam.transform.SetParent(roofFrame.transform, true);
-            supportPoints.Add(beam);
-        }
-
-        for (int i = 0; i < supportPoints.Count; i++)
-        {
-            int next = controlPointsArray.GetNextControlPoint(i);
-            Beam beam = Beam.Create(m_SupportBeamPrefab, transform).Build(supportPoints[i].transform.localPosition, supportPoints[next].transform.localPosition, 0);
+            ProBuilderMesh beam = GenerateBeam(scaledControlPoints[i], m_ControlPoints[i]);
             beam.transform.SetParent(roofFrame.transform, true);
         }
 
-        for (int i = 0; i < supportPoints.Count; i++)
+        for (int i = 0; i < scaledControlPoints.Length; i++)
         {
-            int next = controlPointsArray.GetNextControlPoint(i);
-            Extrudable[] extrudables = { supportPoints[i], supportPoints[next] };
-            GameObject tile = new GameObject("Tile " + i.ToString());
-
-            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudables).Extend(false, true, false, false);
-            roofTile.transform.SetParent(tiles.transform, true);
-            roofTile.SetMaterial(m_RoofTileMaterial);
-            roofTile.SetHeight(m_TileHeight);
-            roofTile.SetExtendDistance(m_TileExtend);
-            roofTile.StartConstruction();
-
+            int next = scaledControlPoints.GetNextControlPoint(i);
+            ProBuilderMesh beam = GenerateBeam(scaledControlPoints[i], scaledControlPoints[next]);
+            beam.transform.SetParent(roofFrame.transform, true);
         }
 
-        m_ControlPoints = startPositions;
+        m_ControlPoints = scaledControlPoints;
     }
 
     private void BuildOpenGable()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
-
         if (m_ControlPoints.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
         {
             GameObject roofFrame = new GameObject("Roof Frame");
@@ -304,71 +295,48 @@ public class Roof : MonoBehaviour
             GameObject tiles = new GameObject("Tiles");
             tiles.transform.SetParent(transform, false);
 
-            List<Tile> roofTiles = new ();
+            List<Tile> roofTiles = new();
 
             int supportSteps = 1;
             int centreSteps = 1;
-            bool doesSupportHaveTC = m_SupportBeamPrefab.TryGetComponent(out TransformCurve tc);
-            bool doesCentreHaveTC = m_CentreBeamPrefab.TryGetComponent(out TransformCurve tc1);
-            
+            bool doesSupportHaveTC = false;
+            bool doesCentreHaveTC = false;
+
             switch (oneLine.Length)
             {
                 case 2:
                     if (oneLine.Length == 2) // Prevents scope error.
                     {
-                        Vector3 start = oneLine[0] + (Vector3.up * m_Height);
-                        Vector3 end = oneLine[1] + (Vector3.up * m_Height);
+                        Vector3 start = oneLine[0] + (Vector3.up * m_GableHeight);
+                        Vector3 end = oneLine[1] + (Vector3.up * m_GableHeight);
 
-                        float distance = Vector3.Distance(start, end);
-                        int possibleSteps = Mathf.FloorToInt(distance);
-
-                        if(doesCentreHaveTC)
-                            centreSteps = possibleSteps;
-
-                        Beam centreBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, end, centreSteps);
+                        ProBuilderMesh centreBeam = GenerateBeam(start, end);
                         centreBeam.transform.SetParent(roofFrame.transform, true);
 
-                        Vector3[] localCentreBeamPoints = transform.InverseTransformPoints(centreBeam.ExtrusionPositions).ToArray();
+                        float distance = Vector3.Distance(start, end);
+                        int numberOfSupportBeams = Mathf.FloorToInt((distance*2) * m_SupportBeamDensity);
+                        numberOfSupportBeams = numberOfSupportBeams < 2 ? 2 : numberOfSupportBeams;
 
-                        if (doesSupportHaveTC)
-                            supportSteps = possibleSteps;
+                        Vector3[] centreBeamPoints = Vector3Extensions.LerpCollection(start, end, numberOfSupportBeams);
+                        Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[1], m_ControlPoints[2], numberOfSupportBeams);
+                        Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[0], m_ControlPoints[3], numberOfSupportBeams);
 
-                        int size = localCentreBeamPoints.Length;
-
-                        Beam[] firstSupportBeamSet = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                        Beam[] secondSupportBeamSet = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                        Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[1], controlPointsArray[2], size).ToArray();
-                        Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[0], controlPointsArray[3], size).ToArray();
-                        
-                        for (int i = 0; i < size; i++)
+                        for (int i = 0; i < numberOfSupportBeams; i++)
                         {
-                            Connector connector = new (new Beam[]
-                            { 
-                                firstSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsA[i], supportSteps),
-                                secondSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsB[i], supportSteps)
-                            });
+                            ProBuilderMesh supportBeamA = GenerateBeam(centreBeamPoints[i], endPointsA[i]);
+                            ProBuilderMesh supportBeamB = GenerateBeam(centreBeamPoints[i], endPointsB[i]);
 
-                            centreBeam.AddConnector(connector);
+                            supportBeamA.transform.SetParent(roofFrame.transform, true);
+                            supportBeamB.transform.SetParent(roofFrame.transform, true);
                         }
-
-                        Beam[] combined = firstSupportBeamSet.Concat(secondSupportBeamSet).ToArray();
-
-                        foreach (Beam extruder in combined)
-                        {
-                            extruder.transform.SetParent(roofFrame.transform, true);
-                        }
-
-                        roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstSupportBeamSet, true).Extend(false, true, true, true));
-                        roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondSupportBeamSet).Extend(false, true, true, true));
                     }
                     break;
                 case 3:
                     if (oneLine.Length == 3)
                     {
-                        Vector3 start = oneLine[0] + (Vector3.up * m_Height);
-                        Vector3 mid = oneLine[1] + (Vector3.up * m_Height);
-                        Vector3 end = oneLine[2] + (Vector3.up * m_Height);
+                        Vector3 start = oneLine[0] + (Vector3.up * m_GableHeight);
+                        Vector3 mid = oneLine[1] + (Vector3.up * m_GableHeight);
+                        Vector3 end = oneLine[2] + (Vector3.up * m_GableHeight);
 
                         // Index Points
                         bool isL = m_ControlPoints.IsPolygonLShaped(out int index);
@@ -402,8 +370,8 @@ public class Roof : MonoBehaviour
                         Beam[] first = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
                         Beam[] second = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
 
-                        Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[next], controlPointsArray[index], size).ToArray();
-                        Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[twoNext], controlPointsArray[threeNext], size).ToArray();
+                        Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[next], m_ControlPoints[index], size).ToArray();
+                        Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[twoNext], m_ControlPoints[threeNext], size).ToArray();
 
                         for (int i = 0; i < size; i++)
                         {
@@ -415,7 +383,7 @@ public class Roof : MonoBehaviour
 
                             firstBeam.AddConnector(connector);
                         }
-                        
+
                         Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(end, mid, centreSteps);
                         secondBeam.transform.SetParent(roofFrame.transform, true);
 
@@ -424,8 +392,8 @@ public class Roof : MonoBehaviour
                         Beam[] third = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
                         Beam[] fourth = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
 
-                        Vector3[] endPointsC = Vector3Extensions.LerpCollection(controlPointsArray[onePrevious], controlPointsArray[index], size).ToArray();
-                        Vector3[] endPointsD = Vector3Extensions.LerpCollection(controlPointsArray[twoPrevious], controlPointsArray[threePrevious], size).ToArray();
+                        Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[onePrevious], m_ControlPoints[index], size).ToArray();
+                        Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[twoPrevious], m_ControlPoints[threePrevious], size).ToArray();
 
                         for (int i = 0; i < size - 1; i++)
                         {
@@ -439,7 +407,7 @@ public class Roof : MonoBehaviour
                         }
 
                         third[^1] = first[^1];
-                        fourth[^ 1] = second[^1];
+                        fourth[^1] = second[^1];
                         secondBeam.AddConnector(firstBeam.GetLastConnector());
 
                         Extrudable[] combined = first.Concat(second).Concat(third).Concat(fourth).ToArray();
@@ -470,10 +438,10 @@ public class Roof : MonoBehaviour
                 case 4:
                     if (oneLine.Length == 4)
                     {
-                        Vector3 first = oneLine[0] + (Vector3.up * m_Height);
-                        Vector3 second = oneLine[1] + (Vector3.up * m_Height);
-                        Vector3 third = oneLine[2] + (Vector3.up * m_Height);
-                        Vector3 fourth = oneLine[3] + (Vector3.up * m_Height);
+                        Vector3 first = oneLine[0] + (Vector3.up * m_GableHeight);
+                        Vector3 second = oneLine[1] + (Vector3.up * m_GableHeight);
+                        Vector3 third = oneLine[2] + (Vector3.up * m_GableHeight);
+                        Vector3 fourth = oneLine[3] + (Vector3.up * m_GableHeight);
 
                         float distanceA = Vector3.Distance(first, fourth);
                         float distanceB = Vector3.Distance(second, fourth);
@@ -509,8 +477,8 @@ public class Roof : MonoBehaviour
                             Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
                             Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
 
-                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[tPoint0Next], controlPointsArray[tPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[tPoint1Previous], controlPointsArray[tPointIndices[1]], size).ToArray();
+                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Next], m_ControlPoints[tPointIndices[0]], size).ToArray();
+                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint1Previous], m_ControlPoints[tPointIndices[1]], size).ToArray();
 
                             for (int i = 0; i < size; i++)
                             {
@@ -530,13 +498,13 @@ public class Roof : MonoBehaviour
                             Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
 
                             // Support Beams
-                            Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size-1).ToArray();
-                            Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size-1).ToArray();
+                            Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                            Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
 
-                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(controlPointsArray[tPoint0Previous], controlPointsArray[tPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(controlPointsArray[tPoint1Next], controlPointsArray[tPointIndices[1]], size).ToArray();
+                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Previous], m_ControlPoints[tPointIndices[0]], size).ToArray();
+                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint1Next], m_ControlPoints[tPointIndices[1]], size).ToArray();
 
-                            for (int i = 0; i < size-1; i++)
+                            for (int i = 0; i < size - 1; i++)
                             {
                                 thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps);
                                 fourthBeams[i].Build(localThirdBeamPoints[i], endPointsD[i], supportSteps);
@@ -544,11 +512,11 @@ public class Roof : MonoBehaviour
 
                             localSecondBeamPoints = localSecondBeamPoints[..^1];
                             Vector3[] longPoints = localSecondBeamPoints.Concat(localThirdBeamPoints.Reverse()).ToArray();
-                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(controlPointsArray[tPoint0Previous1], controlPointsArray[tPoint1Next1], longPoints.Length).ToArray();
+                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Previous1], m_ControlPoints[tPoint1Next1], longPoints.Length).ToArray();
 
                             Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, longPoints.Length).ToArray();
 
-                            for(int i = 0; i < longPoints.Length; i++)
+                            for (int i = 0; i < longPoints.Length; i++)
                             {
                                 fifthBeams[i].Build(longPoints[i], endPointsE[i], supportSteps);
                             }
@@ -563,7 +531,7 @@ public class Roof : MonoBehaviour
                             }
 
                             int count = 0;
-                            for (int i = fifthBeams.Length-1; i > localSecondBeamPoints.Length; i--)
+                            for (int i = fifthBeams.Length - 1; i > localSecondBeamPoints.Length; i--)
                             {
                                 Connector connector = new(new Beam[]
                                 {
@@ -639,12 +607,12 @@ public class Roof : MonoBehaviour
                             Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
                             Beam[] sixthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
 
-                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[twoPointPrevious], controlPointsArray[threePointPrevious], size).ToArray();
-                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[onePointPrevious], controlPointsArray[uPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(controlPointsArray[threePointPrevious], controlPointsArray[threePointNext], size).ToArray();
-                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(controlPointsArray[uPointIndices[0]], controlPointsArray[uPointIndices[1]], size).ToArray();
-                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(controlPointsArray[twoPointNext], controlPointsArray[threePointNext], size).ToArray();
-                            Vector3[] endPointsF = Vector3Extensions.LerpCollection(controlPointsArray[onePointNext], controlPointsArray[uPointIndices[1]], size).ToArray();
+                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[twoPointPrevious], m_ControlPoints[threePointPrevious], size).ToArray();
+                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[onePointPrevious], m_ControlPoints[uPointIndices[0]], size).ToArray();
+                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[threePointPrevious], m_ControlPoints[threePointNext], size).ToArray();
+                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[uPointIndices[0]], m_ControlPoints[uPointIndices[1]], size).ToArray();
+                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(m_ControlPoints[twoPointNext], m_ControlPoints[threePointNext], size).ToArray();
+                            Vector3[] endPointsF = Vector3Extensions.LerpCollection(m_ControlPoints[onePointNext], m_ControlPoints[uPointIndices[1]], size).ToArray();
 
                             for (int i = 0; i < size; i++)
                             {
@@ -724,7 +692,7 @@ public class Roof : MonoBehaviour
             foreach (Tile roofTile in roofTiles)
             {
                 roofTile.transform.SetParent(tiles.transform, false);
-                roofTile.SetMaterial(m_RoofTileMaterial);
+                roofTile.SetMaterial(m_TileMaterial);
                 roofTile.SetHeight(m_TileHeight);
                 roofTile.SetExtendDistance(m_TileExtend);
                 //roofTile.SetUVOffset(internalOffset, externalOffset);
@@ -740,55 +708,51 @@ public class Roof : MonoBehaviour
     /// </summary>
     private void BuildM()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
-        if (controlPointsArray.Length == 4)
+        if (m_ControlPoints.Length != 4)
+            return;
+
+        Vector3[] mPointsA = new Vector3[4];
+        Vector3[] mPointsB = new Vector3[4];
+
+        mPointsA[0] = m_ControlPoints[0];
+        mPointsA[1] = m_ControlPoints[1];
+        mPointsB[2] = m_ControlPoints[2];
+        mPointsB[3] = m_ControlPoints[3];
+
+        mPointsB[0] = Vector3.Lerp(mPointsA[0], mPointsB[3], 0.5f);
+        mPointsB[1] = Vector3.Lerp(mPointsA[1], mPointsB[2], 0.5f);
+
+        mPointsA[2] = mPointsB[1];
+        mPointsA[3] = mPointsB[0];
+
+        // Rotate Points 90
+
+        Vector3[] tempA = mPointsA.Clone() as Vector3[];
+
+        for (int i = 0; i < mPointsA.Length; i++)
         {
-            Vector3[] mPointsA = new Vector3[4];
-            Vector3[] mPointsB = new Vector3[4];
-
-            mPointsA[0] = controlPointsArray[0];
-            mPointsA[1] = controlPointsArray[1];
-            mPointsB[2] = controlPointsArray[2];
-            mPointsB[3] = controlPointsArray[3];
-
-            mPointsB[0] = Vector3.Lerp(mPointsA[0], mPointsB[3], 0.5f);
-            mPointsB[1] = Vector3.Lerp(mPointsA[1], mPointsB[2], 0.5f);
-
-            mPointsA[2] = mPointsB[1];
-            mPointsA[3] = mPointsB[0];
-
-            // Rotate Points 90
-
-            Vector3[] tempA = mPointsA.Clone() as Vector3[];
-
-            for (int i = 0; i < mPointsA.Length; i++)
-            {
-                int index = controlPointsArray.GetNextControlPoint(i);
-                tempA[i] = mPointsA[index];
-
-            }
-
-            mPointsA = tempA;
-
-            Vector3[] tempB = mPointsB.Clone() as Vector3[];
-
-            for (int i = 0; i < mPointsB.Length; i++)
-            {
-                int index = controlPointsArray.GetNextControlPoint(i);
-                tempB[i] = mPointsB[index];
-
-            }
-
-            mPointsB = tempB;
-
-            m_ControlPoints = mPointsA;
-            BuildOpenGable();
-            m_ControlPoints = mPointsB;
-            BuildOpenGable();
-
-            m_ControlPoints = controlPointsArray; // Reset. // Any reason to do this?
+            int index = m_ControlPoints.GetNextControlPoint(i);
+            tempA[i] = mPointsA[index];
 
         }
+
+        mPointsA = tempA;
+
+        Vector3[] tempB = mPointsB.Clone() as Vector3[];
+
+        for (int i = 0; i < mPointsB.Length; i++)
+        {
+            int index = m_ControlPoints.GetNextControlPoint(i);
+            tempB[i] = mPointsB[index];
+
+        }
+
+        mPointsB = tempB;
+
+        m_ControlPoints = mPointsA;
+        BuildOpenGable();
+        m_ControlPoints = mPointsB;
+        BuildOpenGable();
     }
 
     /// <summary>
@@ -796,12 +760,11 @@ public class Roof : MonoBehaviour
     /// </summary>
     private void BuildFlat()
     {
-        m_Height = 0;
         int[] available = AvailableRoofFrames();
 
-        RoofType random = (RoofType) Rando.Range(0, available.Length);
+        RoofType random = (RoofType)Rando.Range(0, available.Length);
 
-        while(random == RoofType.Flat || random == RoofType.Mansard)
+        while (random == RoofType.Flat || random == RoofType.Mansard)
         {
             random = (RoofType)Rando.Range(0, available.Length);
         }
@@ -809,27 +772,5 @@ public class Roof : MonoBehaviour
         m_FrameType = random;
 
         BuildFrame();
-    }
-
-    private void Deconstruct()
-    {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            GameObject child = transform.GetChild(i).gameObject;
-            if (Application.isEditor)
-            {
-                DestroyImmediate(child);
-            }
-            else
-            {
-                Destroy(child);
-            }
-
-        }
-
-        if (transform.childCount > 0)
-        {
-            Deconstruct();
-        }
     }
 }

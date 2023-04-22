@@ -11,6 +11,11 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class MeshMaker
 {
+    private static readonly int[] _QuadTriangles = new int[]
+    {
+        0, 1, 3, 3, 1, 2
+    };
+
     private static readonly int[] _CubeTriangles = new int[]
     {
          0, 4, 1, 1, 4, 5, // Front
@@ -41,11 +46,12 @@ public static class MeshMaker
 
         Vector3[] vertices = new Vector3[8];
 
+        // Bottom Points
         vertices[0] = points[0] + right;
         vertices[1] = points[3] + right;
         vertices[2] = points[3];
         vertices[3] = points[0];
-
+        // Top Points
         vertices[4] = points[1] + right;
         vertices[5] = points[2] + right;
         vertices[6] = points[2];
@@ -60,12 +66,38 @@ public static class MeshMaker
 
         new MeshImporter(cube).Import();
 
-        //ProBuilderMesh cube = ProBuilderMesh.Create(vertices, _CubeFaces);
-
-        //cube.ToMesh();
-        //cube.Refresh();
-
         return cube.GetComponent<ProBuilderMesh>();
+    }
+
+    public static ProBuilderMesh CubeProjection(Vector3 start, Vector3 end)
+    {
+        Vector3 forward = start.GetDirectionToTarget(end);
+        Vector3 right = Vector3.Cross(Vector3.up, forward);
+
+        Vector3[] vertices = new Vector3[8];
+
+        // Bottom Points
+        vertices[0] = start - right;
+        vertices[1] = end - right;
+        vertices[2] = end + right;
+        vertices[3] = start + right;
+        // Top Points
+        vertices[4] = vertices[0] + Vector3.up;
+        vertices[5] = new Vector3(forward.x, vertices[1].y, forward.z);
+        vertices[6] = new Vector3(forward.x, vertices[2].y, forward.z);
+        vertices[7] = vertices[3] + Vector3.up;
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices;
+        mesh.triangles = _CubeTriangles;
+
+        GameObject cubeProjection = new GameObject();
+        cubeProjection.AddComponent<MeshFilter>().sharedMesh = mesh;
+
+        new MeshImporter(cubeProjection).Import();
+
+        return cubeProjection.GetComponent<ProBuilderMesh>();
+
     }
 
     public static ProBuilderMesh Quad (IEnumerable<Vector3> controlPoints, bool flipFace = false)
@@ -73,13 +105,7 @@ public static class MeshMaker
         if (controlPoints.ToArray().Length != 4)
             return null;
 
-        int[] tris = new int[6];
-        tris[0] = 0;
-        tris[1] = 1;
-        tris[2] = 3;
-        tris[3] = 3;
-        tris[4] = 1;
-        tris[5] = 2;
+        int[] tris = _QuadTriangles.Clone() as int[];
 
         if (flipFace)
             tris = tris.Reverse().ToArray();
