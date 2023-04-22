@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -69,23 +70,23 @@ public static class MeshMaker
         return cube.GetComponent<ProBuilderMesh>();
     }
 
-    public static ProBuilderMesh CubeProjection(Vector3 start, Vector3 end)
+    public static ProBuilderMesh CubeProjection(Vector3 start, Vector3 end, Vector3 size)
     {
         Vector3 forward = start.GetDirectionToTarget(end);
-        Vector3 right = Vector3.Cross(Vector3.up, forward);
+        Vector3 right = Vector3.Cross(Vector3.up, forward) * size.x;
 
         Vector3[] vertices = new Vector3[8];
 
         // Bottom Points
-        vertices[0] = start - right;
-        vertices[1] = end - right;
-        vertices[2] = end + right;
-        vertices[3] = start + right;
+        vertices[0] = start + right;
+        vertices[1] = end + right;
+        vertices[2] = end - right;
+        vertices[3] = start - right;
         // Top Points
-        vertices[4] = vertices[0] + Vector3.up;
-        vertices[5] = new Vector3(forward.x, vertices[1].y, forward.z);
-        vertices[6] = new Vector3(forward.x, vertices[2].y, forward.z);
-        vertices[7] = vertices[3] + Vector3.up;
+        vertices[4] = vertices[0] + (Vector3.up * size.y);
+        vertices[5] = new Vector3(vertices[1].x + (forward.x * size.y), vertices[1].y, vertices[1].z + (forward.z * size.y));
+        vertices[6] = new Vector3(vertices[2].x + (forward.x * size.y), vertices[2].y, vertices[2].z + (forward.z * size.y));
+        vertices[7] = vertices[3] + (Vector3.up * size.y);
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
