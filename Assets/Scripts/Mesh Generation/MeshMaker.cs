@@ -12,12 +12,12 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class MeshMaker
 {
-    private static readonly int[] _QuadTriangles = new int[]
+    private static readonly int[] m_QuadTriangles = new int[]
     {
         0, 1, 3, 3, 1, 2
     };
 
-    private static readonly int[] _CubeTriangles = new int[]
+    private static readonly int[] m_CubeTriangles = new int[]
     {
          0, 4, 1, 1, 4, 5, // Front
          2, 6, 7, 7, 3, 2, // Back
@@ -27,10 +27,14 @@ public static class MeshMaker
          0, 2, 3, 1, 2, 0  // Bottom
     };
 
-    private static readonly Face[] _CubeFaces = new Face[] 
+    private static readonly Face[] m_CubeFaces = new Face[] 
     {
         new Face(new int[] { 0, 4, 1, 1, 4, 5 }), // Front
-        new Face(new int[] { 2, 6, 7, 7, 3, 2 })  // Back
+        new Face(new int[] { 2, 6, 7, 7, 3, 2 }), // Back
+        new Face(new int[] { 4, 7, 5, 5, 7, 6 }), // Top
+        new Face(new int[] { 0, 3, 7, 7, 4, 0 }), // Left
+        new Face(new int[] { 1, 5, 2, 2, 5, 6 }), // Right
+        new Face(new int[] { 0, 2, 3, 1, 2, 0 })  // Bottom
     }; 
 
     public static ProBuilderMesh Cube(IEnumerable<Vector3> controlPoints, float depth, bool flipFace = false)
@@ -60,7 +64,7 @@ public static class MeshMaker
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
-        mesh.triangles = _CubeTriangles;
+        mesh.triangles = m_CubeTriangles;
 
         GameObject cube = new GameObject();
         cube.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -90,7 +94,7 @@ public static class MeshMaker
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
-        mesh.triangles = _CubeTriangles;
+        mesh.triangles = m_CubeTriangles;
 
         GameObject cubeProjection = new GameObject();
         cubeProjection.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -101,12 +105,44 @@ public static class MeshMaker
 
     }
 
+    public static ProBuilderMesh CubeProjection(IEnumerable<Vector3> controlPoints, float height)
+    {
+        Vector3[] points = controlPoints.ToArray();
+        Vector3[] vertices = new Vector3[8];
+        Vector3 up = Vector3.up * height;
+
+        Vector3 dir = points[2].GetDirectionToTarget(points[3]);
+        Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
+
+        // Bottom Points
+        vertices[0] = points[0];
+        vertices[1] = points[1];
+        vertices[2] = points[2];
+        vertices[3] = points[3];
+
+        vertices[4] = points[0] + up;
+        vertices[5] = points[1] + up;
+        vertices[6] = points[2] + forward;
+        vertices[7] = points[3] + forward;
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices;
+        mesh.triangles = m_CubeTriangles;
+
+        GameObject cubeProjection = new GameObject();
+        cubeProjection.AddComponent<MeshFilter>().sharedMesh = mesh;
+
+        new MeshImporter(cubeProjection).Import();
+
+        return cubeProjection.GetComponent<ProBuilderMesh>();
+    }
+
     public static ProBuilderMesh Quad (IEnumerable<Vector3> controlPoints, bool flipFace = false)
     {
         if (controlPoints.ToArray().Length != 4)
             return null;
 
-        int[] tris = _QuadTriangles.Clone() as int[];
+        int[] tris = m_QuadTriangles.Clone() as int[];
 
         if (flipFace)
             tris = tris.Reverse().ToArray();
@@ -115,6 +151,65 @@ public static class MeshMaker
         quad.ToMesh();
         quad.Refresh();
         return quad;
+    }
+
+    public static ProBuilderMesh ProjectedCubeGrid(IEnumerable<Vector3> controlPoints, float height, float width, int numberOfPCubes)
+    {
+        Vector3[] points = controlPoints.ToArray();
+
+        Vector3 forwardA = points[0].GetDirectionToTarget(points[1]);
+
+        Vector3 forwardB = points[2].GetDirectionToTarget(points[3]);
+        Vector3 cross = Vector3.Cross(Vector3.up, forwardB);
+
+        // Bottom Points
+        Vector3[] bottomLeft = Vector3Extensions.LerpCollection(points[0], points[1], numberOfPCubes);
+        Vector3[] bottomRight = Vector3Extensions.LerpCollection(points[0] + (forwardA * width), points[1], numberOfPCubes);
+        Vector3[] topLeft = Vector3Extensions.LerpCollection(points[2], points[3], numberOfPCubes);
+        Vector3[] topRight = Vector3Extensions.LerpCollection(points[2] + (forwardB * width), points[3], numberOfPCubes);
+
+        // Top Points
+        Vector3[] bottomLeft1 = Vector3Extensions.LerpCollection(points[0] + (Vector3.up * height), points[1] + (Vector3.up * height), numberOfPCubes);
+        Vector3[] bottomRight1 = Vector3Extensions.LerpCollection(points[0] + (forwardA * width) + (Vector3.up * height), points[1] + (Vector3.up * height), numberOfPCubes);
+        Vector3[] topLeft1 = Vector3Extensions.LerpCollection(points[2] + (cross * height), points[3] + (cross * height), numberOfPCubes);
+        Vector3[] topRight1 = Vector3Extensions.LerpCollection(points[2] + (forwardB * width) + (cross * height), points[3] + (cross * height) , numberOfPCubes);
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Face> faces = new List<Face>();
+        int vertCount = 0;
+
+        for(int i = 0; i < numberOfPCubes; i++)
+        {
+            vertices.Add(bottomLeft[i]);
+            vertices.Add(bottomRight[i]);
+            vertices.Add(topLeft[i]);
+            vertices.Add(topRight[i]);
+            vertices.Add(bottomLeft1[i]);
+            vertices.Add(bottomRight1[i]);
+            vertices.Add(topLeft1[i]);
+            vertices.Add(topRight1[i]);
+
+            int[] tris = m_CubeTriangles.Clone() as int[];
+
+            for(int j = 0; j < tris.Length; j++)
+            {
+                tris[j] += vertCount;
+            }
+
+            for(int j = 0; j < tris.Length; j+= 6)
+            {
+                faces.Add(new Face(new int[] { tris[i], tris[i + 1], tris[i + 2], tris[i + 3], tris[i + 4], tris[i + 5] }));
+            }
+
+            vertCount += 8;
+        }
+
+        ProBuilderMesh projectedCubes = ProBuilderMesh.Create(vertices, faces);
+        projectedCubes.ToMesh();
+        projectedCubes.Refresh();
+
+        return projectedCubes;
+
     }
 
     public static ProBuilderMesh HoleGrid(IEnumerable<Vector3> controlPoints, Vector3 offset, float angle, Vector3 scale, int columns, int rows, bool flipFace = false)
