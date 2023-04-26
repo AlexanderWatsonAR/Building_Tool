@@ -10,10 +10,9 @@ using System.Linq;
 public class WallSection : MonoBehaviour
 {
     [SerializeField] private WallElement m_WallElement;
-    [SerializeField, HideInInspector] private IEnumerable<Vector3> m_ControlPoints;
+    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private float m_WallDepth;
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
-    [SerializeField, HideInInspector] private MeshFilter m_MeshFilter;
 
     public WallElement WallElement => m_WallElement;
 
@@ -44,10 +43,9 @@ public class WallSection : MonoBehaviour
 
     public WallSection Initialize(IEnumerable<Vector3> controlPoints, float wallDepth)
     {
-        m_ControlPoints = controlPoints;
+        m_ControlPoints = controlPoints == null ? m_ControlPoints : controlPoints.ToArray();
         m_WallDepth = wallDepth;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_MeshFilter = GetComponent<MeshFilter>();
 
         // Window
         m_WindowHeight = 0.5f;
@@ -122,9 +120,11 @@ public class WallSection : MonoBehaviour
         style.fontSize = 18;
         style.normal.textColor = Color.red;
 
-        for (int i = 0; i < positions.Count; i++)
+        for(int i = 0; i < m_ProBuilderMesh.faces[0].distinctIndexes.Count(); i++)
         {
-            Handles.Label(positions[i], i.ToString(), style);
+            int index = m_ProBuilderMesh.faces[0].distinctIndexes[i];
+
+            Handles.Label(positions[index], index.ToString(), style);
         }
     }
 }

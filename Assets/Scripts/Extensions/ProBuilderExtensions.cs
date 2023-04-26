@@ -10,6 +10,56 @@ using Edge = UnityEngine.ProBuilder.Edge;
 
 public static class ProBuilderExtensions
 {
+    /// <summary>
+    /// Assumes Pivot location is at the centre.
+    /// </summary>
+    /// <param name="proBuilderMesh"></param>
+    public static void LocaliseVertices(this ProBuilderMesh proBuilderMesh)
+    {
+        Transform t = proBuilderMesh.transform;
+        Vertex[] vertices = proBuilderMesh.GetVertices();
+
+        Vector3 centre = ProMaths.Average(proBuilderMesh.positions);
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            // Scale
+            Vector3 point = vertices[i].position - centre;
+            Vector3 v = Vector3.Scale(point, t.localScale) + centre;
+            Vector3 offset = v - vertices[i].position;
+            vertices[i].position += offset;
+
+            // Rotation
+            Vector3 localEulerAngles = t.localEulerAngles;
+            Vector3 v1 = Quaternion.Euler(localEulerAngles) * (vertices[i].position - centre) + centre;
+            offset = v1 - vertices[i].position;
+            vertices[i].position += offset;
+
+            // Position
+            vertices[i].position += t.localPosition;
+        }
+
+        proBuilderMesh.SetVertices(vertices);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
+
+        proBuilderMesh.transform.localPosition = Vector3.zero;
+        proBuilderMesh.transform.localEulerAngles = Vector3.zero;
+    }
+
+    public static Vector3[] GetDistinctVerts(this ProBuilderMesh proBuilderMesh, Face face)
+    {
+        Vector3[] positions = proBuilderMesh.positions.ToArray();
+        Vector3[] verts = new Vector3[face.distinctIndexes.Count];
+
+        for(int i = 0; i < face.distinctIndexes.Count; i++)
+        {
+            verts[i] = positions[face.distinctIndexes[i]];
+        }
+
+        return verts;
+    }
+
     public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, Vector3 transformPoint, float scale)
     {
         ScaleVertices(proBuilderMesh, faces, transformPoint, Vector3.one * scale);

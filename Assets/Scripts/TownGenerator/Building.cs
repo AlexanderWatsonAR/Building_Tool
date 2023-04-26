@@ -44,8 +44,8 @@ public class Building : MonoBehaviour
 
     public Building Initialize()
     {
-        if (hasInitialized)
-            return this;
+        //if (hasInitialized)
+        //    return this;
 
         m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
@@ -78,7 +78,7 @@ public class Building : MonoBehaviour
 
         m_Roof.SetControlPoints(m_BuildingPolytool.ControlPoints);
 
-        hasInitialized = true;
+        //hasInitialized = true;
 
         return this;
     }

@@ -461,12 +461,12 @@ public static class PolyToolExtensions
         return indices;
     }
 
-    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> controlPoints, float scaleFactor)
+    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> controlPoints, float scaleFactor, bool concaveScaling = false)
     {
         Vector3[] points = controlPoints.ToArray();
         int[] concavePoints = GetConcaveIndexPoints(controlPoints);
 
-        if(concavePoints.Length == 0)
+        if(concavePoints.Length == 0 && concaveScaling == false)
         {
             Vector3 centre = ProMaths.Average(points);
 

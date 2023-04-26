@@ -27,6 +27,16 @@ public static class MeshMaker
          0, 2, 3, 1, 2, 0  // Bottom
     };
 
+    private static readonly int[] m_ProjectedCubeTriangles = new int[]
+    {
+         5, 4, 0, 0, 1, 5, // Front
+         2, 6, 7, 7, 3, 2, // Back
+         4, 5, 7, 7, 6, 4, // Top
+         3, 7, 5, 5, 1, 3, // Left
+         0, 4, 6, 6, 2, 0, // Right
+         1, 0, 2, 2, 3, 1  // Bottom
+    };
+
     private static readonly Face[] m_CubeFaces = new Face[] 
     {
         new Face(new int[] { 0, 4, 1, 1, 4, 5 }), // Front
@@ -52,10 +62,10 @@ public static class MeshMaker
         Vector3[] vertices = new Vector3[8];
 
         // Bottom Points
-        vertices[0] = points[0] + right;
-        vertices[1] = points[3] + right;
-        vertices[2] = points[3];
-        vertices[3] = points[0];
+        vertices[0] = points[0] + right; // Bottom left
+        vertices[1] = points[3] + right; // Bottom right
+        vertices[2] = points[3];         // Top Right
+        vertices[3] = points[0];         // Top Left
         // Top Points
         vertices[4] = points[1] + right;
         vertices[5] = points[2] + right;
@@ -94,7 +104,7 @@ public static class MeshMaker
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
-        mesh.triangles = m_CubeTriangles;
+        mesh.triangles = m_ProjectedCubeTriangles;
 
         GameObject cubeProjection = new GameObject();
         cubeProjection.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -127,7 +137,7 @@ public static class MeshMaker
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
-        mesh.triangles = m_CubeTriangles;
+        mesh.triangles = m_ProjectedCubeTriangles;
 
         GameObject cubeProjection = new GameObject();
         cubeProjection.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -158,58 +168,89 @@ public static class MeshMaker
         Vector3[] points = controlPoints.ToArray();
 
         Vector3 forwardA = points[0].GetDirectionToTarget(points[1]);
-
         Vector3 forwardB = points[2].GetDirectionToTarget(points[3]);
         Vector3 cross = Vector3.Cross(Vector3.up, forwardB);
 
         // Bottom Points
-        Vector3[] bottomLeft = Vector3Extensions.LerpCollection(points[0], points[1], numberOfPCubes);
-        Vector3[] bottomRight = Vector3Extensions.LerpCollection(points[0] + (forwardA * width), points[1], numberOfPCubes);
-        Vector3[] topLeft = Vector3Extensions.LerpCollection(points[2], points[3], numberOfPCubes);
-        Vector3[] topRight = Vector3Extensions.LerpCollection(points[2] + (forwardB * width), points[3], numberOfPCubes);
+        Vector3[] a = Vector3Extensions.LerpCollection(points[0], points[1], numberOfPCubes);
+        Vector3[] b = Vector3Extensions.LerpCollection(points[0] + (forwardA * width), points[1] + (forwardA * width), numberOfPCubes);
+        Vector3[] c = Vector3Extensions.LerpCollection(points[2], points[3], numberOfPCubes);
+        Vector3[] d = Vector3Extensions.LerpCollection(points[2] + (forwardB * width), points[3] + (forwardB * width), numberOfPCubes);
 
         // Top Points
-        Vector3[] bottomLeft1 = Vector3Extensions.LerpCollection(points[0] + (Vector3.up * height), points[1] + (Vector3.up * height), numberOfPCubes);
-        Vector3[] bottomRight1 = Vector3Extensions.LerpCollection(points[0] + (forwardA * width) + (Vector3.up * height), points[1] + (Vector3.up * height), numberOfPCubes);
-        Vector3[] topLeft1 = Vector3Extensions.LerpCollection(points[2] + (cross * height), points[3] + (cross * height), numberOfPCubes);
-        Vector3[] topRight1 = Vector3Extensions.LerpCollection(points[2] + (forwardB * width) + (cross * height), points[3] + (cross * height) , numberOfPCubes);
+        Vector3[] e = Vector3Extensions.LerpCollection(points[0] + (Vector3.up * height), points[1] + (Vector3.up * height), numberOfPCubes);
+        Vector3[] f = Vector3Extensions.LerpCollection(points[0] + (Vector3.up * height) + (forwardA * width), points[1] + (forwardA * width) + (Vector3.up * height), numberOfPCubes);
+        Vector3[] g = Vector3Extensions.LerpCollection(points[2] + (cross * height), points[3] + (cross * height), numberOfPCubes);
+        Vector3[] h = Vector3Extensions.LerpCollection(points[2] + (forwardB * width) + (cross * height), points[3] + (forwardB * width) + (cross * height) , numberOfPCubes);
 
-        List<Vector3> vertices = new List<Vector3>();
-        List<Face> faces = new List<Face>();
+        List<Vector3> positions = new List<Vector3>();
+        List<int> triangles = new List<int>();
         int vertCount = 0;
 
         for(int i = 0; i < numberOfPCubes; i++)
         {
-            vertices.Add(bottomLeft[i]);
-            vertices.Add(bottomRight[i]);
-            vertices.Add(topLeft[i]);
-            vertices.Add(topRight[i]);
-            vertices.Add(bottomLeft1[i]);
-            vertices.Add(bottomRight1[i]);
-            vertices.Add(topLeft1[i]);
-            vertices.Add(topRight1[i]);
+                positions.Add(a[i]);
+                positions.Add(b[i]);
+                positions.Add(c[i]);
+                positions.Add(d[i]);
+                positions.Add(e[i]);
+                positions.Add(f[i]);
+                positions.Add(g[i]);
+                positions.Add(h[i]);
 
-            int[] tris = m_CubeTriangles.Clone() as int[];
+            int[] tris = m_ProjectedCubeTriangles.Clone() as int[];
 
             for(int j = 0; j < tris.Length; j++)
             {
                 tris[j] += vertCount;
             }
 
-            for(int j = 0; j < tris.Length; j+= 6)
-            {
-                faces.Add(new Face(new int[] { tris[i], tris[i + 1], tris[i + 2], tris[i + 3], tris[i + 4], tris[i + 5] }));
-            }
+            triangles.AddRange(tris);
 
             vertCount += 8;
         }
 
-        ProBuilderMesh projectedCubes = ProBuilderMesh.Create(vertices, faces);
-        projectedCubes.ToMesh();
-        projectedCubes.Refresh();
+        Mesh mesh = new Mesh();
+        mesh.vertices = positions.ToArray();
+        mesh.triangles = triangles.ToArray();
 
-        return projectedCubes;
+        GameObject projectedCube = new GameObject();
+        projectedCube.AddComponent<MeshFilter>().sharedMesh = mesh;
+        projectedCube.AddComponent<MeshRenderer>();
 
+        new MeshImporter(projectedCube).Import();
+
+        ProBuilderMesh proMesh = projectedCube.GetComponent<ProBuilderMesh>();
+        proMesh.ToMesh();
+        proMesh.Refresh();
+
+        return proMesh;
+
+    }
+
+    public static ProBuilderMesh[] MultiCubes(IEnumerable<Vector3> topPoints, IEnumerable<Vector3> bottomPoints, int numberOfCubes, float width, bool flipFace = false)
+    {
+        Vector3[] top = topPoints.ToArray();
+        Vector3[] bottom = bottomPoints.ToArray();
+
+        Vector3[] topA = Vector3Extensions.LerpCollection(top[0], top[1], numberOfCubes);
+        Vector3[] topB = Vector3Extensions.LerpCollection(top[2], top[3], numberOfCubes);
+
+        Vector3[] bottomA = Vector3Extensions.LerpCollection(bottom[0], bottom[3], numberOfCubes);
+
+        Vector3 dir = bottom[0].GetDirectionToTarget(bottom[3]);
+        Vector3 cross = Vector3.Cross(Vector3.up, dir) * width;
+
+        Vector3[] bottomB = Vector3Extensions.LerpCollection(bottom[0] + cross, bottom[3] + cross, numberOfCubes);
+
+        ProBuilderMesh[] cubes = new ProBuilderMesh[numberOfCubes];
+
+        for (int i = 0; i < numberOfCubes; i++)
+        {
+            cubes[i] = Cube(new Vector3[] { topA[i], topB[i], bottomA[i], bottomB[i] }, width, flipFace);
+        }
+
+        return cubes;
     }
 
     public static ProBuilderMesh HoleGrid(IEnumerable<Vector3> controlPoints, Vector3 offset, float angle, Vector3 scale, int columns, int rows, bool flipFace = false)
