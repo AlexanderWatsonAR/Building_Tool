@@ -100,7 +100,7 @@ public class Storey : MonoBehaviour
     public Storey Build()
     {
         BuildPillars();
-        BuildWallEndPosts();
+        DefineInteriorPoints();
         BuildExternalWalls();
         BuildFloor();
 
@@ -212,7 +212,7 @@ public class Storey : MonoBehaviour
         }
     }
 
-    private void BuildWallEndPosts()
+    private void DefineInteriorPoints()
     {
         Vector3[] insidePoints = new Vector3[m_ControlPoints.Length];
         Vector3[] scalingDirections = new Vector3[m_ControlPoints.Length];

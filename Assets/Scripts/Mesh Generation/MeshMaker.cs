@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
@@ -47,28 +48,28 @@ public static class MeshMaker
         new Face(new int[] { 0, 2, 3, 1, 2, 0 })  // Bottom
     }; 
 
-    public static ProBuilderMesh Cube(IEnumerable<Vector3> controlPoints, float depth, bool flipFace = false)
+    public static ProBuilderMesh Cube(IEnumerable<Vector3> controlPoints, float height, bool flipFace = false)
     {
-        // TODO: Add other faces.
-        // Issue: faces with shared triangles see to mess up.
+        // Control Points: 0 = Bottom Left, 1 = Top Left, 2 = Top Right, 3 = Bottom Right
 
         Vector3[] points = controlPoints.ToArray();
         if (controlPoints.ToArray().Length != 4)
             return null;
 
-        Vector3 forward = points[0].GetDirectionToTarget(points[3]);
-        Vector3 right = Vector3.Cross(Vector3.up, forward) * depth;
+        Vector3 dir = points[0].GetDirectionToTarget(points[3]);
+        Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
 
         Vector3[] vertices = new Vector3[8];
 
         // Bottom Points
-        vertices[0] = points[0] + right; // Bottom left
-        vertices[1] = points[3] + right; // Bottom right
-        vertices[2] = points[3];         // Top Right
-        vertices[3] = points[0];         // Top Left
+        vertices[0] = points[0] + forward; 
+        vertices[1] = points[3] + forward; 
+        vertices[2] = points[3];         
+        vertices[3] = points[0];
+        
         // Top Points
-        vertices[4] = points[1] + right;
-        vertices[5] = points[2] + right;
+        vertices[4] = points[1] + forward;
+        vertices[5] = points[2] + forward;
         vertices[6] = points[2];
         vertices[7] = points[1];
 
@@ -115,36 +116,55 @@ public static class MeshMaker
 
     }
 
-    public static ProBuilderMesh CubeProjection(IEnumerable<Vector3> controlPoints, float height)
+    public static ProBuilderMesh CubeProjection(IEnumerable<Vector3> controlPoints, float height, bool flipFace = false)
     {
+        // Control Points: 0 = Bottom Left, 1 = Top Left, 2 = Top Right, 3 = Bottom Right
+
         Vector3[] points = controlPoints.ToArray();
         Vector3[] vertices = new Vector3[8];
         Vector3 up = Vector3.up * height;
 
-        Vector3 dir = points[2].GetDirectionToTarget(points[3]);
+        Vector3 dir = points[0].GetDirectionToTarget(points[3]);
         Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
 
-        // Bottom Points
-        vertices[0] = points[0];
-        vertices[1] = points[1];
-        vertices[2] = points[2];
-        vertices[3] = points[3];
+        // Bottom Points // works if flip face is true
+        //vertices[0] = points[0];
+        //vertices[1] = points[3];
+        //vertices[2] = points[3] + forward;
+        //vertices[3] = points[0] + forward;
 
-        vertices[4] = points[0] + up;
-        vertices[5] = points[1] + up;
-        vertices[6] = points[2] + forward;
-        vertices[7] = points[3] + forward;
+        // Bottom Points
+        vertices[0] = points[0] + forward;
+        vertices[1] = points[3] + forward;
+        vertices[2] = points[3];
+        vertices[3] = points[0];
+
+        // Top Points
+        vertices[4] = points[1] + up;
+        vertices[5] = points[2] + up;
+        vertices[6] = points[2];
+        vertices[7] = points[1];
+
+        int[] tris = m_CubeTriangles.Clone() as int[];
+
+        if (flipFace)
+            tris = tris.Reverse().ToArray();
 
         Mesh mesh = new Mesh();
+        mesh.name = "Projected Cube";
         mesh.vertices = vertices;
-        mesh.triangles = m_ProjectedCubeTriangles;
+        mesh.triangles = tris;
 
         GameObject cubeProjection = new GameObject();
         cubeProjection.AddComponent<MeshFilter>().sharedMesh = mesh;
 
         new MeshImporter(cubeProjection).Import();
 
-        return cubeProjection.GetComponent<ProBuilderMesh>();
+        ProBuilderMesh projection = cubeProjection.GetComponent<ProBuilderMesh>();
+        projection.ToMesh();
+        projection.Refresh();
+
+        return projection;
     }
 
     public static ProBuilderMesh Quad (IEnumerable<Vector3> controlPoints, bool flipFace = false)

@@ -243,37 +243,10 @@ public class Roof : MonoBehaviour
 
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            ProBuilderMesh beam = GenerateBeam(middle, m_ControlPoints[i]);
-            beam.transform.SetParent(roofFrame.transform, true);
+            //ProBuilderMesh beam = GenerateBeam(middle, m_ControlPoints[i]);
+            //beam.transform.SetParent(roofFrame.transform, true);
         }
 
-    }
-
-    private ProBuilderMesh GenerateBeam(Vector3 start, Vector3 end, PivotLocation pivotLocation = PivotLocation.Center)
-    {
-        float distance = Vector3.Distance(start, end);
-        Vector3 forward = start.GetDirectionToTarget(end);
-        Vector3 position = start + (forward * (distance / 2));
-        Vector3 scale = new Vector3(m_BeamWidth, m_BeamDepth, distance);
-
-        ProBuilderMesh beam = ShapeGenerator.GenerateCube(pivotLocation, scale);
-        beam.name = "Beam";
-        beam.transform.SetParent(transform, false);
-        beam.transform.localPosition = position;
-        beam.transform.forward = forward;
-        beam.GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
-        beam.LocaliseVertices();
-
-        return beam;
-    }
-
-    private ProBuilderMesh GenerateBeams(Vector3[] points, int numberOfBeams)
-    {
-        ProBuilderMesh beams = MeshMaker.ProjectedCubeGrid(points, m_BeamDepth, m_BeamWidth, numberOfBeams);
-        beams.name = "Support Beams";
-        beams.transform.SetParent(transform, false);
-        beams.GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
-        return beams;
     }
 
     private void BuildMansard()
@@ -287,8 +260,8 @@ public class Roof : MonoBehaviour
         {
             scaledControlPoints[i] += (Vector3.up * m_MansardHeight);
 
-            ProBuilderMesh beam = GenerateBeam(scaledControlPoints[i], m_ControlPoints[i]);
-            beam.transform.SetParent(roofFrame.transform, true);
+            //ProBuilderMesh beam = GenerateBeam(scaledControlPoints[i], m_ControlPoints[i]);
+            //beam.transform.SetParent(roofFrame.transform, true);
         }
 
         //for (int i = 0; i < scaledControlPoints.Length; i++)
@@ -312,48 +285,12 @@ public class Roof : MonoBehaviour
         m_ControlPoints = scaledControlPoints;
     }
 
-    private List<ProBuilderMesh> BuildBaseFrame()
-    {
-        //IList<IList<Vector3>> holes = new List<IList<Vector3>>();
-        //holes.Add(PolyToolExtensions.ScalePolygon(controlPoints, m_BeamDepth*2, true));
-
-        //ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create();
-
-        //proBuilderMesh.CreateShapeFromPolygon(controlPoints, m_BeamWidth, false, holes);
-        //proBuilderMesh.GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
-        //proBuilderMesh.transform.SetParent(transform, false);
-        //proBuilderMesh.ToMesh();
-        //proBuilderMesh.Refresh();
-
-        Vector3[] scaledControlPoints = PolyToolExtensions.ScalePolygon(m_ControlPoints, m_BeamDepth * 2, true);
-        List<ProBuilderMesh> baseFrame = new();
-
-        for (int i = 0; i < m_ControlPoints.Length; i++)
-        {
-            int next = m_ControlPoints.GetNextControlPoint(i);
-
-            Vector3[] points = new Vector3[] { m_ControlPoints[i], m_ControlPoints[next], scaledControlPoints[next], scaledControlPoints[i] };
-
-            ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create();
-            proBuilderMesh.CreateShapeFromPolygon(points, m_BeamWidth, false);
-            proBuilderMesh.GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
-            proBuilderMesh.transform.SetParent(transform, false);
-            proBuilderMesh.ToMesh();
-            proBuilderMesh.Refresh();
-
-            baseFrame.Add(proBuilderMesh);
-        }
-        return baseFrame;
-    }
-
     private void BuildOpenGable()
     {
         if (m_ControlPoints.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
         {
             GameObject roofFrame = new GameObject("Roof Frame");
             roofFrame.transform.SetParent(transform, false);
-
-            List<ProBuilderMesh> baseFrame = BuildBaseFrame();
 
             //ProBuilderMesh baseFrame = BuildBaseFrame(m_ControlPoints);
            // baseFrame.transform.SetParent(roofFrame.transform, true);
@@ -362,9 +299,6 @@ public class Roof : MonoBehaviour
             tiles.transform.SetParent(transform, false);
 
             List<Tile> roofTiles = new();
-
-
-            
 
             Vector3 beamDepth = Vector3.up * m_BeamDepth;
             Vector3 beamWidth = Vector3.up * m_BeamDepth;
@@ -382,66 +316,16 @@ public class Roof : MonoBehaviour
                         Vector3 start = oneLine[0] + (Vector3.up * m_GableHeight);
                         Vector3 end = oneLine[1] + (Vector3.up * m_GableHeight);
 
-                        ProBuilderMesh centreBeam = GenerateBeam(start, end);
-                        centreBeam.transform.SetParent(roofFrame.transform, true);
-                        centreBeam.SetSelectedFaces(new Face[] { centreBeam.faces[3] });
+                        //GameObject roofTile = new GameObject("Roof Tile", typeof(RoofTile));
+                        //RoofTile tile = roofTile.GetComponent<RoofTile>();
+                        //tile.SetControlPoints(new Vector3[] { m_ControlPoints[0], start, end, m_ControlPoints[3] });
+                        //tile.Initialize().Extend(false, true, true, true).Build();
 
-                        float distance = Vector3.Distance(start, end);
-                        int numberOfSupportBeams = Mathf.FloorToInt((distance * 2) * m_SupportBeamDensity);
-                        numberOfSupportBeams = numberOfSupportBeams < 2 ? 2 : numberOfSupportBeams;
+                        GameObject roofTile = new GameObject("Roof Tile", typeof(RoofTile));
+                        RoofTile tile = roofTile.GetComponent<RoofTile>();
+                        tile.SetControlPoints(new Vector3[] { m_ControlPoints[1], start, end, m_ControlPoints[2] });
+                        tile.Initialize().Extend(false, true, true, true).Build();
 
-                        List<Vector3[]> top = new();
-                        top.Add(centreBeam.GetDistinctVerts(centreBeam.faces[1]));
-                        top.Add(centreBeam.GetDistinctVerts(centreBeam.faces[3]));
-
-                        List<Vector3[]> bottom = new();
-                        bottom.Add(baseFrame[1].GetDistinctVerts(baseFrame[1].faces[0]));
-                        bottom.Add(baseFrame[3].GetDistinctVerts(baseFrame[3].faces[0]).Reverse().ToArray());
-
-                        for(int i = 0; i < top.Count; i++)
-                        {
-                            ProBuilderMesh[] supports = MeshMaker.MultiCubes(top[i], bottom[i], numberOfSupportBeams, m_BeamWidth);
-
-                            for (int j = 0; j < numberOfSupportBeams; j++)
-                            {
-                                supports[j].transform.SetParent(roofFrame.transform, false);
-                                supports[j].name = "Support Beam";
-                                supports[j].GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
-                            }
-                        }
-
-
-
-
-                        //test.GetComponent<Renderer>().sharedMaterial = m_BeamMaterial;
-                        //test.transform.SetParent(roofFrame.transform, false);
-                        //test.name = "test";
-
-
-                        //Vector3 forward = start.GetDirectionToTarget(end);
-                        //Vector3 dir = Vector3.Cross(Vector3.up, forward);
-
-                        //Vector3[] pointsA = new Vector3[]
-                        //{
-                        //    start + (0.5f * m_BeamWidth * dir) - (beamDepth * 0.5f),
-                        //    end + (0.5f * m_BeamWidth * dir) + (-forward * m_BeamWidth) - (beamDepth* 0.5f),
-                        //    m_ControlPoints[1] + (m_ControlPoints[1].GetDirectionToTarget(m_ControlPoints[0]) * m_BeamDepth) + (Vector3.up * m_BeamWidth),
-                        //    m_ControlPoints[2] + (m_ControlPoints[1].GetDirectionToTarget(m_ControlPoints[0]) * m_BeamDepth) + (m_ControlPoints[2].GetDirectionToTarget(m_ControlPoints[1]) * m_BeamWidth) + (Vector3.up * m_BeamWidth)
-                        //};
-
-                        //ProBuilderMesh supportBeamsA = GenerateBeams(pointsA, numberOfSupportBeams);
-                        //supportBeamsA.transform.SetParent(roofFrame.transform, true);
-
-                        //Vector3[] pointsB = new Vector3[]
-                        //{
-                        //    end + (0.5f * m_BeamWidth * -dir) - (beamDepth * 0.5f),
-                        //    start + (0.5f * m_BeamWidth * -dir) + (forward * m_BeamWidth) - (beamDepth * 0.5f),
-                        //    m_ControlPoints[3] + (m_ControlPoints[3].GetDirectionToTarget(m_ControlPoints[2]) * m_BeamDepth) + (Vector3.up * m_BeamWidth),
-                        //    m_ControlPoints[0] + (m_ControlPoints[3].GetDirectionToTarget(m_ControlPoints[2]) * m_BeamDepth) + (m_ControlPoints[0].GetDirectionToTarget(m_ControlPoints[3]) * m_BeamWidth) + (Vector3.up * m_BeamWidth)
-                        //};
-
-                        //ProBuilderMesh supportBeamsB = GenerateBeams(pointsB, numberOfSupportBeams);
-                        //supportBeamsB.transform.SetParent(roofFrame.transform, true);
                     }
                     break;
                 case 3:
@@ -465,8 +349,8 @@ public class Roof : MonoBehaviour
                         float average = (distanceA + distanceB) * 0.5f;
                         int numberOfSupportBeams = Mathf.FloorToInt(average);
 
-                        ProBuilderMesh firstBeam = GenerateBeam(start, mid);
-                        firstBeam.transform.SetParent(roofFrame.transform, true);
+                        //ProBuilderMesh firstBeam = GenerateBeam(start, mid);
+                        //firstBeam.transform.SetParent(roofFrame.transform, true);
 
                         Vector3 forward = start.GetDirectionToTarget(end);
                         Vector3 dir = Vector3.Cross(Vector3.up, forward);
@@ -479,8 +363,8 @@ public class Roof : MonoBehaviour
                             m_ControlPoints[index] + (m_ControlPoints[index].GetDirectionToTarget(m_ControlPoints[threeNext]) * m_BeamDepth) /*+ (m_ControlPoints[2].GetDirectionToTarget(m_ControlPoints[1]) * m_BeamWidth)*/ + (Vector3.up * m_BeamDepth)
                         };
 
-                        ProBuilderMesh supportBeams = GenerateBeams(pointsA, numberOfSupportBeams);
-                        supportBeams.transform.SetParent(roofFrame.transform, true);
+                        //ProBuilderMesh supportBeams = GenerateBeams(pointsA, numberOfSupportBeams);
+                       // supportBeams.transform.SetParent(roofFrame.transform, true);
 
 
                         //Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[next], m_ControlPoints[index], size).ToArray();
