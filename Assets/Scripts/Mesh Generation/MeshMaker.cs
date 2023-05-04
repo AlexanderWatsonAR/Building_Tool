@@ -124,18 +124,21 @@ public static class MeshMaker
         Vector3[] vertices = new Vector3[8];
         Vector3 up = Vector3.up * height;
 
-        Vector3 dir = points[0].DirectionToTarget(points[3]);
-        Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
+        //Vector3 dir = points[0].DirectionToTarget(points[3]);
+        //Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
+        Vector3 scale = new Vector3(1, 0, 1);
 
-        // Bottom Points // works if flip face is true
-        //vertices[0] = points[0];
-        //vertices[1] = points[3];
-        //vertices[2] = points[3] + forward;
-        //vertices[3] = points[0] + forward;
+        Vector3 dirA = points[1].DirectionToTarget(points[0]);
+        Vector3 a = dirA * height;
+        a.Scale(scale);
+
+        Vector3 dirB = points[2].DirectionToTarget(points[3]);
+        Vector3 b = dirB * height;
+        b.Scale(scale);
 
         // Bottom Points
-        vertices[0] = points[0] + forward;
-        vertices[1] = points[3] + forward;
+        vertices[0] = points[0] + a;
+        vertices[1] = points[3] + b;
         vertices[2] = points[3];
         vertices[3] = points[0];
 
@@ -151,7 +154,6 @@ public static class MeshMaker
             tris = tris.Reverse().ToArray();
 
         Mesh mesh = new Mesh();
-        mesh.name = "Projected Cube";
         mesh.vertices = vertices;
         mesh.triangles = tris;
 
