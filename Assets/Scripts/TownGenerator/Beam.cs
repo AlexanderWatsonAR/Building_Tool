@@ -64,7 +64,7 @@ public class Beam : Extrudable
         }
 
         transform.localPosition = startPosition;
-        transform.forward = Vector3Extensions.GetDirectionToTarget(startPosition, endPosition);
+        transform.forward = Vector3Extensions.DirectionToTarget(startPosition, endPosition);
         transform.eulerAngles += (Vector3.right * 90);
 
         float distance = Vector3.Distance(startPosition, endPosition);

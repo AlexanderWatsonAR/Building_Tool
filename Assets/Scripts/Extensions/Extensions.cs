@@ -379,7 +379,7 @@ public static class Extensions
 
         Vector3 a = positions[edge.a];
         Vector3 b = positions[edge.b];
-        Vector3 dir = a.GetDirectionToTarget(b);
+        Vector3 dir = a.DirectionToTarget(b);
 
         Vector3 scale = Vector3.zero;
 

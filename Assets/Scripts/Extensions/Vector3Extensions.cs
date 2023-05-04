@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
@@ -27,9 +29,14 @@ public static class Vector3Extensions
     /// <param name="position"></param>
     /// <param name="targetPosition"></param>
     /// <returns></returns>
-    public static Vector3 GetDirectionToTarget(this Vector3 position, Vector3 targetPosition)
+    public static Vector3 DirectionToTarget(this Vector3 position, Vector3 targetPosition)
     {
         return (targetPosition - position).normalized;
+    }
+
+    public static Vector3 DirectionToTarget(this ControlPoint controlPoint, ControlPoint targetControlPoint)
+    {
+        return (targetControlPoint.Position - controlPoint.Position).normalized;
     }
 
     /// <summary>
@@ -60,4 +67,17 @@ public static class Vector3Extensions
         return samplePoints;
     }
 
+    public static Vector3[] ShiftIndices(this IEnumerable<Vector3> controlPoints)
+    {
+        Vector3[] points = controlPoints.ToArray();
+        Vector3[] temp = points.Clone() as Vector3[];
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            int index = points.GetNextControlPoint(i);
+            temp[i] = points[index];
+        }
+
+        return temp;
+    }
 }

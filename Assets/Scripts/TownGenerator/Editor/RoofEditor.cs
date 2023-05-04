@@ -13,7 +13,7 @@ public class RoofEditor : Editor
     private bool m_ShowPyramid = true;
     private bool m_ShowMansard = true;
     private bool m_ShowGable = true;
-    private bool m_ShowBeam = true;
+    private bool m_ShowMShaped = true;
     private bool m_ShowTile = true;
 
     public override void OnInspectorGUI()
@@ -27,18 +27,13 @@ public class RoofEditor : Editor
         SerializedProperty pyramidHeight = serializedObject.FindProperty("m_PyramidHeight");
         SerializedProperty gableHeight = serializedObject.FindProperty("m_GableHeight");
 
-        SerializedProperty beamWidth = serializedObject.FindProperty("m_BeamWidth");
-        SerializedProperty beamDepth = serializedObject.FindProperty("m_BeamDepth");
-        SerializedProperty beamDensity = serializedObject.FindProperty("m_SupportBeamDensity");
-        SerializedProperty beamMaterial = serializedObject.FindProperty("m_BeamMaterial");
-
         SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
         SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
         SerializedProperty tileMaterial = serializedObject.FindProperty("m_TileMaterial");
+        SerializedProperty rotate = serializedObject.FindProperty("m_Rotate");
 
         int index = 0;
         int value = (int)frameType.GetEnumValue<RoofType>();
-        string frameName = frameType.GetEnumName<RoofType>();
 
         int[] frames = roof.AvailableRoofFrames();
         string[] allOptions = frameType.enumNames;
@@ -84,7 +79,7 @@ public class RoofEditor : Editor
                 DisplayGable(gableHeight);
                 break;
             case (int)RoofType.MShaped:
-                DisplayGable(gableHeight);
+                DisplayMShaped(gableHeight, rotate);
                 break;
             case (int)RoofType.Pyramid:
                 DisplayPyramid(pyramidHeight);
@@ -95,7 +90,6 @@ public class RoofEditor : Editor
                 break;
         }
 
-        DisplayBeam(beamWidth, beamDepth, beamDensity, beamMaterial);
         DisplayTile(tileHeight, tileExtend, tileMaterial);
 
         if (serializedObject.ApplyModifiedProperties())
@@ -110,6 +104,17 @@ public class RoofEditor : Editor
                 roof.OnAnyRoofChange_Invoke();
             }
         }
+    }
+
+    private void DisplayMShaped(SerializedProperty height, SerializedProperty rotate)
+    {
+        m_ShowMShaped = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowMShaped, "M Shaped");
+        if (m_ShowMShaped)
+        {
+            EditorGUILayout.Slider(height, -10, 10, "Height");
+            EditorGUILayout.PropertyField(rotate);
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
     }
 
     private void DisplayGable(SerializedProperty height)
@@ -139,19 +144,6 @@ public class RoofEditor : Editor
         {
             EditorGUILayout.Slider(height, -10, 10, "Height");
             EditorGUILayout.Slider(scale, -10, 10, "Scale");
-        }
-        EditorGUILayout.EndFoldoutHeaderGroup();
-    }
-
-    private void DisplayBeam(SerializedProperty width, SerializedProperty depth, SerializedProperty density, SerializedProperty mat)
-    {
-        m_ShowBeam = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowBeam, "Beam");
-        if (m_ShowBeam)
-        {
-            EditorGUILayout.Slider(width, 0.01f, 10, "Width");
-            EditorGUILayout.Slider(depth, 0.01f, 10, "Depth");
-            EditorGUILayout.Slider(density, 0, 1, "Density");
-            EditorGUILayout.ObjectField(mat, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
     }

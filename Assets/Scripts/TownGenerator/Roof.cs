@@ -57,19 +57,21 @@ public class Roof : MonoBehaviour
 
     // Gable 
     [SerializeField, Range(-10, 10)] private float m_GableHeight;
+    [SerializeField] private bool m_Rotate; // For M shaped
     public float GableHeight => m_GableHeight;
+    public bool Rotate => m_Rotate;
     // End Gable
 
-    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
-    [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints;
 
     public RoofType FrameType => m_FrameType;
 
     private Vector3[] m_TempVerts;
 
-    public IEnumerable<Vector3> ControlPoints => m_ControlPoints;
+    public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
 
-    public void SetControlPoints(IEnumerable<Vector3> controlPoints)
+    public void SetControlPoints(IEnumerable<ControlPoint> controlPoints)
     {
         m_ControlPoints = controlPoints.ToArray();
     }
@@ -89,6 +91,7 @@ public class Roof : MonoBehaviour
     public Roof Initialize()
     {
         m_GableHeight = 1;
+        m_Rotate = false;
         m_PyramidHeight = 1;
         m_MansardHeight = 1;
         m_MansardScale = 1;
@@ -105,7 +108,7 @@ public class Roof : MonoBehaviour
         if (TryGetComponent(out Building building))
         {
             m_ControlPoints = building.ControlPoints;
-            m_OriginalControlPoints = m_ControlPoints;
+            m_OriginalControlPoints = m_ControlPoints.Clone() as ControlPoint[];
         }
 
         return this;
@@ -114,6 +117,7 @@ public class Roof : MonoBehaviour
     public Roof Initialize(Roof roof)
     {
         m_GableHeight = roof.GableHeight;
+        m_Rotate = roof.Rotate;
         m_PyramidHeight = roof.PyramidHeight;
         m_MansardHeight = roof.MansardHeight;
         m_MansardScale = roof.MansardScale;
@@ -124,7 +128,7 @@ public class Roof : MonoBehaviour
         m_BeamMaterial = roof.m_BeamMaterial;
 
         m_ControlPoints = roof.ControlPoints.ToArray();
-        m_OriginalControlPoints = m_ControlPoints;
+        m_OriginalControlPoints = m_ControlPoints.Clone() as ControlPoint[];
         m_TileHeight = roof.TileHeight;
         m_TileExtend = roof.TileExtend;
         m_TileFlipFace = roof.TileFlipFace;
@@ -154,36 +158,36 @@ public class Roof : MonoBehaviour
             case 4:
                 return new int[] { OpenGable, Mansard, Flat, Dormer, MShaped, Pyramid, PyramidHip };
             case 5:
-                if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
+                if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
                 {
                     return new int[] { Mansard, Flat, Pyramid, PyramidHip };
                 }
                 return new int[] { Mansard, Flat };
             case 6:
-                if (m_ControlPoints.IsPolygonLShaped(out _))
+                if (m_ControlPoints.IsLShaped(out _))
                 {
-                    if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
+                    if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
                     {
                         return new int[] { OpenGable, Mansard, Flat, Dormer, Pyramid, PyramidHip };
                     }
 
                     return new int[] { OpenGable, Mansard, Flat, Dormer };
                 }
-                if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
+                if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
                 {
                     return new int[] { Mansard, Flat, Pyramid, PyramidHip };
                 }
                 return new int[] { Mansard, Flat };
             case 7:
-                if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
+                if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
                 {
                     return new int[] { Mansard, Flat, Pyramid, PyramidHip };
                 }
                 return new int[] { Mansard, Flat };
             case 8:
-                if (m_ControlPoints.IsPolygonTShaped(out _) || m_ControlPoints.IsPolygonUShaped(out _))
+                if (m_ControlPoints.IsTShaped(out _) || m_ControlPoints.IsUShaped(out _))
                 {
-                    if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
+                    if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
                     {
                         return new int[] { OpenGable, Mansard, Flat, Dormer, Pyramid, PyramidHip };
                     }
@@ -238,8 +242,8 @@ public class Roof : MonoBehaviour
         GameObject roofFrame = new GameObject("Pyramid Roof Frame");
         roofFrame.transform.SetParent(transform, false);
 
-        Vector3 middle = ProMaths.Average(m_ControlPoints);
-        middle += (Vector3.up * m_PyramidHeight);
+        //Vector3 middle = ProMaths.Average(m_ControlPoints);
+        //middle += (Vector3.up * m_PyramidHeight);
 
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
@@ -282,12 +286,23 @@ public class Roof : MonoBehaviour
         mesh.ToMesh();
         mesh.Refresh();
 
-        m_ControlPoints = scaledControlPoints;
+        //m_ControlPoints = scaledControlPoints;
+    }
+
+    private void CreateRoofTile(Vector3[] points, bool heightStart = false, bool heightEnd = true, bool widthStart = true, bool widthEnd = true)
+    {
+        ProBuilderMesh roofTile = ProBuilderMesh.Create();
+        roofTile.name = "Roof Tile";
+        RoofTile tile = roofTile.AddComponent<RoofTile>();
+        tile.SetControlPoints(points);
+        tile.Initialize(m_TileHeight, m_TileExtend).Extend(heightStart, heightEnd, widthStart, widthEnd).Build();
+        tile.GetComponent<Renderer>().material = TileMaterial;
+        tile.transform.SetParent(transform, false);
     }
 
     private void BuildOpenGable()
     {
-        if (m_ControlPoints.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
+        if (m_ControlPoints.IsDescribableInOneLine(out Vector3[] oneLine))
         {
             GameObject roofFrame = new GameObject("Roof Frame");
             roofFrame.transform.SetParent(transform, false);
@@ -316,16 +331,8 @@ public class Roof : MonoBehaviour
                         Vector3 start = oneLine[0] + (Vector3.up * m_GableHeight);
                         Vector3 end = oneLine[1] + (Vector3.up * m_GableHeight);
 
-                        //GameObject roofTile = new GameObject("Roof Tile", typeof(RoofTile));
-                        //RoofTile tile = roofTile.GetComponent<RoofTile>();
-                        //tile.SetControlPoints(new Vector3[] { m_ControlPoints[0], start, end, m_ControlPoints[3] });
-                        //tile.Initialize().Extend(false, true, true, true).Build();
-
-                        GameObject roofTile = new GameObject("Roof Tile", typeof(RoofTile));
-                        RoofTile tile = roofTile.GetComponent<RoofTile>();
-                        tile.SetControlPoints(new Vector3[] { m_ControlPoints[1], start, end, m_ControlPoints[2] });
-                        tile.Initialize().Extend(false, true, true, true).Build();
-
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[3].Position, end, start, m_ControlPoints[0].Position });
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[1].Position, start, end, m_ControlPoints[2].Position });
                     }
                     break;
                 case 3:
@@ -336,99 +343,36 @@ public class Roof : MonoBehaviour
                         Vector3 end = oneLine[2] + (Vector3.up * m_GableHeight);
 
                         // Index Points
-                        bool isL = m_ControlPoints.IsPolygonLShaped(out int index);
-                        int next = m_ControlPoints.GetNextControlPoint(index);
-                        int twoNext = m_ControlPoints.GetNextControlPoint(next);
-                        int threeNext = m_ControlPoints.GetNextControlPoint(twoNext);
-                        int onePrevious = m_ControlPoints.GetPreviousControlPoint(index);
-                        int twoPrevious = m_ControlPoints.GetPreviousControlPoint(onePrevious);
-                        int threePrevious = m_ControlPoints.GetPreviousControlPoint(twoPrevious);
+                        bool isL = m_ControlPoints.IsLShaped(out int index);
+                        int next = m_ControlPoints.GetNext(index);
+                        int twoNext = m_ControlPoints.GetNext(next);
+                        int threeNext = m_ControlPoints.GetNext(twoNext);
+                        int onePrevious = m_ControlPoints.GetPrevious(index);
+                        int twoPrevious = m_ControlPoints.GetPrevious(onePrevious);
+                        int threePrevious = m_ControlPoints.GetPrevious(twoPrevious);
 
                         float distanceA = Vector3.Distance(start, mid);
                         float distanceB = Vector3.Distance(mid, end);
                         float average = (distanceA + distanceB) * 0.5f;
                         int numberOfSupportBeams = Mathf.FloorToInt(average);
 
+                        
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[index].Position, mid, start, m_ControlPoints[next].Position }, false, false, false, false);
+
                         //ProBuilderMesh firstBeam = GenerateBeam(start, mid);
                         //firstBeam.transform.SetParent(roofFrame.transform, true);
 
-                        Vector3 forward = start.GetDirectionToTarget(end);
-                        Vector3 dir = Vector3.Cross(Vector3.up, forward);
+                        //Vector3 forward = start.DirectionToTarget(end);
+                        //Vector3 dir = Vector3.Cross(Vector3.up, forward);
 
-                        Vector3[] pointsA = new Vector3[]
-                        {
-                            start + (0.5f * m_BeamWidth * -dir) - (beamDepth * 0.5f),
-                            mid + (0.5f * m_BeamWidth * -dir) + (forward * m_BeamWidth) - (beamDepth * 0.5f),
-                            m_ControlPoints[next] + (m_ControlPoints[next].GetDirectionToTarget(m_ControlPoints[twoNext]) * m_BeamDepth) + (Vector3.up * m_BeamDepth),
-                            m_ControlPoints[index] + (m_ControlPoints[index].GetDirectionToTarget(m_ControlPoints[threeNext]) * m_BeamDepth) /*+ (m_ControlPoints[2].GetDirectionToTarget(m_ControlPoints[1]) * m_BeamWidth)*/ + (Vector3.up * m_BeamDepth)
-                        };
-
-                        //ProBuilderMesh supportBeams = GenerateBeams(pointsA, numberOfSupportBeams);
-                       // supportBeams.transform.SetParent(roofFrame.transform, true);
-
-
-                        //Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[next], m_ControlPoints[index], size).ToArray();
-                        //Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[twoNext], m_ControlPoints[threeNext], size).ToArray();
-
-                        //for (int i = 0; i < size; i++)
+                        //Vector3[] pointsA = new Vector3[]
                         //{
-                        //    Connector connector = new(new Beam[]
-                        //    {
-                        //        first[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
-                        //        second[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
-                        //    });
-
-                        //    firstBeam.AddConnector(connector);
-                        //}
-
-                        //Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(end, mid, centreSteps);
-                        //secondBeam.transform.SetParent(roofFrame.transform, true);
-
-                        //Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
-
-                        //Beam[] third = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                        //Beam[] fourth = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                        //Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[onePrevious], m_ControlPoints[index], size).ToArray();
-                        //Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[twoPrevious], m_ControlPoints[threePrevious], size).ToArray();
-
-                        //for (int i = 0; i < size - 1; i++)
-                        //{
-                        //    Connector connector = new(new Beam[]
-                        //    {
-                        //        third[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
-                        //        fourth[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
-                        //    });
-
-                        //    secondBeam.AddConnector(connector);
-                        //}
-
-                        //third[^1] = first[^1];
-                        //fourth[^1] = second[^1];
-                        //secondBeam.AddConnector(firstBeam.GetLastConnector());
-
-                        //Extrudable[] combined = first.Concat(second).Concat(third).Concat(fourth).ToArray();
-
-                        //foreach (Extrudable extruder in combined)
-                        //{
-                        //    extruder.transform.SetParent(roofFrame.transform, true);
-                        //}
-
-                        //roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(first, true).Extend(false, true, true, false));
-                        //roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(second).Extend(false, true, true, false));
-                        //roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(third).Extend(false, true, true, false));
-                        //roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourth, true).Extend(false, true, true, false));
-
-                        //// Suspend construction if the centre beam is being reshaped.
-                        //firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
-                        //firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
-                        //secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
-                        //secondBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
-
-                        //firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
-                        //firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
-                        //secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
-                        //secondBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
+                        //    start + (0.5f * m_BeamWidth * -dir) - (beamDepth * 0.5f),
+                        //    mid + (0.5f * m_BeamWidth * -dir) + (forward * m_BeamWidth) - (beamDepth * 0.5f),
+                        //    m_ControlPoints[next] + (m_ControlPoints[next].DirectionToTarget(m_ControlPoints[twoNext]) * m_BeamDepth) + (Vector3.up * m_BeamDepth),
+                        //    m_ControlPoints[index] + (m_ControlPoints[index].DirectionToTarget(m_ControlPoints[threeNext]) * m_BeamDepth) /*+ (m_ControlPoints[2].GetDirectionToTarget(m_ControlPoints[1]) * m_BeamWidth)*/ + (Vector3.up * m_BeamDepth)
+                        //};
 
                     }
                     break;
@@ -456,232 +400,232 @@ public class Roof : MonoBehaviour
 
                         //steps = Mathf.FloorToInt(average); // multiply it by something? a 0 to 1 value, maybe? something specified by the player/dev.
 
-                        if (m_ControlPoints.IsPolygonTShaped(out int[] tPointIndices))
-                        {
-                            // Indices
-                            int tPoint0Previous = m_ControlPoints.GetPreviousControlPoint(tPointIndices[0]);
-                            int tPoint0Previous1 = m_ControlPoints.GetPreviousControlPoint(tPoint0Previous);
-                            int tPoint0Next = m_ControlPoints.GetNextControlPoint(tPointIndices[0]);
-                            int tPoint1Previous = m_ControlPoints.GetPreviousControlPoint(tPointIndices[1]);
-                            int tPoint1Next = m_ControlPoints.GetNextControlPoint(tPointIndices[1]);
-                            int tPoint1Next1 = m_ControlPoints.GetNextControlPoint(tPoint1Next);
+                        //if (m_ControlPoints.IsTShaped(out int[] tPointIndices))
+                        //{
+                        //    // Indices
+                        //    int tPoint0Previous = m_ControlPoints.GetPrevious(tPointIndices[0]);
+                        //    int tPoint0Previous1 = m_ControlPoints.GetPrevious(tPoint0Previous);
+                        //    int tPoint0Next = m_ControlPoints.GetNext(tPointIndices[0]);
+                        //    int tPoint1Previous = m_ControlPoints.GetPrevious(tPointIndices[1]);
+                        //    int tPoint1Next = m_ControlPoints.GetNext(tPointIndices[1]);
+                        //    int tPoint1Next1 = m_ControlPoints.GetNext(tPoint1Next);
 
-                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, fourth, centreSteps);
-                            int size = firstBeam.ExtrusionPositions.Length;
-                            Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
+                        //    Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, fourth, centreSteps);
+                        //    int size = firstBeam.ExtrusionPositions.Length;
+                        //    Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
 
-                            // Supports
-                            Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                            Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
+                        //    // Supports
+                        //    Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
+                        //    Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
 
-                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Next], m_ControlPoints[tPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint1Previous], m_ControlPoints[tPointIndices[1]], size).ToArray();
+                        //    Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Next], m_ControlPoints[tPointIndices[0]], size).ToArray();
+                        //    Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint1Previous], m_ControlPoints[tPointIndices[1]], size).ToArray();
 
-                            for (int i = 0; i < size; i++)
-                            {
-                                Connector connector = new(new Beam[]
-                                {
-                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
-                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
-                                });
+                        //    for (int i = 0; i < size; i++)
+                        //    {
+                        //        Connector connector = new(new Beam[]
+                        //        {
+                        //            firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
+                        //            secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
+                        //        });
 
-                                firstBeam.AddConnector(connector);
-                            }
-                            // Centre beams
-                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, fourth, centreSteps);
-                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(third, fourth, centreSteps);
+                        //        firstBeam.AddConnector(connector);
+                        //    }
+                        //    // Centre beams
+                        //    Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, fourth, centreSteps);
+                        //    Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(third, fourth, centreSteps);
 
-                            Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
-                            Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
+                        //    Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
+                        //    Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
 
-                            // Support Beams
-                            Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                        //    // Support Beams
+                        //    Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                        //    Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
 
-                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Previous], m_ControlPoints[tPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint1Next], m_ControlPoints[tPointIndices[1]], size).ToArray();
+                        //    Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Previous], m_ControlPoints[tPointIndices[0]], size).ToArray();
+                        //    Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint1Next], m_ControlPoints[tPointIndices[1]], size).ToArray();
 
-                            for (int i = 0; i < size - 1; i++)
-                            {
-                                thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps);
-                                fourthBeams[i].Build(localThirdBeamPoints[i], endPointsD[i], supportSteps);
-                            }
+                        //    for (int i = 0; i < size - 1; i++)
+                        //    {
+                        //        thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps);
+                        //        fourthBeams[i].Build(localThirdBeamPoints[i], endPointsD[i], supportSteps);
+                        //    }
 
-                            localSecondBeamPoints = localSecondBeamPoints[..^1];
-                            Vector3[] longPoints = localSecondBeamPoints.Concat(localThirdBeamPoints.Reverse()).ToArray();
-                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Previous1], m_ControlPoints[tPoint1Next1], longPoints.Length).ToArray();
+                        //    localSecondBeamPoints = localSecondBeamPoints[..^1];
+                        //    Vector3[] longPoints = localSecondBeamPoints.Concat(localThirdBeamPoints.Reverse()).ToArray();
+                        //    Vector3[] endPointsE = Vector3Extensions.LerpCollection(m_ControlPoints[tPoint0Previous1], m_ControlPoints[tPoint1Next1], longPoints.Length).ToArray();
 
-                            Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, longPoints.Length).ToArray();
+                        //    Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, longPoints.Length).ToArray();
 
-                            for (int i = 0; i < longPoints.Length; i++)
-                            {
-                                fifthBeams[i].Build(longPoints[i], endPointsE[i], supportSteps);
-                            }
+                        //    for (int i = 0; i < longPoints.Length; i++)
+                        //    {
+                        //        fifthBeams[i].Build(longPoints[i], endPointsE[i], supportSteps);
+                        //    }
 
-                            for (int i = 0; i < localSecondBeamPoints.Length; i++)
-                            {
-                                Connector connector = new(new Beam[]
-                                {
-                                    thirdBeams[i], fifthBeams[i]
-                                });
-                                secondBeam.AddConnector(connector);
-                            }
+                        //    for (int i = 0; i < localSecondBeamPoints.Length; i++)
+                        //    {
+                        //        Connector connector = new(new Beam[]
+                        //        {
+                        //            thirdBeams[i], fifthBeams[i]
+                        //        });
+                        //        secondBeam.AddConnector(connector);
+                        //    }
 
-                            int count = 0;
-                            for (int i = fifthBeams.Length - 1; i > localSecondBeamPoints.Length; i--)
-                            {
-                                Connector connector = new(new Beam[]
-                                {
-                                    fourthBeams[count], fifthBeams[i]
-                                });
+                        //    int count = 0;
+                        //    for (int i = fifthBeams.Length - 1; i > localSecondBeamPoints.Length; i--)
+                        //    {
+                        //        Connector connector = new(new Beam[]
+                        //        {
+                        //            fourthBeams[count], fifthBeams[i]
+                        //        });
 
-                                thirdBeam.AddConnector(connector);
-                                count++;
-                            }
+                        //        thirdBeam.AddConnector(connector);
+                        //        count++;
+                        //    }
 
-                            Array.Resize(ref thirdBeams, thirdBeams.Length + 1);
-                            thirdBeams[^1] = firstBeams[^1];
+                        //    Array.Resize(ref thirdBeams, thirdBeams.Length + 1);
+                        //    thirdBeams[^1] = firstBeams[^1];
 
-                            Array.Resize(ref fourthBeams, fourthBeams.Length + 1);
-                            fourthBeams[^1] = secondBeams[^1];
+                        //    Array.Resize(ref fourthBeams, fourthBeams.Length + 1);
+                        //    fourthBeams[^1] = secondBeams[^1];
 
-                            List<Beam> combined = firstBeams.Concat(secondBeams).Concat(thirdBeams).Concat(fourthBeams).Concat(fifthBeams).ToList();
-                            combined.Add(firstBeam);
-                            combined.Add(secondBeam);
-                            combined.Add(thirdBeam);
+                        //    List<Beam> combined = firstBeams.Concat(secondBeams).Concat(thirdBeams).Concat(fourthBeams).Concat(fifthBeams).ToList();
+                        //    combined.Add(firstBeam);
+                        //    combined.Add(secondBeam);
+                        //    combined.Add(thirdBeam);
 
-                            foreach (Extrudable extruder in combined)
-                            {
-                                extruder.transform.SetParent(roofFrame.transform, true);
-                            }
+                        //    foreach (Extrudable extruder in combined)
+                        //    {
+                        //        extruder.transform.SetParent(roofFrame.transform, true);
+                        //    }
 
-                            roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, true));
+                        //    roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams).Extend(false, true, true, false));
+                        //    roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams, true).Extend(false, true, true, false));
+                        //    roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, true, false));
+                        //    roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, true, false));
+                        //    roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, true));
 
-                            // Suspend construction if the centre beam is being reshaped.
-                            firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
-                            firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
+                        //    // Suspend construction if the centre beam is being reshaped.
+                        //    firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
+                        //    firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
+                        //    secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
+                        //    secondBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
+                        //    thirdBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
+                        //    thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
 
-                            firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
-                            firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
-                        }
+                        //    firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
+                        //    firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
+                        //    secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
+                        //    secondBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
+                        //    thirdBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
+                        //    thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
+                        //}
 
-                        if (m_ControlPoints.IsPolygonUShaped(out int[] uPointIndices))
-                        {
-                            // Indices
-                            int onePointPrevious = m_ControlPoints.GetPreviousControlPoint(uPointIndices[0]);
-                            int twoPointPrevious = m_ControlPoints.GetPreviousControlPoint(onePointPrevious);
-                            int threePointPrevious = m_ControlPoints.GetPreviousControlPoint(twoPointPrevious);
-                            int onePointNext = m_ControlPoints.GetNextControlPoint(uPointIndices[1]);
-                            int twoPointNext = m_ControlPoints.GetNextControlPoint(onePointNext);
-                            int threePointNext = m_ControlPoints.GetNextControlPoint(twoPointNext);
+                    //    if (m_ControlPoints.IsUShaped(out int[] uPointIndices))
+                    //    {
+                    //        // Indices
+                    //        int onePointPrevious = m_ControlPoints.GetPrevious(uPointIndices[0]);
+                    //        int twoPointPrevious = m_ControlPoints.GetPrevious(onePointPrevious);
+                    //        int threePointPrevious = m_ControlPoints.GetPrevious(twoPointPrevious);
+                    //        int onePointNext = m_ControlPoints.GetNext(uPointIndices[1]);
+                    //        int twoPointNext = m_ControlPoints.GetNext(onePointNext);
+                    //        int threePointNext = m_ControlPoints.GetNext(twoPointNext);
 
-                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, second, centreSteps);
-                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, third, centreSteps);
-                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(fourth, third, centreSteps);
+                    //        Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, second, centreSteps);
+                    //        Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, third, centreSteps);
+                    //        Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(fourth, third, centreSteps);
 
-                            int size = firstBeam.ExtrusionPositions.Length;
-                            Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
-                            Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
-                            Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
+                    //        int size = firstBeam.ExtrusionPositions.Length;
+                    //        Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
+                    //        Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
+                    //        Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
 
-                            // Supports
-                            Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                            Beam[] sixthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
+                    //        // Supports
+                    //        Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                    //        Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                    //        Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                    //        Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
+                    //        Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
+                    //        Beam[] sixthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
 
-                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[twoPointPrevious], m_ControlPoints[threePointPrevious], size).ToArray();
-                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[onePointPrevious], m_ControlPoints[uPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[threePointPrevious], m_ControlPoints[threePointNext], size).ToArray();
-                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[uPointIndices[0]], m_ControlPoints[uPointIndices[1]], size).ToArray();
-                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(m_ControlPoints[twoPointNext], m_ControlPoints[threePointNext], size).ToArray();
-                            Vector3[] endPointsF = Vector3Extensions.LerpCollection(m_ControlPoints[onePointNext], m_ControlPoints[uPointIndices[1]], size).ToArray();
+                    //        Vector3[] endPointsA = Vector3Extensions.LerpCollection(m_ControlPoints[twoPointPrevious], m_ControlPoints[threePointPrevious], size).ToArray();
+                    //        Vector3[] endPointsB = Vector3Extensions.LerpCollection(m_ControlPoints[onePointPrevious], m_ControlPoints[uPointIndices[0]], size).ToArray();
+                    //        Vector3[] endPointsC = Vector3Extensions.LerpCollection(m_ControlPoints[threePointPrevious], m_ControlPoints[threePointNext], size).ToArray();
+                    //        Vector3[] endPointsD = Vector3Extensions.LerpCollection(m_ControlPoints[uPointIndices[0]], m_ControlPoints[uPointIndices[1]], size).ToArray();
+                    //        Vector3[] endPointsE = Vector3Extensions.LerpCollection(m_ControlPoints[twoPointNext], m_ControlPoints[threePointNext], size).ToArray();
+                    //        Vector3[] endPointsF = Vector3Extensions.LerpCollection(m_ControlPoints[onePointNext], m_ControlPoints[uPointIndices[1]], size).ToArray();
 
-                            for (int i = 0; i < size; i++)
-                            {
-                                if (i < size - 1)
-                                {
-                                    Connector connectorA = new(new Beam[]
-                                    {
-                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
-                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
-                                    });
+                    //        for (int i = 0; i < size; i++)
+                    //        {
+                    //            if (i < size - 1)
+                    //            {
+                    //                Connector connectorA = new(new Beam[]
+                    //                {
+                    //                firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
+                    //                secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
+                    //                });
 
-                                    firstBeam.AddConnector(connectorA);
+                    //                firstBeam.AddConnector(connectorA);
 
-                                    Connector connectorB = new(new Beam[]
-                                    {
-                                    thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
-                                    fourthBeams[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
-                                    });
+                    //                Connector connectorB = new(new Beam[]
+                    //                {
+                    //                thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
+                    //                fourthBeams[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
+                    //                });
 
-                                    secondBeam.AddConnector(connectorB);
-                                }
+                    //                secondBeam.AddConnector(connectorB);
+                    //            }
 
-                                Connector connectorC = new(new Beam[]
-                                {
-                                    fifthBeams[i].Build(localThirdBeamPoints[i], endPointsE[i], supportSteps),
-                                    sixthBeams[i].Build(localThirdBeamPoints[i], endPointsF[i], supportSteps)
-                                });
+                    //            Connector connectorC = new(new Beam[]
+                    //            {
+                    //                fifthBeams[i].Build(localThirdBeamPoints[i], endPointsE[i], supportSteps),
+                    //                sixthBeams[i].Build(localThirdBeamPoints[i], endPointsF[i], supportSteps)
+                    //            });
 
-                                thirdBeam.AddConnector(connectorC);
-                            }
+                    //            thirdBeam.AddConnector(connectorC);
+                    //        }
 
-                            // The last element of first should be the same as the last element for third.
-                            Array.Resize(ref firstBeams, size);
-                            firstBeams[^1] = thirdBeams[0];
+                    //        // The last element of first should be the same as the last element for third.
+                    //        Array.Resize(ref firstBeams, size);
+                    //        firstBeams[^1] = thirdBeams[0];
 
-                            Array.Resize(ref secondBeams, size);
-                            secondBeams[^1] = fourthBeams[0];
+                    //        Array.Resize(ref secondBeams, size);
+                    //        secondBeams[^1] = fourthBeams[0];
 
-                            Array.Resize(ref thirdBeams, size);
-                            thirdBeams[^1] = fifthBeams[^1];
+                    //        Array.Resize(ref thirdBeams, size);
+                    //        thirdBeams[^1] = fifthBeams[^1];
 
-                            Array.Resize(ref fourthBeams, size);
-                            fourthBeams[^1] = sixthBeams[^1];
+                    //        Array.Resize(ref fourthBeams, size);
+                    //        fourthBeams[^1] = sixthBeams[^1];
 
-                            Extrudable[] combined = firstBeams.Concat(secondBeams).Concat(thirdBeams).Concat(fourthBeams).Concat(fifthBeams).Concat(sixthBeams).ToArray();
+                    //        Extrudable[] combined = firstBeams.Concat(secondBeams).Concat(thirdBeams).Concat(fourthBeams).Concat(fifthBeams).Concat(sixthBeams).ToArray();
 
-                            foreach (Extrudable extruder in combined)
-                            {
-                                extruder.transform.SetParent(roofFrame.transform, true);
-                            }
+                    //        foreach (Extrudable extruder in combined)
+                    //        {
+                    //            extruder.transform.SetParent(roofFrame.transform, true);
+                    //        }
 
-                            roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, false, false));
-                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, false, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Sixth Tile").AddComponent<Tile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
+                    //        roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams, true).Extend(false, true, true, false));
+                    //        roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams).Extend(false, true, true, false));
+                    //        roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, false, false));
+                    //        roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, false, false));
+                    //        roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, false));
+                    //        roofTiles.Add(new GameObject("Sixth Tile").AddComponent<Tile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
 
-                            firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
-                            firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[5].SuspendConstruction;
+                    //        firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
+                    //        firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
+                    //        secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
+                    //        secondBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
+                    //        thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
+                    //        thirdBeam.OnConnectorBeginReshape += roofTiles[5].SuspendConstruction;
 
-                            firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
-                            firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[5].StartConstruction;
-                        }
+                    //        firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
+                    //        firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
+                    //        secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
+                    //        secondBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
+                    //        thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
+                    //        thirdBeam.OnConnectorEndReshape += roofTiles[5].StartConstruction;
+                    //    }
                     }
                     break;
             }
@@ -711,45 +655,97 @@ public class Roof : MonoBehaviour
         Vector3[] mPointsA = new Vector3[4];
         Vector3[] mPointsB = new Vector3[4];
 
-        mPointsA[0] = m_ControlPoints[0];
-        mPointsA[1] = m_ControlPoints[1];
-        mPointsB[2] = m_ControlPoints[2];
-        mPointsB[3] = m_ControlPoints[3];
 
-        mPointsB[0] = Vector3.Lerp(mPointsA[0], mPointsB[3], 0.5f);
-        mPointsB[1] = Vector3.Lerp(mPointsA[1], mPointsB[2], 0.5f);
-
-        mPointsA[2] = mPointsB[1];
-        mPointsA[3] = mPointsB[0];
-
-        // Rotate Points 90
-
-        Vector3[] tempA = mPointsA.Clone() as Vector3[];
-
-        for (int i = 0; i < mPointsA.Length; i++)
+        if (m_Rotate)
         {
-            int index = m_ControlPoints.GetNextControlPoint(i);
-            tempA[i] = mPointsA[index];
+            mPointsA[1] = m_ControlPoints[0].Position;
+            mPointsA[2] = m_ControlPoints[1].Position;
+
+            mPointsB[0] = m_ControlPoints[3].Position;
+            mPointsB[3] = m_ControlPoints[2].Position;
+
+            Vector3 midA = Vector3.Lerp(m_ControlPoints[0].Position, m_ControlPoints[3].Position, 0.5f);
+            Vector3 midB = Vector3.Lerp(m_ControlPoints[1].Position, m_ControlPoints[2].Position, 0.5f);
+
+            Vector3 dirA = m_ControlPoints[0].Position.DirectionToTarget(m_ControlPoints[3].Position);
+            Vector3 dirB = m_ControlPoints[1].Position.DirectionToTarget(m_ControlPoints[2].Position);
+
+            mPointsA[0] = midA - (dirA * m_TileHeight);
+            mPointsA[3] = midB - (dirB * m_TileHeight);
+
+            mPointsB[1] = midA + (dirA * m_TileHeight);
+            mPointsB[2] = midB + (dirB * m_TileHeight);
 
         }
-
-        mPointsA = tempA;
-
-        Vector3[] tempB = mPointsB.Clone() as Vector3[];
-
-        for (int i = 0; i < mPointsB.Length; i++)
+        else
         {
-            int index = m_ControlPoints.GetNextControlPoint(i);
-            tempB[i] = mPointsB[index];
+            mPointsA[0] = m_ControlPoints[0].Position;
+            mPointsA[3] = m_ControlPoints[3].Position;
 
+            mPointsB[1] = m_ControlPoints[1].Position;
+            mPointsB[2] = m_ControlPoints[2].Position;
+
+            Vector3 dirA = mPointsA[0].DirectionToTarget(mPointsB[1]);
+            Vector3 dirB = mPointsA[3].DirectionToTarget(mPointsB[2]);
+
+            Vector3 midA = Vector3.Lerp(mPointsA[0], mPointsB[1], 0.5f);
+            Vector3 midB = Vector3.Lerp(mPointsA[3], mPointsB[2], 0.5f);
+
+            mPointsA[1] = midA - (dirA * m_TileHeight);
+            mPointsA[2] = midB - (dirB * m_TileHeight);
+
+            mPointsB[0] = midA + (dirA * m_TileHeight);
+            mPointsB[3] = midB + (dirB * m_TileHeight);
         }
 
-        mPointsB = tempB;
+        List<Vector3[]> mArrays = new List<Vector3[]>();
+        mArrays.Add(mPointsA);
+        mArrays.Add(mPointsB);
 
-        m_ControlPoints = mPointsA;
-        BuildOpenGable();
-        m_ControlPoints = mPointsB;
-        BuildOpenGable();
+        int iterator = 0;
+        foreach (Vector3[] m in mArrays)
+        {
+            if(m.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
+            {
+                Vector3 start = oneLine[0] + (Vector3.up * m_GableHeight);
+                Vector3 end = oneLine[1] + (Vector3.up * m_GableHeight);
+
+                if(m_Rotate)
+                {
+                    if (iterator == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] });
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] }, false, false);
+
+                    }
+
+                    if (iterator == mArrays.Count - 1)
+                    {
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] }, false, false);
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] });
+                    }
+                }
+                else
+                {
+                    if (iterator == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] });
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] }, false, false);
+                    }
+
+                    if (iterator == mArrays.Count - 1)
+                    {
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] }, false, false);
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] });
+                    }
+                }
+
+            }
+
+            iterator++;
+        }
+
+
     }
 
     /// <summary>
@@ -771,14 +767,14 @@ public class Roof : MonoBehaviour
         BuildFrame();
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         //if (m_TempVerts == null | m_TempVerts.Length == 0)
         //    return;
 
-        //for(int i = 0; i < m_TempVerts.Length; i++)
-        //{
-        //    Handles.Label(m_TempVerts[i] + transform.localPosition, i.ToString());
-        //}
+        for (int i = 0; i < m_ControlPoints.Length; i++)
+        {
+            Handles.Label(m_ControlPoints[i].Position + transform.localPosition, i.ToString());
+        }
     }
 }

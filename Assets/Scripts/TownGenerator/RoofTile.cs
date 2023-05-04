@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.ProBuilder;
+using UnityEngine.ProBuilder.MeshOperations;
 
 public class RoofTile : MonoBehaviour
 {
@@ -12,9 +13,7 @@ public class RoofTile : MonoBehaviour
     [SerializeField] private Material m_Material;
 
     [SerializeField, HideInInspector] Vector3[] m_ControlPoints;
-
-    [SerializeField, HideInInspector] Vector3[] m_ExtendedControlPoints;
-
+    [SerializeField, HideInInspector] Vector3[] m_ExtendedPositions;
     [SerializeField, HideInInspector] ProBuilderMesh m_ProBuilderMesh;
 
     // Control point indices
@@ -26,68 +25,74 @@ public class RoofTile : MonoBehaviour
     public void SetControlPoints(IEnumerable<Vector3> controlPoints)
     {
         m_ControlPoints = controlPoints.ToArray();
-        m_ExtendedControlPoints = m_ControlPoints;
+        m_ExtendedPositions = m_ControlPoints.Clone() as Vector3[];
     }
 
     private void Reset()
     {
-        Initialize();
+        Initialize(0.25f, 0.25f);
     }
 
-    public RoofTile Initialize()
+    public RoofTile Initialize(float height, float extend)
     {
-        m_Height = 0.2f;
-        m_Extend = 0.23f;
+        m_Height = height;
+        m_Extend = extend;
+        m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
         return this;
     }
 
-    public RoofTile Extend(bool heightBeginning, bool heightEnd, bool widthBeginning, bool widthEnd)
+    public RoofTile Extend(bool heightBeginning = false, bool heightEnd = true, bool widthBeginning = true, bool widthEnd = true)
     {
         m_ExtendHeightBeginning = heightBeginning;
         m_ExtendHeightEnd = heightEnd;
         m_ExtendWidthBeginning = widthBeginning;
         m_ExtendWidthEnd = widthEnd;
 
-        m_ExtendedControlPoints = m_ControlPoints;
+        m_ExtendedPositions = m_ControlPoints.Clone() as Vector3[];
 
         if (!heightBeginning && !heightEnd && !widthBeginning && !widthEnd)
             return this;
 
-        Vector3 topLeftToBottomLeft = m_ControlPoints[m_TopLeft].GetDirectionToTarget(m_ControlPoints[m_BottomLeft]);
-        Vector3 topRightToBottomRight = m_ControlPoints[m_TopRight].GetDirectionToTarget(m_ControlPoints[m_BottomRight]);
+        Vector3 topLeftToBottomLeft = m_ControlPoints[m_TopLeft].DirectionToTarget(m_ControlPoints[m_BottomLeft]);
+        Vector3 topRightToBottomRight = m_ControlPoints[m_TopRight].DirectionToTarget(m_ControlPoints[m_BottomRight]);
 
-        Vector3 topLeftToTopRight = m_ControlPoints[m_TopLeft].GetDirectionToTarget(m_ControlPoints[m_TopRight]);
-        Vector3 bottomLeftToBottomRight = m_ControlPoints[m_BottomLeft].GetDirectionToTarget(m_ControlPoints[m_BottomRight]);
+        Vector3 topLeftToTopRight = m_ControlPoints[m_TopLeft].DirectionToTarget(m_ControlPoints[m_TopRight]);
+        Vector3 bottomLeftToBottomRight = m_ControlPoints[m_BottomLeft].DirectionToTarget(m_ControlPoints[m_BottomRight]);
 
-        if (heightBeginning)
+        if (m_ExtendHeightBeginning)
         {
-            m_ExtendedControlPoints[m_TopLeft] += -topLeftToBottomLeft * m_Extend;
-            m_ExtendedControlPoints[m_TopRight] += -topRightToBottomRight * m_Extend;
+            m_ExtendedPositions[m_TopLeft] += -topLeftToBottomLeft * m_Extend;
+            m_ExtendedPositions[m_TopRight] += -topRightToBottomRight * m_Extend;
         }
 
-        if (heightEnd)
+        if (m_ExtendHeightEnd)
         {
-            m_ExtendedControlPoints[m_BottomLeft] += topLeftToBottomLeft * m_Extend;
-            m_ExtendedControlPoints[m_BottomRight] += topRightToBottomRight * m_Extend;
+            m_ExtendedPositions[m_BottomLeft] += topLeftToBottomLeft * m_Extend;
+            m_ExtendedPositions[m_BottomRight] += topRightToBottomRight * m_Extend;
         }
 
-        if (widthBeginning)
+        if (m_ExtendWidthBeginning)
         {
-            m_ExtendedControlPoints[m_TopLeft] += -topLeftToTopRight * m_Extend;
-            m_ExtendedControlPoints[m_BottomLeft] += -bottomLeftToBottomRight * m_Extend;
+            m_ExtendedPositions[m_TopLeft] += -topLeftToTopRight * m_Extend;
+            m_ExtendedPositions[m_BottomLeft] += -bottomLeftToBottomRight * m_Extend;
         }
 
-        if (widthEnd)
+        if (m_ExtendWidthEnd)
         {
-            m_ExtendedControlPoints[m_TopRight] += topLeftToTopRight * m_Extend;
-            m_ExtendedControlPoints[m_BottomRight] += bottomLeftToBottomRight * m_Extend;
+            m_ExtendedPositions[m_TopRight] += topLeftToTopRight * m_Extend;
+            m_ExtendedPositions[m_BottomRight] += bottomLeftToBottomRight * m_Extend;
         }
         return this;
     }
 
     public RoofTile Build()
     {
-        m_ProBuilderMesh = MeshMaker.CubeProjection(m_ExtendedControlPoints, m_Height);
+        ProBuilderMesh mesh = MeshMaker.CubeProjection(m_ExtendedPositions, m_Height);
+
+        m_ProBuilderMesh.RebuildWithPositionsAndFaces(mesh.positions, mesh.faces);
+        m_ProBuilderMesh.ToMesh();
+        m_ProBuilderMesh.Refresh();
+        DestroyImmediate(mesh.gameObject);
 
         return this;
     }

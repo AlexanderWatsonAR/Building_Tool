@@ -23,19 +23,7 @@ public class Building : MonoBehaviour
     private bool hasInitialized;
 
     public bool HasConstructed => m_HasConstructed;
-    public Vector3[] ControlPoints => m_BuildingPolytool.ControlPoints.ToArray();
-
-    public void SetBuildingMaterials(GameObject pillarPrefab, GameObject wallOutlinePrefab, Material colourSwatchMaterial)
-    {
-        //m_Storeys = GetComponents<Storey>();
-
-        //foreach (Storey storey in m_Storeys)
-        //{
-        //    storey.Initialize(wallOutlinePrefab, pillarPrefab);
-        //}
-
-        //m_ColourSwatchMaterial = colourSwatchMaterial;
-    }
+    public ControlPoint[] ControlPoints => m_BuildingPolytool.ControlPoints.ToArray();
 
     private void Reset()
     {
@@ -50,13 +38,7 @@ public class Building : MonoBehaviour
         m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
         m_BuildingPolytool = GetComponent<Polytool>();
-
-        if (!m_BuildingPolytool.IsClockwise())
-        {
-            IEnumerable<Vector3> reverseControlPoints = m_BuildingPolytool.ControlPoints;
-            reverseControlPoints.Reverse();
-            m_BuildingPolytool.SetControlPoints(reverseControlPoints);
-        }
+        m_BuildingPolytool.CalculateForwards();
 
         if(m_Storeys == null)
         {
@@ -71,12 +53,12 @@ public class Building : MonoBehaviour
         int count = 0;
         foreach(Storey storey in m_Storeys)
         {
-            storey.SetControlPoints(m_BuildingPolytool.ControlPoints);
+            storey.SetControlPoints(ControlPoints);
             storey.SetID(count);
             count++;
         }
 
-        m_Roof.SetControlPoints(m_BuildingPolytool.ControlPoints);
+        m_Roof.SetControlPoints(ControlPoints);
 
         //hasInitialized = true;
 

@@ -10,9 +10,18 @@ using System;
 
 public static class PolyToolExtensions
 {
+    public static Vector3 Centre(this IEnumerable<ControlPoint> controlPoints)
+    {
+        return PolygonCentre(GetPositions(controlPoints));
+    }
+
     public static Vector3 PolygonCentre(this IEnumerable<Vector3> controlPoints)
     {
-        return UnityEngine.ProBuilder.Math.Average(controlPoints.ToArray());
+        return ProMaths.Average(controlPoints.ToArray());
+    }
+    public static bool IsPointInside(this IEnumerable<ControlPoint> controlPoints, Vector3 point)
+    {
+        return IsPointInsidePolygon(GetPositions(controlPoints), point);
     }
 
     // https://codereview.stackexchange.com/questions/108857/point-inside-polygon-check
@@ -24,7 +33,7 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static bool IsPointInside(this Polytool polyTool, Vector3 point)
     {
-        return IsPointInsidePolygon(polyTool.ControlPoints, point);
+        return IsPointInsidePolygon(polyTool.Positions, point);
     }
     /// <summary>
     /// Assumes Polygon is orientated on the 'y'.
@@ -44,6 +53,11 @@ public static class PolyToolExtensions
         return c;
     }
 
+    public static bool IsLShaped(this IEnumerable<ControlPoint> controlPoints, out int lPointIndex)
+    {
+        return IsPolygonLShaped(GetPositions(controlPoints), out lPointIndex);
+    }
+
     /// <summary>
     /// Does the Polyshape resemble an 'L'? 
     /// </summary>
@@ -52,7 +66,7 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static bool IsLShaped(this Polytool polyTool, out int lPointIndex)
     {
-        return IsPolygonLShaped(polyTool.ControlPoints, out lPointIndex);
+        return IsPolygonLShaped(polyTool.Positions, out lPointIndex);
     }
     /// <summary>
     /// Does the Polygon resemble an 'L'?
@@ -80,8 +94,8 @@ public static class PolyToolExtensions
             int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
             int nextPoint = controlPointsArray.GetNextControlPoint(i);
 
-            nextForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
+            nextForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
+            previousForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
             inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
 
             Vector3 a = controlPointsArray[i] + inbetweenForward[i];
@@ -111,7 +125,12 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static bool IsTShaped(this Polytool polyTool, out int[] tPointsIndex)
     {
-        return IsPolygonTShaped(polyTool.ControlPoints, out tPointsIndex);
+        return IsPolygonTShaped(polyTool.Positions, out tPointsIndex);
+    }
+
+    public static bool IsTShaped(this IEnumerable<ControlPoint> controlPoints, out int[] tPointsIndex)
+    {
+        return IsPolygonTShaped(GetPositions(controlPoints), out tPointsIndex);
     }
 
     public static bool IsPolygonTShaped(this IEnumerable<Vector3> controlPoints, out int[] tPointsIndex)
@@ -134,8 +153,8 @@ public static class PolyToolExtensions
             int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
             int nextPoint = controlPointsArray.GetNextControlPoint(i);
 
-            nextForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
+            nextForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
+            previousForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
             inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
 
             Vector3 a = controlPointsArray[i] + inbetweenForward[i];
@@ -196,7 +215,12 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static bool IsUShaped(this Polytool polyTool, out int[] uPointsIndex)
     {
-        return IsPolygonUShaped(polyTool.ControlPoints, out uPointsIndex);
+        return IsPolygonUShaped(polyTool.Positions, out uPointsIndex);
+    }
+
+    public static bool IsUShaped(this IEnumerable<ControlPoint> controlPoints, out int[] uPointsIndex)
+    {
+        return IsPolygonUShaped(GetPositions(controlPoints), out uPointsIndex);
     }
 
     public static bool IsPolygonUShaped(this IEnumerable<Vector3> controlPoints, out int[] uPointsIndex)
@@ -220,8 +244,8 @@ public static class PolyToolExtensions
             int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
             int nextPoint = controlPointsArray.GetNextControlPoint(i);
 
-            nextForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.GetDirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
+            nextForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
+            previousForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
             inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
 
             Vector3 a = controlPointsArray[i] + inbetweenForward[i];
@@ -253,7 +277,7 @@ public static class PolyToolExtensions
 
     public static bool IsEShaped(this Polytool polyTool, out int[] ePointsIndex)
     {
-        return IsPolygonEShaped(polyTool.ControlPoints, out ePointsIndex);
+        return IsPolygonEShaped(polyTool.Positions, out ePointsIndex);
     }
 
     public static bool IsPolygonEShaped(this IEnumerable<Vector3> controlPoints, out int[] ePointsIndices)
@@ -304,7 +328,7 @@ public static class PolyToolExtensions
 
     public static bool IsXShaped(this Polytool polyTool, out int[] xPointIndices)
     {
-        return IsPolygonXShaped(polyTool.ControlPoints, out xPointIndices);
+        return IsPolygonXShaped(polyTool.Positions, out xPointIndices);
     }
 
     public static bool IsPolygonXShaped(this IEnumerable<Vector3> controlPoints, out int[] xPointIndices)
@@ -336,7 +360,7 @@ public static class PolyToolExtensions
 
     public static bool IsNShaped(this Polytool polyTool, out int[] nPointIndices)
     {
-        return IsPolygonNShaped(polyTool.ControlPoints, out nPointIndices);
+        return IsPolygonNShaped(polyTool.Positions, out nPointIndices);
     }
 
     public static bool IsPolygonNShaped(this IEnumerable<Vector3> controlPoints, out int[] nPointIndices)
@@ -355,7 +379,7 @@ public static class PolyToolExtensions
 
     public static bool IsMShaped(this Polytool polyTool, out int[] mPointIndices)
     {
-        return IsPolygonMShaped(polyTool.ControlPoints, out mPointIndices);
+        return IsPolygonMShaped(polyTool.Positions, out mPointIndices);
     }
 
     public static bool IsPolygonMShaped(this IEnumerable<Vector3> controlPoints, out int[] mPointIndices)
@@ -435,8 +459,8 @@ public static class PolyToolExtensions
             int previousPoint = points.GetPreviousControlPoint(i);
             int nextPoint = points.GetNextControlPoint(i);
 
-            Vector3 nextForward = Vector3Extensions.GetDirectionToTarget(points[i], points[nextPoint]);
-            Vector3 previousForward = Vector3Extensions.GetDirectionToTarget(points[i], points[previousPoint]);
+            Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i], points[nextPoint]);
+            Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i], points[previousPoint]);
             Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
 
             Vector3 a = points[i] + inbetweenForward;
@@ -459,6 +483,11 @@ public static class PolyToolExtensions
         int[] indices = Enumerable.Range(0, controlPoints.Count()).ToArray();
         indices = indices.Except(concavePoints).ToArray();
         return indices;
+    }
+
+    public static Vector3[] ScalePolygon(this IEnumerable<ControlPoint> controlPoints, float scaleFactor, bool concaveScaling = false)
+    {
+        return ScalePolygon(GetPositions(controlPoints), scaleFactor, concaveScaling);
     }
 
     public static Vector3[] ScalePolygon(this IEnumerable<Vector3> controlPoints, float scaleFactor, bool concaveScaling = false)
@@ -485,8 +514,8 @@ public static class PolyToolExtensions
             int previousPoint = points.GetPreviousControlPoint(i);
             int nextPoint = points.GetNextControlPoint(i);
 
-            Vector3 nextForward = Vector3Extensions.GetDirectionToTarget(points[i], points[nextPoint]);
-            Vector3 previousForward = Vector3Extensions.GetDirectionToTarget(points[i], points[previousPoint]);
+            Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i], points[nextPoint]);
+            Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i], points[previousPoint]);
             Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
 
             Vector3 pos = points[i] + inbetweenForward;
@@ -515,7 +544,12 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static int GetNextPoint(this Polytool polyTool, int index)
     {
-        return polyTool.ControlPoints.GetNextControlPoint(index);
+        return polyTool.Positions.GetNextControlPoint(index);
+    }
+
+    public static int GetNext(this IEnumerable<ControlPoint> controlPoints, int index)
+    {
+        return GetNextControlPoint(GetPositions(controlPoints), index);
     }
 
     public static int GetNextControlPoint(this IEnumerable<Vector3> controlPoints, int index)
@@ -541,7 +575,12 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static int GetPreviousPoint(this Polytool polyTool, int index)
     {
-        return polyTool.ControlPoints.GetPreviousControlPoint(index);
+        return polyTool.Positions.GetPreviousControlPoint(index);
+    }
+
+    public static int GetPrevious(this IEnumerable<ControlPoint> controlPoints, int index)
+    {
+        return GetPreviousControlPoint(GetPositions(controlPoints), index);
     }
 
     public static int GetPreviousControlPoint(this IEnumerable<Vector3> controlPoints, int index)
@@ -561,7 +600,14 @@ public static class PolyToolExtensions
 
     public static bool IsConcave(this Polytool polyTool, out int[] concavePoints)
     {
-        concavePoints = GetConcaveIndexPoints(polyTool.ControlPoints);
+        concavePoints = GetConcaveIndexPoints(polyTool.Positions);
+
+        return concavePoints.Length > 0;
+    }
+
+    public static bool IsConcave(this IEnumerable<ControlPoint> controlPoints, out int[] concavePoints)
+    {
+        concavePoints = GetConcaveIndexPoints(GetPositions(controlPoints));
 
         return concavePoints.Length > 0;
     }
@@ -582,7 +628,12 @@ public static class PolyToolExtensions
     /// <returns></returns>
     public static bool IsDescribableInOneLine(this Polytool polyTool, out Vector3[] oneLine)
     {
-        return IsPolygonDescribableInOneLine(polyTool.ControlPoints, out oneLine);
+        return IsPolygonDescribableInOneLine(polyTool.Positions, out oneLine);
+    }
+
+    public static bool IsDescribableInOneLine(this IEnumerable<ControlPoint> controlPoints, out Vector3[] oneLine)
+    {
+        return IsPolygonDescribableInOneLine(GetPositions(controlPoints), out oneLine);
     }
 
     public static bool IsPolygonDescribableInOneLine(this IEnumerable<Vector3> controlPoints, out Vector3[] oneLine)
@@ -764,5 +815,26 @@ public static class PolyToolExtensions
         }
 
         return false;
+    }
+
+    public static Vector3[] GetPositions(this IEnumerable<ControlPoint> controlPoints)
+    {
+        ControlPoint[] points = controlPoints.ToArray();
+        Vector3[] positions = new Vector3[points.Length];
+
+        for(int i = 0; i < points.Length; i++)
+        {
+            positions[i] = points[i].Position;
+        }
+
+        return positions;
+    }
+
+    public static void SetPositions(this ControlPoint[] controlPoints, ControlPoint[] other)
+    {
+        for(int i = 0; i < controlPoints.Length; i++)
+        {
+            controlPoints[i].SetPosition(other[i].Position);
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.ProBuilder;
@@ -11,7 +12,7 @@ using UnityEngine.Serialization;
 public class Storey : MonoBehaviour
 {
     [SerializeField, HideInInspector] private int m_StoreyID;
-    private Vector3[] m_ControlPoints;
+    [SerializeField] private ControlPoint[] m_ControlPoints;
     private IEnumerable<Vector3> m_NextStoreyPoints;
 
     // Wall
@@ -41,9 +42,28 @@ public class Storey : MonoBehaviour
 
     public int ID => m_StoreyID;
     public IEnumerable<Vector3> NextStoreyPoints => m_NextStoreyPoints;
-    public IEnumerable<Vector3> ControlPoints => m_ControlPoints;
+    public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
 
-    public void SetControlPoints(IEnumerable<Vector3> controlPoints)
+    public Vector3[] InsidePoints
+    {
+        get
+        {
+            if (m_InsidePoints != null)
+                return m_InsidePoints;
+
+            m_InsidePoints = new Vector3[m_ControlPoints.Length];
+
+            for (int i = 0; i < m_InsidePoints.Length; i++)
+            {
+                float w = Mathf.Lerp(-1, 1, m_WallDepth);
+                m_InsidePoints[i] = m_ControlPoints[i].Position + m_ControlPoints[i].Forward + (m_ControlPoints[i].Forward * w);
+            }
+
+            return m_InsidePoints;
+        }
+    }
+
+    public void SetControlPoints(IEnumerable<ControlPoint> controlPoints)
     {
         m_ControlPoints = controlPoints.ToArray();
     }
@@ -63,7 +83,7 @@ public class Storey : MonoBehaviour
         return Initialize(storey.ID, storey.ControlPoints, storey.WallHeight, storey.WallDepth, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.PillarWidth, storey.PillarDepth, storey.PillarMaterial);
     }
 
-    public Storey Initialize(int id, IEnumerable<Vector3> controlPoints, float wallHeight, float wallDepth, Material wallMaterial, float floorHeight, Material floorMaterial, float pillarWidth, float pillarDepth, Material pillarMaterial)
+    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, float wallHeight, float wallDepth, Material wallMaterial, float floorHeight, Material floorMaterial, float pillarWidth, float pillarDepth, Material pillarMaterial)
     {
         m_StoreyID = id;
         m_ControlPoints = controlPoints != null ? controlPoints.ToArray() : null;
@@ -71,7 +91,7 @@ public class Storey : MonoBehaviour
         m_WallHeight = wallHeight;
         m_WallDepth = wallDepth;
         m_WallMaterial = wallMaterial;
-        
+
         m_FloorMaterial = floorMaterial;
         m_FloorHeight = floorHeight;
 
@@ -79,7 +99,7 @@ public class Storey : MonoBehaviour
         m_PillarWidth = pillarWidth;
         m_PillarMaterial = pillarMaterial;
 
-        if(m_FloorMaterial == null)
+        if (m_FloorMaterial == null)
         {
             m_FloorMaterial = BuiltinMaterials.defaultMaterial;
         }
@@ -89,7 +109,7 @@ public class Storey : MonoBehaviour
             m_WallMaterial = BuiltinMaterials.defaultMaterial;
         }
 
-        if(m_PillarMaterial == null)
+        if (m_PillarMaterial == null)
         {
             m_PillarMaterial = BuiltinMaterials.defaultMaterial;
         }
@@ -100,7 +120,7 @@ public class Storey : MonoBehaviour
     public Storey Build()
     {
         BuildPillars();
-        DefineInteriorPoints();
+        m_InsidePoints = m_InsidePoints ?? InsidePoints;
         BuildExternalWalls();
         BuildFloor();
 
@@ -119,20 +139,14 @@ public class Storey : MonoBehaviour
             ProBuilderMesh pillar = ShapeGenerator.GenerateCube(PivotLocation.Center, scale);
             pillar.name = "Pillar " + i.ToString();
             pillar.transform.SetParent(transform, true);
-            pillar.transform.localPosition = m_ControlPoints[i];
+            pillar.transform.localPosition = m_ControlPoints[i].Position;
             pillar.GetComponent<Renderer>().GetComponent<Renderer>().material = m_PillarMaterial;
-            int index = m_ControlPoints.GetNextControlPoint(i);
+            int index = m_ControlPoints.GetNext(i);
 
-            pillar.transform.forward = pillar.transform.localPosition.GetDirectionToTarget(m_ControlPoints[index]);
+            pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_ControlPoints[index].Position);
             pillar.transform.localPosition += m_WallHeight / 2 * Vector3.up;
-
-            //topY += pillar.GetComponent<Renderer>().localBounds.max.y * pillar.transform.localScale.y;
-
             pillar.transform.SetParent(pillars.transform, true);
         }
-
-        //m_Height = (topY /= controlPointsArray.Length);
-        //m_NextStoreyPoints = topPillarPoints;
     }
 
     private void BuildExternalWalls()
@@ -148,17 +162,17 @@ public class Storey : MonoBehaviour
         // Construct the walls 
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int oneNext = m_ControlPoints.GetNextControlPoint(i);
-            int onePrevious = m_ControlPoints.GetPreviousControlPoint(i);
+            int oneNext = m_ControlPoints.GetNext(i);
+            int onePrevious = m_ControlPoints.GetPrevious(i);
 
-            Vector3 nextControlPoint = m_ControlPoints[oneNext];
+            Vector3 nextControlPoint = m_ControlPoints[oneNext].Position;
             Vector3 oneNextInside = m_InsidePoints[oneNext];
             Vector3 onePreviousInside = m_InsidePoints[onePrevious];
 
-            Vector3 nextForward = m_InsidePoints[i].GetDirectionToTarget(oneNextInside);
+            Vector3 nextForward = m_InsidePoints[i].DirectionToTarget(oneNextInside);
             Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallDepth;
 
-            Vector3 previousForward = m_InsidePoints[i].GetDirectionToTarget(onePreviousInside);
+            Vector3 previousForward = m_InsidePoints[i].DirectionToTarget(onePreviousInside);
             Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_WallDepth;
 
             Vector3 bottomLeft = m_InsidePoints[i];
@@ -167,12 +181,12 @@ public class Storey : MonoBehaviour
             Vector3 topRight = bottomRight + h;
 
             // Post Points
-            Vector3 zero = m_ControlPoints[i];
+            Vector3 zero = m_ControlPoints[i].Position;
             Vector3 one = m_InsidePoints[i] + nextRight;
             Vector3 two = m_InsidePoints[i];
             Vector3 three = m_InsidePoints[i] + previousRight;
 
-            bool isConcave = m_ControlPoints.IsPolygonConcave(out int[] concavePoints);
+            bool isConcave = m_ControlPoints.IsConcave(out int[] concavePoints);
 
             if (isConcave)
             {
@@ -186,11 +200,11 @@ public class Storey : MonoBehaviour
 
                     if (concavePoints[j] == i)
                     {
-                        bottomLeft = m_ControlPoints[i] - nextRight;
+                        bottomLeft = m_ControlPoints[i].Position - nextRight;
                         topLeft = bottomLeft + h;
 
-                        one = m_ControlPoints[i] - nextRight;
-                        three = m_ControlPoints[i] - previousRight;
+                        one = m_ControlPoints[i].Position - nextRight;
+                        three = m_ControlPoints[i].Position - previousRight;
                     }
                 }
             }
@@ -212,55 +226,22 @@ public class Storey : MonoBehaviour
         }
     }
 
-    private void DefineInteriorPoints()
-    {
-        Vector3[] insidePoints = new Vector3[m_ControlPoints.Length];
-        Vector3[] scalingDirections = new Vector3[m_ControlPoints.Length];
-
-        for (int i = 0; i < m_ControlPoints.Length; i++)
-        {
-            int previousPoint = m_ControlPoints.GetPreviousControlPoint(i);
-            int nextPoint = m_ControlPoints.GetNextControlPoint(i);
-
-            Vector3 a = m_ControlPoints[i].GetDirectionToTarget(m_ControlPoints[nextPoint]);
-            Vector3 b = m_ControlPoints[i].GetDirectionToTarget(m_ControlPoints[previousPoint]);
-            Vector3 c = Vector3.Lerp(a, b, 0.5f);
-
-            Vector3 pos = m_ControlPoints[i] + c;
-
-            if (!m_ControlPoints.IsPointInsidePolygon(pos))
-            {
-                pos = m_ControlPoints[i] - c;
-                scalingDirections[i] = -c;
-            }
-            else
-            {
-                scalingDirections[i] = c;
-            }
-
-            insidePoints[i] = pos;
-        }
-
-        for (int i = 0; i < insidePoints.Length; i++)
-        {
-            float w = Mathf.Lerp(-1, 1, m_WallDepth);
-
-            insidePoints[i] += scalingDirections[i] * w;
-        }
-
-        m_InsidePoints = insidePoints;
-    }
-
     private void BuildFloor()
     {
         ProBuilderMesh floor = ProBuilderMesh.Create();
         floor.name = "Floor";
         floor.transform.SetParent(transform, false);
-        floor.CreateShapeFromPolygon(m_ControlPoints.ToList(), m_FloorHeight, false);
+        Vector3[] positions = PolyToolExtensions.GetPositions(m_ControlPoints);
+        floor.CreateShapeFromPolygon(positions, m_FloorHeight, false);
         floor.GetComponent<Renderer>().sharedMaterial = m_FloorMaterial;
         floor.ToMesh();
         floor.Refresh();
     }
 
-    
+    private void OnDrawGizmosSelected()
+    {
+        Handles.color = Color.red;
+        Handles.DrawAAPolyLine(InsidePoints);
+
+    }
 }

@@ -13,11 +13,6 @@ public class etes : MonoBehaviour
     {
         polytool = GetComponent<Polytool>();
 
-        if (!polytool.IsClockwiseAlternative())
-        {
-            polytool.ReverseControlPoints();
-        }
-
     }
 
     private void OnDrawGizmos()
@@ -34,7 +29,7 @@ public class etes : MonoBehaviour
         
         if(polytool.IsMShaped(out int[] convexPoints))
         {
-            Vector3[] controlPointsArray = polytool.LocalControlPoints.ToArray();
+            Vector3[] controlPointsArray = polytool.LocalPositions.ToArray();
 
             GUIStyle style = new GUIStyle();
             style.fontSize = 18;
@@ -53,7 +48,7 @@ public class etes : MonoBehaviour
                     }
                 }
 
-                Handles.Label(polytool.LocalControlPoints[i], i.ToString(), style);
+                Handles.Label(polytool.LocalPositions[i], i.ToString(), style);
             }
 
         }

@@ -18,7 +18,7 @@ public static class BuildingShapeGenerator
         beam.transform.SetParent(extrudable.transform, false);
         beam.transform.localPosition = startPosition;
         float distance = Vector3.Distance(startPosition, endPosition);
-        beam.transform.forward = Vector3Extensions.GetDirectionToTarget(beam.transform.localPosition, endPosition);
+        beam.transform.forward = Vector3Extensions.DirectionToTarget(beam.transform.localPosition, endPosition);
         beam.transform.eulerAngles += (Vector3.right * 90);
 
         steps = steps == 0 ? Mathf.FloorToInt(distance / 5) : steps;

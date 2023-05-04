@@ -56,7 +56,7 @@ public static class MeshMaker
         if (controlPoints.ToArray().Length != 4)
             return null;
 
-        Vector3 dir = points[0].GetDirectionToTarget(points[3]);
+        Vector3 dir = points[0].DirectionToTarget(points[3]);
         Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
 
         Vector3[] vertices = new Vector3[8];
@@ -87,7 +87,7 @@ public static class MeshMaker
 
     public static ProBuilderMesh CubeProjection(Vector3 start, Vector3 end, Vector3 size)
     {
-        Vector3 forward = start.GetDirectionToTarget(end);
+        Vector3 forward = start.DirectionToTarget(end);
         Vector3 right = Vector3.Cross(Vector3.up, forward) * size.x;
 
         Vector3[] vertices = new Vector3[8];
@@ -124,7 +124,7 @@ public static class MeshMaker
         Vector3[] vertices = new Vector3[8];
         Vector3 up = Vector3.up * height;
 
-        Vector3 dir = points[0].GetDirectionToTarget(points[3]);
+        Vector3 dir = points[0].DirectionToTarget(points[3]);
         Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
 
         // Bottom Points // works if flip face is true
@@ -187,8 +187,8 @@ public static class MeshMaker
     {
         Vector3[] points = controlPoints.ToArray();
 
-        Vector3 forwardA = points[0].GetDirectionToTarget(points[1]);
-        Vector3 forwardB = points[2].GetDirectionToTarget(points[3]);
+        Vector3 forwardA = points[0].DirectionToTarget(points[1]);
+        Vector3 forwardB = points[2].DirectionToTarget(points[3]);
         Vector3 cross = Vector3.Cross(Vector3.up, forwardB);
 
         // Bottom Points
@@ -258,7 +258,7 @@ public static class MeshMaker
 
         Vector3[] bottomA = Vector3Extensions.LerpCollection(bottom[0], bottom[3], numberOfCubes);
 
-        Vector3 dir = bottom[0].GetDirectionToTarget(bottom[3]);
+        Vector3 dir = bottom[0].DirectionToTarget(bottom[3]);
         Vector3 cross = Vector3.Cross(Vector3.up, dir) * width;
 
         Vector3[] bottomB = Vector3Extensions.LerpCollection(bottom[0] + cross, bottom[3] + cross, numberOfCubes);

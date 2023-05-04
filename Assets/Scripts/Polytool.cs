@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 using UEColor = UnityEngine.Color;
 using UnityEngine.ProBuilder;
 using System;
+using UnityEngine.Rendering;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -14,17 +15,33 @@ using UnityEditor;
 [System.Serializable]
 public class Polytool : MonoBehaviour
 {
-    [SerializeField] private List<Vector3> m_ControlPoints; // world points.
+    [SerializeField] private List<ControlPoint> m_ControlPoints;
     [SerializeField] private bool m_IsDrawing;
     [SerializeField] private bool m_Show;
 
-    public event Action<List<Vector3>> OnControlPointsChanged;
+    /// <summary>
+    /// TODO: Invoke when a control point's position has changed
+    /// </summary>
+    public event Action<Vector3, int> OnPositionChanged;
 
-    public List<Vector3> ControlPoints
+    public Vector3[] Positions
+    {
+        get
+        {
+            Vector3[] positions = new Vector3[m_ControlPoints.Count];
+            for(int i = 0; i < positions.Length; i++)
+            {
+                positions[i] = m_ControlPoints[i].Position;
+            }
+            return positions;
+        }
+    }
+
+    public List<ControlPoint> ControlPoints
     {
         get 
         {
-            if(!IsClockwiseAlternative(m_ControlPoints))
+            if(!IsClockwise())
             {
                 m_ControlPoints.Reverse();
             }
@@ -33,87 +50,81 @@ public class Polytool : MonoBehaviour
         }
     }
 
-    public List<Vector3> LocalControlPoints
+    public List<Vector3> LocalPositions
     {
         get
         {
-            List<Vector3> controlPoints = new List<Vector3>();
+            List<Vector3> localPoints = new List<Vector3>();
 
-            foreach (Vector3 controlPoint in m_ControlPoints)
+            foreach (Vector3 pos in Positions)
             {
-                controlPoints.Add(controlPoint);
+                localPoints.Add(pos);
             }
 
             //Traverse the parents.
             Transform current = transform;
             while (current != null)
             {
-                for (int i = 0; i < controlPoints.Count; i++)
+                for (int i = 0; i < localPoints.Count; i++)
                 {
                     // Scale
-                    Vector3 point = controlPoints[i] - current.localPosition;
+                    Vector3 point = localPoints[i] - current.localPosition;
                     Vector3 v = Vector3.Scale(point, current.localScale) + current.localPosition;
-                    Vector3 offset = v - controlPoints[i];
-                    controlPoints[i] += offset;
+                    Vector3 offset = v - localPoints[i];
+                    localPoints[i] += offset;
 
                     // Rotation
                     Vector3 localEulerAngles = current.localEulerAngles;
-                    Vector3 v1 = Quaternion.Euler(localEulerAngles) * (controlPoints[i] - current.localPosition) + current.localPosition;
-                    offset = v1 - controlPoints[i];
-                    controlPoints[i] += offset;
+                    Vector3 v1 = Quaternion.Euler(localEulerAngles) * (localPoints[i] - current.localPosition) + current.localPosition;
+                    offset = v1 - localPoints[i];
+                    localPoints[i] += offset;
 
                     // Position
-                    controlPoints[i] += current.localPosition;
+                    localPoints[i] += current.localPosition;
                 }
 
                 current = current.parent;
             }
 
-            return controlPoints;
+            return localPoints;
         }
     }
 
     public void ShiftControlPoints()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
+        ControlPoint[] controlPoints = m_ControlPoints.ToArray();
 
-        Vector3 temp = controlPointsArray[0]; // Save the value at index 0
+        ControlPoint temp = controlPoints[0]; // Save the value at index 0
 
         // Shift each element to the right, starting from the end of the array
-        for (int i = controlPointsArray.Length - 1; i >= 1; i--)
+        for (int i = controlPoints.Length - 1; i >= 1; i--)
         {
-            controlPointsArray[i] = controlPointsArray[i - 1];
+            controlPoints[i] = controlPoints[i - 1];
         }
 
-        controlPointsArray[1] = temp; // Set the new value at index 1
+        controlPoints[1] = temp; // Set the new value at index 1
 
-        SetControlPoints(controlPointsArray);
-    }
-
-    public void SetControlPoints(IEnumerable<Vector3> controlPoints)
-    {
-        m_ControlPoints = controlPoints.ToList();
-        OnControlPointsChanged?.Invoke(ControlPoints);
-    }
-
-    public void SetControlPoints(IList<Vector3> controlPoints)
-    {
         SetControlPoints(controlPoints);
     }
 
-    public void AddControlPoint(Vector3 controlPoint)
+    public void SetControlPoints(IEnumerable<ControlPoint> controlPoints)
     {
-        Vector3 v = transform.InverseTransformPoint(controlPoint);
+        m_ControlPoints = controlPoints.ToList();
+    }
+    public void AddControlPoint(Vector3 position)
+    {
+
+        Vector3 v = transform.InverseTransformPoint(position);
 
         if (m_ControlPoints.Count <= 2)
         {
-            m_ControlPoints.Add(v);
+            m_ControlPoints.Add(new ControlPoint(v));
         }
         else
         {
-            Vector3 a = transform.TransformPoint(m_ControlPoints[0]);
+            Vector3 a = transform.TransformPoint(m_ControlPoints[0].Position);
 
-            float distance = Vector3.Distance(a, controlPoint);
+            float distance = Vector3.Distance(a, position);
 
             if(distance <= 1)
             {
@@ -121,7 +132,7 @@ public class Polytool : MonoBehaviour
             }
             else
             {
-                m_ControlPoints.Add(v);
+                m_ControlPoints.Add(new ControlPoint(v));
             }
         }
     }
@@ -136,19 +147,46 @@ public class Polytool : MonoBehaviour
         m_ControlPoints.RemoveAt(index);
     }
 
-    public Vector3 GetControlPointAt(int index)
+    public ControlPoint GetControlPointAt(int index)
     {
         return m_ControlPoints[index];
     }
 
-    public void SetControlPointAt(int index, Vector3 value)
+    public void SetControlPointAt(int index, ControlPoint value)
     {
         m_ControlPoints[index] = value;
     }
 
-    public int GetNumberOfControlPoints()
+    public int ControlPointCount()
     {
         return m_ControlPoints.Count;
+    }
+
+    public void CalculateForwards()
+    {
+        if (!IsClockwise())
+            ReverseControlPoints();
+
+        Vector3[] points = Positions;
+
+        for(int i = 0; i < m_ControlPoints.Count; i++)
+        {
+            int previousPoint = points.GetPreviousControlPoint(i);
+            int nextPoint = points.GetNextControlPoint(i);
+
+            Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i], points[nextPoint]);
+            Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i], points[previousPoint]);
+            Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
+
+            Vector3 v = points[i] + inbetweenForward;
+
+            if (!points.IsPointInsidePolygon(v))
+            {
+                inbetweenForward = -inbetweenForward;
+            }
+
+            m_ControlPoints[i].SetForward(inbetweenForward);
+        }
     }
 
 #if UNITY_EDITOR
@@ -157,48 +195,38 @@ public class Polytool : MonoBehaviour
         if (m_ControlPoints == null || m_Show == false)
             return;
         
-        for (int i = 0; i < LocalControlPoints.Count; i++)
+        for (int i = 0; i < LocalPositions.Count; i++)
         {
             //if (i == 0)
             //    Handles.color = UEColor.red;
             //else
                 Handles.color = UEColor.white;
 
-            float size = UnityEditor.HandleUtility.GetHandleSize(m_ControlPoints[i]) * 0.04f;
+            float size = UnityEditor.HandleUtility.GetHandleSize(m_ControlPoints[i].Position) * 0.04f;
 
-            Handles.DotHandleCap(i, LocalControlPoints[i], Quaternion.identity, size, Event.current.type);
+            Handles.DotHandleCap(i, LocalPositions[i], Quaternion.identity, size, Event.current.type);
         }
 
         if (m_ControlPoints.Count <= 1)
             return;
 
-        Handles.DrawAAPolyLine(LocalControlPoints.ToArray());
+        Handles.DrawAAPolyLine(LocalPositions.ToArray());
 
         if(!m_IsDrawing && m_ControlPoints.Count >= 3)
         {
-            Handles.DrawAAPolyLine(LocalControlPoints[0], LocalControlPoints[^1]);
+            Handles.DrawAAPolyLine(LocalPositions[0], LocalPositions[^1]);
         }
     }
 #endif
-
-    // Helper functions
-
-    /// <summary>
-    /// Do the control points move clockwise?
-    /// </summary>
-    /// <returns></returns>
-    public bool IsClockwise()
-    {
-        return IsClockwise(m_ControlPoints);
-    }
     /// <summary>
     /// Do the control points move clockwise?
     /// </summary>
     /// <param name="polygonControlPoints"></param>
     /// <returns></returns>
-    public bool IsClockwise(IEnumerable<Vector3> polygonControlPoints)
+    public bool IsClockwise()
     {
-        Vector3[] points = polygonControlPoints.ToArray();
+        Vector3[] points = Positions;
+
         float temp = 0;
         bool isClockwise = false;
 
@@ -221,30 +249,6 @@ public class Polytool : MonoBehaviour
 
         isClockwise = temp < 0 ? false : true;
 
-        return isClockwise;
-    }
-
-    public bool IsClockwiseAlternative()
-    {
-        return IsClockwiseAlternative(m_ControlPoints);
-
-    }
-
-    public bool IsClockwiseAlternative(IEnumerable<Vector3> polygonControlPoints)
-    {
-        Vector3[] controlPointsArray = polygonControlPoints.ToArray();
-
-        // Calculate the sum of the cross products of consecutive edges
-        float sum = 0f;
-        for (int i = 0; i < controlPointsArray.Length; i++)
-        {
-            Vector3 current = controlPointsArray[i];
-            Vector3 next = controlPointsArray[(i + 1) % controlPointsArray.Length];
-            sum += (next.x - current.x) * (next.z + current.z);
-        }
-
-        // If the sum is negative, the polygon is clockwise
-        bool isClockwise = sum < 0 ? true : false;
         return isClockwise;
     }
 
