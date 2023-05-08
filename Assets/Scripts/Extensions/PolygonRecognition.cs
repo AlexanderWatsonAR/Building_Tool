@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 using Unity.VisualScripting;
 using System;
 
-public static class PolyToolExtensions
+public static class PolygonRecognition
 {
     public static Vector3 Centre(this IEnumerable<ControlPoint> controlPoints)
     {
@@ -135,74 +135,46 @@ public static class PolyToolExtensions
 
     public static bool IsPolygonTShaped(this IEnumerable<Vector3> controlPoints, out int[] tPointsIndex)
     {
-        Vector3[] controlPointsArray = controlPoints.ToArray();
+        Vector3[] points = controlPoints.ToArray();
         tPointsIndex = new int[2];
 
-        if (controlPointsArray.Length != 8)
+        if (points.Length != 8)
             return false;
 
-        Vector3[] nextForward = new Vector3[controlPointsArray.Length];
-        Vector3[] previousForward = new Vector3[controlPointsArray.Length];
-        Vector3[] inbetweenForward = new Vector3[controlPointsArray.Length];
+        int[] indices = GetConcaveIndexPoints(points);
 
-        List<float> angles = new List<float>();
-        List<int> indices = new List<int>();
-
-        for (int i = 0; i < controlPointsArray.Length; i++)
-        {
-            int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
-            int nextPoint = controlPointsArray.GetNextControlPoint(i);
-
-            nextForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
-            inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
-
-            Vector3 a = controlPointsArray[i] + inbetweenForward[i];
-
-            if (!controlPointsArray.IsPointInsidePolygon(a))
-            {
-                angles.Add(Vector3.Angle(nextForward[i], previousForward[i]));
-                indices.Add(i);
-            }
-        }
-
-        if (indices.Count != 2)
+        if (indices.Length != 2)
             return false;
 
-        tPointsIndex[0] = indices[0];
-        tPointsIndex[1] = indices[1];
+        int[] pointsNext = new int[5];
+        pointsNext[0] = controlPoints.GetNextControlPoint(indices[0]);
+        pointsNext[1] = controlPoints.GetNextControlPoint(pointsNext[0]);
+        pointsNext[2] = controlPoints.GetNextControlPoint(pointsNext[1]);
+        pointsNext[3] = controlPoints.GetNextControlPoint(pointsNext[2]);
+        pointsNext[4] = controlPoints.GetNextControlPoint(pointsNext[3]);
 
-        if (angles.Count == 2)
+        int[] pointsPrevious = new int[5];
+        pointsPrevious[0] = controlPoints.GetPreviousControlPoint(indices[0]);
+        pointsPrevious[1] = controlPoints.GetPreviousControlPoint(pointsPrevious[0]);
+        pointsPrevious[2] = controlPoints.GetPreviousControlPoint(pointsPrevious[1]);
+        pointsPrevious[3] = controlPoints.GetPreviousControlPoint(pointsPrevious[2]);
+        pointsPrevious[4] = controlPoints.GetPreviousControlPoint(pointsPrevious[3]);
+
+
+        if (pointsNext[4] == indices[1] &&
+            pointsPrevious[2] == indices[1])
         {
-            if (angles[0] < 100 && angles[1] < 100)
-            {
-                if (Mathf.Abs(indices[0] - indices[1]) == 3)
-                {
-                    // trying to work out if points are parallel
-                    // get forward vector between b and previous point
-                    // get forward vector between c and next point
-
-                    Vector3 b = controlPointsArray[indices[0]];
-                    Vector3 c = controlPointsArray[indices[1]];
-
-                    int previousPoint = controlPointsArray.GetPreviousControlPoint(indices[0]);
-
-                    Vector3 backwardsVector = (controlPointsArray[previousPoint] - b).normalized;
-
-                    float distance = Vector3.Distance(b, c);
-
-                    Vector3 d = b + (-backwardsVector * distance);
-
-                    float distanceA = Vector3.Distance(c, d);
-
-                    if (distanceA <= 5)
-                    {
-                        return true;
-                    }
-
-                }
-            }
+            tPointsIndex = indices.Clone() as int[];
+            tPointsIndex = tPointsIndex.Reverse().ToArray();
+            return true;
         }
+        else if(pointsPrevious[4] == indices[1] &&
+                pointsNext[2] == indices[1])
+        {
+            tPointsIndex = indices.Clone() as int[];
+            return true;
+        }
+
 
         return false;
     }
@@ -227,48 +199,22 @@ public static class PolyToolExtensions
     {
         uPointsIndex = new int[2];
 
-        Vector3[] controlPointsArray = controlPoints.ToArray();
+        int[] concavePoints = GetConcaveIndexPoints(controlPoints);
 
-        if (controlPointsArray.Length != 8)
-            return false;
-
-        Vector3[] nextForward = new Vector3[controlPointsArray.Length];
-        Vector3[] previousForward = new Vector3[controlPointsArray.Length];
-        Vector3[] inbetweenForward = new Vector3[controlPointsArray.Length];
-
-        //List<float> angles = new List<float>();
-        List<int> indices = new List<int>();
-
-        for (int i = 0; i < controlPointsArray.Length; i++)
-        {
-            int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
-            int nextPoint = controlPointsArray.GetNextControlPoint(i);
-
-            nextForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
-            inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
-
-            Vector3 a = controlPointsArray[i] + inbetweenForward[i];
-
-            if (!controlPointsArray.IsPointInsidePolygon(a))
-            {
-                //float angle = Vector3.Angle(nextForward[i], previousForward[i]);
-                //Debug.Log(angle);
-                //angles.Add(angle);
-                indices.Add(i);
-            }
-        }
-
-        if (indices.Count != 2)
+        if (concavePoints.Length != 2)
             return false;
 
         // We know if it's the u shape if the indices points are next to each other.
-        int next = controlPointsArray.GetNextControlPoint(indices[0]);
+        int next = controlPoints.GetNextControlPoint(concavePoints[0]);
+        int previous = controlPoints.GetPreviousControlPoint(concavePoints[0]);
 
-        if (next == indices[1])
+        if (next == concavePoints[1] ||
+            previous == concavePoints[1])
         {
-            uPointsIndex[0] = indices[0];
-            uPointsIndex[1] = indices[1];
+            uPointsIndex = concavePoints.Clone() as int[];
+
+            if (previous == concavePoints[1])
+                uPointsIndex = uPointsIndex.Reverse().ToArray();
             return true;
         }
 
@@ -356,6 +302,11 @@ public static class PolyToolExtensions
 
         return false;
         
+    }
+
+    public static bool IsNShaped(this IEnumerable<ControlPoint> controlPoints, out int[] nPointIndices)
+    {
+        return IsPolygonNShaped(controlPoints.GetPositions(), out nPointIndices);
     }
 
     public static bool IsNShaped(this Polytool polyTool, out int[] nPointIndices)

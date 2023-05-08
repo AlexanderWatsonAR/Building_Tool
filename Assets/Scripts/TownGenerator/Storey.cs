@@ -19,7 +19,7 @@ public class Storey : MonoBehaviour
     [SerializeField, Range(1, 100)] private float m_WallHeight;
     [SerializeField, Range(0, 1)] private float m_WallDepth;
     [SerializeField] private Material m_WallMaterial;
-    private Vector3[] m_InsidePoints;
+    [SerializeField] private Vector3[] m_InsidePoints;
     public float WallHeight => m_WallHeight;
     public float WallDepth => m_WallDepth;
     public Material WallMaterial => m_WallMaterial;
@@ -48,9 +48,6 @@ public class Storey : MonoBehaviour
     {
         get
         {
-            if (m_InsidePoints != null)
-                return m_InsidePoints;
-
             m_InsidePoints = new Vector3[m_ControlPoints.Length];
 
             for (int i = 0; i < m_InsidePoints.Length; i++)
@@ -231,7 +228,7 @@ public class Storey : MonoBehaviour
         ProBuilderMesh floor = ProBuilderMesh.Create();
         floor.name = "Floor";
         floor.transform.SetParent(transform, false);
-        Vector3[] positions = PolyToolExtensions.GetPositions(m_ControlPoints);
+        Vector3[] positions = PolygonRecognition.GetPositions(m_ControlPoints);
         floor.CreateShapeFromPolygon(positions, m_FloorHeight, false);
         floor.GetComponent<Renderer>().sharedMaterial = m_FloorMaterial;
         floor.ToMesh();

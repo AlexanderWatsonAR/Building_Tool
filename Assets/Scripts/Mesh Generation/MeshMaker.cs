@@ -131,14 +131,16 @@ public static class MeshMaker
         Vector3 dirA = points[1].DirectionToTarget(points[0]);
         Vector3 a = dirA * height;
         a.Scale(scale);
+        Vector3 a1 = points[0].DirectionToTarget(points[0] + a) * height;
 
         Vector3 dirB = points[2].DirectionToTarget(points[3]);
         Vector3 b = dirB * height;
         b.Scale(scale);
+        Vector3 b1 = points[3].DirectionToTarget(points[3] + b) * height;
 
         // Bottom Points
-        vertices[0] = points[0] + a;
-        vertices[1] = points[3] + b;
+        vertices[0] = points[0] + a1;
+        vertices[1] = points[3] + b1;
         vertices[2] = points[3];
         vertices[3] = points[0];
 

@@ -74,7 +74,7 @@ public class Wall : MonoBehaviour
                 wallSection.name = "Wall Section " + i.ToString() + " " + j.ToString();
                 wallSection.GetComponent<Renderer>().sharedMaterial = m_Material;
                 
-                wallSection.transform.SetParent(transform, true);
+                wallSection.transform.SetParent(transform, false);
                 wallSection.AddComponent<WallSection>().Initialize(points, m_Depth).Build();
             }
         }
@@ -107,8 +107,8 @@ public class Wall : MonoBehaviour
         if (m_Points == null)
             return;
 
-        Handles.DrawAAPolyLine(m_Points);
-        Handles.DrawAAPolyLine(m_Points[0], m_Points[^1]);
+        //Handles.DrawAAPolyLine(m_Points);
+        //Handles.DrawAAPolyLine(m_Points[0], m_Points[^1]);
 
         if (m_Rows != 0 && m_Columns != 0)
         {
@@ -123,7 +123,21 @@ public class Wall : MonoBehaviour
                     Vector3 third = subPoints[i + 1, j + 1];
                     Vector3 fourth = subPoints[i + 1, j + 0];
 
+                    Vector3 dir = first.DirectionToTarget(fourth);
+                    Vector3 cross = Vector3.Cross(Vector3.up, dir) * m_Depth;
+
+                    first += cross;
+                    second += cross;
+                    third += cross;
+                    fourth += cross;
+
+                    first += transform.position;
+                    second += transform.position;
+                    third += transform.position;
+                    fourth += transform.position;
+
                     Handles.DrawAAPolyLine(first, second, third, fourth);
+                    Handles.DrawAAPolyLine(first, fourth);
 
                 }
             }
