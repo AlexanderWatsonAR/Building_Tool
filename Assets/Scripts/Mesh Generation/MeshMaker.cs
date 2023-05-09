@@ -57,6 +57,12 @@ public static class MeshMaker
             return null;
 
         Vector3 dir = points[0].DirectionToTarget(points[3]);
+
+        if (points[0] == points[3])
+        {
+            dir = points[1].DirectionToTarget(points[2]);
+        }
+
         Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
 
         Vector3[] vertices = new Vector3[8];

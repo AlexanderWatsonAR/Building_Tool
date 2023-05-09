@@ -97,7 +97,7 @@ public class Building : MonoBehaviour
     {
         if (m_Roof == null && m_BuildingPolytool == null)
             return;
-        //
+        
         m_Roof.Initialize(roof);
     }
 

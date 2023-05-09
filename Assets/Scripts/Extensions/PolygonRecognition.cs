@@ -76,43 +76,34 @@ public static class PolygonRecognition
     /// <returns></returns>
     public static bool IsPolygonLShaped(this IEnumerable<Vector3> controlPoints, out int lPointIndex)
     {
-        Vector3[] controlPointsArray = controlPoints.ToArray();
         lPointIndex = 0;
 
-        if (controlPointsArray.Length != 6)
+        if (controlPoints.Count() != 6)
             return false;
 
-        Vector3[] nextForward = new Vector3[controlPointsArray.Length];
-        Vector3[] previousForward = new Vector3[controlPointsArray.Length];
-        Vector3[] inbetweenForward = new Vector3[controlPointsArray.Length];
+        int[] indices = GetConcaveIndexPoints(controlPoints);
 
-        int count = 0;
-        float angle = 0;
+        if (indices.Length != 1)
+            return false;
 
-        for (int i = 0; i < controlPointsArray.Length; i++)
-        {
-            int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
-            int nextPoint = controlPointsArray.GetNextControlPoint(i);
+        Vector3[] points = controlPoints.ToArray();
 
-            nextForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[nextPoint]);
-            previousForward[i] = Vector3Extensions.DirectionToTarget(controlPointsArray[i], controlPointsArray[previousPoint]);
-            inbetweenForward[i] = Vector3.Lerp(nextForward[i], previousForward[i], 0.5f);
+        lPointIndex = indices[0];
 
-            Vector3 a = controlPointsArray[i] + inbetweenForward[i];
+        int next = controlPoints.GetNextControlPoint(lPointIndex);
+        int previous = controlPoints.GetPreviousControlPoint(lPointIndex);
 
-            if (!controlPointsArray.IsPointInsidePolygon(a))
-            {
-                count++;
-                angle = Vector3.Angle(nextForward[i], previousForward[i]);
-                lPointIndex = i;
-            }
-        }
+        Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[lPointIndex], points[next]);
+        Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[lPointIndex], points[previous]);
 
-        if (count == 1 && angle < 100)
+        float angle = Vector3.Angle(nextForward, previousForward);
+
+        if (angle < 100)
         {
             return true;
         }
 
+        lPointIndex = 0;
         return false;
     }
 
@@ -221,6 +212,11 @@ public static class PolygonRecognition
         return false;
     }
 
+    public static bool IsEShaped(this IEnumerable<ControlPoint> controlPoints, out int[] ePointsIndex)
+    {
+        return IsPolygonEShaped(controlPoints.GetPositions(), out ePointsIndex);
+    }
+
     public static bool IsEShaped(this Polytool polyTool, out int[] ePointsIndex)
     {
         return IsPolygonEShaped(polyTool.Positions, out ePointsIndex);
@@ -231,9 +227,9 @@ public static class PolygonRecognition
         int[] indices = controlPoints.GetConcaveIndexPoints();
         ePointsIndices = new int[4];
 
-        Vector3[] controlPointsArray = controlPoints.ToArray();
+        Vector3[] points = controlPoints.ToArray();
 
-        if (controlPointsArray.Length != 12 && indices.Length == ePointsIndices.Length)
+        if (points.Length != 12 && indices.Length == ePointsIndices.Length)
             return false;
 
         // Organise points.
@@ -269,6 +265,24 @@ public static class PolygonRecognition
         if (count > 1)
             return false;
 
+
+        if(!indices.Contains(ePointsIndices[0]) ||
+           !indices.Contains(ePointsIndices[1]) ||
+           !indices.Contains(ePointsIndices[2]) ||
+           !indices.Contains(ePointsIndices[3]))
+        {
+            return false;
+        }
+
+        // Note: I don't think this is useful.
+        // I think the way I created the organising of the points will create adjacent e indices.
+        //// Check if the concave points are adjacent to one another
+        //int a = Mathf.Abs(ePointsIndices[1] - ePointsIndices[0]);
+        //int b = Mathf.Abs(ePointsIndices[3] - ePointsIndices[2]);
+
+        //if (a + b != 2 && a + b != 12)
+        //    return false;
+
         return true;
     }
 
@@ -277,17 +291,21 @@ public static class PolygonRecognition
         return IsPolygonXShaped(polyTool.Positions, out xPointIndices);
     }
 
+    public static bool IsXShaped(this IEnumerable<ControlPoint> controlPoints, out int[] xPointIndices)
+    {
+        return IsPolygonXShaped(controlPoints.GetPositions(), out xPointIndices);
+    }
+
     public static bool IsPolygonXShaped(this IEnumerable<Vector3> controlPoints, out int[] xPointIndices)
     {
         int[] indices = GetConcaveIndexPoints(controlPoints);
         xPointIndices = new int[4];
 
-        Vector3[] controlPointsArray = controlPoints.ToArray();
+        Vector3[] points = controlPoints.ToArray();
         
-        if (controlPointsArray.Length != 12 | indices.Length != xPointIndices.Length)
+        if (points.Length != 12 | indices.Length != xPointIndices.Length)
             return false;
 
-        //
         if(Mathf.Abs(indices[0] - indices[1]) == 3 &&
            Mathf.Abs(indices[1] - indices[2]) == 3 &&
            Mathf.Abs(indices[2] - indices[3]) == 3 &&
@@ -326,6 +344,11 @@ public static class PolygonRecognition
 //
         nPointIndices = indices;
         return true;
+    }
+
+    public static bool IsMShaped(this IEnumerable<ControlPoint> controlPoints, out int[] mPointIndices)
+    {
+        return IsPolygonMShaped(controlPoints.GetPositions(), out mPointIndices);
     }
 
     public static bool IsMShaped(this Polytool polyTool, out int[] mPointIndices)
@@ -396,6 +419,7 @@ public static class PolygonRecognition
 
         if (count > 1)
             return false;
+
         return true;
     }
 
@@ -717,26 +741,25 @@ public static class PolygonRecognition
                     return true;
                 }
 
-                if (points.IsPolygonXShaped(out int[] plusPointIndices))
+                if (points.IsPolygonXShaped(out int[] xPointIndices))
                 {
                     oneLine = new Vector3[5];
 
-                    for (int i = 0; i < plusPointIndices.Length; i++)
+                    for (int i = 0; i < xPointIndices.Length; i++)
                     {
-                        int onePointNext = points.GetNextControlPoint(plusPointIndices[i]);
+                        int onePointNext = points.GetNextControlPoint(xPointIndices[i]);
                         int twoPointNext = points.GetNextControlPoint(onePointNext);
                         oneLine[i] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
                     }
 
-                    Vector3[] plusPoints = new Vector3[] { points[plusPointIndices[0]],
-                        points[plusPointIndices[1]],
-                        points[plusPointIndices[2]],
-                        points[plusPointIndices[3]] };
+                    Vector3[] xPoints = new Vector3[] { points[xPointIndices[0]],
+                        points[xPointIndices[1]],
+                        points[xPointIndices[2]],
+                        points[xPointIndices[3]] };
 
-                    oneLine[4] = ProMaths.Average(plusPoints);
+                    oneLine[4] = ProMaths.Average(xPoints);
                     return true;
                 }
-
                 if (points.IsPolygonMShaped(out int[] mPointIndices))
                 {
                     oneLine = new Vector3[7];
@@ -762,6 +785,7 @@ public static class PolygonRecognition
                     oneLine[6] = Vector3.Lerp(points[threePointPrevious], points[fourPointPrevious], 0.5f);
                     return true;
                 }
+
                 return false;
         }
 

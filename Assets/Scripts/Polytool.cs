@@ -90,6 +90,11 @@ public class Polytool : MonoBehaviour
         }
     }
 
+    private void Reset()
+    {
+        m_Show = true;
+    }
+
     public void ShiftControlPoints()
     {
         ControlPoint[] controlPoints = m_ControlPoints.ToArray();
