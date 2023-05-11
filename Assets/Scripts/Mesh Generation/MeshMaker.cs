@@ -130,8 +130,6 @@ public static class MeshMaker
         Vector3[] vertices = new Vector3[8];
         Vector3 up = Vector3.up * height;
 
-        //Vector3 dir = points[0].DirectionToTarget(points[3]);
-        //Vector3 forward = Vector3.Cross(Vector3.up, dir) * height;
         Vector3 scale = new Vector3(1, 0, 1);
 
         Vector3 dirA = points[1].DirectionToTarget(points[0]);
@@ -145,10 +143,10 @@ public static class MeshMaker
         Vector3 b1 = points[3].DirectionToTarget(points[3] + b) * height;
 
         // Bottom Points
-        vertices[0] = points[0] + a1;
-        vertices[1] = points[3] + b1;
-        vertices[2] = points[3];
-        vertices[3] = points[0];
+        vertices[0] = points[0];
+        vertices[1] = points[3];
+        vertices[2] = points[3] - b1;
+        vertices[3] = points[0] - a1;
 
         // Top Points
         vertices[4] = points[1] + up;

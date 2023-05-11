@@ -22,7 +22,7 @@ public class Polytool : MonoBehaviour
     /// <summary>
     /// TODO: Invoke when a control point's position has changed
     /// </summary>
-    public event Action<Vector3, int> OnPositionChanged;
+    //public event Action<Vector3, int> OnPositionChanged;
 
     public Vector3[] Positions
     {
@@ -45,8 +45,15 @@ public class Polytool : MonoBehaviour
             {
                 m_ControlPoints.Reverse();
             }
+            //
+            List<ControlPoint> controlPoints = new ();
 
-            return m_ControlPoints;
+            foreach(ControlPoint point in m_ControlPoints)
+            {
+                controlPoints.Add(new ControlPoint(point));
+            }
+
+            return controlPoints;
         }
     }
 
@@ -89,7 +96,7 @@ public class Polytool : MonoBehaviour
             return localPoints;
         }
     }
-
+    
     private void Reset()
     {
         m_Show = true;

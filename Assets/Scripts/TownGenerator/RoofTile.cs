@@ -22,6 +22,11 @@ public class RoofTile : MonoBehaviour
     private static readonly int m_TopRight = 2;
     private static readonly int m_BottomRight = 3;
 
+    public bool ExtendHeightBeginning => m_ExtendHeightBeginning;
+    public bool ExtendHeightEnd => m_ExtendHeightEnd;
+    public bool ExtendWidthBeginning => m_ExtendWidthBeginning;
+    public bool ExtendWidthEnd => m_ExtendWidthEnd;
+
     public void SetControlPoints(IEnumerable<Vector3> controlPoints)
     {
         m_ControlPoints = controlPoints.ToArray();

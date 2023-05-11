@@ -18,8 +18,11 @@ public class PolytoolEditor : Editor
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
-        polytool = (Polytool)target;
         serializedObject.Update();
+
+        polytool = (Polytool)target;
+
+
         EditorGUILayout.BeginHorizontal();
         isDrawingPrevious = serializedObject.FindProperty("m_IsDrawing").boolValue;
 

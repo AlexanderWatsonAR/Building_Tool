@@ -87,7 +87,8 @@ public class Building : MonoBehaviour
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(roof).BuildFrame();
+        roofGO.AddComponent<Roof>().Initialize(roof).SetControlPoints(ControlPoints);
+        roofGO.GetComponent<Roof>().BuildFrame();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
         return this;

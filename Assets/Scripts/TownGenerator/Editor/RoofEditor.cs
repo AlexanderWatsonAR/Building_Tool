@@ -135,7 +135,7 @@ public class RoofEditor : Editor
             EditorGUILayout.Slider(height, -10, 10, "Height");
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
-    }
+    }//
 
     private void DisplayMansard(SerializedProperty height, SerializedProperty scale)
     {
