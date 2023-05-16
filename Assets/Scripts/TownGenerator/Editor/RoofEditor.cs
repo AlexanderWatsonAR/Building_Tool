@@ -111,7 +111,7 @@ public class RoofEditor : Editor
         m_ShowMShaped = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowMShaped, "M Shaped");
         if (m_ShowMShaped)
         {
-            EditorGUILayout.Slider(height, -10, 10, "Height");
+            EditorGUILayout.Slider(height, 0, 10, "Height");
             EditorGUILayout.PropertyField(rotate);
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
@@ -122,7 +122,7 @@ public class RoofEditor : Editor
         m_ShowGable = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowGable, "Gable");
         if (m_ShowGable)
         {
-            EditorGUILayout.Slider(height, -10, 10, "Height");
+            EditorGUILayout.Slider(height, 0, 10, "Height");
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
     }
@@ -132,7 +132,7 @@ public class RoofEditor : Editor
         m_ShowPyramid = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPyramid, "Pyramid");
         if (m_ShowPyramid)
         {
-            EditorGUILayout.Slider(height, -10, 10, "Height");
+            EditorGUILayout.Slider(height, 0, 10, "Height");
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
     }//
@@ -142,8 +142,8 @@ public class RoofEditor : Editor
         m_ShowMansard = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowMansard, "Mansard");
         if (m_ShowMansard)
         {
-            EditorGUILayout.Slider(height, -10, 10, "Height");
-            EditorGUILayout.Slider(scale, -10, 10, "Scale");
+            EditorGUILayout.Slider(height, 0, 10, "Height");
+            EditorGUILayout.Slider(scale, 0, 2, "Scale");
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
     }

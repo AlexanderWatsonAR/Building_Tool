@@ -15,6 +15,7 @@ public class RoofTile : MonoBehaviour
     [SerializeField, HideInInspector] Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] Vector3[] m_ExtendedPositions;
     [SerializeField, HideInInspector] ProBuilderMesh m_ProBuilderMesh;
+    [SerializeField][HideInInspector] bool m_IsOutside;
 
     // Control point indices
     private static readonly int m_BottomLeft = 0;
@@ -35,13 +36,14 @@ public class RoofTile : MonoBehaviour
 
     private void Reset()
     {
-        Initialize(0.25f, 0.25f);
+        Initialize(0.25f, 0.25f, true);
     }
 
-    public RoofTile Initialize(float height, float extend)
+    public RoofTile Initialize(float height, float extend, bool isInside = true)
     {
         m_Height = height;
         m_Extend = extend;
+        m_IsOutside = isInside;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
         return this;
     }
@@ -92,7 +94,7 @@ public class RoofTile : MonoBehaviour
 
     public RoofTile Build()
     {
-        ProBuilderMesh mesh = MeshMaker.CubeProjection(m_ExtendedPositions, m_Height);
+        ProBuilderMesh mesh = MeshMaker.CubeProjection(m_ExtendedPositions, m_Height, m_IsOutside);
 
         m_ProBuilderMesh.RebuildWithPositionsAndFaces(mesh.positions, mesh.faces);
         m_ProBuilderMesh.ToMesh();

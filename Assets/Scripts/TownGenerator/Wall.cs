@@ -18,6 +18,11 @@ public class Wall : MonoBehaviour
 
     ProBuilderMesh[,] m_WallSections;
 
+    public Vector3[] ControlPoints => m_Points;
+    public Material Material => m_Material;
+    public float Height => m_Height;
+    public float Depth => m_Depth;
+
     private Vector3[,] SubPoints
     {
         get

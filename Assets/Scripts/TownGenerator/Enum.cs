@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum RoofType
 {
-    OpenGable, Mansard, Flat, Dormer, MShaped, Pyramid, PyramidHip
+    OpenGable, Mansard, Dormer, MShaped, Pyramid, PyramidHip
 }
 public enum Axis
 {

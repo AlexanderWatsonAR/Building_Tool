@@ -86,25 +86,9 @@ public static class PolygonRecognition
         if (indices.Length != 1)
             return false;
 
-        Vector3[] points = controlPoints.ToArray();
-
         lPointIndex = indices[0];
 
-        int next = controlPoints.GetNextControlPoint(lPointIndex);
-        int previous = controlPoints.GetPreviousControlPoint(lPointIndex);
-
-        Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[lPointIndex], points[next]);
-        Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[lPointIndex], points[previous]);
-
-        float angle = Vector3.Angle(nextForward, previousForward);
-
-        if (angle < 100)
-        {
-            return true;
-        }
-
-        lPointIndex = 0;
-        return false;
+        return true;
     }
 
 
@@ -549,17 +533,34 @@ public static class PolygonRecognition
         return GetNextControlPoint(GetPositions(controlPoints), index);
     }
 
+    public static int GetIndex(this IEnumerable<ControlPoint> controlPoints, int index)
+    {
+        return GetControlPointIndex(controlPoints.GetPositions(), index);
+    }
+
+    public static int GetControlPointIndex(this IEnumerable<Vector3> controlPoints, int index)
+    {
+        while (index < 0)
+        {
+            index = controlPoints.Count() - Mathf.Abs(index);
+        }
+
+        while (index >= controlPoints.Count())
+        {
+            index -= controlPoints.Count();
+        }
+
+        return index;
+    }
+
     public static int GetNextControlPoint(this IEnumerable<Vector3> controlPoints, int index)
     {
-        Vector3[] controlPointsArray = controlPoints.ToArray();
-
-        if (index < 0 || index >= controlPointsArray.Length)
-            return -1;
+        index = controlPoints.GetControlPointIndex(index);
 
         int next = 1;
 
-        if (index == controlPointsArray.Length - 1)
-            next = -(controlPointsArray.Length - 1);
+        if (index == controlPoints.Count() - 1)
+            next = -(controlPoints.Count() - 1);
 
         return index + next;
     }
@@ -582,15 +583,11 @@ public static class PolygonRecognition
 
     public static int GetPreviousControlPoint(this IEnumerable<Vector3> controlPoints, int index)
     {
-        Vector3[] controlPointsArray = controlPoints.ToArray();
-
-        if (index < 0 || index >= controlPointsArray.Length)
-            return -1;
-
+        index = controlPoints.GetControlPointIndex(index);
         int previous = -1;
 
         if (index == 0)
-            previous = controlPointsArray.Length - 1;
+            previous = controlPoints.Count() - 1;
 
         return index + previous;
     }

@@ -122,7 +122,7 @@ public static class MeshMaker
 
     }
 
-    public static ProBuilderMesh CubeProjection(IEnumerable<Vector3> controlPoints, float height, bool flipFace = false)
+    public static ProBuilderMesh CubeProjection(IEnumerable<Vector3> controlPoints, float height, bool isOutside = true)
     {
         // Control Points: 0 = Bottom Left, 1 = Top Left, 2 = Top Right, 3 = Bottom Right
 
@@ -143,10 +143,19 @@ public static class MeshMaker
         Vector3 b1 = points[3].DirectionToTarget(points[3] + b) * height;
 
         // Bottom Points
-        vertices[0] = points[0];
-        vertices[1] = points[3];
-        vertices[2] = points[3] - b1;
-        vertices[3] = points[0] - a1;
+        vertices[0] = points[0] + a1;
+        vertices[1] = points[3] + b1;
+        vertices[2] = points[3];
+        vertices[3] = points[0];
+
+        if (!isOutside) // projects the new vertices inside instead of out.
+        {
+            // Bottom Points
+            vertices[0] = points[0];
+            vertices[1] = points[3];
+            vertices[2] = points[3] - b1;
+            vertices[3] = points[0] - a1;
+        }
 
         // Top Points
         vertices[4] = points[1] + up;
@@ -155,9 +164,6 @@ public static class MeshMaker
         vertices[7] = points[1];
 
         int[] tris = m_CubeTriangles.Clone() as int[];
-
-        if (flipFace)
-            tris = tris.Reverse().ToArray();
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
