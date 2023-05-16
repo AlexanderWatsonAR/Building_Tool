@@ -879,6 +879,24 @@ public static class PolygonRecognition
 
         return false;
     }
+    /// <summary>
+    /// Indices for indices
+    /// </summary>
+    /// <param name="controlPoints"></param>
+    /// <param name="startIndex"></param>
+    /// <returns></returns>
+    public static int[] RelativeIndices(this IEnumerable<ControlPoint> controlPoints, int startIndex)
+    {
+        int[] relativeIndices = new int[controlPoints.Count()];
+        relativeIndices[0] = startIndex;
+
+        for(int i = 1; i < relativeIndices.Length; i++)
+        {
+            relativeIndices[i] = controlPoints.GetNext(relativeIndices[i - 1]);
+        }
+
+        return relativeIndices;
+    }
 
     public static Vector3[] GetPositions(this IEnumerable<ControlPoint> controlPoints)
     {
