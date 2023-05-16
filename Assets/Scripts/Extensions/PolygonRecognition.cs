@@ -249,7 +249,6 @@ public static class PolygonRecognition
         if (count > 1)
             return false;
 
-
         if(!indices.Contains(ePointsIndices[0]) ||
            !indices.Contains(ePointsIndices[1]) ||
            !indices.Contains(ePointsIndices[2]) ||
@@ -257,15 +256,6 @@ public static class PolygonRecognition
         {
             return false;
         }
-
-        // Note: I don't think this is useful.
-        // I think the way I created the organising of the points will create adjacent e indices.
-        //// Check if the concave points are adjacent to one another
-        //int a = Mathf.Abs(ePointsIndices[1] - ePointsIndices[0]);
-        //int b = Mathf.Abs(ePointsIndices[3] - ePointsIndices[2]);
-
-        //if (a + b != 2 && a + b != 12)
-        //    return false;
 
         return true;
     }
@@ -378,17 +368,13 @@ public static class PolygonRecognition
         int[] indices = GetConcaveIndexPoints(controlPoints);
         mPointIndices = new int[3];
 
-        Vector3[] controlPointsArray = controlPoints.ToArray();
-
-        if (controlPointsArray.Length != 12 | indices.Length != mPointIndices.Length)
+        if (controlPoints.Count() != 12 | indices.Length != mPointIndices.Length)
             return false;
 
         // Organise the m points.
-
         for (int i = 0; i< indices.Length; i++)
         {
-            int oneNext = controlPoints.GetNextControlPoint(indices[i]);
-            int twoNext = controlPoints.GetNextControlPoint(oneNext);
+            int twoNext = controlPoints.GetControlPointIndex(indices[i] + 2);
 
             try
             {
@@ -406,24 +392,14 @@ public static class PolygonRecognition
 
         for (int i = 0; i < indices.Length; i++)
         {
-            int oneNext = controlPoints.GetNextControlPoint(indices[i]);
-            int twoNext = controlPoints.GetNextControlPoint(oneNext);
-            int threeNext = controlPoints.GetNextControlPoint(twoNext);
-            int fourNext = controlPoints.GetNextControlPoint(threeNext);
-            int fiveNext = controlPoints.GetNextControlPoint(fourNext);
-
-            int onePrevious = controlPoints.GetPreviousControlPoint(indices[i]);
-            int twoPrevious = controlPoints.GetPreviousControlPoint(onePrevious);
-            int threePrevious = controlPoints.GetPreviousControlPoint(twoPrevious);
-            int fourPrevious = controlPoints.GetPreviousControlPoint(threePrevious);
-            int fivePrevious = controlPoints.GetPreviousControlPoint(fourPrevious);
+            int fiveNext = controlPoints.GetControlPointIndex(indices[i] + 5);
+            int fivePrevious = controlPoints.GetControlPointIndex(indices[i] - 5);
 
             if (fiveNext == mPointIndices[0] &&
                 fivePrevious == mPointIndices[2])
             {
                 mPointIndices[1] = indices[i];
             }
-
         }
 
         int count = 0;
@@ -440,7 +416,62 @@ public static class PolygonRecognition
         return true;
     }
 
+    public static bool IsSimpleMShaped(this IEnumerable<ControlPoint> controlPoints, out int[] simpleMPointIndices)
+    {
+        return IsPolygonSimpleMShaped(controlPoints.GetPositions(), out simpleMPointIndices);
+    }
 
+    public static bool IsPolygonSimpleMShaped(this IEnumerable<Vector3> controlPoints, out int[] simpleMPointIndices)
+    {
+        simpleMPointIndices = new int[3];
+        int[] concavePoints = controlPoints.GetConcaveIndexPoints();
+
+        if (controlPoints.Count() != 10 | concavePoints.Length != simpleMPointIndices.Length)
+            return false;
+
+        for (int i = 0; i < concavePoints.Length; i++)
+        {
+            int twoNext = controlPoints.GetControlPointIndex(concavePoints[i] + 2);
+
+            try
+            {
+                concavePoints.Single(s => s == twoNext);
+            }
+            catch (InvalidOperationException)
+            {
+                continue;
+            }
+
+            simpleMPointIndices[0] = concavePoints[i];
+            simpleMPointIndices[2] = twoNext;
+            break;
+        }
+
+        for (int i = 0; i < concavePoints.Length; i++)
+        {
+            int fiveNext = controlPoints.GetControlPointIndex(concavePoints[i] + 4);
+            int fivePrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 4);
+
+            if (fiveNext == simpleMPointIndices[0] &&
+                fivePrevious == simpleMPointIndices[2])
+            {
+                simpleMPointIndices[1] = concavePoints[i];
+            }
+        }
+
+        int count = 0;
+
+        for (int i = 0; i < simpleMPointIndices.Length; i++)
+        {
+            if (simpleMPointIndices[i] == 0)
+                count++;
+        }
+
+        if (count > 1)
+            return false;
+
+        return true;
+    }
 
     public static int[] GetConcaveIndexPoints(this IEnumerable<Vector3> controlPoints)
     {
@@ -748,6 +779,29 @@ public static class PolygonRecognition
                     oneLine[5] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
                     return true;
                 }
+                if(points.IsPolygonSimpleMShaped(out int[] simpleMPointIndices))
+                {
+                    oneLine = new Vector3[5];
+
+                    int onePrevious = points.GetControlPointIndex(simpleMPointIndices[0] - 1);
+                    int twoPrevious = points.GetControlPointIndex(simpleMPointIndices[0] - 2);
+                    int threePrevious = points.GetControlPointIndex(simpleMPointIndices[0] - 3);
+
+                    int oneNext = points.GetControlPointIndex(simpleMPointIndices[0] + 1);
+
+                    oneLine[0] = Vector3.Lerp(points[onePrevious], points[twoPrevious], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[simpleMPointIndices[0]], points[threePrevious], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[oneNext], points[simpleMPointIndices[1]], 0.5f);
+
+                    onePrevious = points.GetControlPointIndex(simpleMPointIndices[1] - 1);
+                    oneNext = points.GetControlPointIndex(simpleMPointIndices[2] + 1);
+                    int twoNext = points.GetControlPointIndex(simpleMPointIndices[2] + 2);
+
+                    oneLine[3] = Vector3.Lerp(points[simpleMPointIndices[2]], points[onePrevious], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[oneNext], points[twoNext], 0.5f);
+                    return true;
+                }
+
 
                 return false;
             case 12:

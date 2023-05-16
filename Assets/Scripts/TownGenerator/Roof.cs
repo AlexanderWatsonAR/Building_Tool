@@ -334,6 +334,7 @@ public class Roof : MonoBehaviour
     }
     private void BuildOpenGable()
     {
+
         if (m_ControlPoints.IsDescribableInOneLine(out Vector3[] oneLine))
         {
             for (int i = 0; i < oneLine.Length; i++)
@@ -458,6 +459,40 @@ public class Roof : MonoBehaviour
                             CreateWall(new Vector3[] { m_ControlPoints[next1].Position, oneLine[i], oneLine[i], m_ControlPoints[next].Position });
                         }
 
+                    }
+                    if(m_ControlPoints.IsSimpleMShaped(out int[] simpleMPointIndices))
+                    {
+                        // Define a map of the indices from a single ref to a concave point.
+                        int[] indices = new int[m_ControlPoints.Length];
+                        indices[0] = simpleMPointIndices[0];
+                        
+                        for(int i = 1; i < indices.Length; i++)
+                        {
+                            indices[i] = m_ControlPoints.GetPrevious(indices[i - 1]);
+                        }
+
+                        int simpleMPoint0 = simpleMPointIndices[0];
+                        int simpleMPoint1 = simpleMPointIndices[1];
+                        int simpleMPoint2 = simpleMPointIndices[2];
+                        int simpleMPoint0Previous1 = m_ControlPoints.GetIndex(simpleMPoint0 - 1);
+                        int simpleMPoint0Previous2 = m_ControlPoints.GetIndex(simpleMPoint0 - 2);
+                        int simpleMPoint0Previous3 = m_ControlPoints.GetIndex(simpleMPoint0 - 3);
+                        int simpleMPoint1Previous1 = m_ControlPoints.GetIndex(simpleMPoint1 - 1);
+                        int simpleMPoint1Previous2 = m_ControlPoints.GetIndex(simpleMPoint1 - 2);
+                        int simpleMPoint2Previous1 = m_ControlPoints.GetIndex(simpleMPoint2 - 1);
+                        int simpleMPoint2Next1 = m_ControlPoints.GetIndex(simpleMPoint2 + 1);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[1], oneLine[0], m_ControlPoints[indices[2]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[3]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[4]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[4], oneLine[3], m_ControlPoints[indices[5]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[3], oneLine[4], m_ControlPoints[indices[7]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[8]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[9]].Position }, false, true, false, false);
+
+                        CreateWall(new Vector3[] { m_ControlPoints[simpleMPoint0Previous1].Position, oneLine[0], oneLine[0], m_ControlPoints[simpleMPoint0Previous2].Position });
+                        CreateWall(new Vector3[] { m_ControlPoints[simpleMPoint1Previous2].Position, oneLine[4], oneLine[4], m_ControlPoints[simpleMPoint2Next1].Position });
                     }
                     break;
                 case 6:
