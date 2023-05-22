@@ -473,6 +473,97 @@ public static class PolygonRecognition
         return true;
     }
 
+    public static bool IsZigZagShaped(this IEnumerable<ControlPoint> controlPoints, out int[] zigZagIndices)
+    {
+        return IsPolygonZigZagShaped(controlPoints.GetPositions(), out zigZagIndices);
+    }
+
+    public static bool IsPolygonZigZagShaped(this IEnumerable<Vector3> controlPoints, out int[] zigZagIndices)
+    {
+        // Not finished.
+        int[] concavePoints = controlPoints.GetConcaveIndexPoints();
+        zigZagIndices = new int[concavePoints.Length];
+        zigZagIndices[0] = -1;
+
+        if (controlPoints.Count() < 14 | controlPoints.Count() % 2 != 0 |
+            concavePoints.Count() < 5  | concavePoints.Count() % 2 == 0)
+            return false;
+
+        int count = 0;
+
+        List<Tuple<int, int, int>> data = new();
+
+        // Find the first point.
+        for (int i = 0; i < concavePoints.Length; i++)
+        {
+            int onePrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 1);
+            int twoPrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 2);
+            int threePrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 3);
+            int twoNext = controlPoints.GetControlPointIndex(concavePoints[i] + 2);
+
+            bool conditionA = concavePoints.Any(a => a == onePrevious);
+            bool conditionB = concavePoints.Any(b => b == twoPrevious);
+            bool conditionC = concavePoints.Any(c => c == threePrevious);
+            bool conditionD = concavePoints.Any(d => d == twoNext);
+
+            // if true, we have found either end of the zig zag.
+            if (!conditionA && !conditionB && !conditionC && conditionD)
+            {
+                // Looking at the zigzag, where the ends of the shape are on the left & right,
+                // we can see that the number of concave points on the top & bottom of the shape differ.
+                // With that we can find a start point.
+
+                int numberOfConcavePoints = 1;
+
+                while(concavePoints.Any(d => d == twoNext))
+                {
+                    twoNext = controlPoints.GetControlPointIndex(twoNext + 2);
+                    numberOfConcavePoints++;
+                }
+
+                data.Add(new Tuple<int, int, int> (i, numberOfConcavePoints, count));
+
+            }
+            count++;
+        }
+
+        if (data.Count != 2)
+            return false;
+
+        if (data[0].Item2 > data[1].Item2)
+        {
+            zigZagIndices[0] = data[0].Item1;
+            count = data[0].Item3;
+        }
+        else
+        {
+            zigZagIndices[0] = data[1].Item1;
+            count = data[1].Item3;
+        }
+
+        if (zigZagIndices[0] == -1)
+            return false;
+
+        for(int i = 0; i < concavePoints.Length; i++)
+        {
+            zigZagIndices[i] = concavePoints[count];
+            count++;
+
+            if (count > concavePoints.Length - 1)
+                count = 0;
+        }
+
+        if(zigZagIndices.Distinct().Count() != concavePoints.Count())
+            return false;
+
+        return true;
+    }
+
+    public static bool IsPolygonCrenelShaped()
+    {
+        return false;
+    }
+
     public static int[] GetConcaveIndexPoints(this IEnumerable<Vector3> controlPoints)
     {
         Vector3[] points = controlPoints.ToArray();
@@ -682,16 +773,11 @@ public static class PolygonRecognition
 
                 if (points.IsPolygonLShaped(out index))
                 {
-                    int onePointNext = points.GetNextControlPoint(index);
-                    int twoPointNext = points.GetNextControlPoint(onePointNext);
-                    int threePointNext = points.GetNextControlPoint(twoPointNext);
+                    int[] lIndices = points.RelativeIndices(index);
 
-                    int onePointPrevious = points.GetPreviousControlPoint(index);
-                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-
-                    oneLine[0] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[index], points[threePointNext], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[lIndices[1]], points[lIndices[2]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[lIndices[0]], points[lIndices[3]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[lIndices[5]], points[lIndices[4]], 0.5f);
                     return true;
                 }
                 break;
@@ -703,50 +789,30 @@ public static class PolygonRecognition
 
                 if (points.IsPolygonTShaped(out indices))
                 {
-                    int onePointNext = points.GetNextControlPoint(indices[0]);
-                    int twoPointNext = points.GetNextControlPoint(onePointNext);
+                    int[] tIndices = points.RelativeIndices(indices[0]);
 
-                    int onePointPrevious = points.GetPreviousControlPoint(indices[0]);
-                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-
-                    start = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
-                    second = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
-
-                    onePointNext = points.GetNextControlPoint(indices[1]);
-                    twoPointNext = points.GetNextControlPoint(onePointNext);
-
-                    third = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
+                    start = Vector3.Lerp(points[tIndices[1]], points[tIndices[2]], 0.5f);
+                    second = Vector3.Lerp(points[tIndices[7]], points[tIndices[6]], 0.5f);
+                    third = Vector3.Lerp(points[tIndices[4]], points[tIndices[5]], 0.5f);
                     last = Vector3.Lerp(second, third, 0.5f);
                 }
                 if (points.IsPolygonUShaped(out indices))
                 {
-                    int onePointPrevious = points.GetPreviousControlPoint(indices[0]);
-                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
+                    int[] uIndices = points.RelativeIndices(indices[0]);
 
-                    int onePointNext = points.GetNextControlPoint(indices[1]);
-                    int twoPointNext = points.GetNextControlPoint(onePointNext);
-                    int threePointNext = points.GetNextControlPoint(twoPointNext);
-
-                    start = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
-                    second = Vector3.Lerp(points[indices[0]], points[threePointPrevious], 0.5f);
-                    third = Vector3.Lerp(points[indices[1]], points[threePointNext], 0.5f);
-                    last = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
+                    start = Vector3.Lerp(points[uIndices[7]], points[uIndices[6]], 0.5f);
+                    second = Vector3.Lerp(points[uIndices[0]], points[uIndices[5]], 0.5f);
+                    third = Vector3.Lerp(points[uIndices[1]], points[uIndices[4]], 0.5f);
+                    last = Vector3.Lerp(points[uIndices[2]], points[uIndices[3]], 0.5f);
                 }
                 if(points.IsPolygonSimpleNShaped(out indices))
                 {
-                    int indices0Previous = points.GetPreviousControlPoint(indices[0]);
-                    int indices0Previous1 = points.GetPreviousControlPoint(indices0Previous);
-                    int indices0Previous2 = points.GetPreviousControlPoint(indices0Previous1);
+                    int[] nIndices = points.RelativeIndices(indices[0]);
 
-                    int indices0Next = points.GetNextControlPoint(indices[0]);
-                    int indices1Previous = points.GetPreviousControlPoint(indices[1]);
-                    int indices1Previous1 = points.GetPreviousControlPoint(indices1Previous);
-
-                    start = Vector3.Lerp(points[indices0Previous], points[indices0Previous1], 0.5f);
-                    second = Vector3.Lerp(points[indices[0]], points[indices0Previous2], 0.5f);
-                    third = Vector3.Lerp(points[indices[1]], points[indices0Next], 0.5f);
-                    last = Vector3.Lerp(points[indices1Previous], points[indices1Previous1], 0.5f);
+                    start = Vector3.Lerp(points[nIndices[7]], points[nIndices[6]], 0.5f);
+                    second = Vector3.Lerp(points[nIndices[0]], points[nIndices[5]], 0.5f);
+                    third = Vector3.Lerp(points[nIndices[4]], points[nIndices[1]], 0.5f);
+                    last = Vector3.Lerp(points[nIndices[2]], points[nIndices[3]], 0.5f);
                 }
 
                 oneLine[0] = start;
@@ -758,74 +824,43 @@ public static class PolygonRecognition
                 if (points.IsPolygonNShaped(out int[] nPointIndices))
                 {
                     oneLine = new Vector3[6];
-                    int onePointPrevious = points.GetPreviousControlPoint(nPointIndices[0]);
-                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
+                    int[] nIndices = points.RelativeIndices(nPointIndices[0]);
 
-                    int onePointNext = points.GetNextControlPoint(nPointIndices[1]);
-
-                    oneLine[0] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[nPointIndices[0]], points[threePointPrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[nPointIndices[0]], points[onePointNext], 0.5f);
-
-                    onePointPrevious = points.GetPreviousControlPoint(nPointIndices[1]);
-                    twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-                    threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
-
-                    onePointNext = points.GetNextControlPoint(nPointIndices[0]);
-
-                    oneLine[3] = Vector3.Lerp(points[nPointIndices[1]], points[onePointNext], 0.5f);
-                    oneLine[4] = Vector3.Lerp(points[nPointIndices[1]], points[threePointPrevious], 0.5f);
-                    oneLine[5] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[nIndices[9]], points[nIndices[8]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[nIndices[0]], points[nIndices[7]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[nIndices[0]], points[nIndices[6]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[nIndices[5]], points[nIndices[1]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[nIndices[5]], points[nIndices[2]], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[nIndices[3]], points[nIndices[4]], 0.5f);
                     return true;
                 }
                 if(points.IsPolygonSimpleMShaped(out int[] simpleMPointIndices))
                 {
                     oneLine = new Vector3[5];
+                    int[] mIndices = points.RelativeIndices(simpleMPointIndices[0]);
 
-                    int onePrevious = points.GetControlPointIndex(simpleMPointIndices[0] - 1);
-                    int twoPrevious = points.GetControlPointIndex(simpleMPointIndices[0] - 2);
-                    int threePrevious = points.GetControlPointIndex(simpleMPointIndices[0] - 3);
-
-                    int oneNext = points.GetControlPointIndex(simpleMPointIndices[0] + 1);
-
-                    oneLine[0] = Vector3.Lerp(points[onePrevious], points[twoPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[simpleMPointIndices[0]], points[threePrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[oneNext], points[simpleMPointIndices[1]], 0.5f);
-
-                    onePrevious = points.GetControlPointIndex(simpleMPointIndices[1] - 1);
-                    oneNext = points.GetControlPointIndex(simpleMPointIndices[2] + 1);
-                    int twoNext = points.GetControlPointIndex(simpleMPointIndices[2] + 2);
-
-                    oneLine[3] = Vector3.Lerp(points[simpleMPointIndices[2]], points[onePrevious], 0.5f);
-                    oneLine[4] = Vector3.Lerp(points[oneNext], points[twoNext], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[mIndices[9]], points[mIndices[8]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[mIndices[0]], points[mIndices[7]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[mIndices[1]], points[mIndices[6]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[mIndices[2]], points[mIndices[5]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[mIndices[3]], points[mIndices[4]], 0.5f);
                     return true;
                 }
-
-
                 return false;
             case 12:
                 if (points.IsPolygonEShaped(out int[] ePointIndices))
                 {
                     oneLine = new Vector3[6];
-                    int onePointPrevious = points.GetPreviousControlPoint(ePointIndices[0]);
-                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
 
-                    int onePointNext = points.GetNextControlPoint(ePointIndices[3]);
-                    int twoPointNext = points.GetNextControlPoint(onePointNext);
-                    int threePointNext = points.GetNextControlPoint(twoPointNext);
+                    int[] eIndices = controlPoints.RelativeIndices(ePointIndices[0]);
 
-                    oneLine[0] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[ePointIndices[0]], points[threePointPrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[ePointIndices[3]], points[threePointNext], 0.5f);
-                    oneLine[3] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[eIndices[11]], points[eIndices[10]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[eIndices[0]], points[eIndices[9]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[eIndices[5]], points[eIndices[8]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[eIndices[6]], points[eIndices[7]], 0.5f);
                     oneLine[4] = Vector3.Lerp(oneLine[1], oneLine[2], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[eIndices[2]], points[eIndices[3]], 0.5f);
 
-                    onePointPrevious = points.GetPreviousControlPoint(ePointIndices[2]);
-                    twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-
-                    oneLine[5] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
                     return true;
                 }
 
@@ -851,30 +886,43 @@ public static class PolygonRecognition
                 if (points.IsPolygonMShaped(out int[] mPointIndices))
                 {
                     oneLine = new Vector3[7];
-                    int onePointPrevious = points.GetPreviousControlPoint(mPointIndices[0]);
-                    int twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-                    int threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
-                    int fourPointPrevious = points.GetPreviousControlPoint(threePointPrevious);
 
-                    int onePointNext = points.GetNextControlPoint(mPointIndices[0]);
+                    int[] mIndices = controlPoints.RelativeIndices(mPointIndices[0]);
 
-                    oneLine[0] = Vector3.Lerp(points[onePointPrevious], points[twoPointPrevious], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[mPointIndices[0]], points[threePointPrevious], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[mPointIndices[0]], points[fourPointPrevious], 0.5f);
-                    oneLine[3] = Vector3.Lerp(points[mPointIndices[1]], points[onePointNext], 0.5f);
-
-                    onePointPrevious = points.GetPreviousControlPoint(mPointIndices[1]);
-                    twoPointPrevious = points.GetPreviousControlPoint(onePointPrevious);
-                    threePointPrevious = points.GetPreviousControlPoint(twoPointPrevious);
-                    fourPointPrevious = points.GetPreviousControlPoint(threePointPrevious);
-
-                    oneLine[4] = Vector3.Lerp(points[mPointIndices[2]], points[onePointPrevious], 0.5f);
-                    oneLine[5] = Vector3.Lerp(points[mPointIndices[2]], points[twoPointPrevious], 0.5f);
-                    oneLine[6] = Vector3.Lerp(points[threePointPrevious], points[fourPointPrevious], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[mIndices[11]], points[mIndices[10]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[mIndices[0]], points[mIndices[9]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[mIndices[0]], points[mIndices[8]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[mIndices[1]], points[mIndices[7]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[mIndices[2]], points[mIndices[6]], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[mIndices[2]], points[mIndices[5]], 0.5f);
+                    oneLine[6] = Vector3.Lerp(points[mIndices[3]], points[mIndices[4]], 0.5f);
                     return true;
                 }
 
                 return false;
+        }
+
+        if(points.IsPolygonZigZagShaped(out int[] zigZagIndices))
+        {
+            int length = points.Count() / 2;
+            oneLine = new Vector3[length];
+
+
+            int[] relative = controlPoints.RelativeIndices(zigZagIndices[0]);
+            int previous = relative.Length - 3;
+
+            oneLine[0] = Vector3.Lerp(points[relative[^1]], points[relative[^2]], 0.5f);
+
+            int itr = 1;
+            for (int i = 0; i < zigZagIndices.Length + 1; i++)
+            {
+                oneLine[itr] = Vector3.Lerp(points[relative[i]], points[relative[previous]], 0.5f);
+
+                previous --;
+                itr++;
+            }
+
+            return true;
         }
 
         return false;
@@ -887,12 +935,17 @@ public static class PolygonRecognition
     /// <returns></returns>
     public static int[] RelativeIndices(this IEnumerable<ControlPoint> controlPoints, int startIndex)
     {
+        return RelativeIndices(controlPoints.GetPositions(), startIndex);
+    }
+
+    public static int[] RelativeIndices(this IEnumerable<Vector3> controlPoints, int startIndex)
+    {
         int[] relativeIndices = new int[controlPoints.Count()];
         relativeIndices[0] = startIndex;
 
-        for(int i = 1; i < relativeIndices.Length; i++)
+        for (int i = 1; i < relativeIndices.Length; i++)
         {
-            relativeIndices[i] = controlPoints.GetNext(relativeIndices[i - 1]);
+            relativeIndices[i] = controlPoints.GetNextControlPoint(relativeIndices[i - 1]);
         }
 
         return relativeIndices;

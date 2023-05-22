@@ -48,6 +48,10 @@ public class PolytoolEditor : Editor
     private void OnSceneGUI()
     {
         serializedObject.Update();
+        Input();
+    }
+    private void Input()
+    {
         bool isDrawing = serializedObject.FindProperty("m_IsDrawing").boolValue;
 
         if (isDrawingPrevious && !isDrawing)
@@ -77,7 +81,6 @@ public class PolytoolEditor : Editor
 
         if (currentEvent.type == EventType.MouseMove)
             SceneView.RepaintAll();
-
     }
 
     private void OnSelectionChanged()

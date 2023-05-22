@@ -26,11 +26,14 @@ public class RoofEditor : Editor
         SerializedProperty mansardScale = serializedObject.FindProperty("m_MansardScale");
         SerializedProperty pyramidHeight = serializedObject.FindProperty("m_PyramidHeight");
         SerializedProperty gableHeight = serializedObject.FindProperty("m_GableHeight");
+        SerializedProperty gableScale = serializedObject.FindProperty("m_GableScale");
+        SerializedProperty isFlipped = serializedObject.FindProperty("m_IsFlipped");
+        SerializedProperty isOpen = serializedObject.FindProperty("m_IsOpen");
 
         SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
         SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
         SerializedProperty tileMaterial = serializedObject.FindProperty("m_TileMaterial");
-        SerializedProperty rotate = serializedObject.FindProperty("m_Rotate");
+        
 
         int index = 0;
         int value = (int)frameType.GetEnumValue<RoofType>();
@@ -69,17 +72,17 @@ public class RoofEditor : Editor
         switch(frameType.enumValueIndex)
         {
             case (int)RoofType.OpenGable:
-                DisplayGable(gableHeight);
+                DisplayGable(gableHeight, gableScale, isOpen);
                 break;
             case (int)RoofType.Mansard:
                 DisplayMansard(mansardHeight, mansardScale);
                 break;
             case (int)RoofType.Dormer:
                 DisplayMansard(mansardHeight, mansardScale);
-                DisplayGable(gableHeight);
+                DisplayGable(gableHeight, gableScale, isOpen);
                 break;
             case (int)RoofType.MShaped:
-                DisplayMShaped(gableHeight, rotate);
+                DisplayMShaped(gableHeight, isFlipped);
                 break;
             case (int)RoofType.Pyramid:
                 DisplayPyramid(pyramidHeight);
@@ -117,12 +120,19 @@ public class RoofEditor : Editor
         EditorGUILayout.EndFoldoutHeaderGroup();
     }
 
-    private void DisplayGable(SerializedProperty height)
+    private void DisplayGable(SerializedProperty height, SerializedProperty scale, SerializedProperty isOpen)
     {
         m_ShowGable = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowGable, "Gable");
         if (m_ShowGable)
         {
             EditorGUILayout.Slider(height, 0, 10, "Height");
+
+            if(!isOpen.boolValue)
+            {
+                EditorGUILayout.Slider(scale, 0, 1, "Scale");
+            }
+
+            EditorGUILayout.PropertyField(isOpen);
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
     }

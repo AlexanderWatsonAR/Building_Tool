@@ -209,14 +209,13 @@ public class Polytool : MonoBehaviour
         
         for (int i = 0; i < LocalPositions.Count; i++)
         {
-            //if (i == 0)
-            //    Handles.color = UEColor.red;
-            //else
-                Handles.color = UEColor.white;
+            Handles.color = UEColor.white;
 
             float size = UnityEditor.HandleUtility.GetHandleSize(m_ControlPoints[i].Position) * 0.04f;
 
-            Handles.DotHandleCap(i, LocalPositions[i], Quaternion.identity, size, Event.current.type);
+            m_ControlPoints[i].SetPosition(Handles.FreeMoveHandle(LocalPositions[i], Quaternion.identity, size, Vector3.up, Handles.DotHandleCap));
+
+            //Handles.DotHandleCap(i, LocalPositions[i], Quaternion.identity, size, Event.current.type);
         }
 
         if (m_ControlPoints.Count <= 1)
