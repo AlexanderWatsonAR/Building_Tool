@@ -11,6 +11,57 @@ using UnityEngine.ProBuilder.Shapes;
 
 public static class Extensions
 {
+    public static float PolygonLength(this IEnumerable<Vector3> controlPoints)
+    {
+        float distance = 0;
+
+        Vector3[] points = controlPoints.ToArray();
+
+        for(int i = 0; i < points.Length; i++)
+        {
+            int next = points.GetNextControlPoint(i);
+            distance += Vector3.Distance(points[i], points[next]);
+        }
+        
+        return distance;
+    }
+
+    /// <summary>
+    /// 2D line intersection on the XZ plane
+    /// </summary>
+    /// <param name="line1Start"></param>
+    /// <param name="line1End"></param>
+    /// <param name="line2Start"></param>
+    /// <param name="line2End"></param>
+    /// <param name="intersection"></param>
+    /// <returns></returns>
+    public static bool DoLinesIntersect(Vector3 line1Start, Vector3 line1End, Vector3 line2Start, Vector3 line2End, out Vector3 intersection)
+    {
+        intersection = Vector3.zero;
+        float denominator = ((line1End.x - line1Start.x) * (line2End.z - line2Start.z)) - ((line1End.z - line1Start.z) * (line2End.x - line2Start.x));
+
+        if (denominator == 0f)
+        {
+            // The lines are parallel or coincident, so no intersection point exists
+            return false;
+        }
+
+        float ua = (((line2End.x - line2Start.x) * (line1Start.z - line2Start.z)) - ((line2End.z - line2Start.z) * (line1Start.x - line2Start.x))) / denominator;
+        float ub = (((line1End.x - line1Start.x) * (line1Start.z - line2Start.z)) - ((line1End.y - line1Start.z) * (line1Start.x - line2Start.x))) / denominator;
+
+        if (ua >= 0f && ua <= 1f && ub >= 0f && ub <= 1f)
+        {
+            // Intersection point lies within both line segments
+            float intersectionX = line1Start.x + (ua * (line1End.x - line1Start.x));
+            float intersectionZ = line1Start.z + (ua * (line1End.z - line1Start.z));
+            intersection = new Vector3(intersectionX, line1Start.y, intersectionZ);
+            return true;
+        }
+
+        // The intersection point is outside the range of at least one of the line segments
+        return false;
+    }
+
     public static void DeleteChildren(this Transform transform)
     {
         for (int i = 0; i < transform.childCount; i++)
