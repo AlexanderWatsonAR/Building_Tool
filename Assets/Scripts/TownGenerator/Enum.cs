@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum RoofType
 {
-    OpenGable, Mansard, Dormer, MShaped, Pyramid, PyramidHip
+    Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip
 }
 public enum Axis
 {
@@ -24,4 +24,9 @@ public enum TransformType
 public enum WallElement
 {
     Wall, Door, Window, Empty
+}
+
+public enum DoorHingePoint
+{
+    Left, Right
 }

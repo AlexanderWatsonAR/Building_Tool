@@ -20,6 +20,7 @@ public class WallSectionEditor : Editor
         SerializedProperty doorRows = serializedObject.FindProperty("m_DoorRows");
         SerializedProperty doorHeight = serializedObject.FindProperty("m_PedimentHeight");
         SerializedProperty doorWidth = serializedObject.FindProperty("m_SideWidth");
+        SerializedProperty doorMaterial = serializedObject.FindProperty("m_DoorMaterial");
         // End Door
 
         // Window
@@ -42,6 +43,7 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.LabelField("Size");
                 EditorGUILayout.PropertyField(doorHeight);
                 EditorGUILayout.PropertyField(doorWidth);
+                EditorGUILayout.ObjectField(doorMaterial, new GUIContent("Material"));
                 break;
             case WallElement.Window:
                 EditorGUILayout.LabelField("Number of Windows");

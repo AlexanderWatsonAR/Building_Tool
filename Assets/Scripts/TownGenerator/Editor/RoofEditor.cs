@@ -40,7 +40,7 @@ public class RoofEditor : Editor
 
         int[] frames = roof.AvailableRoofFrames();
         string[] allOptions = frameType.enumNames;
-        string[] allOptionsDisplay = frameType.enumDisplayNames; // "Open Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
+        string[] allOptionsDisplay = frameType.enumDisplayNames; // "Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
         string[] options = new string[frames.Length];
         string[] optionsDisplay = new string[frames.Length];
 
@@ -71,7 +71,7 @@ public class RoofEditor : Editor
 
         switch(frameType.enumValueIndex)
         {
-            case (int)RoofType.OpenGable:
+            case (int)RoofType.Gable:
                 DisplayGable(gableHeight, gableScale, isOpen);
                 break;
             case (int)RoofType.Mansard:

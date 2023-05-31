@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using System.Linq;
+using UnityEngine.ProBuilder.Shapes;
 
 public class WallSection : MonoBehaviour
 {
@@ -32,7 +33,9 @@ public class WallSection : MonoBehaviour
     [SerializeField, Range(0, 1)] private float m_PedimentHeight;
     [SerializeField, Range(0, 1)] private float m_SideWidth;
     [SerializeField, Range(1, 10)] private int m_DoorColumns, m_DoorRows;
+    [SerializeField] private Material m_DoorMaterial;
 
+    public Material DoorMaterial => m_DoorMaterial;
     public float PedimentHeight => m_PedimentHeight;
     public float SideWidth => m_SideWidth;
 
@@ -59,6 +62,7 @@ public class WallSection : MonoBehaviour
         m_SideWidth = 0.5f;
         m_DoorColumns = 1;
         m_DoorRows = 1;
+        m_DoorMaterial = BuiltinMaterials.defaultMaterial;
         // End Door
 
 
@@ -67,6 +71,7 @@ public class WallSection : MonoBehaviour
 
     public WallSection Build()
     {
+        transform.DeleteChildren();
         switch(m_WallElement)
         {
             case WallElement.Wall:
@@ -74,12 +79,23 @@ public class WallSection : MonoBehaviour
                 break;
             case WallElement.Door:
                 Vector3 doorScale = new Vector3(m_SideWidth, m_PedimentHeight, m_SideWidth);
-                ProBuilderMesh doorGridA = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows);
+                List<Vector3[]> doorGridControlPoints;
+                ProBuilderMesh doorGridA = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, out doorGridControlPoints);
                 doorGridA.Extrude(new Face[] { doorGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
-                ProBuilderMesh doorGridB = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, true);
+                ProBuilderMesh doorGridB = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, out _, true);
                 CombineMeshes.Combine(new ProBuilderMesh[] { doorGridA, doorGridB }, doorGridA);
                 Rebuild(doorGridA);
                 DestroyImmediate(doorGridB.gameObject);
+
+                foreach(Vector3[] controlPoints in doorGridControlPoints)
+                {
+                    ProBuilderMesh doorPro = ProBuilderMesh.Create();
+                    doorPro.name = "Door";
+                    doorPro.transform.SetParent(transform, true);
+                    Door door = doorPro.AddComponent<Door>();
+                    door.Initialize(controlPoints, m_WallDepth).SetMaterial(DoorMaterial).Build();
+                }
+
                 break;
             case WallElement.Window:
                 Vector3 windowScale = new Vector3(m_WindowWidth, m_WindowHeight, m_WindowWidth);

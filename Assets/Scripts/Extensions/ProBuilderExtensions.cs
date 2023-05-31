@@ -143,39 +143,8 @@ public static class ProBuilderExtensions
     {
         ScaleVertices(proBuilderMesh, indices, transformPoint, Vector3.one * scale);
     }
-
     public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Vector3 scale)
     {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach (int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        int[] indicesArray = indices.ToArray();
-        for (int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 point = selectedVerts[i] - transformPoint;
-            Vector3 v = Vector3.Scale(point, scale) + transformPoint;
-            //positions[indicesArray[i]] = point + v;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-
-        //proBuilderMesh.RebuildWithPositionsAndFaces(positions, proBuilderMesh.faces);
-        //proBuilderMesh.ToMesh();
-        //proBuilderMesh.Refresh();
-
-
-        //proBuilderMesh.transform.TransformVertex(Vertex vertex)
-    }
-
-    public static void ScaleVerticesAlt(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Vector3 scale)
-    {
-        // TODO: check if more cost effective than other scale funcs.
-
         Vertex[] points = proBuilderMesh.GetVertices();
         List<Vector3> selectedVerts = new List<Vector3>();
 
@@ -183,7 +152,7 @@ public static class ProBuilderExtensions
         {
             selectedVerts.Add(points[i].position);
         }
-
+        
         int[] indicesArray = indices.ToArray();
         for (int i = 0; i < selectedVerts.Count; i++)
         {

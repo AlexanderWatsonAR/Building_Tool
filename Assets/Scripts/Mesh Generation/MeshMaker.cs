@@ -459,9 +459,11 @@ public static class MeshMaker
     }
 
 
-    public static ProBuilderMesh DoorGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, bool flipFace = false)
+    public static ProBuilderMesh DoorGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, out List<Vector3[]> doorGridControlPoints, bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();
+
+        doorGridControlPoints = new List<Vector3[]>();
 
         if (cps.Length != 4)
             return null;
@@ -631,6 +633,8 @@ public static class MeshMaker
         ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create(allVerts, new Face[] { new Face(triangles) });
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
+
+        doorGridControlPoints = holePointsGrid;
 
         return proBuilderMesh;
     }

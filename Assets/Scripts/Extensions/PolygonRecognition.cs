@@ -507,17 +507,17 @@ public static class PolygonRecognition
         return true;
     }
 
-    public static bool IsHShaped(this IEnumerable<ControlPoint> controlPoints, out int[] hIndices)
+    public static bool IsHShaped(this IEnumerable<ControlPoint> controlPoints, out int[] hPointIndices)
     {
-        return IsPolygonHShaped(controlPoints.GetPositions(), out hIndices);
+        return IsPolygonHShaped(controlPoints.GetPositions(), out hPointIndices);
     }
 
-    public static bool IsPolygonHShaped(this IEnumerable<Vector3> controlPoints, out int[] hIndices)
+    public static bool IsPolygonHShaped(this IEnumerable<Vector3> controlPoints, out int[] hPointIndices)
     {
-        hIndices = new int[] { -1, -1, -1, -1 };
+        hPointIndices = new int[] { -1, -1, -1, -1 };
         int[] indices = controlPoints.GetConcaveIndexPoints();
 
-        if (controlPoints.Count() != 12 | indices.Length != hIndices.Length)
+        if (controlPoints.Count() != 12 | indices.Length != hPointIndices.Length)
             return false;
 
         for (int i = 0; i < indices.Length; i++)
@@ -534,30 +534,66 @@ public static class PolygonRecognition
 
             if (conA && conB && conC && conD)
             {
-                hIndices[0] = indices[i];
-                hIndices[1] = oneNext;
-                hIndices[2] = sixNext;
-                hIndices[3] = sevenNext;
+                hPointIndices[0] = indices[i];
+                hPointIndices[1] = oneNext;
+                hPointIndices[2] = sixNext;
+                hPointIndices[3] = sevenNext;
                 break;
             }
         }
 
-        if (hIndices.Any(x => x == -1))
+        if (hPointIndices.Any(x => x == -1))
             return false;
 
         return true;
     }
 
-    public static bool IsZigZagShaped(this IEnumerable<ControlPoint> controlPoints, out int[] zigZagIndices)
+    public static bool IsYShaped(this IEnumerable<ControlPoint> controlPoints, out int[] yPointIndices)
     {
-        return IsPolygonZigZagShaped(controlPoints.GetPositions(), out zigZagIndices);
+        return IsPolygonYShaped(controlPoints.GetPositions(), out yPointIndices);
     }
 
-    public static bool IsPolygonZigZagShaped(this IEnumerable<Vector3> controlPoints, out int[] zigZagIndices)
+    public static bool IsPolygonYShaped(this IEnumerable<Vector3> controlPoints, out int[] yPointIndices)
+    {
+        yPointIndices = new int[] { -1, -1, -1 };
+        int[] indices = controlPoints.GetConcaveIndexPoints();
+
+        if (controlPoints.Count() != 9 | indices.Length != 3)
+            return false;
+
+        for( int i = 0; i < indices.Length; i++)
+        {
+            int threePrevious = controlPoints.GetControlPointIndex(indices[i] - 3);
+            int threeNext = controlPoints.GetControlPointIndex(indices[i] + 3);
+
+            bool conA = indices.Any(x => x == threePrevious);
+            bool conB = indices.Any(x => x == threeNext);
+
+            if(conA && conB)
+            {
+                yPointIndices[0] = indices[i];
+                yPointIndices[1] = threeNext;
+                yPointIndices[2] = threePrevious;
+                break;
+            }
+        }
+
+        if (yPointIndices.Any(x => x == -1))
+            return false;
+
+        return true;
+    }
+
+    public static bool IsZigZagShaped(this IEnumerable<ControlPoint> controlPoints, out int[] zigZagPointIndices)
+    {
+        return IsPolygonZigZagShaped(controlPoints.GetPositions(), out zigZagPointIndices);
+    }
+
+    public static bool IsPolygonZigZagShaped(this IEnumerable<Vector3> controlPoints, out int[] zigZagPointIndices)
     {
         int[] concavePoints = controlPoints.GetConcaveIndexPoints();
-        zigZagIndices = new int[concavePoints.Length];
-        zigZagIndices[0] = -1;
+        zigZagPointIndices = new int[concavePoints.Length];
+        zigZagPointIndices[0] = -1;
 
         if (controlPoints.Count() < 14 | controlPoints.Count() % 2 != 0 |
             concavePoints.Count() < 5  | concavePoints.Count() % 2 == 0)
@@ -606,36 +642,36 @@ public static class PolygonRecognition
 
         if (data[0].Item2 > data[1].Item2)
         {
-            zigZagIndices[0] = data[0].Item1;
+            zigZagPointIndices[0] = data[0].Item1;
             count = data[0].Item3;
         }
         else
         {
-            zigZagIndices[0] = data[1].Item1;
+            zigZagPointIndices[0] = data[1].Item1;
             count = data[1].Item3;
         }
 
-        if (zigZagIndices[0] == -1)
+        if (zigZagPointIndices[0] == -1)
             return false;
 
         for(int i = 0; i < concavePoints.Length; i++)
         {
-            zigZagIndices[i] = concavePoints[count];
+            zigZagPointIndices[i] = concavePoints[count];
             count++;
 
             if (count > concavePoints.Length - 1)
                 count = 0;
         }
 
-        if(zigZagIndices.Distinct().Count() != concavePoints.Count())
+        if(zigZagPointIndices.Distinct().Count() != concavePoints.Count())
             return false;
 
         return true;
     }
 
-    public static bool IsCrenelShaped(this IEnumerable<ControlPoint> controlPoints, out int[] crenelIndices)
+    public static bool IsCrenelShaped(this IEnumerable<ControlPoint> controlPoints, out int[] crenelPointIndices)
     {
-        return IsPolygonCrenelShaped(controlPoints.GetPositions(), out crenelIndices);
+        return IsPolygonCrenelShaped(controlPoints.GetPositions(), out crenelPointIndices);
     }
 
     public static bool IsPolygonCrenelShaped(this IEnumerable<Vector3> controlPoints, out int[] crenelIndices)
@@ -889,9 +925,6 @@ public static class PolygonRecognition
     {
         List<Vector3> points = controlPoints.ToList();
         oneLine = new Vector3[0];
-
-        if (points.Count % 2 != 0)
-            return false;
         
         switch (points.Count)
         {
@@ -953,6 +986,21 @@ public static class PolygonRecognition
                 oneLine[2] = third;
                 oneLine[3] = last;
                 return true;
+            case 9:
+                if(points.IsPolygonYShaped(out int[] yPointIndices))
+                {
+                    oneLine = new Vector3[4];
+
+                    int[] relativeIndices = points.RelativeIndices(yPointIndices[0]);
+
+                    oneLine[0] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[2]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[relativeIndices[4]], points[relativeIndices[5]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[relativeIndices[7]], points[relativeIndices[8]], 0.5f);
+                    oneLine[3] = ProMaths.Average(new Vector3[] { points[yPointIndices[0]], points[yPointIndices[1]], points[yPointIndices[2]] });
+                    return true;
+                }
+
+                return false;
             case 10:
                 if (points.IsPolygonNShaped(out int[] nPointIndices))
                 {
@@ -1003,7 +1051,7 @@ public static class PolygonRecognition
                 }
                 return false;
             case 12:
-                if (points.IsPolygonEShaped(out int[] ePointIndices))//
+                if (points.IsPolygonEShaped(out int[] ePointIndices))
                 {
                     oneLine = new Vector3[6];
 
@@ -1073,8 +1121,6 @@ public static class PolygonRecognition
                     oneLine[3] = Vector3.Lerp(points[relIndices[5]], points[relIndices[4]], 0.5f);
                     oneLine[5] = Vector3.Lerp(points[relIndices[2]], points[relIndices[3]], 0.5f);
 
-                    // Idea: Line could extend in both directions so that intersection is guaranteed.
-
                     Vector3 mid = Vector3.Lerp(points[relIndices[0]], points[relIndices[7]], 0.5f);
                     Vector3 dir = points[relIndices[0]].DirectionToTarget(points[relIndices[7]]);
                     Vector3 targetDirection = Vector3.Cross(dir, Vector3.up);
@@ -1088,13 +1134,6 @@ public static class PolygonRecognition
                     {
                         oneLine[1] = intersection;
                     }
-                    else
-                    {
-                        //line2End = line2Start + ((-targetDirection) * polygonLength);
-                        //Extensions.DoLinesIntersect(oneLine[0], oneLine[2], line2Start, line2End, out intersection);
-                        //oneLine[1] = intersection;
-                    }
-                    
 
                     mid = Vector3.Lerp(points[relIndices[1]], points[relIndices[6]], 0.5f);
                     dir = points[relIndices[1]].DirectionToTarget(points[relIndices[6]]);
@@ -1105,12 +1144,6 @@ public static class PolygonRecognition
                     if (Extensions.DoLinesIntersect(oneLine[3], oneLine[5], line2Start, line2End, out intersection))
                     {
                         oneLine[4] = intersection;
-                    }
-                    else
-                    {
-                        //line2End = line2Start + ((-targetDirection) * polygonLength);
-                        //Extensions.DoLinesIntersect(oneLine[3], oneLine[5], line2Start, line2End, out intersection);
-                        //oneLine[4] = intersection;
                     }
 
                     return true;
