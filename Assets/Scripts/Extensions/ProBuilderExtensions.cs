@@ -14,24 +14,25 @@ public static class ProBuilderExtensions
     /// Assumes Pivot location is at the centre.
     /// </summary>
     /// <param name="proBuilderMesh"></param>
-    public static void LocaliseVertices(this ProBuilderMesh proBuilderMesh)
+    public static void LocaliseVertices(this ProBuilderMesh proBuilderMesh, Vector3? transformPoint = null)
     {
         Transform t = proBuilderMesh.transform;
         Vertex[] vertices = proBuilderMesh.GetVertices();
 
-        Vector3 centre = ProMaths.Average(proBuilderMesh.positions);
+        if(transformPoint == null)
+            transformPoint = ProMaths.Average(proBuilderMesh.positions);
 
         for (int i = 0; i < vertices.Length; i++)
         {
             // Scale
-            Vector3 point = vertices[i].position - centre;
-            Vector3 v = Vector3.Scale(point, t.localScale) + centre;
+            Vector3 point = vertices[i].position - transformPoint.Value;
+            Vector3 v = Vector3.Scale(point, t.localScale) + transformPoint.Value;
             Vector3 offset = v - vertices[i].position;
             vertices[i].position += offset;
 
             // Rotation
             Vector3 localEulerAngles = t.localEulerAngles;
-            Vector3 v1 = Quaternion.Euler(localEulerAngles) * (vertices[i].position - centre) + centre;
+            Vector3 v1 = Quaternion.Euler(localEulerAngles) * (vertices[i].position - transformPoint.Value) + transformPoint.Value;
             offset = v1 - vertices[i].position;
             vertices[i].position += offset;
 
@@ -45,6 +46,7 @@ public static class ProBuilderExtensions
 
         proBuilderMesh.transform.localPosition = Vector3.zero;
         proBuilderMesh.transform.localEulerAngles = Vector3.zero;
+        proBuilderMesh.transform.localScale = Vector3.one;
     }
 
     public static Vector3[] GetDistinctVerts(this ProBuilderMesh proBuilderMesh, Face face)

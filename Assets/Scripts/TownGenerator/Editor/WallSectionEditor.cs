@@ -8,6 +8,8 @@ using UnityEditor.Rendering;
 [CustomEditor(typeof(WallSection))]
 public class WallSectionEditor : Editor
 {
+    private bool m_IsDoorActiveFoldout = true;
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -20,6 +22,8 @@ public class WallSectionEditor : Editor
         SerializedProperty doorRows = serializedObject.FindProperty("m_DoorRows");
         SerializedProperty doorHeight = serializedObject.FindProperty("m_PedimentHeight");
         SerializedProperty doorWidth = serializedObject.FindProperty("m_SideWidth");
+        SerializedProperty doorActive = serializedObject.FindProperty("m_IsDoorActive");
+        SerializedProperty doorScale = serializedObject.FindProperty("m_DoorScale");
         SerializedProperty doorMaterial = serializedObject.FindProperty("m_DoorMaterial");
         // End Door
 
@@ -43,7 +47,28 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.LabelField("Size");
                 EditorGUILayout.PropertyField(doorHeight);
                 EditorGUILayout.PropertyField(doorWidth);
-                EditorGUILayout.ObjectField(doorMaterial, new GUIContent("Material"));
+
+                doorActive.boolValue = EditorGUILayout.Toggle("Is Active", doorActive.boolValue);
+
+                if (doorActive.boolValue)
+                {
+                    m_IsDoorActiveFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsDoorActiveFoldout, "Door");
+
+                    if (m_IsDoorActiveFoldout)
+                    {
+                        doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
+                        //EditorGUILayout.BeginHorizontal();
+                        //float x = EditorGUILayout.Slider("x", doorScale.vector3Value.x, 0, 1);
+                        //float y = EditorGUILayout.Slider("y", doorScale.vector3Value.y, 0, 1);
+                        //float z = EditorGUILayout.Slider("z", doorScale.vector3Value.z, 0, 1);
+                        //doorScale.vector3Value = new Vector3(x, y, z);
+                        //EditorGUILayout.EndHorizontal();
+
+                        EditorGUILayout.ObjectField(doorMaterial, new GUIContent("Material"));
+                    }
+
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                }
                 break;
             case WallElement.Window:
                 EditorGUILayout.LabelField("Number of Windows");
@@ -55,43 +80,10 @@ public class WallSectionEditor : Editor
                 break;
         }
 
-        WallElement wallElement = section.WallElement;
-        // Window
-        int wColumns = section.WindowColumns;
-        int wRows = section.WindowRows;
-        float wHeight = section.WindowHeight;
-        float wWidth = section.WindowWidth;
-        // End Window
-
-        // Door
-        int dColumns = section.DoorColumns;
-        int dRows = section.DoorRows;
-        float dHeight = section.PedimentHeight;
-        float dWidth = section.SideWidth;
-
 
         if (serializedObject.ApplyModifiedProperties())
         {
-            if((WallElement)element.enumValueIndex != wallElement)
-            {
-                section.Build();
-            }
-
-            if(winColumns.intValue != wColumns ||
-               winRows.intValue != wRows ||
-               winHeight.floatValue != wHeight ||
-               winWidth.floatValue != wWidth)
-            {
-                section.Build();
-            }
-
-            if (doorColumns.intValue != dColumns ||
-               doorRows.intValue != dRows ||
-               doorHeight.floatValue != dHeight ||
-               doorWidth.floatValue != dWidth)
-            {
-                section.Build();
-            }
+            section.Build();
         }
 
 

@@ -593,11 +593,12 @@ public static class PolygonRecognition
     {
         int[] concavePoints = controlPoints.GetConcaveIndexPoints();
         zigZagPointIndices = new int[concavePoints.Length];
-        zigZagPointIndices[0] = -1;
 
         if (controlPoints.Count() < 14 | controlPoints.Count() % 2 != 0 |
             concavePoints.Count() < 5  | concavePoints.Count() % 2 == 0)
             return false;
+
+        zigZagPointIndices[0] = -1;
 
         int count = 0;
 
@@ -678,14 +679,14 @@ public static class PolygonRecognition
     {
         int[] concavePoints = controlPoints.GetConcaveIndexPoints();
         crenelIndices = new int[concavePoints.Length];
-        crenelIndices[0] = -1;
 
         if(controlPoints.Count() < 16 | controlPoints.Count() % 2 != 0 |
             concavePoints.Length < 6 | concavePoints.Count() % 2 != 0 )
         {
             return false;
         }
-        
+
+        crenelIndices[0] = -1;
         int count = 0;
 
         for(int i = 0; i < concavePoints.Length; i++)
@@ -729,6 +730,43 @@ public static class PolygonRecognition
                 count = 0;
         }
         
+
+        return true;
+    }
+
+    public static bool IsAsteriskShaped(this IEnumerable<ControlPoint> controlPoints, out int[] asteriskPointIndices)
+    {
+        return IsPolygonAsteriskShaped(controlPoints.GetPositions(), out asteriskPointIndices);
+    }
+
+    public static bool IsPolygonAsteriskShaped(this IEnumerable<Vector3> controlPoints, out int[] asteriskPointIndices)
+    {
+        int[] concavePoints = controlPoints.GetConcaveIndexPoints();
+        asteriskPointIndices = new int[concavePoints.Length];
+
+        if (controlPoints.Count() < 15 | controlPoints.Count() % 2 == 0 |
+            concavePoints.Length < 5 | concavePoints.Count() % 2 == 0)
+        {
+            return false;
+        }
+
+        asteriskPointIndices[0] = -1;
+
+        int oneNext = controlPoints.GetControlPointIndex(concavePoints[0] + 1);
+        int twoNext = controlPoints.GetControlPointIndex(concavePoints[0] + 2);
+        int threeNext = controlPoints.GetControlPointIndex(concavePoints[0] + 3);
+
+        bool conditionA = concavePoints.Any(x => x == oneNext);
+        bool conditionB = concavePoints.Any(x => x == twoNext);
+        bool conditionC = concavePoints.Any(x => x == threeNext);
+
+        if(!conditionA && !conditionB && conditionC)
+        {
+            asteriskPointIndices = concavePoints;
+        }
+
+        if (asteriskPointIndices[0] == -1)
+            return false;
 
         return true;
     }
@@ -1152,19 +1190,19 @@ public static class PolygonRecognition
                 return false;
         }
 
-        if(points.IsPolygonZigZagShaped(out int[] zigZagIndices))
+        if(points.IsPolygonZigZagShaped(out int[] zigZagPointIndices))
         {
             int length = points.Count() / 2;
             oneLine = new Vector3[length];
 
 
-            int[] relative = points.RelativeIndices(zigZagIndices[0]);
+            int[] relative = points.RelativeIndices(zigZagPointIndices[0]);
             int previous = relative.Length - 3;
 
             oneLine[0] = Vector3.Lerp(points[relative[^1]], points[relative[^2]], 0.5f);
 
             int itr = 1;
-            for (int i = 0; i < zigZagIndices.Length + 1; i++)
+            for (int i = 0; i < zigZagPointIndices.Length + 1; i++)
             {
                 oneLine[itr] = Vector3.Lerp(points[relative[i]], points[relative[previous]], 0.5f);
 
@@ -1174,13 +1212,13 @@ public static class PolygonRecognition
 
             return true;
         }
-        else if(points.IsPolygonCrenelShaped(out int[] crenelIndices))
+        else if(points.IsPolygonCrenelShaped(out int[] crenelPointIndices))
         {
             int length = points.Count() / 2;//
             oneLine = new Vector3[length];
 
-            int[] startIndices = points.RelativeIndices(crenelIndices[0]);
-            int[] endIndices = points.RelativeIndices(crenelIndices[^1]);
+            int[] startIndices = points.RelativeIndices(crenelPointIndices[0]);
+            int[] endIndices = points.RelativeIndices(crenelPointIndices[^1]);
 
             // Start Points
             oneLine[0] = Vector3.Lerp(points[startIndices[^1]], points[startIndices[^2]], 0.5f);
@@ -1190,7 +1228,7 @@ public static class PolygonRecognition
             oneLine[^2] = Vector3.Lerp(points[endIndices[0]], points[endIndices[3]], 0.5f);
             oneLine[^1] = Vector3.Lerp(points[endIndices[1]], points[endIndices[2]], 0.5f);
 
-            int count = crenelIndices.Length;
+            int count = crenelPointIndices.Length;
 
             int start = 1;
             int end = 4;
@@ -1213,6 +1251,27 @@ public static class PolygonRecognition
                 start += 4;
                 end += 4;
             }
+
+            return true;
+        }
+        else if(points.IsPolygonAsteriskShaped(out int[] asteriskPointIndices))
+        {
+            oneLine = new Vector3[asteriskPointIndices.Length + 1];
+
+            Vector3[] asteriskPoints = new Vector3[asteriskPointIndices.Length];
+
+            for (int i = 0; i < asteriskPointIndices.Length; i++)
+            {
+                int current = asteriskPointIndices[i];
+                int nextOne = points.GetControlPointIndex(current + 1);
+                int nextTwo = points.GetControlPointIndex(current + 2);
+
+                asteriskPoints[i] = points[current];
+                oneLine[i] = Vector3.Lerp(points[nextOne], points[nextTwo], 0.5f);
+
+            }
+
+            oneLine[^1] = ProMaths.Average(asteriskPoints);
 
             return true;
         }

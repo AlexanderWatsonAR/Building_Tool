@@ -33,6 +33,9 @@ public class WallSection : MonoBehaviour
     [SerializeField, Range(0, 1)] private float m_PedimentHeight;
     [SerializeField, Range(0, 1)] private float m_SideWidth;
     [SerializeField, Range(1, 10)] private int m_DoorColumns, m_DoorRows;
+    [SerializeField] private bool m_IsDoorActive;
+    [SerializeField] private Vector3 m_DoorScale;
+    [SerializeField] private Vector3 m_DoorHingeOffset;
     [SerializeField] private Material m_DoorMaterial;
 
     public Material DoorMaterial => m_DoorMaterial;
@@ -63,6 +66,9 @@ public class WallSection : MonoBehaviour
         m_DoorColumns = 1;
         m_DoorRows = 1;
         m_DoorMaterial = BuiltinMaterials.defaultMaterial;
+        m_IsDoorActive = true;
+        m_DoorScale = Vector3.one * 0.9f;
+        m_DoorHingeOffset = Vector3.zero;
         // End Door
 
 
@@ -87,13 +93,16 @@ public class WallSection : MonoBehaviour
                 Rebuild(doorGridA);
                 DestroyImmediate(doorGridB.gameObject);
 
+                if (!m_IsDoorActive)
+                    return this;
+
                 foreach(Vector3[] controlPoints in doorGridControlPoints)
                 {
                     ProBuilderMesh doorPro = ProBuilderMesh.Create();
                     doorPro.name = "Door";
                     doorPro.transform.SetParent(transform, true);
                     Door door = doorPro.AddComponent<Door>();
-                    door.Initialize(controlPoints, m_WallDepth).SetMaterial(DoorMaterial).Build();
+                    door.Initialize(controlPoints, m_WallDepth, m_DoorScale).SetMaterial(DoorMaterial).Build();
                 }
 
                 break;

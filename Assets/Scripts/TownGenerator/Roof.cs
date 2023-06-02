@@ -940,6 +940,45 @@ public class Roof : MonoBehaviour
                 }
                 
             }
+            else if(m_ControlPoints.IsAsteriskShaped(out int[] asteriskPointIndices))
+            {
+                if(!m_IsOpen)
+                {
+                    for(int i = 0; i < oneLine.Length-1; i++)
+                    {
+                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[^1], 0.5f);
+                        oneLine[i] = Vector3.Lerp(oneLine[i], a, m_GableScale);
+                    }
+                }
+
+                int count = oneLine.Length-2;
+                for(int i = 0; i < asteriskPointIndices.Length; i++)
+                {
+                    int current = asteriskPointIndices[i];
+                    int previous = m_ControlPoints.GetIndex(current - 1);
+                    int next = m_ControlPoints.GetIndex(current + 1);
+
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[^1], oneLine[i], m_ControlPoints[next].Position }, false, true, false, true);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[count], oneLine[^1], m_ControlPoints[current].Position }, false, true, true, false);
+                    count++;
+
+                    if(count > oneLine.Length-2)
+                    {
+                        count = 0;
+                    }
+
+                    int nextTwo = m_ControlPoints.GetIndex(current + 2);
+
+                    if (m_IsOpen)
+                    { 
+                        CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[i], oneLine[i], m_ControlPoints[next].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[i], oneLine[i], m_ControlPoints[nextTwo].Position }, false, true, false, true);
+                    }
+                }
+            }
         }
 
         if(!m_IsOpen)
