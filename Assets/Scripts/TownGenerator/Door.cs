@@ -56,11 +56,9 @@ public class Door : MonoBehaviour
         Rebuild(MeshMaker.Cube(m_ControlPoints, m_Depth));
 
         // Scale
-        m_ProBuilderMesh.SetPivot(m_Centre);
         m_ProBuilderMesh.transform.localScale = m_Scale;
         m_ProBuilderMesh.LocaliseVertices();
         // Rotate
-        m_ProBuilderMesh.SetPivot(m_HingePosition + m_HingeOffset);
         m_ProBuilderMesh.transform.localEulerAngles = Vector3.up * m_Angle;
         m_ProBuilderMesh.LocaliseVertices(m_HingePosition + m_HingeOffset);
         return this;
