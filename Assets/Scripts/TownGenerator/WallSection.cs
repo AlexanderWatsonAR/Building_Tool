@@ -21,6 +21,9 @@ public class WallSection : MonoBehaviour
     [SerializeField, Range(0, 1)] private float m_WindowHeight;
     [SerializeField, Range(0, 1)] private float m_WindowWidth;
     [SerializeField, Range(1, 10)] private int m_WindowColumns, m_WindowRows;
+    [SerializeField] private bool m_IsWindowActive;
+    [SerializeField, Range(1, 10)] private int m_WindowFrameColumns, m_WindowFrameRows;
+    [SerializeField] private Vector3 m_WindowFrameScale;
 
     public float WindowHeight => m_WindowHeight;
     public float WindowWidth => m_WindowWidth;
@@ -32,10 +35,13 @@ public class WallSection : MonoBehaviour
     // --------- Door Properties ---------------
     [SerializeField, Range(0, 1)] private float m_PedimentHeight;
     [SerializeField, Range(0, 1)] private float m_SideWidth;
-    [SerializeField, Range(1, 10)] private int m_DoorColumns, m_DoorRows;
+    [SerializeField, Range(-1, 1)] private float m_SideOffset;
+    [SerializeField, Range(1, 10)] private int m_DoorColumns, m_DoorRows; 
     [SerializeField] private bool m_IsDoorActive;
     [SerializeField] private Vector3 m_DoorScale;
+    [SerializeField] private TransformPoint m_DoorHingePoint;
     [SerializeField] private Vector3 m_DoorHingeOffset;
+    [SerializeField] private Vector3 m_DoorHingeEulerAngles;
     [SerializeField] private Material m_DoorMaterial;
 
     public Material DoorMaterial => m_DoorMaterial;
@@ -58,6 +64,10 @@ public class WallSection : MonoBehaviour
         m_WindowWidth = 0.5f;
         m_WindowColumns = 1;
         m_WindowRows = 1;
+        m_IsWindowActive = true;
+        m_WindowFrameRows = 2;
+        m_WindowFrameColumns = 2;
+        m_WindowFrameScale = Vector3.one * 0.95f;
         // End Window
 
         // Door
@@ -68,7 +78,8 @@ public class WallSection : MonoBehaviour
         m_DoorMaterial = BuiltinMaterials.defaultMaterial;
         m_IsDoorActive = true;
         m_DoorScale = Vector3.one * 0.9f;
-        m_DoorHingeOffset = Vector3.zero;
+        m_DoorHingePoint = TransformPoint.Left;
+        m_DoorHingeEulerAngles = Vector3.zero;
         // End Door
 
 
@@ -86,9 +97,9 @@ public class WallSection : MonoBehaviour
             case WallElement.Door:
                 Vector3 doorScale = new Vector3(m_SideWidth, m_PedimentHeight, m_SideWidth);
                 List<Vector3[]> doorGridControlPoints;
-                ProBuilderMesh doorGridA = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, out doorGridControlPoints);
+                ProBuilderMesh doorGridA = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, m_SideOffset, out doorGridControlPoints);
                 doorGridA.Extrude(new Face[] { doorGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
-                ProBuilderMesh doorGridB = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, out _, true);
+                ProBuilderMesh doorGridB = MeshMaker.DoorGrid(m_ControlPoints, doorScale, m_DoorColumns, m_DoorRows, m_SideOffset, out _, true);
                 CombineMeshes.Combine(new ProBuilderMesh[] { doorGridA, doorGridB }, doorGridA);
                 Rebuild(doorGridA);
                 DestroyImmediate(doorGridB.gameObject);
@@ -102,18 +113,45 @@ public class WallSection : MonoBehaviour
                     doorPro.name = "Door";
                     doorPro.transform.SetParent(transform, true);
                     Door door = doorPro.AddComponent<Door>();
-                    door.Initialize(controlPoints, m_WallDepth, m_DoorScale).SetMaterial(DoorMaterial).Build();
+                    door.Initialize(controlPoints, m_WallDepth, m_DoorScale);
+                    door.HingePoint = m_DoorHingePoint;
+                    door.SetHingeOffset(m_DoorHingeOffset).SetHingeEulerAngles(m_DoorHingeEulerAngles).SetMaterial(DoorMaterial).Build();
                 }
 
                 break;
             case WallElement.Window:
                 Vector3 windowScale = new Vector3(m_WindowWidth, m_WindowHeight, m_WindowWidth);
-                ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, windowScale, m_WindowColumns, m_WindowRows);
+                List<Vector3[]> holeGridControlPoints;
+                ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, windowScale, m_WindowColumns, m_WindowRows, out holeGridControlPoints);
                 holeGridA.Extrude(new Face[] { holeGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
-                ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, windowScale, m_WindowColumns, m_WindowRows, true);
+                ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, windowScale, m_WindowColumns, m_WindowRows, out _, true);
                 CombineMeshes.Combine(new ProBuilderMesh[] { holeGridA, holeGridB }, holeGridA);
                 Rebuild(holeGridA);
                 DestroyImmediate(holeGridB.gameObject);
+
+                if (!m_IsWindowActive)
+                    return this;
+
+                float windowDepth = m_WallDepth * 0.5f;
+
+                foreach (Vector3[] hole in holeGridControlPoints)
+                {
+                    GameObject win = new GameObject("Window", typeof(Window));
+                    win.transform.SetParent(transform, true);
+                    Vector3 dir = hole[0].DirectionToTarget(hole[3]);
+                    Vector3 forward = Vector3.Cross(Vector3.up, dir);
+
+                    for(int i = 0; i < hole.Length; i++)
+                    {
+                        hole[i] += forward * windowDepth;
+                    }
+
+                    Window window = win.GetComponent<Window>();
+                    window.Initialize(hole, windowDepth);
+                    window.SetFrameGrid(m_WindowFrameColumns, m_WindowFrameRows);
+                    window.SetFrameScale(m_WindowFrameScale).Build();
+                }
+
                 break;
             case WallElement.Empty:
                 m_ProBuilderMesh.Clear();

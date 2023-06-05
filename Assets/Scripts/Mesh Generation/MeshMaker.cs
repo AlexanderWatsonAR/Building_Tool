@@ -287,9 +287,10 @@ public static class MeshMaker
         return cubes;
     }
 
-    public static ProBuilderMesh HoleGrid(IEnumerable<Vector3> controlPoints, Vector3 offset, float angle, Vector3 scale, int columns, int rows, bool flipFace = false)
+    public static ProBuilderMesh HoleGrid(IEnumerable<Vector3> controlPoints, Vector3 offset, float angle, Vector3 scale, int columns, int rows, out List<Vector3[]> holeGridControlPoints,  bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();
+        holeGridControlPoints = new ();
 
         if (cps.Length != 4)
             return null;
@@ -451,6 +452,8 @@ public static class MeshMaker
             triangles = triangles.Reverse<int>().ToList();
         }
 
+        holeGridControlPoints = holePointsGrid;
+
         ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create(allVerts, new Face[] { new Face(triangles) });
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
@@ -459,11 +462,11 @@ public static class MeshMaker
     }
 
 
-    public static ProBuilderMesh DoorGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, out List<Vector3[]> doorGridControlPoints, bool flipFace = false)
+    public static ProBuilderMesh DoorGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, float sideOffset, out List<Vector3[]> doorGridControlPoints, bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();
 
-        doorGridControlPoints = new List<Vector3[]>();
+        doorGridControlPoints = new ();
 
         if (cps.Length != 4)
             return null;
@@ -532,6 +535,26 @@ public static class MeshMaker
                     Vector3 v = Vector3.Scale(point, scale) + bottomCentre;
                     topPoints[k] = v;
                 }
+
+                float width = Vector3.Distance(bottomPoints[0], bottomPoints[1]);
+                float height = Vector3.Distance(bottomPoints[0], topPoints[0]);
+                Vector3 dir = bottomPoints[0].DirectionToTarget(bottomPoints[1]);
+
+                if(sideOffset > 0)
+                {
+                    bottomPoints[0] = Vector3.Lerp(bottomPoints[0], bl, sideOffset);
+                    bottomPoints[1] = bottomPoints[0] + (dir * width);
+                }
+                else
+                {
+                    sideOffset = -sideOffset;
+                    bottomPoints[1] = Vector3.Lerp(bottomPoints[1], br, sideOffset);
+                    bottomPoints[0] = bottomPoints[1] + (-dir * width);
+                    sideOffset = -sideOffset;
+                }
+
+                topPoints[0] = bottomPoints[0] + (Vector3.up * height);
+                topPoints[1] = bottomPoints[1] + (Vector3.up * height);
 
                 Vector3[] hole = new Vector3[] { bottomPoints[0], topPoints[0], topPoints[1], bottomPoints[1] };
 

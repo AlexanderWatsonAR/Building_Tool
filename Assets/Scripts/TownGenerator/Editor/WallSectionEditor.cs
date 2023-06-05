@@ -4,11 +4,15 @@ using UnityEngine;
 using UnityEditor;
 using Unity.VisualScripting;
 using UnityEditor.Rendering;
+using UnityEngine.ProBuilder.Shapes;
+using static UnityEngine.Rendering.DebugUI.Table;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(WallSection))]
 public class WallSectionEditor : Editor
 {
     private bool m_IsDoorActiveFoldout = true;
+    private bool m_IsWindowActiveFoldout = true;
 
     public override void OnInspectorGUI()
     {
@@ -22,8 +26,12 @@ public class WallSectionEditor : Editor
         SerializedProperty doorRows = serializedObject.FindProperty("m_DoorRows");
         SerializedProperty doorHeight = serializedObject.FindProperty("m_PedimentHeight");
         SerializedProperty doorWidth = serializedObject.FindProperty("m_SideWidth");
+        SerializedProperty doorOffset = serializedObject.FindProperty("m_SideOffset");
         SerializedProperty doorActive = serializedObject.FindProperty("m_IsDoorActive");
         SerializedProperty doorScale = serializedObject.FindProperty("m_DoorScale");
+        SerializedProperty doorHingePoint = serializedObject.FindProperty("m_DoorHingePoint");
+        SerializedProperty doorHingeOffset = serializedObject.FindProperty("m_DoorHingeOffset");
+        SerializedProperty doorHingeEulerAngles = serializedObject.FindProperty("m_DoorHingeEulerAngles");
         SerializedProperty doorMaterial = serializedObject.FindProperty("m_DoorMaterial");
         // End Door
 
@@ -32,6 +40,10 @@ public class WallSectionEditor : Editor
         SerializedProperty winRows = serializedObject.FindProperty("m_WindowRows");
         SerializedProperty winHeight = serializedObject.FindProperty("m_WindowHeight");
         SerializedProperty winWidth = serializedObject.FindProperty("m_WindowWidth");
+        SerializedProperty winActive = serializedObject.FindProperty("m_IsWindowActive");
+        SerializedProperty winFColumns = serializedObject.FindProperty("m_WindowFrameColumns");
+        SerializedProperty winFRows = serializedObject.FindProperty("m_WindowFrameRows");
+        SerializedProperty winFScale = serializedObject.FindProperty("m_WindowFrameScale");
         // End Window
 
         EditorGUILayout.PropertyField(element);
@@ -45,6 +57,7 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.IntSlider(doorColumns, 1, 10, "Columns");
                 EditorGUILayout.IntSlider(doorRows, 1, 10, "Rows");
                 EditorGUILayout.LabelField("Size");
+                EditorGUILayout.PropertyField(doorOffset);
                 EditorGUILayout.PropertyField(doorHeight);
                 EditorGUILayout.PropertyField(doorWidth);
 
@@ -57,14 +70,12 @@ public class WallSectionEditor : Editor
                     if (m_IsDoorActiveFoldout)
                     {
                         doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
-                        //EditorGUILayout.BeginHorizontal();
-                        //float x = EditorGUILayout.Slider("x", doorScale.vector3Value.x, 0, 1);
-                        //float y = EditorGUILayout.Slider("y", doorScale.vector3Value.y, 0, 1);
-                        //float z = EditorGUILayout.Slider("z", doorScale.vector3Value.z, 0, 1);
-                        //doorScale.vector3Value = new Vector3(x, y, z);
-                        //EditorGUILayout.EndHorizontal();
-
                         EditorGUILayout.ObjectField(doorMaterial, new GUIContent("Material"));
+
+                        EditorGUILayout.LabelField("Hinge");
+                        doorHingePoint.SetEnumValue((TransformPoint)EditorGUILayout.EnumPopup("Position", doorHingePoint.GetEnumValue<TransformPoint>()));
+                        doorHingeOffset.vector3Value = EditorGUILayout.Vector3Field("Offset", doorHingeOffset.vector3Value);
+                        doorHingeEulerAngles.vector3Value = EditorGUILayout.Vector3Field("Rotation", doorHingeEulerAngles.vector3Value);
                     }
 
                     EditorGUILayout.EndFoldoutHeaderGroup();
@@ -77,6 +88,24 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.LabelField("Size");
                 EditorGUILayout.Slider(winHeight, 0, 1, "Height");
                 EditorGUILayout.Slider(winWidth, 0, 1, "Width");
+
+                winActive.boolValue = EditorGUILayout.Toggle("Is Active", winActive.boolValue);
+
+                if (winActive.boolValue)
+                {
+                    m_IsWindowActiveFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsWindowActiveFoldout, "Window");
+
+                    if (m_IsWindowActiveFoldout)
+                    {
+                        winFColumns.intValue = EditorGUILayout.IntSlider("Columns", winFColumns.intValue, 1, 10);
+                        winFRows.intValue = EditorGUILayout.IntSlider("Rows", winFRows.intValue, 1, 10);
+                        EditorGUILayout.LabelField("Size");
+                        float y = EditorGUILayout.Slider("Height", winFScale.vector3Value.y, 0, 1);
+                        float x = EditorGUILayout.Slider("Width", winFScale.vector3Value.x, 0, 1);
+                        winFScale.vector3Value = new Vector3(x, y, winFScale.vector3Value.z);
+                    }
+                }
+
                 break;
         }
 
@@ -85,7 +114,5 @@ public class WallSectionEditor : Editor
         {
             section.Build();
         }
-
-
     }
 }

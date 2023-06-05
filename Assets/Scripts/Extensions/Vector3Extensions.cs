@@ -67,6 +67,11 @@ public static class Vector3Extensions
         return samplePoints;
     }
 
+    public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
+    {
+        return Vector3.Distance(a, value) / Vector3.Distance(a, b);
+    }
+
     public static Vector3[] ShiftIndices(this IEnumerable<Vector3> controlPoints)
     {
         Vector3[] points = controlPoints.ToArray();

@@ -25,8 +25,3 @@ public enum WallElement
 {
     Wall, Door, Window, Empty
 }
-
-public enum DoorHingePoint
-{
-    Left, Right
-}

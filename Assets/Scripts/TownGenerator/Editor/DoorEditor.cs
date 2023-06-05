@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Rendering;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(Door))]
 public class DoorEditor : Editor
@@ -20,11 +22,14 @@ public class DoorEditor : Editor
 
         SerializedProperty doorScale = serializedObject.FindProperty("m_Scale");
         SerializedProperty hingeOffset = serializedObject.FindProperty("m_HingeOffset");
-        SerializedProperty angle = serializedObject.FindProperty("m_Angle");
+        SerializedProperty hingeEulerAngles = serializedObject.FindProperty("m_HingeEulerAngles");
+        SerializedProperty hingePoint = serializedObject.FindProperty("m_HingePoint");
 
         doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
-        hingeOffset.vector3Value = EditorGUILayout.Vector3Field("Hinge Offset", hingeOffset.vector3Value);
-        angle.floatValue = EditorGUILayout.FloatField("Angle", angle.floatValue);
+        EditorGUILayout.LabelField("Hinge");
+        door.HingePoint = (TransformPoint) EditorGUILayout.EnumPopup("Position", hingePoint.GetEnumValue<TransformPoint>());
+        hingeOffset.vector3Value = EditorGUILayout.Vector3Field("Offset", hingeOffset.vector3Value);
+        hingeEulerAngles.vector3Value = EditorGUILayout.Vector3Field("Rotation", hingeEulerAngles.vector3Value);
 
         if (serializedObject.ApplyModifiedProperties())
         {
