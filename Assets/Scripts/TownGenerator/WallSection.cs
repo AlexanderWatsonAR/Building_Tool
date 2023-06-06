@@ -24,6 +24,8 @@ public class WallSection : MonoBehaviour
     [SerializeField] private bool m_IsWindowActive;
     [SerializeField, Range(1, 10)] private int m_WindowFrameColumns, m_WindowFrameRows;
     [SerializeField] private Vector3 m_WindowFrameScale;
+    [SerializeField] private Material m_WindowPaneMaterial;
+    [SerializeField] private Material m_WindowFrameMaterial;
 
     public float WindowHeight => m_WindowHeight;
     public float WindowWidth => m_WindowWidth;
@@ -68,6 +70,8 @@ public class WallSection : MonoBehaviour
         m_WindowFrameRows = 2;
         m_WindowFrameColumns = 2;
         m_WindowFrameScale = Vector3.one * 0.95f;
+        m_WindowPaneMaterial = BuiltinMaterials.defaultMaterial;
+        m_WindowFrameMaterial = BuiltinMaterials.defaultMaterial;
         // End Window
 
         // Door
@@ -149,7 +153,8 @@ public class WallSection : MonoBehaviour
                     Window window = win.GetComponent<Window>();
                     window.Initialize(hole, windowDepth);
                     window.SetFrameGrid(m_WindowFrameColumns, m_WindowFrameRows);
-                    window.SetFrameScale(m_WindowFrameScale).Build();
+                    window.SetFrameScale(m_WindowFrameScale);
+                    window.SetMaterials(m_WindowFrameMaterial, m_WindowPaneMaterial).Build();
                 }
 
                 break;

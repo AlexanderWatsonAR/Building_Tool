@@ -41,6 +41,16 @@ public class Window : MonoBehaviour
         return this;
     }
 
+    public Window SetMaterials(Material frame, Material pane)
+    {
+        frame = frame != null ? frame : BuiltinMaterials.defaultMaterial;
+        pane = pane != null ? pane : BuiltinMaterials.defaultMaterial;
+
+        m_FrameMaterial = frame;
+        m_PaneMaterial = pane;
+        return this;
+    }
+
     public Window SetFrameGrid(int cols, int rows)
     {
         m_Columns = cols;

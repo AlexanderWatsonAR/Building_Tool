@@ -35,6 +35,9 @@ public class Storey : MonoBehaviour
     // Pillar
     [SerializeField] private float m_PillarWidth, m_PillarDepth;
     [SerializeField] private Material m_PillarMaterial;
+    [SerializeField] private bool m_ArePillarsActive;
+
+    public bool ArePillarsActive => m_ArePillarsActive;
     public Material PillarMaterial => m_PillarMaterial;
     public float PillarWidth => m_PillarWidth;
     public float PillarDepth => m_PillarDepth;
@@ -72,15 +75,15 @@ public class Storey : MonoBehaviour
 
     private void Reset()
     {
-        Initialize(-1, null, 3, 0.5f, null, 0.1f, null, 0.5f, 0.5f, null);
+        Initialize(-1, null, 3, 0.5f, null, 0.1f, null, true, 0.5f, 0.5f, null);
     }
 
     public Storey Initialize(Storey storey)
     {
-        return Initialize(storey.ID, storey.ControlPoints, storey.WallHeight, storey.WallDepth, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.PillarWidth, storey.PillarDepth, storey.PillarMaterial);
+        return Initialize(storey.ID, storey.ControlPoints, storey.WallHeight, storey.WallDepth, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.ArePillarsActive, storey.PillarWidth, storey.PillarDepth, storey.PillarMaterial);
     }
 
-    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, float wallHeight, float wallDepth, Material wallMaterial, float floorHeight, Material floorMaterial, float pillarWidth, float pillarDepth, Material pillarMaterial)
+    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, float wallHeight, float wallDepth, Material wallMaterial, float floorHeight, Material floorMaterial, bool arePillarsActive, float pillarWidth, float pillarDepth, Material pillarMaterial)
     {
         m_StoreyID = id;
         m_ControlPoints = controlPoints != null ? controlPoints.ToArray() : null;
@@ -92,6 +95,7 @@ public class Storey : MonoBehaviour
         m_FloorMaterial = floorMaterial;
         m_FloorHeight = floorHeight;
 
+        m_ArePillarsActive = arePillarsActive;
         m_PillarDepth = pillarDepth;
         m_PillarWidth = pillarWidth;
         m_PillarMaterial = pillarMaterial;
@@ -116,6 +120,7 @@ public class Storey : MonoBehaviour
 
     public Storey Build()
     {
+        transform.DeleteChildren();
         BuildPillars();
         m_InsidePoints = m_InsidePoints ?? InsidePoints;
         BuildExternalWalls();
@@ -126,6 +131,9 @@ public class Storey : MonoBehaviour
 
     private void BuildPillars()
     {
+        if (!m_ArePillarsActive)
+            return;
+
         GameObject pillars = new GameObject("Pillars");
         pillars.transform.SetParent(transform, false);
 

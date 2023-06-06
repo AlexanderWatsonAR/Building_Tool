@@ -27,31 +27,36 @@ public class StoreyEditor : Editor
         // End Floor
 
         // Pillar
+        SerializedProperty pillarsActive = serializedObject.FindProperty("m_ArePillarsActive");
         SerializedProperty pillarWidth = serializedObject.FindProperty("m_PillarWidth");
         SerializedProperty pillarDepth = serializedObject.FindProperty("m_PillarDepth");
         SerializedProperty pillarMaterial = serializedObject.FindProperty("m_PillarMaterial");
         // End Pillar
 
         m_ShowWall = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowWall, "Wall");
-        if(m_ShowWall)
+        if (m_ShowWall)
         {
             EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
             EditorGUILayout.Slider(wallDepth, 0, 1, "Depth");
             EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
-
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
 
-        m_ShowFloor = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowFloor, "Floor");
-        if (m_ShowFloor)
+        pillarsActive.boolValue = EditorGUILayout.Toggle("Is Active", pillarsActive.boolValue);
+
+        if (pillarsActive.boolValue)
         {
-            EditorGUILayout.Slider(floorHeight, 0.00001f, 1, "Height");
-            EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
+            m_ShowFloor = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowFloor, "Floor");
+            if (m_ShowFloor)
+            {
+                EditorGUILayout.Slider(floorHeight, 0.00001f, 1, "Height");
+                EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
         }
-        EditorGUILayout.EndFoldoutHeaderGroup();
 
         m_ShowPillar = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPillar, "Pillar");
-        if(m_ShowPillar)
+        if (m_ShowPillar)
         {
             EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
             EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
@@ -59,43 +64,16 @@ public class StoreyEditor : Editor
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
 
-        // Wall
-        float wDepth = storey.WallDepth;
-        float wHeight = storey.WallHeight;
-        int wMaterialID = storey.WallMaterial.GetInstanceID();
-        // End Wall
-
-        // Floor
-        float fHeight = storey.FloorHeight;
-        int fMaterialID = storey.FloorMaterial.GetInstanceID();
-        // End Floor
-
-        // Pillar
-        float pWidth = storey.PillarWidth;
-        float pDepth = storey.PillarDepth;
-        int pMaterialID = storey.PillarMaterial.GetInstanceID();
-        //End Pillar
 
         if (serializedObject.ApplyModifiedProperties())
         {
-            if (wallDepth.floatValue != wDepth ||
-                wallHeight.floatValue != wHeight ||
-                wallMaterial.objectReferenceInstanceIDValue != wMaterialID ||
-                floorHeight.floatValue != fHeight ||
-                floorMaterial.objectReferenceInstanceIDValue != fMaterialID ||
-                pillarWidth.floatValue != pWidth ||
-                pillarDepth.floatValue != pDepth ||
-                pillarMaterial.objectReferenceInstanceIDValue != pMaterialID)
+            if (storey.TryGetComponent(out Building building))
             {
-                if (storey.TryGetComponent(out Building building))
-                {
-                    building.Build();
-                }
-                else
-                {
-                    storey.Build();
-                }
-                
+                building.Build();
+            }
+            else
+            {
+                storey.Build();
             }
         }
 

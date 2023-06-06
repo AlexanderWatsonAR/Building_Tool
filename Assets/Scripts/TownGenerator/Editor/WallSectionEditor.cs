@@ -44,6 +44,9 @@ public class WallSectionEditor : Editor
         SerializedProperty winFColumns = serializedObject.FindProperty("m_WindowFrameColumns");
         SerializedProperty winFRows = serializedObject.FindProperty("m_WindowFrameRows");
         SerializedProperty winFScale = serializedObject.FindProperty("m_WindowFrameScale");
+
+        SerializedProperty winPaneMat = serializedObject.FindProperty("m_WindowPaneMaterial");
+        SerializedProperty winFrameMat = serializedObject.FindProperty("m_WindowFrameMaterial");
         // End Window
 
         EditorGUILayout.PropertyField(element);
@@ -103,6 +106,9 @@ public class WallSectionEditor : Editor
                         float y = EditorGUILayout.Slider("Height", winFScale.vector3Value.y, 0, 1);
                         float x = EditorGUILayout.Slider("Width", winFScale.vector3Value.x, 0, 1);
                         winFScale.vector3Value = new Vector3(x, y, winFScale.vector3Value.z);
+                        EditorGUILayout.LabelField("Material");
+                        EditorGUILayout.ObjectField(winPaneMat, new GUIContent("Pane"));
+                        EditorGUILayout.ObjectField(winFrameMat, new GUIContent("Frame"));
                     }
                 }
 
