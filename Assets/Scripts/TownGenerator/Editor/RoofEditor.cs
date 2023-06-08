@@ -21,6 +21,7 @@ public class RoofEditor : Editor
         Roof roof = (Roof)target;
         serializedObject.Update();
 
+        SerializedProperty roofActive = serializedObject.FindProperty("m_IsRoofActive");
         SerializedProperty frameType = serializedObject.FindProperty("m_FrameType");
         SerializedProperty mansardHeight = serializedObject.FindProperty("m_MansardHeight");
         SerializedProperty mansardScale = serializedObject.FindProperty("m_MansardScale");
@@ -33,7 +34,14 @@ public class RoofEditor : Editor
         SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
         SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
         SerializedProperty tileMaterial = serializedObject.FindProperty("m_TileMaterial");
-        
+
+        roofActive.boolValue = EditorGUILayout.Toggle("Is Roof Active", roofActive.boolValue);
+
+        if(!roofActive.boolValue)
+        {
+            Apply(roof);
+            return;
+        }
 
         int index = 0;
         int value = (int)frameType.GetEnumValue<RoofType>();
@@ -94,7 +102,12 @@ public class RoofEditor : Editor
         }
 
         DisplayTile(tileHeight, tileExtend, tileMaterial);
+        Apply(roof);
 
+    }
+
+    private void Apply(Roof roof)
+    {
         if (serializedObject.ApplyModifiedProperties())
         {
             if (roof.TryGetComponent(out Building building))

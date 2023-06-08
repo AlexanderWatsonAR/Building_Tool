@@ -237,6 +237,10 @@ public class Storey : MonoBehaviour
         floor.name = "Floor";
         floor.transform.SetParent(transform, false);
         Vector3[] positions = PolygonRecognition.GetPositions(m_ControlPoints);
+        for(int i = 0; i < positions.Length; i++)
+        {
+            positions[i] += m_ControlPoints[i].Forward * (m_WallDepth * 0.5f);
+        }
         floor.CreateShapeFromPolygon(positions, m_FloorHeight, false);
         floor.GetComponent<Renderer>().sharedMaterial = m_FloorMaterial;
         floor.ToMesh();

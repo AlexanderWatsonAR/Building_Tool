@@ -18,6 +18,7 @@ using UnityEngine.UIElements;
 [System.Serializable]
 public class Roof : MonoBehaviour
 {
+    [SerializeField] private bool m_IsRoofActive;
     [SerializeField] private RoofType m_FrameType;
 
     // Wall
@@ -73,17 +74,25 @@ public class Roof : MonoBehaviour
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
     [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints;
 
+    public bool IsRoofActive => m_IsRoofActive;
     public RoofType FrameType => m_FrameType;
 
     private Vector3[] m_TempOneLine;
 
     public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
 
-    public void SetControlPoints(IEnumerable<ControlPoint> controlPoints)
+    public Roof SetRoofActive(bool value)
+    {
+        m_IsRoofActive = value;
+        return this;
+    }
+
+    public Roof SetControlPoints(IEnumerable<ControlPoint> controlPoints)
     {
         ControlPoint[] points = controlPoints.ToArray();
         m_ControlPoints = PolygonRecognition.Clone(points.ToArray());
         m_OriginalControlPoints = PolygonRecognition.Clone(m_ControlPoints);
+        return this;
     }
 
     public event Action<Roof> OnAnyRoofChange; // Building should sub to this.
@@ -100,6 +109,7 @@ public class Roof : MonoBehaviour
 
     public Roof Initialize()
     {
+        m_IsRoofActive = true;
         m_GableHeight = 1;
         m_GableScale = 0.75f;
         m_IsOpen = false;
@@ -130,6 +140,7 @@ public class Roof : MonoBehaviour
 
     public Roof Initialize(Roof roof)
     {
+        m_IsRoofActive = roof.IsRoofActive;
         m_GableHeight = roof.GableHeight;
         m_GableScale = roof.GableScale;
         m_IsOpen = roof.IsOpen;
@@ -221,6 +232,9 @@ public class Roof : MonoBehaviour
 
         m_Tiles.Clear();
         m_Walls.Clear();
+
+        if (!m_IsRoofActive)
+            return this;
 
         m_ControlPoints.SetPositions(m_OriginalControlPoints);
 

@@ -20,7 +20,7 @@ public class Building : MonoBehaviour
     protected Polytool m_BuildingPolytool;
     protected List<Storey> m_Storeys;
     protected Roof m_Roof;
-    private bool hasInitialized;
+    private bool m_HasInitialized;
 
     public bool HasConstructed => m_HasConstructed;
     public ControlPoint[] ControlPoints => m_BuildingPolytool.ControlPoints.ToArray();
@@ -32,8 +32,8 @@ public class Building : MonoBehaviour
 
     public Building Initialize()
     {
-        //if (hasInitialized)
-        //    return this;
+        if (m_HasInitialized)
+            return this;
 
         m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
@@ -58,9 +58,9 @@ public class Building : MonoBehaviour
             count++;
         }
 
-        m_Roof.SetControlPoints(ControlPoints);
+        m_Roof.SetControlPoints(ControlPoints).SetRoofActive(true);
 
-        //hasInitialized = true;
+        m_HasInitialized = true;
 
         return this;
     }
