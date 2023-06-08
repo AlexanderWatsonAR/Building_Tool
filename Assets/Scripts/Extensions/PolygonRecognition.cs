@@ -31,7 +31,7 @@ public static class PolygonRecognition
     /// <param name="polyShape"></param>
     /// <param name="point"></param>
     /// <returns></returns>
-    public static bool IsPointInside(this Polytool polyTool, Vector3 point)
+    public static bool IsPointInside(this PolyPath polyTool, Vector3 point)
     {
         return IsPointInsidePolygon(polyTool.Positions, point);
     }
@@ -64,7 +64,7 @@ public static class PolygonRecognition
     /// <param name="polyTool"></param>
     /// <param name="lPointIndex"></param>
     /// <returns></returns>
-    public static bool IsLShaped(this Polytool polyTool, out int lPointIndex)
+    public static bool IsLShaped(this PolyPath polyTool, out int lPointIndex)
     {
         return IsPolygonLShaped(polyTool.Positions, out lPointIndex);
     }
@@ -98,7 +98,7 @@ public static class PolygonRecognition
     /// <param name="polyTool"></param>
     /// <param name="tPointsIndex"></param>
     /// <returns></returns>
-    public static bool IsTShaped(this Polytool polyTool, out int[] tPointsIndex)
+    public static bool IsTShaped(this PolyPath polyTool, out int[] tPointsIndex)
     {
         return IsPolygonTShaped(polyTool.Positions, out tPointsIndex);
     }
@@ -160,7 +160,7 @@ public static class PolygonRecognition
     /// <param name="polyTool"></param>
     /// <param name="uPointsIndex"></param>
     /// <returns></returns>
-    public static bool IsUShaped(this Polytool polyTool, out int[] uPointsIndex)
+    public static bool IsUShaped(this PolyPath polyTool, out int[] uPointsIndex)
     {
         return IsPolygonUShaped(polyTool.Positions, out uPointsIndex);
     }
@@ -201,7 +201,7 @@ public static class PolygonRecognition
         return IsPolygonEShaped(controlPoints.GetPositions(), out ePointsIndex);
     }
 
-    public static bool IsEShaped(this Polytool polyTool, out int[] ePointsIndex)
+    public static bool IsEShaped(this PolyPath polyTool, out int[] ePointsIndex)
     {
         return IsPolygonEShaped(polyTool.Positions, out ePointsIndex);
     }
@@ -256,7 +256,7 @@ public static class PolygonRecognition
         return true;
     }
 
-    public static bool IsXShaped(this Polytool polyTool, out int[] xPointIndices)
+    public static bool IsXShaped(this PolyPath polyTool, out int[] xPointIndices)
     {
         return IsPolygonXShaped(polyTool.Positions, out xPointIndices);
     }
@@ -297,7 +297,7 @@ public static class PolygonRecognition
         return IsPolygonNShaped(controlPoints.GetPositions(), out nPointIndices);
     }
 
-    public static bool IsNShaped(this Polytool polyTool, out int[] nPointIndices)
+    public static bool IsNShaped(this PolyPath polyTool, out int[] nPointIndices)
     {
         return IsPolygonNShaped(polyTool.Positions, out nPointIndices);
     }
@@ -354,7 +354,7 @@ public static class PolygonRecognition
         return IsPolygonMShaped(controlPoints.GetPositions(), out mPointIndices);
     }
 
-    public static bool IsMShaped(this Polytool polyTool, out int[] mPointIndices)
+    public static bool IsMShaped(this PolyPath polyTool, out int[] mPointIndices)
     {
         return IsPolygonMShaped(polyTool.Positions, out mPointIndices);
     }
@@ -852,7 +852,7 @@ public static class PolygonRecognition
     /// <param name="polyShape"></param>
     /// <param name="currentIndex"></param>
     /// <returns></returns>
-    public static int GetNextPoint(this Polytool polyTool, int index)
+    public static int GetNextPoint(this PolyPath polyTool, int index)
     {
         return polyTool.Positions.GetNextControlPoint(index);
     }
@@ -900,7 +900,7 @@ public static class PolygonRecognition
     /// <param name="polyTool"></param>
     /// <param name="currentIndex"></param>
     /// <returns></returns>
-    public static int GetPreviousPoint(this Polytool polyTool, int index)
+    public static int GetPreviousPoint(this PolyPath polyTool, int index)
     {
         return polyTool.Positions.GetPreviousControlPoint(index);
     }
@@ -921,7 +921,7 @@ public static class PolygonRecognition
         return index + previous;
     }
 
-    public static bool IsConcave(this Polytool polyTool, out int[] concavePoints)
+    public static bool IsConcave(this PolyPath polyTool, out int[] concavePoints)
     {
         concavePoints = GetConcaveIndexPoints(polyTool.Positions);
 
@@ -949,7 +949,7 @@ public static class PolygonRecognition
     /// <param name="polyTool"></param>
     /// <param name="oneLine"></param>
     /// <returns></returns>
-    public static bool IsDescribableInOneLine(this Polytool polyTool, out Vector3[] oneLine)
+    public static bool IsDescribableInOneLine(this PolyPath polyTool, out Vector3[] oneLine)
     {
         return IsPolygonDescribableInOneLine(polyTool.Positions, out oneLine);
     }

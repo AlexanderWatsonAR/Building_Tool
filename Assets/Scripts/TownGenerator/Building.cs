@@ -10,20 +10,20 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.Serialization;
 
-// Generic Building Base Class
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Storey), typeof(Roof))]
 public class Building : MonoBehaviour
 {
     [SerializeField, HideInInspector] private bool m_HasConstructed;
 
-    protected Polytool m_BuildingPolytool;
+    private PolyPath m_BuildingPolyPath;
     protected List<Storey> m_Storeys;
     protected Roof m_Roof;
     private bool m_HasInitialized;
 
     public bool HasConstructed => m_HasConstructed;
-    public ControlPoint[] ControlPoints => m_BuildingPolytool.ControlPoints.ToArray();
+    public ControlPoint[] ControlPoints => m_BuildingPolyPath.ControlPoints.ToArray();
+    public PolyPath PolyPath => m_BuildingPolyPath ?? new PolyPath();
 
     private void Reset()
     {
@@ -37,8 +37,8 @@ public class Building : MonoBehaviour
 
         m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
-        m_BuildingPolytool = GetComponent<Polytool>();
-        m_BuildingPolytool.CalculateForwards();
+        m_BuildingPolyPath = new PolyPath();
+        m_BuildingPolyPath.CalculateForwards();
 
         if(m_Storeys == null)
         {
@@ -96,13 +96,13 @@ public class Building : MonoBehaviour
 
     private void Building_OnAnyRoofChange(Roof roof)
     {
-        if (m_Roof == null && m_BuildingPolytool == null)
+        if (m_Roof == null && m_BuildingPolyPath == null)
             return;
         
         m_Roof.Initialize(roof);
     }
 
-    public void RevertToPolyshape()
+    public void RevertBuilding()
     {
         transform.DeleteChildren();
         m_HasConstructed = false;

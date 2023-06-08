@@ -11,18 +11,21 @@ using UnityEngine.Rendering;
 using UnityEditor;
 #endif
 
-// TODO: Duplicate polyshape functionality
 [System.Serializable]
-public class Polytool : MonoBehaviour
+public class PolyPath
 {
-    [SerializeField] private List<ControlPoint> m_ControlPoints;
-    [SerializeField] private bool m_IsDrawing;
-    [SerializeField] private bool m_Show;
+    [SerializeField] private List<ControlPoint> m_ControlPoints = new();
+    [SerializeField] private bool m_IsClosed, m_IsGizmoDisplaying, m_IsDrawing;
 
-    /// <summary>
-    /// TODO: Invoke when a control point's position has changed
-    /// </summary>
-    //public event Action<Vector3, int> OnPositionChanged;
+    public PolyPath()
+    {
+    }
+
+    public bool IsDrawing
+    {
+        get { return m_IsDrawing; }
+        set { m_IsDrawing = value; }
+    }
 
     public Vector3[] Positions
     {
@@ -45,7 +48,7 @@ public class Polytool : MonoBehaviour
             {
                 m_ControlPoints.Reverse();
             }
-            //
+            
             List<ControlPoint> controlPoints = new ();
 
             foreach(ControlPoint point in m_ControlPoints)
@@ -57,50 +60,47 @@ public class Polytool : MonoBehaviour
         }
     }
 
-    public List<Vector3> LocalPositions
+    public int ControlPointCount => m_ControlPoints.Count;
+    public bool IsGizmoDisplaying => m_IsGizmoDisplaying;
+
+    public List<Vector3> LocalPositions(Transform t)
     {
-        get
+        List<Vector3> localPoints = new List<Vector3>();
+
+        foreach (Vector3 pos in Positions)
         {
-            List<Vector3> localPoints = new List<Vector3>();
-
-            foreach (Vector3 pos in Positions)
-            {
-                localPoints.Add(pos);
-            }
-
-            //Traverse the parents.
-            Transform current = transform;
-            while (current != null)
-            {
-                for (int i = 0; i < localPoints.Count; i++)
-                {
-                    // Scale
-                    Vector3 point = localPoints[i] - current.localPosition;
-                    Vector3 v = Vector3.Scale(point, current.localScale) + current.localPosition;
-                    Vector3 offset = v - localPoints[i];
-                    localPoints[i] += offset;
-
-                    // Rotation
-                    Vector3 localEulerAngles = current.localEulerAngles;
-                    Vector3 v1 = Quaternion.Euler(localEulerAngles) * (localPoints[i] - current.localPosition) + current.localPosition;
-                    offset = v1 - localPoints[i];
-                    localPoints[i] += offset;
-
-                    // Position
-                    localPoints[i] += current.localPosition;
-                }
-
-                current = current.parent;
-            }
-
-            return localPoints;
+            localPoints.Add(pos);
         }
+
+        //Traverse the parents.
+        while (t != null)
+        {
+            for (int i = 0; i < localPoints.Count; i++)
+            {
+                // Scale
+                Vector3 point = localPoints[i] - t.localPosition;
+                Vector3 v = Vector3.Scale(point, t.localScale) + t.localPosition;
+                Vector3 offset = v - localPoints[i];
+                localPoints[i] += offset;
+
+                // Rotation
+                Vector3 localEulerAngles = t.localEulerAngles;
+                Vector3 v1 = Quaternion.Euler(localEulerAngles) * (localPoints[i] - t.localPosition) + t.localPosition;
+                offset = v1 - localPoints[i];
+                localPoints[i] += offset;
+
+                // Position
+                localPoints[i] += t.localPosition;
+            }
+
+            t = t.parent;
+        }
+
+        return localPoints;
     }
-    
-    private void Reset()
-    {
-        m_Show = true;
-    }
+
+
+
 
     public void ShiftControlPoints()
     {
@@ -125,28 +125,7 @@ public class Polytool : MonoBehaviour
     }
     public void AddControlPoint(Vector3 position)
     {
-
-        Vector3 v = transform.InverseTransformPoint(position);
-
-        if (m_ControlPoints.Count <= 2)
-        {
-            m_ControlPoints.Add(new ControlPoint(v));
-        }
-        else
-        {
-            Vector3 a = transform.TransformPoint(m_ControlPoints[0].Position);
-
-            float distance = Vector3.Distance(a, position);
-
-            if(distance <= 1)
-            {
-                m_IsDrawing = false;
-            }
-            else
-            {
-                m_ControlPoints.Add(new ControlPoint(v));
-            }
-        }
+        m_ControlPoints.Add(new ControlPoint(position));
     }
 
     public void ReverseControlPoints()
@@ -169,13 +148,13 @@ public class Polytool : MonoBehaviour
         m_ControlPoints[index] = value;
     }
 
-    public int ControlPointCount()
-    {
-        return m_ControlPoints.Count;
-    }
+
 
     public void CalculateForwards()
     {
+        if (!m_IsClosed)
+            return;
+
         if (!IsClockwise())
             ReverseControlPoints();
 
@@ -201,34 +180,11 @@ public class Polytool : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        if (m_ControlPoints == null || m_Show == false)
-            return;
-        
-        for (int i = 0; i < LocalPositions.Count; i++)
-        {
-            Handles.color = UEColor.white;
+    //private void OnDrawGizmosSelected()
+    //{
 
-            float size = UnityEditor.HandleUtility.GetHandleSize(m_ControlPoints[i].Position) * 0.04f;
+    //}
 
-            m_ControlPoints[i].SetPosition(Handles.FreeMoveHandle(LocalPositions[i], Quaternion.identity, size, Vector3.up, Handles.DotHandleCap));
-
-            //Handles.DotHandleCap(i, LocalPositions[i], Quaternion.identity, size, Event.current.type);
-        }
-
-        if (m_ControlPoints.Count <= 1)
-            return;
-
-        Handles.DrawAAPolyLine(LocalPositions.ToArray());
-
-        if(!m_IsDrawing && m_ControlPoints.Count >= 3)
-        {
-            Handles.DrawAAPolyLine(LocalPositions[0], LocalPositions[^1]);
-        }
-    }
-#endif
     /// <summary>
     /// Do the control points move clockwise?
     /// </summary>
