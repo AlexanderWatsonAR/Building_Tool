@@ -7,13 +7,13 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.Serialization;
+using static UnityEngine.UI.GridLayoutGroup;
 
 [System.Serializable]
 public class Storey : MonoBehaviour
 {
     [SerializeField, HideInInspector] private int m_StoreyID;
     [SerializeField] private ControlPoint[] m_ControlPoints;
-    private IEnumerable<Vector3> m_NextStoreyPoints;
 
     // Wall
     [SerializeField, Range(1, 100)] private float m_WallHeight;
@@ -44,8 +44,9 @@ public class Storey : MonoBehaviour
     // End Pillar
 
     public int ID => m_StoreyID;
-    public IEnumerable<Vector3> NextStoreyPoints => m_NextStoreyPoints;
     public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
+
+    private Vector3[] lineA, lineB, lineC, lineD;
 
     public Vector3[] InsidePoints
     {
@@ -123,7 +124,8 @@ public class Storey : MonoBehaviour
         transform.DeleteChildren();
         BuildPillars();
         m_InsidePoints = m_InsidePoints ?? InsidePoints;
-        BuildExternalWalls();
+        BuildCorners();
+        //BuildExternalWalls();
         BuildFloor();
 
         return this;
@@ -152,6 +154,47 @@ public class Storey : MonoBehaviour
             pillar.transform.localPosition += m_WallHeight / 2 * Vector3.up;
             pillar.transform.SetParent(pillars.transform, true);
         }
+    }
+
+    private void BuildCorners()
+    {
+        Vector3 h = m_WallHeight * Vector3.up;
+
+        GameObject corners = new GameObject("Corners");
+        corners.transform.SetParent(transform, true);
+
+        for(int i = 0; i < m_ControlPoints.Length; i++)
+        {
+            int current = i;
+            int previous = m_ControlPoints.GetPrevious(i);
+            int next = m_ControlPoints.GetNext(i);
+
+            Vector3 firstIntersection, secondIntersection;
+
+            bool didIntersectAB = Extensions.DoLinesIntersect(m_InsidePoints[previous], m_InsidePoints[current], m_ControlPoints[current].Position, m_ControlPoints[next].Position, out firstIntersection);
+            bool didIntersectCD = Extensions.DoLinesIntersect(m_InsidePoints[next], m_InsidePoints[current], m_ControlPoints[current].Position, m_ControlPoints[previous].Position, out secondIntersection);
+
+            //lineA = new Vector3[] { m_InsidePoints[previous], m_InsidePoints[current] + (dirA * polyLength) };
+            //lineB = new Vector3[] { m_ControlPoints[current].Position, m_ControlPoints[next].Position };
+
+            //lineC = new Vector3[] { m_InsidePoints[next], m_InsidePoints[current] + (dirB * polyLength) };
+            //lineD = new Vector3[] { m_ControlPoints[current].Position, m_ControlPoints[previous].Position };
+
+            Vector3[] cornerPoints = new Vector3[] { m_ControlPoints[current].Position, m_InsidePoints[current], firstIntersection, secondIntersection };
+
+            cornerPoints = cornerPoints.SortPointsClockwise().ToArray();
+
+            ProBuilderMesh post = ProBuilderMesh.Create();
+            post.name = "Corner";
+            post.CreateShapeFromPolygon(cornerPoints, m_WallHeight, false);
+            post.GetComponent<Renderer>().sharedMaterial = m_WallMaterial;
+            post.ToMesh();
+            post.Refresh();
+
+            post.transform.SetParent(corners.transform, true);
+
+        }
+
     }
 
     private void BuildExternalWalls()
@@ -249,8 +292,20 @@ public class Storey : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Handles.color = Color.red;
-        Handles.DrawAAPolyLine(InsidePoints);
+        if(lineA != null && lineB != null)
+        {
+            Handles.color = Color.red;
+            Handles.DrawAAPolyLine(lineA);
+
+            Handles.color = Color.green;
+            Handles.DrawAAPolyLine(lineB);
+
+            //Handles.color = Color.yellow;
+            //Handles.DrawAAPolyLine(lineC);
+
+            //Handles.color = Color.magenta;
+            //Handles.DrawAAPolyLine(lineD);
+        }
 
     }
 }

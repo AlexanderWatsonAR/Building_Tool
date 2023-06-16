@@ -19,9 +19,12 @@ public class EditorScripting : EditorWindow
 
     private void OnGUI()
     {
-        if(GUILayout.Button("New Poly building"))//
+        if(GUILayout.Button("New Poly building"))
         {
-            GameObject building = new GameObject("Poly Building", typeof(PolyPath));
+            GameObject building = new GameObject("Poly Building", typeof(Building));
+            Building build = building.GetComponent<Building>();
+            build.PolyPath.PolyMode = PolyMode.Draw;
+            Selection.activeGameObject = building;
         }
 
         //GUILayout.Label("Heading", EditorStyles.boldLabel);

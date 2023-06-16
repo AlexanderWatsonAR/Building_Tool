@@ -14,17 +14,23 @@ using UnityEditor;
 [System.Serializable]
 public class PolyPath
 {
-    [SerializeField] private List<ControlPoint> m_ControlPoints = new();
-    [SerializeField] private bool m_IsClosed, m_IsGizmoDisplaying, m_IsDrawing;
+    [SerializeField] private List<ControlPoint> m_ControlPoints;
+    [SerializeField] private bool m_IsClosedLoop;
+    [SerializeField] private PolyMode m_PolyMode;
 
-    public PolyPath()
+    public event Action<List<ControlPoint>> OnControlPointsChanged;
+
+
+    public PolyPath(bool isClosedLoop = true)
     {
+        m_ControlPoints = m_ControlPoints == null ? new() : m_ControlPoints;
+        m_IsClosedLoop = isClosedLoop;
     }
 
-    public bool IsDrawing
+    public PolyMode PolyMode
     {
-        get { return m_IsDrawing; }
-        set { m_IsDrawing = value; }
+        get { return m_PolyMode; }
+        set { m_PolyMode = value; }
     }
 
     public Vector3[] Positions
@@ -44,11 +50,6 @@ public class PolyPath
     {
         get 
         {
-            if(!IsClockwise())
-            {
-                m_ControlPoints.Reverse();
-            }
-            
             List<ControlPoint> controlPoints = new ();
 
             foreach(ControlPoint point in m_ControlPoints)
@@ -61,7 +62,6 @@ public class PolyPath
     }
 
     public int ControlPointCount => m_ControlPoints.Count;
-    public bool IsGizmoDisplaying => m_IsGizmoDisplaying;
 
     public List<Vector3> LocalPositions(Transform t)
     {
@@ -99,9 +99,6 @@ public class PolyPath
         return localPoints;
     }
 
-
-
-
     public void ShiftControlPoints()
     {
         ControlPoint[] controlPoints = m_ControlPoints.ToArray();
@@ -130,6 +127,9 @@ public class PolyPath
 
     public void ReverseControlPoints()
     {
+        if (IsClockwise())
+            return;
+
         m_ControlPoints.Reverse();
     }
 
@@ -143,16 +143,20 @@ public class PolyPath
         return m_ControlPoints[index];
     }
 
-    public void SetControlPointAt(int index, ControlPoint value)
+    public void SetPositionAt(int index, Vector3 position)
     {
-        m_ControlPoints[index] = value;
+        m_ControlPoints[index].SetPosition(position);
+        OnControlPointsChanged?.Invoke(m_ControlPoints);
     }
 
-
+    public Vector3 GetPositionAt(int index)
+    {
+        return m_ControlPoints[index].Position;
+    }
 
     public void CalculateForwards()
     {
-        if (!m_IsClosed)
+        if (!m_IsClosedLoop)
             return;
 
         if (!IsClockwise())

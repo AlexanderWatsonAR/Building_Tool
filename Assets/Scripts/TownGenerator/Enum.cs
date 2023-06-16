@@ -25,3 +25,8 @@ public enum WallElement
 {
     Wall, Door, Window, Empty
 }
+
+public enum PolyMode
+{
+    Draw, Edit, Show, Hide
+}

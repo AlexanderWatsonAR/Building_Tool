@@ -16,10 +16,10 @@ public class Building : MonoBehaviour
 {
     [SerializeField, HideInInspector] private bool m_HasConstructed;
 
-    private PolyPath m_BuildingPolyPath;
-    protected List<Storey> m_Storeys;
-    protected Roof m_Roof;
-    private bool m_HasInitialized;
+    [SerializeField] private PolyPath m_BuildingPolyPath;
+    [SerializeField] private List<Storey> m_Storeys;
+    [SerializeField] private Roof m_Roof;
+    [SerializeField] private bool m_HasInitialized;
 
     public bool HasConstructed => m_HasConstructed;
     public ControlPoint[] ControlPoints => m_BuildingPolyPath.ControlPoints.ToArray();
@@ -27,7 +27,9 @@ public class Building : MonoBehaviour
 
     private void Reset()
     {
-        Initialize();
+        m_BuildingPolyPath = new PolyPath();
+        m_Storeys = GetComponents<Storey>().ToList();
+        m_Roof = GetComponent<Roof>();
     }
 
     public Building Initialize()
@@ -35,10 +37,8 @@ public class Building : MonoBehaviour
         if (m_HasInitialized)
             return this;
 
-        m_Storeys = GetComponents<Storey>().ToList();
-        m_Roof = GetComponent<Roof>();
-        m_BuildingPolyPath = new PolyPath();
         m_BuildingPolyPath.CalculateForwards();
+        m_BuildingPolyPath.OnControlPointsChanged += Building_OnControlPointsChanged;
 
         if(m_Storeys == null)
         {
@@ -65,11 +65,11 @@ public class Building : MonoBehaviour
         return this;
     }
 
+
+
     public Building Build()
     {
         transform.DeleteChildren();
-
-        Initialize();
 
         Vector3 pos = Vector3.zero;
 
@@ -82,16 +82,21 @@ public class Building : MonoBehaviour
             pos += (Vector3.up * storey.WallHeight);
         }
 
-        Roof roof = GetComponent<Roof>();
-
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(roof).SetControlPoints(ControlPoints);
+        roofGO.AddComponent<Roof>().Initialize(m_Roof).SetControlPoints(ControlPoints);
         roofGO.GetComponent<Roof>().BuildFrame();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
         return this;
+    }
+
+    private void Building_OnControlPointsChanged(List<ControlPoint> controlPoints)
+    {
+        m_HasInitialized = false;
+        m_BuildingPolyPath.OnControlPointsChanged -= Building_OnControlPointsChanged;
+        Initialize().Build();
     }
 
     private void Building_OnAnyRoofChange(Roof roof)

@@ -10,6 +10,28 @@ using System;
 
 public static class PolygonRecognition
 {
+    /// <summary>
+    /// 2D XZ Polygon Sort Function. Only for convex shapes.
+    /// </summary>
+    /// <param name="controlPoints"></param>
+    public static IEnumerable<Vector3> SortPointsClockwise(this IEnumerable<Vector3> controlPoints)
+    {
+        Vector3[] points = controlPoints.ToArray();
+        Vector3 centre = ProMaths.Average(points);
+
+        // Sort points based on angle relative to centroid
+        Array.Sort(points, (a, b) =>
+        {
+            Vector3 dirA = a.DirectionToTarget(centre);
+            Vector3 dirB = b.DirectionToTarget(centre);
+            float angleA = Mathf.Atan2(dirA.z, dirA.x);
+            float angleB = Mathf.Atan2(dirB.z, dirB.x);
+            return angleA.CompareTo(angleB);
+        });
+
+        return points;
+    }
+
     public static Vector3 Centre(this IEnumerable<ControlPoint> controlPoints)
     {
         return PolygonCentre(GetPositions(controlPoints));

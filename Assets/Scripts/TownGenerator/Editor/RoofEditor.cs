@@ -47,59 +47,69 @@ public class RoofEditor : Editor
         int value = (int)frameType.GetEnumValue<RoofType>();
 
         int[] frames = roof.AvailableRoofFrames();
-        string[] allOptions = frameType.enumNames;
-        string[] allOptionsDisplay = frameType.enumDisplayNames; // "Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
-        string[] options = new string[frames.Length];
-        string[] optionsDisplay = new string[frames.Length];
 
-        for (int i = 0; i < frames.Length; i++)
+        if (frames.Length > 0)
         {
-            optionsDisplay[i] = allOptionsDisplay[frames[i]];
-            options[i] = allOptions[frames[i]];
+            string[] allOptions = frameType.enumNames;
+            string[] allOptionsDisplay = frameType.enumDisplayNames; // "Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
+            string[] options = new string[frames.Length];
+            string[] optionsDisplay = new string[frames.Length];
 
-            if (frames[i] == value)
+            for (int i = 0; i < frames.Length; i++)
             {
-                index = i;
+                optionsDisplay[i] = allOptionsDisplay[frames[i]];
+                options[i] = allOptions[frames[i]];
+
+                if (frames[i] == value)
+                {
+                    index = i;
+                }
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Frame Type");
+
+            if (index == -1)
+            {
+                index = 0;
+            }
+
+            int frameIndex = EditorGUILayout.Popup(index, optionsDisplay);
+
+            frameType.SetEnumValue((RoofType)frames[frameIndex]);
+
+            EditorGUILayout.EndHorizontal();
+
+            switch (frameType.enumValueIndex)
+            {
+                case (int)RoofType.Gable:
+                    DisplayGable(gableHeight, gableScale, isOpen);
+                    break;
+                case (int)RoofType.Mansard:
+                    DisplayMansard(mansardHeight, mansardScale);
+                    break;
+                case (int)RoofType.Dormer:
+                    DisplayMansard(mansardHeight, mansardScale);
+                    DisplayGable(gableHeight, gableScale, isOpen);
+                    break;
+                case (int)RoofType.MShaped:
+                    DisplayMShaped(gableHeight, isFlipped);
+                    break;
+                case (int)RoofType.Pyramid:
+                    DisplayPyramid(pyramidHeight);
+                    break;
+                case (int)RoofType.PyramidHip:
+                    DisplayMansard(mansardHeight, mansardScale);
+                    DisplayPyramid(pyramidHeight);
+                    break;
             }
         }
-
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Frame Type");
-
-        if (index == -1)
+        else
         {
-            index = 0;
+            string[] noOptionsDisplay = new string[] { "No Frame Type Available" };
+            EditorGUILayout.Popup(0, noOptionsDisplay);
         }
 
-        int frameIndex = EditorGUILayout.Popup(index, optionsDisplay);
-
-        frameType.SetEnumValue((RoofType)frames[frameIndex]);
-
-        EditorGUILayout.EndHorizontal();
-
-        switch(frameType.enumValueIndex)
-        {
-            case (int)RoofType.Gable:
-                DisplayGable(gableHeight, gableScale, isOpen);
-                break;
-            case (int)RoofType.Mansard:
-                DisplayMansard(mansardHeight, mansardScale);
-                break;
-            case (int)RoofType.Dormer:
-                DisplayMansard(mansardHeight, mansardScale);
-                DisplayGable(gableHeight, gableScale, isOpen);
-                break;
-            case (int)RoofType.MShaped:
-                DisplayMShaped(gableHeight, isFlipped);
-                break;
-            case (int)RoofType.Pyramid:
-                DisplayPyramid(pyramidHeight);
-                break;
-            case (int)RoofType.PyramidHip:
-                DisplayMansard(mansardHeight, mansardScale);
-                DisplayPyramid(pyramidHeight);
-                break;
-        }
 
         DisplayTile(tileHeight, tileExtend, tileMaterial);
         Apply(roof);

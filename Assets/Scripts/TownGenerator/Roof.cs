@@ -117,7 +117,7 @@ public class Roof : MonoBehaviour
         m_PyramidHeight = 1;
         m_MansardHeight = 1;
         m_MansardScale = 1;
-        m_FrameType = RoofType.Pyramid;
+        m_FrameType = RoofType.Mansard;
         m_BeamDepth = 0.2f;
         m_BeamWidth = 0.2f;
         m_SupportBeamDensity = 0.5f;
@@ -170,7 +170,7 @@ public class Roof : MonoBehaviour
     public int[] AvailableRoofFrames()
     {
         if (m_ControlPoints == null)
-            throw new NotImplementedException();
+            return new int[0];
 
         int OpenGable = (int)RoofType.Gable;
         int Mansard = (int)RoofType.Mansard;
@@ -1133,6 +1133,9 @@ public class Roof : MonoBehaviour
     {
         //if (m_TempVerts == null | m_TempVerts.Length == 0)
         //    return;
+        if (m_ControlPoints == null)
+            return;
+
 
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {

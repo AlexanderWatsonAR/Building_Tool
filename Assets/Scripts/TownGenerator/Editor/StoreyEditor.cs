@@ -42,25 +42,27 @@ public class StoreyEditor : Editor
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
 
-        pillarsActive.boolValue = EditorGUILayout.Toggle("Is Active", pillarsActive.boolValue);
 
-        if (pillarsActive.boolValue)
+        m_ShowFloor = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowFloor, "Floor");
+        if (m_ShowFloor)
         {
-            m_ShowFloor = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowFloor, "Floor");
-            if (m_ShowFloor)
-            {
-                EditorGUILayout.Slider(floorHeight, 0.00001f, 1, "Height");
-                EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            EditorGUILayout.Slider(floorHeight, 0.00001f, 1, "Height");
+            EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
         }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+
+
+        pillarsActive.boolValue = EditorGUILayout.Toggle("Are Pillars Active", pillarsActive.boolValue);
 
         m_ShowPillar = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPillar, "Pillar");
-        if (m_ShowPillar)
+        if (pillarsActive.boolValue)
         {
-            EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
-            EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
-            EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
+            if (m_ShowPillar)
+            {
+                EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
+                EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
+                EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
+            }
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
 
