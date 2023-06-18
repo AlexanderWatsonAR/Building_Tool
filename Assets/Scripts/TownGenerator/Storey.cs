@@ -46,7 +46,7 @@ public class Storey : MonoBehaviour
     public int ID => m_StoreyID;
     public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
 
-    private Vector3[] lineA, lineB, lineC, lineD;
+    List<Vector3[]> m_WallPoints;
 
     public Vector3[] InsidePoints
     {
@@ -116,16 +116,21 @@ public class Storey : MonoBehaviour
             m_PillarMaterial = BuiltinMaterials.defaultMaterial;
         }
 
+        m_WallPoints = new();
+
         return this;
     }
 
     public Storey Build()
     {
         transform.DeleteChildren();
+        m_WallPoints.Clear();
         BuildPillars();
         m_InsidePoints = m_InsidePoints ?? InsidePoints;
+        
+        //BuildWalls();
+        BuildExternalWalls();
         BuildCorners();
-        //BuildExternalWalls();
         BuildFloor();
 
         return this;
@@ -158,29 +163,41 @@ public class Storey : MonoBehaviour
 
     private void BuildCorners()
     {
-        Vector3 h = m_WallHeight * Vector3.up;
+        if (m_WallPoints.Count != m_ControlPoints.Length)
+            return;
 
         GameObject corners = new GameObject("Corners");
         corners.transform.SetParent(transform, true);
 
-        for(int i = 0; i < m_ControlPoints.Length; i++)
+        bool isConcave = m_ControlPoints.IsConcave(out int[] concavePoints);
+
+        for (int i = 0; i < m_WallPoints.Count; i++)
         {
             int current = i;
             int previous = m_ControlPoints.GetPrevious(i);
             int next = m_ControlPoints.GetNext(i);
 
-            Vector3 firstIntersection, secondIntersection;
+            Vector3 dirA = m_WallPoints[current][0].DirectionToTarget(m_WallPoints[current][1]);
+            Vector3 crossA = Vector3.Cross(Vector3.up, dirA) * m_WallDepth;
 
-            bool didIntersectAB = Extensions.DoLinesIntersect(m_InsidePoints[previous], m_InsidePoints[current], m_ControlPoints[current].Position, m_ControlPoints[next].Position, out firstIntersection);
-            bool didIntersectCD = Extensions.DoLinesIntersect(m_InsidePoints[next], m_InsidePoints[current], m_ControlPoints[current].Position, m_ControlPoints[previous].Position, out secondIntersection);
+            Vector3 dirB = m_WallPoints[previous][0].DirectionToTarget(m_WallPoints[previous][1]);
+            Vector3 crossB = Vector3.Cross(Vector3.up, dirB) * m_WallDepth;
 
-            //lineA = new Vector3[] { m_InsidePoints[previous], m_InsidePoints[current] + (dirA * polyLength) };
-            //lineB = new Vector3[] { m_ControlPoints[current].Position, m_ControlPoints[next].Position };
+            Vector3 intersection;
 
-            //lineC = new Vector3[] { m_InsidePoints[next], m_InsidePoints[current] + (dirB * polyLength) };
-            //lineD = new Vector3[] { m_ControlPoints[current].Position, m_ControlPoints[previous].Position };
+            Extensions.DoLinesIntersect(m_WallPoints[current][0] + crossA, m_WallPoints[current][1] + crossA, m_WallPoints[previous][0] + crossB, m_WallPoints[previous][1] + crossB, out intersection);
 
-            Vector3[] cornerPoints = new Vector3[] { m_ControlPoints[current].Position, m_InsidePoints[current], firstIntersection, secondIntersection };
+            Vector3[] cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[current][0] + crossB, intersection };
+
+            if (isConcave)
+            {
+                if(concavePoints.Any(b => b == current))
+                {
+                    Extensions.DoLinesIntersect(m_WallPoints[current][0], m_WallPoints[current][1], m_WallPoints[previous][0], m_WallPoints[previous][1], out intersection);
+                    cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1], intersection };
+                }
+
+            }
 
             cornerPoints = cornerPoints.SortPointsClockwise().ToArray();
 
@@ -194,6 +211,64 @@ public class Storey : MonoBehaviour
             post.transform.SetParent(corners.transform, true);
 
         }
+    }
+
+    private void BuildWalls()
+    {
+        GameObject walls = new GameObject("Walls");
+        walls.transform.SetParent(transform, true);
+
+        Vector3 h = Vector3.up * m_WallHeight;
+
+        int[] concavePoints;
+        bool isConcave = m_ControlPoints.IsConcave(out concavePoints);
+
+        for (int i = 0; i < m_ControlPoints.Length; i++)
+        {
+            int current = i;
+            int next = m_ControlPoints.GetNext(i);
+
+            Vector3 first = m_InsidePoints[i];
+            Vector3 second = m_InsidePoints[i] + h;
+            Vector3 third = m_InsidePoints[next] + h;
+            Vector3 fourth = m_InsidePoints[next];
+
+            if (isConcave)
+            {
+                bool conditionA = concavePoints.Any(a => a == next);
+                bool conditionB = concavePoints.Any(b => b == current);
+
+                if (conditionA)
+                {
+                    int twoNext = m_ControlPoints.GetNext(next);
+
+                    if (Extensions.DoLinesIntersect(m_InsidePoints[current], m_InsidePoints[next], m_ControlPoints[twoNext].Position, m_ControlPoints[next].Position, out Vector3 intersection))
+                    {
+                        third = intersection + h;
+                        fourth = intersection;
+                    }
+                }
+                if (conditionB)
+                {
+                    int previous = m_ControlPoints.GetPrevious(current);
+
+                    if (Extensions.DoLinesIntersect(m_InsidePoints[current], m_InsidePoints[next], m_ControlPoints[previous].Position, m_ControlPoints[current].Position, out Vector3 intersection))
+                    {
+                        first = intersection;
+                        second = intersection + h;
+                    }
+                }
+
+            }
+
+            Vector3[] points = new Vector3[] { first, second, third, fourth };
+
+            GameObject wall = new GameObject("Wall " + i.ToString(), typeof(Wall));
+            wall.transform.SetParent(walls.transform, true);
+
+            wall.GetComponent<Wall>().Initialize(points, m_WallDepth, m_WallMaterial).Build();
+        }
+
 
     }
 
@@ -210,12 +285,13 @@ public class Storey : MonoBehaviour
         // Construct the walls 
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int oneNext = m_ControlPoints.GetNext(i);
-            int onePrevious = m_ControlPoints.GetPrevious(i);
+            int current = i;
+            int next = m_ControlPoints.GetNext(i);
+            int previous = m_ControlPoints.GetPrevious(i);
 
-            Vector3 nextControlPoint = m_ControlPoints[oneNext].Position;
-            Vector3 oneNextInside = m_InsidePoints[oneNext];
-            Vector3 onePreviousInside = m_InsidePoints[onePrevious];
+            Vector3 nextControlPoint = m_ControlPoints[next].Position;
+            Vector3 oneNextInside = m_InsidePoints[next];
+            Vector3 onePreviousInside = m_InsidePoints[previous];
 
             Vector3 nextForward = m_InsidePoints[i].DirectionToTarget(oneNextInside);
             Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallDepth;
@@ -238,24 +314,29 @@ public class Storey : MonoBehaviour
 
             if (isConcave)
             {
-                for (int j = 0; j < concavePoints.Length; j++)
+                bool conditionA = concavePoints.Any(a => a == next);
+                bool conditionB = concavePoints.Any(b => b == current);
+
+                if (conditionA)
                 {
-                    if (concavePoints[j] == oneNext)
-                    {
-                        bottomRight = nextControlPoint - nextRight;
-                        topRight = bottomRight + h;
-                    }
-
-                    if (concavePoints[j] == i)
-                    {
-                        bottomLeft = m_ControlPoints[i].Position - nextRight;
-                        topLeft = bottomLeft + h;
-
-                        one = m_ControlPoints[i].Position - nextRight;
-                        three = m_ControlPoints[i].Position - previousRight;
-                    }
+                    bottomRight = nextControlPoint - nextRight;
+                    topRight = bottomRight + h;
                 }
+
+                if (conditionB)
+                {
+                    bottomLeft = m_ControlPoints[i].Position - nextRight;
+                    topLeft = bottomLeft + h;
+
+                    //one = m_ControlPoints[i].Position - nextRight;
+                    //three = m_ControlPoints[i].Position - previousRight;
+
+                    //bool didIntersect = Extensions.DoLinesIntersect(m_InsidePoints[previous], three, m_InsidePoints[next], one, out two);
+                }
+
             }
+
+            m_WallPoints.Add(new Vector3[] { bottomLeft, bottomRight });
 
             Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
 
@@ -263,14 +344,14 @@ public class Storey : MonoBehaviour
             wall.transform.SetParent(walls.transform, true);
             wall.GetComponent<Wall>().Initialize(points, m_WallDepth, m_WallMaterial).Build();
 
-            ProBuilderMesh post = ProBuilderMesh.Create();
-            post.name = "Corner";
-            post.CreateShapeFromPolygon(new Vector3[] { zero, one, two, three }, m_WallHeight, false);
-            post.GetComponent<Renderer>().sharedMaterial = m_WallMaterial;
-            post.ToMesh();
-            post.Refresh();
+            //ProBuilderMesh post = ProBuilderMesh.Create();
+            //post.name = "Corner";
+            //post.CreateShapeFromPolygon(new Vector3[] { zero, one, two, three }, m_WallHeight, false);
+            //post.GetComponent<Renderer>().sharedMaterial = m_WallMaterial;
+            //post.ToMesh();
+            //post.Refresh();
 
-            post.transform.SetParent(corners.transform, true);
+            //post.transform.SetParent(corners.transform, true);
         }
     }
 
@@ -280,7 +361,7 @@ public class Storey : MonoBehaviour
         floor.name = "Floor";
         floor.transform.SetParent(transform, false);
         Vector3[] positions = PolygonRecognition.GetPositions(m_ControlPoints);
-        for(int i = 0; i < positions.Length; i++)
+        for (int i = 0; i < positions.Length; i++)
         {
             positions[i] += m_ControlPoints[i].Forward * (m_WallDepth * 0.5f);
         }
@@ -292,20 +373,15 @@ public class Storey : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if(lineA != null && lineB != null)
-        {
-            Handles.color = Color.red;
-            Handles.DrawAAPolyLine(lineA);
-
-            Handles.color = Color.green;
-            Handles.DrawAAPolyLine(lineB);
-
-            //Handles.color = Color.yellow;
-            //Handles.DrawAAPolyLine(lineC);
-
-            //Handles.color = Color.magenta;
-            //Handles.DrawAAPolyLine(lineD);
-        }
-
+        //if(cornerPoints != null)
+        //{
+        //    if (cornerPoints.Length > 0)
+        //    {
+        //        for(int i = 0; i < cornerPoints.Length; i++)
+        //        {
+        //            Handles.Label(cornerPoints[i] + (Vector3.up * m_WallHeight), new GUIContent(i.ToString()));
+        //        }
+        //    }
+        //}
     }
 }
