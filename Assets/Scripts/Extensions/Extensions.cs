@@ -52,24 +52,24 @@ public static class Extensions
         }
 
         float ua = (((line2End.x - line2Start.x) * (line1Start.z - line2Start.z)) - ((line2End.z - line2Start.z) * (line1Start.x - line2Start.x))) / denominator;
+		float ub = (((line1End.x - line1Start.x) * (line1Start.z - line2Start.z)) - ((line1End.z - line1Start.z) * (line1Start.x - line2Start.x))) / denominator;
+
+        float intersectionX = line1Start.x + (ua * (line1End.x - line1Start.x));
+        float intersectionZ = line1Start.z + (ua * (line1End.z - line1Start.z));
+        intersection = new Vector3(intersectionX, line1Start.y, intersectionZ);
 
         if(isInfinite)
         {
-            float intersectionX = line1Start.x + (ua * (line1End.x - line1Start.x));
-            float intersectionZ = line1Start.z + (ua * (line1End.z - line1Start.z));
-            intersection = new Vector3(intersectionX, line1Start.y, intersectionZ);
             return true;
         }
-        
-        float ub = (((line1End.x - line1Start.x) * (line1Start.z - line2Start.z)) - ((line1End.z - line1Start.z) * (line1Start.x - line2Start.x))) / denominator;
-        // Does the intersection point lies within both line segments?
-        if (ua >= 0f && ua <= 1f && ub >= 0f && ub <= 1f)
+        else if (ua >= 0f && ua <= 1f && ub >= 0f && ub <= 1f) // Does the intersection point lies within both line segments?
         {
-            float intersectionX = line1Start.x + (ua * (line1End.x - line1Start.x));
-            float intersectionZ = line1Start.z + (ua * (line1End.z - line1Start.z));
-            intersection = new Vector3(intersectionX, line1Start.y, intersectionZ);
             return true;
         }
+		else
+		{
+			intersection = Vector3.zero;
+		}
 
         // The intersection point is outside the range of at least one of the line segments
         return false;

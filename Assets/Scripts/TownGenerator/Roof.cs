@@ -786,6 +786,49 @@ public class Roof : MonoBehaviour
                             CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[3]].Position });
                         }
                     }
+                    else if(m_ControlPoints.IsKShaped(out int[] kPointIndices))
+                    {
+                        if (!m_IsOpen)
+                        {
+                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                            Vector3 c = Vector3.Lerp(oneLine[3], oneLine[5], 0.5f);
+                            Vector3 d = Vector3.Lerp(oneLine[4], oneLine[5], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_GableScale);
+                            oneLine[3] = Vector3.Lerp(oneLine[3], c, m_GableScale);
+                            oneLine[4] = Vector3.Lerp(oneLine[4], d, m_GableScale);
+                        }
+
+
+                        int[] indices = m_ControlPoints.RelativeIndices(kPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[5], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[5], oneLine[4], m_ControlPoints[indices[2]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[4], oneLine[5], m_ControlPoints[indices[4]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[5], oneLine[3], m_ControlPoints[indices[5]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[3], oneLine[1], m_ControlPoints[indices[7]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[8]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[0], m_ControlPoints[indices[10]].Position }, false, true, true, true);
+
+                        if (m_IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[10]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[8]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[5]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[2]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[10]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[11]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[9]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[6]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[3]].Position });
+                        }
+
+                    }
                     break;
                 case 7:
                     if (m_ControlPoints.IsMShaped(out int[] mPointIndices))
@@ -889,7 +932,6 @@ public class Roof : MonoBehaviour
                     end--;
                 }
 
-
             }
             else if(m_ControlPoints.IsCrenelShaped(out int[] crenelIndices))
             {
@@ -952,7 +994,6 @@ public class Roof : MonoBehaviour
                     fourCount += 4;
                     twoCount += 2;
                 }
-                
             }
             else if(m_ControlPoints.IsAsteriskShaped(out int[] asteriskPointIndices))
             {
@@ -992,6 +1033,10 @@ public class Roof : MonoBehaviour
                         CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[i], oneLine[i], m_ControlPoints[nextTwo].Position }, false, true, false, true);
                     }
                 }
+            }
+            else if(m_ControlPoints.IsAntennaShaped(out _))
+            {
+                Debug.Log("Antenna");
             }
         }
 

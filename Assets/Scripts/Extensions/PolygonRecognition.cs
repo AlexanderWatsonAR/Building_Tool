@@ -7,6 +7,7 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 using UnityEngine.Rendering;
 using Unity.VisualScripting;
 using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 public static class PolygonRecognition
 {
@@ -113,6 +114,67 @@ public static class PolygonRecognition
         return true;
     }
 
+    public static bool IsAntennaShaped(this IEnumerable<ControlPoint> controlPoints, out int[] antPointsIndex)
+    {
+        return IsPolygonAntennaShaped(controlPoints.GetPositions(), out antPointsIndex);
+    }
+
+    public static bool IsPolygonAntennaShaped(this IEnumerable<Vector3> controlPoints, out int[] antPointsIndex)
+    {
+        int[] concaveIndices = controlPoints.GetConcaveIndexPoints();
+        antPointsIndex = new int[concaveIndices.Length];
+        antPointsIndex[0] = -1;
+
+        if (controlPoints.Count() < 20 || controlPoints.Count() % 2 != 0 ||
+            concaveIndices.Length < 8 || concaveIndices.Length % 2 != 0 ||
+            concaveIndices.Length % 4 != 0)
+            return false;
+
+        if(controlPoints.Count() > 20)
+        {
+            int count = controlPoints.Count() - 20;
+
+            if (count % 8 != 0)
+                return false;
+        }
+
+        int i;
+        for (i = 0; i < antPointsIndex.Length; i++)
+        {
+            int previous = controlPoints.GetControlPointIndex(concaveIndices[i] - 1);
+            int next = controlPoints.GetControlPointIndex(concaveIndices[i] + 1);
+            int fiveNext = controlPoints.GetControlPointIndex(concaveIndices[i] + 5);
+            int fourPrevious = controlPoints.GetControlPointIndex(concaveIndices[i] - 4);
+            int fivePrevious = controlPoints.GetControlPointIndex(concaveIndices[i] - 5);
+
+            bool conditionA = concaveIndices.Any(x => x == previous);
+            bool conditionB = concaveIndices.Any(x => x == next);
+            bool conditionC = concaveIndices.Any(x => x == fiveNext);
+            bool conditionD = concaveIndices.Any(x => x == fourPrevious);
+            bool conditionE = concaveIndices.Any(x => x == fivePrevious);
+
+            if (conditionA && !conditionB && conditionC && conditionD && conditionE)
+            {
+                antPointsIndex[0] = concaveIndices[i];
+                break;
+            }
+        }
+
+        if (antPointsIndex[0] == -1)
+            return false;
+
+        for(int j = 0; j < antPointsIndex.Length; j++)
+        {
+            antPointsIndex[j] = concaveIndices[i];
+            i++;
+
+            if (i >= antPointsIndex.Length)
+                i = 0;
+        }
+
+
+        return true;
+    }
 
     /// <summary>
     /// Does the Polyshape resemble a 'T'? 
@@ -570,6 +632,46 @@ public static class PolygonRecognition
         return true;
     }
 
+    public static bool IsKShaped(this IEnumerable<ControlPoint> controlPoints, out int[] kPointIndices)
+    {
+        return IsPolygonKShaped(controlPoints.GetPositions(), out kPointIndices);
+    }
+
+    public static bool IsPolygonKShaped(this IEnumerable<Vector3> controlPoints, out int[] kPointIndices)
+    {
+        kPointIndices = new int[] { -1, -1, -1, -1 };
+        int[] indices = controlPoints.GetConcaveIndexPoints();
+
+        if (controlPoints.Count() != 12 | indices.Length != 4)
+            return false;
+
+        for (int i = 0; i < indices.Length; i++)
+        {
+            int next = controlPoints.GetControlPointIndex(indices[i] + 1);
+            int fourNext = controlPoints.GetControlPointIndex(indices[i] + 4);
+            int sevenNext = controlPoints.GetControlPointIndex(indices[i] + 7);
+
+            bool conA = indices.Any(x => x == next);
+            bool conB = indices.Any(x => x == fourNext);
+            bool conC = indices.Any(x => x == sevenNext);
+
+            if (conA && conB && conC)
+            {
+                kPointIndices[0] = indices[i];
+                kPointIndices[1] = next;
+                kPointIndices[2] = fourNext;
+                kPointIndices[3] = sevenNext;
+                break;
+            }
+        }
+
+        if (kPointIndices.Any(x => x == -1))
+            return false;
+
+
+        return true;
+    }
+
     public static bool IsYShaped(this IEnumerable<ControlPoint> controlPoints, out int[] yPointIndices)
     {
         return IsPolygonYShaped(controlPoints.GetPositions(), out yPointIndices);
@@ -709,12 +811,13 @@ public static class PolygonRecognition
         }
 
         crenelIndices[0] = -1;
-        int count = 0;
+        int i;
 
-        for(int i = 0; i < concavePoints.Length; i++)
+        for(i = 0; i < concavePoints.Length; i++)
         {
             int threePrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 3);
             int fourPrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 4);
+            int sevenPrevious = controlPoints.GetControlPointIndex(concavePoints[i] - 7);
 
             int oneNext = controlPoints.GetControlPointIndex(concavePoints[i] + 1);
             int fourNext = controlPoints.GetControlPointIndex(concavePoints[i] + 4);
@@ -729,27 +832,27 @@ public static class PolygonRecognition
             bool conditionE = concavePoints.Any(e => e == fiveNext);
             bool conditionF = concavePoints.Any(f => f == eightNext);
             bool conditionG = concavePoints.Any(g => g == nineNext);
+            bool conditionH = concavePoints.Any(h => h == sevenPrevious);
 
-            if(!conditionA && !conditionB &&
+            if (!conditionA && !conditionB &&
                 conditionC && conditionD && conditionE &&
-                conditionF && conditionG)
+                conditionF && conditionG && conditionH)
             {
                 crenelIndices[0] = concavePoints[i];
                 break;
             }
-            count++;
         }
 
         if (crenelIndices[0] == -1)
             return false;
 
-        for(int i = 0; i < concavePoints.Length; i++)
+        for(int j = 0; j < concavePoints.Length; j++)
         {
-            crenelIndices[i] = concavePoints[count];
-            count++;
+            crenelIndices[j] = concavePoints[i];
+            i++;
 
-            if (count > concavePoints.Length - 1)
-                count = 0;
+            if (i > concavePoints.Length - 1)
+                i = 0;
         }
         
 
@@ -1136,40 +1239,6 @@ public static class PolygonRecognition
 
                     return true;
                 }
-                else if (points.IsPolygonXShaped(out int[] xPointIndices))
-                {
-                    oneLine = new Vector3[5];
-
-                    for (int i = 0; i < xPointIndices.Length; i++)
-                    {
-                        int onePointNext = points.GetNextControlPoint(xPointIndices[i]);
-                        int twoPointNext = points.GetNextControlPoint(onePointNext);
-                        oneLine[i] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
-                    }
-
-                    Vector3[] xPoints = new Vector3[] { points[xPointIndices[0]],
-                        points[xPointIndices[1]],
-                        points[xPointIndices[2]],
-                        points[xPointIndices[3]] };
-
-                    oneLine[4] = ProMaths.Average(xPoints);
-                    return true;
-                }
-                else if (points.IsPolygonMShaped(out int[] mPointIndices))
-                {
-                    oneLine = new Vector3[7];
-
-                    int[] mIndices = points.RelativeIndices(mPointIndices[0]);
-
-                    oneLine[0] = Vector3.Lerp(points[mIndices[11]], points[mIndices[10]], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[mIndices[0]], points[mIndices[9]], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[mIndices[0]], points[mIndices[8]], 0.5f);
-                    oneLine[3] = Vector3.Lerp(points[mIndices[1]], points[mIndices[7]], 0.5f);
-                    oneLine[4] = Vector3.Lerp(points[mIndices[2]], points[mIndices[6]], 0.5f);
-                    oneLine[5] = Vector3.Lerp(points[mIndices[2]], points[mIndices[5]], 0.5f);
-                    oneLine[6] = Vector3.Lerp(points[mIndices[3]], points[mIndices[4]], 0.5f);
-                    return true;
-                }
                 else if (points.IsPolygonHShaped(out int[] hIndices))
                 {
                     oneLine = new Vector3[6];
@@ -1190,7 +1259,7 @@ public static class PolygonRecognition
 
                     Vector3 intersection;
 
-                    if(Extensions.DoLinesIntersect(oneLine[0], oneLine[2], line2Start, line2End, out intersection))
+                    if (Extensions.DoLinesIntersect(oneLine[0], oneLine[2], line2Start, line2End, out intersection))
                     {
                         oneLine[1] = intersection;
                     }
@@ -1208,6 +1277,63 @@ public static class PolygonRecognition
 
                     return true;
                 }
+                else if (points.IsPolygonMShaped(out int[] mPointIndices))
+                {
+                    oneLine = new Vector3[7];
+
+                    int[] mIndices = points.RelativeIndices(mPointIndices[0]);
+
+                    oneLine[0] = Vector3.Lerp(points[mIndices[11]], points[mIndices[10]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[mIndices[0]], points[mIndices[9]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[mIndices[0]], points[mIndices[8]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[mIndices[1]], points[mIndices[7]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[mIndices[2]], points[mIndices[6]], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[mIndices[2]], points[mIndices[5]], 0.5f);
+                    oneLine[6] = Vector3.Lerp(points[mIndices[3]], points[mIndices[4]], 0.5f);
+                    return true;
+                }
+                else if(points.IsPolygonKShaped(out int[] kPointIndices))
+                {
+                    oneLine = new Vector3[6];
+
+                    int[] kIndices = points.RelativeIndices(kPointIndices[0]);
+
+                    oneLine[0] = Vector3.Lerp(points[kIndices[11]], points[kIndices[10]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[kIndices[9]], points[kIndices[8]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[kIndices[6]], points[kIndices[5]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[kIndices[3]], points[kIndices[2]], 0.5f);
+
+                    Vector3 line2End = Vector3.Lerp(points[kIndices[0]], points[kIndices[7]], 0.5f);
+
+                    Extensions.DoLinesIntersect(oneLine[0], oneLine[2], oneLine[3], line2End, out oneLine[1]);
+
+                    Vector3 line1End = Vector3.Lerp(points[kIndices[1]], points[kIndices[4]], 0.5f);
+
+                    Extensions.DoLinesIntersect(oneLine[4], line1End, oneLine[3], line2End, out oneLine[5]);
+
+                    return true;
+                }
+                else if (points.IsPolygonXShaped(out int[] xPointIndices))
+                {
+                    oneLine = new Vector3[5];
+
+                    for (int i = 0; i < xPointIndices.Length; i++)
+                    {
+                        int onePointNext = points.GetNextControlPoint(xPointIndices[i]);
+                        int twoPointNext = points.GetNextControlPoint(onePointNext);
+                        oneLine[i] = Vector3.Lerp(points[onePointNext], points[twoPointNext], 0.5f);
+                    }
+
+                    Vector3[] xPoints = new Vector3[] { points[xPointIndices[0]],
+                        points[xPointIndices[1]],
+                        points[xPointIndices[2]],
+                        points[xPointIndices[3]] };
+
+                    oneLine[4] = ProMaths.Average(xPoints);
+                    return true;
+                }
+
+                
 
                 return false;
         }
@@ -1294,6 +1420,67 @@ public static class PolygonRecognition
             }
 
             oneLine[^1] = ProMaths.Average(asteriskPoints);
+
+            return true;
+        }
+        else if(points.IsPolygonAntennaShaped(out int[] antPointIndices))
+        {
+            int size = 9;
+
+            if(points.Count() > 20)
+            {
+                int count = points.Count() - 20;
+                int itr = (count / 8) * 3;
+                size += itr;
+            }
+
+            oneLine = new Vector3[size];
+
+            float length = points.PolygonLength();
+
+            List<Vector3> middle = new();
+
+            int j = 0;
+            for (int i = 0; i < antPointIndices.Length; i+= 2)
+            {
+                int current = antPointIndices[i];
+                
+                int nextOne = points.GetControlPointIndex(current + 1);
+                int nextTwo = points.GetControlPointIndex(current + 2);
+
+                oneLine[j] = Vector3.Lerp(points[nextOne], points[nextTwo], 0.5f);
+
+                if(i == 0 || i == antPointIndices.Length/2)
+                {
+                    int previous = points.GetControlPointIndex(current - 1);
+                    int nextThree = points.GetControlPointIndex(current + 3);
+                    int nextFour = points.GetControlPointIndex(current + 4);
+                    int nextFive = points.GetControlPointIndex(current + 5);
+                    int nextSix = points.GetControlPointIndex(current + 6);
+
+                    j++;
+                    oneLine[j] = Vector3.Lerp(points[nextThree], points[nextFour], 0.5f);
+                    j++;
+
+                    Vector3 line2Start = Vector3.Lerp(points[previous], points[nextSix], 0.5f);
+                    Vector3 line2End = Vector3.Lerp(points[current], points[nextFive], 0.5f);
+
+                    Extensions.DoLinesIntersect(oneLine[j - 1], oneLine[j - 2], line2Start, line2End,  out oneLine[j]);
+                }
+                else
+                {
+                    middle.Add(Vector3.Lerp(points[current], points[antPointIndices[i + 1]], 0.5f));
+                }
+                j++;
+            }
+
+            int thing = 1;
+            for(int i = 0; i < middle.Count/2; i++)
+            {
+                oneLine[j] = Vector3.Lerp(middle[i], middle[^thing], 0.5f);
+                thing++;
+                j++;
+            }
 
             return true;
         }
