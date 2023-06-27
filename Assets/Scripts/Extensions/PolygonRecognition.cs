@@ -1423,7 +1423,7 @@ public static class PolygonRecognition
 
             return true;
         }
-        else if(points.IsPolygonAntennaShaped(out int[] antPointIndices))
+        else if(points.IsPolygonAntennaShaped(out int[] antPointIndices)) // This implementation is quite hacky.
         {
             int size = 9;
 
@@ -1435,9 +1435,10 @@ public static class PolygonRecognition
             }
 
             oneLine = new Vector3[size];
+            Vector3[] unsortedPoints = new Vector3[size];
 
-            float length = points.PolygonLength();
-
+            List<Vector3> top = new();
+            List<Vector3> bottom = new();
             List<Vector3> middle = new();
 
             int j = 0;
@@ -1448,7 +1449,16 @@ public static class PolygonRecognition
                 int nextOne = points.GetControlPointIndex(current + 1);
                 int nextTwo = points.GetControlPointIndex(current + 2);
 
-                oneLine[j] = Vector3.Lerp(points[nextOne], points[nextTwo], 0.5f);
+                unsortedPoints[j] = Vector3.Lerp(points[nextOne], points[nextTwo], 0.5f);
+
+                if(i > 0 && i < antPointIndices.Length / 2)
+                {
+                    top.Add(unsortedPoints[j]);
+                }
+                if(i > antPointIndices.Length / 2)
+                {
+                    bottom.Add(unsortedPoints[j]);
+                }
 
                 if(i == 0 || i == antPointIndices.Length/2)
                 {
@@ -1458,14 +1468,15 @@ public static class PolygonRecognition
                     int nextFive = points.GetControlPointIndex(current + 5);
                     int nextSix = points.GetControlPointIndex(current + 6);
 
-                    j++;
-                    oneLine[j] = Vector3.Lerp(points[nextThree], points[nextFour], 0.5f);
-                    j++;
-
+                    
+                    Vector3 next = Vector3.Lerp(points[nextThree], points[nextFour], 0.5f);
                     Vector3 line2Start = Vector3.Lerp(points[previous], points[nextSix], 0.5f);
                     Vector3 line2End = Vector3.Lerp(points[current], points[nextFive], 0.5f);
 
-                    Extensions.DoLinesIntersect(oneLine[j - 1], oneLine[j - 2], line2Start, line2End,  out oneLine[j]);
+                    j++;
+                    Extensions.DoLinesIntersect(unsortedPoints[j - 1], next, line2Start, line2End,  out unsortedPoints[j]);
+                    j++;
+                    unsortedPoints[j] = next;
                 }
                 else
                 {
@@ -1474,13 +1485,39 @@ public static class PolygonRecognition
                 j++;
             }
 
-            int thing = 1;
-            for(int i = 0; i < middle.Count/2; i++)
+            int mid = size / 2;
+
+            if (size == 9)
+                mid++;
+
+            oneLine[0] = unsortedPoints[0];
+            oneLine[1] = unsortedPoints[1];
+            oneLine[2] = unsortedPoints[2];
+
+            int index = 4;
+            int last = 1;
+            for (int i = 0; i < middle.Count/2; i++)
             {
-                oneLine[j] = Vector3.Lerp(middle[i], middle[^thing], 0.5f);
-                thing++;
-                j++;
+                oneLine[index] = Vector3.Lerp(middle[i], middle[^last], 0.5f);
+                index += 3;
+                last++;
             }
+
+            bottom.Reverse();
+            int b = 3;
+            int t = 5;
+
+            for (int i = 0; i < top.Count; i++)
+            {
+                oneLine[b] = bottom[i];
+                oneLine[t] = top[i];
+                b += 3;
+                t += 3;
+            }
+
+            oneLine[^1] = unsortedPoints[mid-1];
+            oneLine[^2] = unsortedPoints[mid];
+            oneLine[^3] = unsortedPoints[mid+1];
 
             return true;
         }

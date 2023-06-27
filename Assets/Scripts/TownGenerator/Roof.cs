@@ -14,6 +14,8 @@ using UnityEditor;
 using UnityEngine.UI;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UIElements;
+using System.Threading;
+using static System.Net.Mime.MediaTypeNames;
 
 [System.Serializable]
 public class Roof : MonoBehaviour
@@ -1034,9 +1036,137 @@ public class Roof : MonoBehaviour
                     }
                 }
             }
-            else if(m_ControlPoints.IsAntennaShaped(out _))
+            else if(m_ControlPoints.IsAntennaShaped(out int[] antPointIndices))
             {
-                Debug.Log("Antenna");
+                int length = oneLine.Length / 3;
+                int bIndex = 0;
+                int mIndex = 1;
+                int tIndex = 2;
+                for(int i = 0; i < length; i++)
+                {
+                    Vector3 a = Vector3.Lerp(oneLine[tIndex], oneLine[mIndex], 0.5f);
+                    Vector3 b = Vector3.Lerp(oneLine[bIndex], oneLine[mIndex], 0.5f);
+
+                    oneLine[tIndex] = Vector3.Lerp(oneLine[tIndex], a, m_GableScale);
+                    oneLine[bIndex] = Vector3.Lerp(oneLine[bIndex], b, m_GableScale);
+
+                    bIndex += 3;
+                    mIndex += 3;
+                    tIndex += 3;
+                }
+
+                // Middle Vertical
+                int current = m_ControlPoints.GetIndex(antPointIndices[0] - 4);
+                for(int i = 3; i < oneLine.Length - 3; i+= 3)
+                {
+                    int next = m_ControlPoints.GetIndex(current + 1);
+                    int nextTwo = m_ControlPoints.GetIndex(current + 2);
+                    int nextThree = m_ControlPoints.GetIndex(current + 3);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[i+1], oneLine[i], m_ControlPoints[next].Position }, false, true, false, true);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[i], oneLine[i+1], m_ControlPoints[nextThree].Position }, false, true, true, false);
+
+                    if(m_IsOpen)
+                    {
+                        CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[i], oneLine[i], m_ControlPoints[next].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[i], oneLine[i], m_ControlPoints[nextTwo].Position }, false, true, false, false);
+                    }
+
+                    current = m_ControlPoints.GetIndex(current - 4);
+                }
+
+                current = m_ControlPoints.GetIndex(current - 3);
+                for (int i = oneLine.Length - 4; i > 3; i -= 3)
+                {
+                    int previous = m_ControlPoints.GetIndex(current - 1);
+                    int previousTwo = m_ControlPoints.GetIndex(current - 2);
+                    int previousThree = m_ControlPoints.GetIndex(current - 3);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i-1], m_ControlPoints[current].Position }, false, true, true, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previousThree].Position, oneLine[i-1], oneLine[i], m_ControlPoints[previousTwo].Position }, false, true, false, true);
+
+                    if (m_IsOpen)
+                    {
+                        CreateWall(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i], m_ControlPoints[previousTwo].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[previousTwo].Position, oneLine[i], oneLine[i], m_ControlPoints[previous].Position }, false, true, false, false);
+                    }
+
+                    current = m_ControlPoints.GetIndex(current - 4);
+                }
+
+
+                // Middle Horizontal
+                current = m_ControlPoints.GetIndex(antPointIndices[0]);
+                int nextFive = m_ControlPoints.GetIndex(current + 5);
+                int index = 1;
+                int loop = (oneLine.Length / 3) - 1;
+                for (int i = 0; i < loop; i++)
+                {
+                    int previous = m_ControlPoints.GetIndex(current - 1);
+                    int next = m_ControlPoints.GetIndex(nextFive + 1);
+
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[index + 3], oneLine[index], m_ControlPoints[current].Position }, false, true, false, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[nextFive].Position, oneLine[index], oneLine[index + 3], m_ControlPoints[next].Position }, false, true, false, false);
+
+                    current = m_ControlPoints.GetIndex(current - 4);
+                    nextFive = m_ControlPoints.GetIndex(nextFive + 4);
+                    index += 3;
+                }
+
+                // Ends
+                current = m_ControlPoints.GetIndex(antPointIndices[0]);
+                index = 0;
+
+                for (int i = 0; i < 2; i++)
+                {
+                    int next = m_ControlPoints.GetIndex(current + 1);
+                    int nextTwo = m_ControlPoints.GetIndex(current + 2);
+                    int nextThree = m_ControlPoints.GetIndex(current + 3);
+                    int nextFour = m_ControlPoints.GetIndex(current + 4);
+                    nextFive = m_ControlPoints.GetIndex(current + 5);
+
+                    if(i == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[index + 1], oneLine[index], m_ControlPoints[next].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index], oneLine[index + 2], m_ControlPoints[nextThree].Position }, false, true, true, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index + 2], oneLine[index + 1], m_ControlPoints[nextFive].Position }, false, true, true, false);
+
+                        if (m_IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index], oneLine[index], m_ControlPoints[next].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[nextThree].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[index], oneLine[index], m_ControlPoints[nextTwo].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[nextThree].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[nextFour].Position }, false, true, false, false);
+                        }
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[index + 1], oneLine[index + 2], m_ControlPoints[next].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index + 2], oneLine[index], m_ControlPoints[nextThree].Position }, false, true, true, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index], oneLine[index + 1], m_ControlPoints[nextFive].Position }, false, true, true, false);
+
+                        if (m_IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[next].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index], oneLine[index], m_ControlPoints[nextThree].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[nextTwo].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[nextThree].Position, oneLine[index], oneLine[index], m_ControlPoints[nextFour].Position }, false, true, false, false);
+                        }
+                    }
+
+                    index += oneLine.Length - 3;
+                    current = m_ControlPoints.GetIndex(current + (m_ControlPoints.Length/2));
+                }
             }
         }
 
@@ -1184,15 +1314,23 @@ public class Roof : MonoBehaviour
 
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
+            Handles.color = Color.white;
             Handles.Label(m_ControlPoints[i].Position + transform.localPosition, i.ToString());
         }
 
         if (m_TempOneLine == null)
             return;
 
+        int itr = 0;
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 16;
+        style.normal.textColor = Color.red;
+
         foreach (Vector3 point in m_TempOneLine)
         {
-            Handles.DrawSolidDisc(point, Vector3.up, 0.1f);
+            Handles.Label(point, itr.ToString(), style);
+            itr++;
+            //Handles.DrawSolidDisc(point, Vector3.up, 0.1f);
         }
 
     }

@@ -67,6 +67,27 @@ public static class Vector3Extensions
         return samplePoints;
     }
 
+    public static Vector3[] QuadraticLerpCollection(Vector3 a, Vector3 b, Vector3 c, int numberOfSamples)
+    {
+        Vector3[] ab = LerpCollection(a, b, numberOfSamples);
+        Vector3[] bc = LerpCollection(b, c, numberOfSamples);
+
+        Vector3[] samplePoints = new Vector3[numberOfSamples];
+
+        float index = 0;
+        float count = (float)numberOfSamples / (numberOfSamples - 1);
+
+        for (int i = 0; i < numberOfSamples; i++)
+        {
+            float t = index / (float)numberOfSamples;
+            index += count;
+
+            samplePoints[i] = Vector3.Lerp(ab[i], bc[i], t);
+        }
+
+        return samplePoints;
+    }
+
     public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
     {
         return Vector3.Distance(a, value) / Vector3.Distance(a, b);

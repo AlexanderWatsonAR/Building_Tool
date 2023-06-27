@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using static UnityEditor.PlayerSettings;
+using UnityEditor.PackageManager.UI;
 
 // Add Poly path stuff
 [CustomEditor(typeof(Building))]
@@ -12,6 +13,10 @@ public class BuildingEditor : Editor
     private PolyPath m_PolyPath;
     private SerializedProperty m_PolyPathProp;
     private Vector3 m_MousePosition;
+    private Color m_CP_Valid = Color.green;
+    private Color m_CP_Invalid = Color.red;
+    private bool m_IsValidPoint;
+    MouseCursor m_MouseCursor;
     [SerializeField] private PolyMode m_PolyMode = PolyMode.Hide;
 
     public override void OnInspectorGUI()
@@ -55,6 +60,18 @@ public class BuildingEditor : Editor
 
     private void OnSceneGUI()
     {
+        //Event evt = Event.current;
+
+        //if (m_PolyMode == PolyMode.Edit)
+        //{
+        //    m_MouseCursor = MouseCursor.ArrowPlus;
+        //}
+        //else
+        //{
+        //    m_MouseCursor = MouseCursor.Arrow;
+        //}
+
+
         Input();
         Draw();
     }
@@ -68,15 +85,40 @@ public class BuildingEditor : Editor
         
         Ray ray = UnityEditor.HandleUtility.GUIPointToWorldRay(currentEvent.mousePosition);
 
-        float size = UnityEditor.HandleUtility.GetHandleSize(ray.origin) * 0.175f;
+        float size = UnityEditor.HandleUtility.GetHandleSize(ray.GetPoint(1)) * 0.05f;
+
+        bool didHit = Physics.Raycast(ray, out RaycastHit hit);
+
+        if(didHit)
+        {
+            Vector3 hp = m_Building.transform.InverseTransformPoint(hit.point);
+
+            if(ValidatePoint(hp))
+            {
+                Handles.color = m_CP_Valid;
+                m_IsValidPoint = true;
+            }
+            else
+            {
+                Handles.color = m_CP_Invalid;
+                m_IsValidPoint = false;
+            }
+            
+        }
+        else
+        {
+            Handles.color = m_CP_Invalid;
+            m_IsValidPoint = false;
+        }
 
         Handles.DotHandleCap(-1, ray.GetPoint(1), Quaternion.identity, size, currentEvent.type);
+        Handles.color = Color.white;
 
         m_MousePosition = ray.GetPoint(1);
 
         if (currentEvent.type == EventType.MouseDown && currentEvent.button == 0)
         {
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (didHit)
             {
                 Vector3 point = m_Building.transform.InverseTransformPoint(hit.point);
 
@@ -94,7 +136,15 @@ public class BuildingEditor : Editor
                     }
                 }
 
-                m_PolyPath.AddControlPoint(point);
+                if (ValidatePoint(point))
+                {
+                    m_PolyPath.AddControlPoint(point);
+                    m_IsValidPoint = true;
+                }
+                else
+                {
+                    m_IsValidPoint = false;
+                }
             }
         }
 
@@ -124,12 +174,21 @@ public class BuildingEditor : Editor
             }  
         }
 
-        if (m_PolyPath.ControlPointCount <= 1)
+        if (m_PolyPath.ControlPointCount < 1)
             return;
 
         if(m_PolyMode == PolyMode.Draw && m_PolyPath.ControlPointCount > 0)
         {
+            if(m_IsValidPoint)
+            {
+                Handles.color = m_CP_Valid;
+            }
+            else
+            {
+                Handles.color = m_CP_Invalid;
+            }
             Handles.DrawDottedLine(localPositions[^1], m_MousePosition, 1);
+            Handles.color = Color.white;
         }
 
         Handles.DrawAAPolyLine(localPositions.ToArray());
@@ -139,6 +198,42 @@ public class BuildingEditor : Editor
             Handles.DrawAAPolyLine(localPositions[0], localPositions[^1]);
         }
 
+    }
+
+    private bool ValidatePoint(Vector3 point)
+    {
+        if (m_PolyPath.ControlPointCount == 0)
+            return true;
+
+        if(m_PolyPath.ControlPointCount >= 3)
+        {
+            if(Vector3.Distance(point, m_PolyPath.GetPositionAt(0)) <= 1)
+            {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < m_PolyPath.ControlPointCount; i++)
+        {
+            float dis = Vector3.Distance(point, m_PolyPath.GetPositionAt(i));
+
+            if (dis <= 1)
+            {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < m_PolyPath.ControlPointCount-1; i++)
+        {
+            float dis = HandleUtility.DistancePointLine(point, m_PolyPath.GetPositionAt(i), m_PolyPath.GetPositionAt(i + 1));
+
+            if (dis <= 1)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void OnEnable()

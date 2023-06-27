@@ -14,12 +14,16 @@ public class Storey : MonoBehaviour
 {
     [SerializeField, HideInInspector] private int m_StoreyID;
     [SerializeField] private ControlPoint[] m_ControlPoints;
+    [SerializeField] private StoreyElement m_ActiveElements;
 
     // Wall
     [SerializeField, Range(1, 100)] private float m_WallHeight;
     [SerializeField, Range(0, 1)] private float m_WallDepth;
     [SerializeField] private Material m_WallMaterial;
     [SerializeField] private Vector3[] m_InsidePoints;
+    [SerializeField] private bool m_CurvedCorners;
+
+    public bool CurvedCorners => m_CurvedCorners;
     public float WallHeight => m_WallHeight;
     public float WallDepth => m_WallDepth;
     public Material WallMaterial => m_WallMaterial;
@@ -35,9 +39,7 @@ public class Storey : MonoBehaviour
     // Pillar
     [SerializeField] private float m_PillarWidth, m_PillarDepth;
     [SerializeField] private Material m_PillarMaterial;
-    [SerializeField] private bool m_ArePillarsActive;
 
-    public bool ArePillarsActive => m_ArePillarsActive;
     public Material PillarMaterial => m_PillarMaterial;
     public float PillarWidth => m_PillarWidth;
     public float PillarDepth => m_PillarDepth;
@@ -46,7 +48,12 @@ public class Storey : MonoBehaviour
     public int ID => m_StoreyID;
     public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
 
+    public StoreyElement ActiveElements => m_ActiveElements;
+
     List<Vector3[]> m_WallPoints;
+
+    //Vector3[] m_ConcaveCornerPoints;
+
 
     public Vector3[] InsidePoints
     {
@@ -76,27 +83,28 @@ public class Storey : MonoBehaviour
 
     private void Reset()
     {
-        Initialize(-1, null, 3, 0.5f, null, 0.1f, null, true, 0.5f, 0.5f, null);
+        Initialize(-1, null, StoreyElement.Everything, 3, 0.5f, false, null, 0.1f, null, 0.5f, 0.5f, null);
     }
 
     public Storey Initialize(Storey storey)
     {
-        return Initialize(storey.ID, storey.ControlPoints, storey.WallHeight, storey.WallDepth, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.ArePillarsActive, storey.PillarWidth, storey.PillarDepth, storey.PillarMaterial);
+        return Initialize(storey.ID, storey.ControlPoints, storey.ActiveElements, storey.WallHeight, storey.WallDepth, storey.CurvedCorners, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.PillarWidth, storey.PillarDepth, storey.PillarMaterial);
     }
 
-    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, float wallHeight, float wallDepth, Material wallMaterial, float floorHeight, Material floorMaterial, bool arePillarsActive, float pillarWidth, float pillarDepth, Material pillarMaterial)
+    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, StoreyElement activeElements, float wallHeight, float wallDepth, bool curvedCorners, Material wallMaterial, float floorHeight, Material floorMaterial, float pillarWidth, float pillarDepth, Material pillarMaterial)
     {
         m_StoreyID = id;
         m_ControlPoints = controlPoints != null ? controlPoints.ToArray() : null;
+        m_ActiveElements = activeElements;
 
         m_WallHeight = wallHeight;
         m_WallDepth = wallDepth;
+        m_CurvedCorners = curvedCorners;
         m_WallMaterial = wallMaterial;
 
         m_FloorMaterial = floorMaterial;
         m_FloorHeight = floorHeight;
 
-        m_ArePillarsActive = arePillarsActive;
         m_PillarDepth = pillarDepth;
         m_PillarWidth = pillarWidth;
         m_PillarMaterial = pillarMaterial;
@@ -138,7 +146,7 @@ public class Storey : MonoBehaviour
 
     private void BuildPillars()
     {
-        if (!m_ArePillarsActive)
+        if (!IsElementActive(StoreyElement.Pillar))
             return;
 
         GameObject pillars = new GameObject("Pillars");
@@ -163,6 +171,9 @@ public class Storey : MonoBehaviour
 
     private void BuildCorners()
     {
+        if (!IsElementActive(StoreyElement.Walls))
+            return;
+
         if (m_WallPoints.Count != m_ControlPoints.Length)
             return;
 
@@ -188,6 +199,9 @@ public class Storey : MonoBehaviour
             Extensions.DoLinesIntersect(m_WallPoints[current][0] + crossA, m_WallPoints[current][1] + crossA, m_WallPoints[previous][0] + crossB, m_WallPoints[previous][1] + crossB, out intersection);
 
             Vector3[] cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[current][0] + crossB, intersection };
+            Vector3[] curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[1], cornerPoints[3], cornerPoints[2], 8);
+            Vector3[] points = new Vector3[curveyPoints.Length + 1];
+            points[0] = cornerPoints[0];
 
             if (isConcave)
             {
@@ -195,15 +209,26 @@ public class Storey : MonoBehaviour
                 {
                     Extensions.DoLinesIntersect(m_WallPoints[current][0], m_WallPoints[current][1], m_WallPoints[previous][0], m_WallPoints[previous][1], out intersection);
                     cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1], intersection };
+                    curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[2], cornerPoints[3], cornerPoints[0], 8);
+                    points[0] = cornerPoints[1];
                 }
 
             }
 
+            for(int j = 0; j < curveyPoints.Length; j++)
+            {
+                points[j+1] = curveyPoints[j];
+            }
+
+            points = points.SortPointsClockwise().ToArray();
             cornerPoints = cornerPoints.SortPointsClockwise().ToArray();
 
             ProBuilderMesh post = ProBuilderMesh.Create();
             post.name = "Corner";
-            post.CreateShapeFromPolygon(cornerPoints, m_WallHeight, false);
+            if(m_CurvedCorners)
+                post.CreateShapeFromPolygon(points, m_WallHeight, false);
+            else
+                post.CreateShapeFromPolygon(cornerPoints, m_WallHeight, false);
             post.GetComponent<Renderer>().sharedMaterial = m_WallMaterial;
             post.ToMesh();
             post.Refresh();
@@ -274,13 +299,13 @@ public class Storey : MonoBehaviour
 
     private void BuildExternalWalls()
     {
+        if (!IsElementActive(StoreyElement.Walls))
+            return;
+
         Vector3 h = m_WallHeight * Vector3.up;
 
         GameObject walls = new GameObject("Walls");
         walls.transform.SetParent(transform, true);
-
-        GameObject corners = new GameObject("Wall Corners");
-        corners.transform.SetParent(walls.transform, true);
 
         // Construct the walls 
         for (int i = 0; i < m_ControlPoints.Length; i++)
@@ -327,11 +352,6 @@ public class Storey : MonoBehaviour
                 {
                     bottomLeft = m_ControlPoints[i].Position - nextRight;
                     topLeft = bottomLeft + h;
-
-                    //one = m_ControlPoints[i].Position - nextRight;
-                    //three = m_ControlPoints[i].Position - previousRight;
-
-                    //bool didIntersect = Extensions.DoLinesIntersect(m_InsidePoints[previous], three, m_InsidePoints[next], one, out two);
                 }
 
             }
@@ -343,20 +363,14 @@ public class Storey : MonoBehaviour
             GameObject wall = new GameObject("Wall " + i.ToString(), typeof(Wall));
             wall.transform.SetParent(walls.transform, true);
             wall.GetComponent<Wall>().Initialize(points, m_WallDepth, m_WallMaterial).Build();
-
-            //ProBuilderMesh post = ProBuilderMesh.Create();
-            //post.name = "Corner";
-            //post.CreateShapeFromPolygon(new Vector3[] { zero, one, two, three }, m_WallHeight, false);
-            //post.GetComponent<Renderer>().sharedMaterial = m_WallMaterial;
-            //post.ToMesh();
-            //post.Refresh();
-
-            //post.transform.SetParent(corners.transform, true);
         }
     }
 
     private void BuildFloor()
     {
+        if (!IsElementActive(StoreyElement.Floor))
+            return;
+
         ProBuilderMesh floor = ProBuilderMesh.Create();
         floor.name = "Floor";
         floor.transform.SetParent(transform, false);
@@ -371,15 +385,32 @@ public class Storey : MonoBehaviour
         floor.Refresh();
     }
 
+    private bool IsElementActive(StoreyElement storeyElement)
+    {
+        return m_ActiveElements == StoreyElement.Nothing ? false : (m_ActiveElements & storeyElement) != 0;
+    }
+
     private void OnDrawGizmosSelected()
     {
-        //if(cornerPoints != null)
+        //if(curvePoints != null)
         //{
-        //    if (cornerPoints.Length > 0)
+        //    if(curvePoints.Length > 0)
         //    {
-        //        for(int i = 0; i < cornerPoints.Length; i++)
+        //        for(int i = 0; i < curvePoints.Length; i++)
         //        {
-        //            Handles.Label(cornerPoints[i] + (Vector3.up * m_WallHeight), new GUIContent(i.ToString()));
+        //            Handles.DrawSolidDisc(curvePoints[i], Vector3.up, 0.05f);
+        //            //Handles.Disc(-1, Quaternion.identity, curvePoints[i], Vector3.up, 0.1f, false, 1);
+        //        }
+        //    }
+        //}
+
+        //if (m_ConcaveCornerPoints != null)
+        //{
+        //    if (m_ConcaveCornerPoints.Length > 0)
+        //    {
+        //        for (int i = 0; i < m_ConcaveCornerPoints.Length; i++)
+        //        {
+        //            Handles.Label(m_ConcaveCornerPoints[i] + (Vector3.up * m_WallHeight), new GUIContent(i.ToString()));
         //        }
         //    }
         //}
