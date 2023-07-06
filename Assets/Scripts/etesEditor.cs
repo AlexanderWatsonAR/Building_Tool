@@ -10,12 +10,12 @@ public class EtesEditor : Editor
     {
         DrawDefaultInspector();
 
-        //etes test = (etes)target;
+        etes test = (etes)target;
 
-        //if (GUILayout.Button("Test"))
-        //{
-        //    test.DoTest();
-        //}
+        if (GUILayout.Button("Test"))
+        {
+            test.DoTest();
+        }
     }
 
 }

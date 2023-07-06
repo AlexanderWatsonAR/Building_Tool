@@ -15,10 +15,13 @@ public static class PolygonRecognition
     /// 2D XZ Polygon Sort Function. Only for convex shapes.
     /// </summary>
     /// <param name="controlPoints"></param>
-    public static IEnumerable<Vector3> SortPointsClockwise(this IEnumerable<Vector3> controlPoints)
+    public static IEnumerable<Vector3> SortPointsClockwise(this IEnumerable<Vector3> controlPoints, Vector3? sortPoint = null)
     {
         Vector3[] points = controlPoints.ToArray();
         Vector3 centre = ProMaths.Average(points);
+
+        if (sortPoint != null)
+            centre = sortPoint.Value;
 
         // Sort points based on angle relative to centroid
         Array.Sort(points, (a, b) =>
