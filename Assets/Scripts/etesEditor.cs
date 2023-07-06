@@ -8,12 +8,14 @@ public class EtesEditor : Editor
 {
     public override void OnInspectorGUI()
     {
-        etes test = (etes)target;
+        DrawDefaultInspector();
 
-        if(GUILayout.Button("Test"))
-        {
-            test.DoTest();
-        }
+        //etes test = (etes)target;
+
+        //if (GUILayout.Button("Test"))
+        //{
+        //    test.DoTest();
+        //}
     }
 
 }

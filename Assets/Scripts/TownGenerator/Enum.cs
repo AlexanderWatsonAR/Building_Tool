@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Flags]
 public enum StoreyElement
 {
-    Nothing = 0, Walls = 1, Floor = 2, Pillar = 4, Everything = ~0
+    Nothing = 0, Walls = 1, Floor = 2, Pillars = 4, Everything = ~0
 }
 public enum RoofType
 {

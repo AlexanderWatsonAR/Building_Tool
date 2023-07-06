@@ -50,6 +50,11 @@ public class Storey : MonoBehaviour
 
     public StoreyElement ActiveElements => m_ActiveElements;
 
+    public bool AreWallsActive => IsElementActive(StoreyElement.Walls);
+    public bool ArePillarsActive => IsElementActive(StoreyElement.Pillars);
+    public bool IsFloorActive => IsElementActive(StoreyElement.Floor);
+
+
     List<Vector3[]> m_WallPoints;
 
     //Vector3[] m_ConcaveCornerPoints;
@@ -146,7 +151,7 @@ public class Storey : MonoBehaviour
 
     private void BuildPillars()
     {
-        if (!IsElementActive(StoreyElement.Pillar))
+        if (!IsElementActive(StoreyElement.Pillars))
             return;
 
         GameObject pillars = new GameObject("Pillars");

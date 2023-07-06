@@ -35,13 +35,7 @@ public class RoofEditor : Editor
         SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
         SerializedProperty tileMaterial = serializedObject.FindProperty("m_TileMaterial");
 
-        roofActive.boolValue = EditorGUILayout.Toggle("Is Roof Active", roofActive.boolValue);
-
-        if(!roofActive.boolValue)
-        {
-            Apply(roof);
-            return;
-        }
+        roofActive.boolValue = EditorGUILayout.BeginToggleGroup("Is Active", roofActive.boolValue);
 
         int index = 0;
         int value = (int)frameType.GetEnumValue<RoofType>();
@@ -112,11 +106,12 @@ public class RoofEditor : Editor
 
 
         DisplayTile(tileHeight, tileExtend, tileMaterial);
-        Apply(roof);
+        EditorGUILayout.EndToggleGroup();
+        ApplyRoofChanges(roof);
 
     }
 
-    private void Apply(Roof roof)
+    private void ApplyRoofChanges(Roof roof)
     {
         if (serializedObject.ApplyModifiedProperties())
         {

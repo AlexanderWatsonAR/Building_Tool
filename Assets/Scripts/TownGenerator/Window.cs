@@ -68,9 +68,9 @@ public class Window : MonoBehaviour
     {
         transform.DeleteChildren();
         // Frame
-        m_Frame = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, m_FrameScale, m_Columns, m_Rows, out _);
+        m_Frame = MeshMaker.HoleGrid(m_ControlPoints, m_FrameScale, m_Columns, m_Rows, out _);
         m_Frame.Extrude(new Face[] { m_Frame.faces[0] }, ExtrudeMethod.FaceNormal, m_FrameDepth);
-        ProBuilderMesh holeGrid = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, m_FrameScale, m_Columns, m_Rows, out _, true);
+        ProBuilderMesh holeGrid = MeshMaker.HoleGrid(m_ControlPoints, m_FrameScale, m_Columns, m_Rows, out _, true);
         CombineMeshes.Combine(new ProBuilderMesh[] { m_Frame, holeGrid }, m_Frame);
         DestroyImmediate(holeGrid.gameObject);
         m_Frame.transform.SetParent(transform, true);
@@ -84,12 +84,5 @@ public class Window : MonoBehaviour
         m_Pane.GetComponent<Renderer>().sharedMaterial = m_PaneMaterial;
 
         return this;
-    }
-    private void Rebuild(ProBuilderMesh member, ProBuilderMesh mesh)
-    {
-        member.RebuildWithPositionsAndFaces(mesh.positions, mesh.faces);
-        member.ToMesh();
-        member.Refresh();
-        DestroyImmediate(mesh.gameObject);
     }
 }

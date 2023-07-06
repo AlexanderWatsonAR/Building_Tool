@@ -38,6 +38,7 @@ public class StoreyEditor : Editor
 
         EditorGUILayout.PropertyField(activeElements);
 
+        EditorGUI.BeginDisabledGroup(!storey.AreWallsActive);
         m_ShowWall = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowWall, "Wall");
         if (m_ShowWall)
         {
@@ -47,8 +48,9 @@ public class StoreyEditor : Editor
             EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
+        EditorGUI.EndDisabledGroup();
 
-
+        EditorGUI.BeginDisabledGroup(!storey.IsFloorActive);
         m_ShowFloor = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowFloor, "Floor");
         if (m_ShowFloor)
         {
@@ -56,9 +58,9 @@ public class StoreyEditor : Editor
             EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
+        EditorGUI.EndDisabledGroup();
 
-
-
+        EditorGUI.BeginDisabledGroup(!storey.ArePillarsActive);
         m_ShowPillar = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPillar, "Pillar");
             if (m_ShowPillar)
             {
@@ -67,7 +69,7 @@ public class StoreyEditor : Editor
                 EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
             }
         EditorGUILayout.EndFoldoutHeaderGroup();
-
+        EditorGUI.EndDisabledGroup();
 
         if (serializedObject.ApplyModifiedProperties())
         {

@@ -76,6 +76,50 @@ public static class PolygonRecognition
         return c;
     }
 
+    public static bool IsArrowShaped(this IEnumerable<ControlPoint> controlPoints, out int[] arrowPointIndices)
+    {
+        return IsPolygonArrowShaped(controlPoints.GetPositions(), out arrowPointIndices);
+    }
+
+    public static bool IsPolygonArrowShaped(this IEnumerable<Vector3> controlPoints, out int[] arrowPointIndices)
+    {
+        int[] concaveIndices = controlPoints.GetConcaveIndexPoints();
+        arrowPointIndices = new int[] { -1, -1 };
+
+        if (controlPoints.Count() != 9 | concaveIndices.Length != arrowPointIndices.Length)
+            return false;
+
+        int i;
+        for(i = 0; i < concaveIndices.Length; i++)
+        {
+            int sixNext = controlPoints.GetControlPointIndex(concaveIndices[i] + 6);
+            int threePrevious = controlPoints.GetControlPointIndex(concaveIndices[i] - 3);
+
+            bool conditionA = concaveIndices.Any(x => x == sixNext);
+            bool conditionB = concaveIndices.Any(x => x == threePrevious);
+
+            if(conditionA && conditionB)
+            {
+                arrowPointIndices[0] = concaveIndices[i];
+                break;
+            }
+        }
+
+        if (arrowPointIndices[0] == -1)
+            return false;
+
+        if(i == 0)
+        {
+            arrowPointIndices[1] = concaveIndices[1];
+        }
+        else
+        {
+            arrowPointIndices[1] = concaveIndices[0];
+        }
+
+        return true;
+    }
+
     public static bool IsLShaped(this IEnumerable<ControlPoint> controlPoints, out int lPointIndex)
     {
         return IsPolygonLShaped(GetPositions(controlPoints), out lPointIndex);
@@ -123,6 +167,10 @@ public static class PolygonRecognition
     {
         int[] concaveIndices = controlPoints.GetConcaveIndexPoints();
         antPointsIndex = new int[concaveIndices.Length];
+
+        if(antPointsIndex.Length == 0)
+            return false;
+
         antPointsIndex[0] = -1;
 
         if (controlPoints.Count() < 20 || controlPoints.Count() % 2 != 0 ||
@@ -1150,7 +1198,20 @@ public static class PolygonRecognition
                 oneLine[3] = last;
                 return true;
             case 9:
-                if(points.IsPolygonYShaped(out int[] yPointIndices))
+                if(points.IsPolygonArrowShaped(out int[] arrowPointIndices))
+                {
+                    oneLine = new Vector3[4];
+
+                    int[] relativeIndices = points.RelativeIndices(arrowPointIndices[0]);
+
+                    oneLine[0] = Vector3.Lerp(points[relativeIndices[8]], points[relativeIndices[7]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[2]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[relativeIndices[4]], points[relativeIndices[5]], 0.5f);
+                    Extensions.DoLinesIntersect(oneLine[0], points[relativeIndices[3]], oneLine[1], Vector3.Lerp(points[relativeIndices[0]], points[relativeIndices[3]], 0.5f), out oneLine[3]);
+                    return true;
+
+                }
+                else if(points.IsPolygonYShaped(out int[] yPointIndices))
                 {
                     oneLine = new Vector3[4];
 
@@ -1159,6 +1220,8 @@ public static class PolygonRecognition
                     oneLine[0] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[2]], 0.5f);
                     oneLine[1] = Vector3.Lerp(points[relativeIndices[4]], points[relativeIndices[5]], 0.5f);
                     oneLine[2] = Vector3.Lerp(points[relativeIndices[7]], points[relativeIndices[8]], 0.5f);
+
+                   
                     oneLine[3] = ProMaths.Average(new Vector3[] { points[yPointIndices[0]], points[yPointIndices[1]], points[yPointIndices[2]] });
                     return true;
                 }

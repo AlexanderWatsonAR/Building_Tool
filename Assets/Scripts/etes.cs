@@ -6,52 +6,42 @@ using UnityEngine;
 
 public class etes : MonoBehaviour
 {
-    private PolyPath polytool;
+    [SerializeField, Range(4, 32)] private int side = 4;
+    [SerializeField, Range(0, 1)] private float scale = 0.5f;
 
-
-    public void DoTest()
+    private void OnDrawGizmosSelected()
     {
-        polytool = GetComponent<PolyPath>();
+        Vector3[] controlPoints = new Vector3[] { new Vector3(-10.5f, 0, -10.5f), new Vector3(-10.5f, 0, 10.5f), new Vector3(10.5f, 0, 10.5f), new Vector3(10.5f, 0, -10.5f) };
+
+        List<Vector3[]> points = MeshMaker.HoleGrid0(controlPoints, Vector3.one * scale, 1, 1, side);
+
+        Handles.color = Color.white;
+        foreach (Vector3[] vertices in points)
+        {
+            Handles.DrawPolyLine(vertices);
+            Handles.DrawPolyLine(vertices[0], vertices[^1]);
+            for(int i = 0; i < vertices.Length;i++)
+            {
+                Handles.Label(vertices[i], (4 + i).ToString());
+            }
+        }
+
+        Handles.color = Color.red;
+        Handles.DrawPolyLine(controlPoints);
+        Handles.DrawPolyLine(controlPoints[0], controlPoints[^1]);
+
+        for (int i = 0; i < controlPoints.Length; i++)
+        {
+            Handles.Label(controlPoints[i], i.ToString());
+        }
 
     }
 
-    private void OnDrawGizmos()
+    public void DoTest()
     {
-        //polytool = GetComponent<PolyPath>();
+        //Vector3[] controlPoints = new Vector3[] { new Vector3(-10.5f, -10.5f, 0), new Vector3(-10.5f, 10.5f, 0), new Vector3(10.5f, 10.5f, 0), new Vector3(10.5f, -10.5f, 0) };
 
-        //if (polytool.IsDescribableInOneLine(out Vector3[] oneLine))
-        //{
-        //    foreach(Vector3 line in oneLine)
-        //    {
-        //        Handles.DoPositionHandle(line, Quaternion.identity);
-        //    }
-        //}
-        
-        //if(polytool.IsMShaped(out int[] convexPoints))
-        //{
-        //    Vector3[] controlPointsArray = polytool.LocalPositions.ToArray();
-
-        //    GUIStyle style = new GUIStyle();
-        //    style.fontSize = 18;
-        //    for (int i = 0; i < controlPointsArray.Length; i++)
-        //    {
-        //        for(int j = 0; j < convexPoints.Length; j++)
-        //        {
-        //            if (i == convexPoints[j])
-        //            {
-        //                style.normal.textColor = Color.red;
-        //                break;
-        //            }
-        //            else
-        //            {
-        //                style.normal.textColor = Color.green;
-        //            }
-        //        }
-
-        //        Handles.Label(polytool.LocalPositions[i], i.ToString(), style);
-        //    }
-
-        //}
+        //MeshMaker.HoleGrid0(controlPoints, Vector3.one * scale, 1, 1, side);
     }
 
 }

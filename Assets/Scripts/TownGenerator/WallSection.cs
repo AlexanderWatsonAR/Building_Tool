@@ -126,9 +126,9 @@ public class WallSection : MonoBehaviour
             case WallElement.Window:
                 Vector3 windowScale = new Vector3(m_WindowWidth, m_WindowHeight, m_WindowWidth);
                 List<Vector3[]> holeGridControlPoints;
-                ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, windowScale, m_WindowColumns, m_WindowRows, out holeGridControlPoints);
+                ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out holeGridControlPoints);
                 holeGridA.Extrude(new Face[] { holeGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
-                ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, Vector3.zero, 0, windowScale, m_WindowColumns, m_WindowRows, out _, true);
+                ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out _, true);
                 CombineMeshes.Combine(new ProBuilderMesh[] { holeGridA, holeGridB }, holeGridA);
                 Rebuild(holeGridA);
                 DestroyImmediate(holeGridB.gameObject);
