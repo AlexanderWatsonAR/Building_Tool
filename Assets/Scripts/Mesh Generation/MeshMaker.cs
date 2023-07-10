@@ -312,137 +312,87 @@ public static class MeshMaker
 
         List<Vector3[]> controlPointsGrid = new List<Vector3[]>();
         List<Vector3[]> holePointsGrid = new List<Vector3[]>();
-        List<int[]> cIndexGrid = new List<int[]>();
+        //List<int[]> cIndexGrid = new List<int[]>();
 
         for (int i = 0; i < leftPoints.Length; i++)
         {
             controlPointsGrid.Add(Vector3Extensions.LerpCollection(leftPoints[i], rightPoints[i], pointsWide));
 
-            cIndexGrid.Add(new int[pointsWide]);
-            cIndexGrid[i][0] = i;
+            //cIndexGrid.Add(new int[pointsWide]);
+            //cIndexGrid[i][0] = i;
 
-            for (int j = 1; j < cIndexGrid[0].Length; j++)
-            {
-                cIndexGrid[i][j] = cIndexGrid[i][j - 1] + pointsHigh;
-            }
+            //for (int j = 1; j < cIndexGrid[0].Length; j++)
+            //{
+            //    cIndexGrid[i][j] = cIndexGrid[i][j - 1] + pointsHigh;
+            //}
         }
 
-        // This section deals with generating the triangles
+        IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
-        Vector3 bl = controlPointsGrid[0][0];
-        Vector3 tl = controlPointsGrid[1][0];
-        Vector3 tr = controlPointsGrid[1][1];
-        Vector3 br = controlPointsGrid[0][1];
-        Vector3[] quadVerts = new Vector3[] { bl, tl, tr, br };
-        Vector3 forward = Vector3.Cross(Vector3.up, bl.DirectionToTarget(br));
-
-        Vector3 position = ProMaths.Average(new Vector3[] { bl, tl, tr, br });
-        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, -forward);
-        float radius = Vector3.Distance(bl, br) * 0.5f;
-
-        Vector3[] holeVerts = CreateNPolygon(sides, radius);
-
-        for (int i = 0; i < holeVerts.Length; i++)
+        for (int i = 0; i < columns; i++)
         {
-            holeVerts[i] += position;
-
-            // Rotate to align with control points
-            Vector3 euler = rotation.eulerAngles;
-            Vector3 v = Quaternion.Euler(euler) * (holeVerts[i] - position) + position;
-            holeVerts[i] = v;
-
-            // Rotate to apply angle
-            euler = Quaternion.AngleAxis(angle, forward).eulerAngles;
-            Vector3 v1 = Quaternion.Euler(euler) * (holeVerts[i] - position) + position;
-            holeVerts[i] = v1;
-
-        }
-
-        // Point + index.
-        List<List<int>> reachablePoints = new(4);
-        reachablePoints.Add(new List<int>());
-        reachablePoints.Add(new List<int>());
-        reachablePoints.Add(new List<int>());
-        reachablePoints.Add(new List<int>());
-
-        float maxDistance = Vector3.Distance(bl, br) * 0.5f;
-        float marginForError = maxDistance * 0.1f;
-
-        for (int i = 0; i < quadVerts.Length; i++)
-        {
-            for (int j = 0; j < holeVerts.Length; j++)
+            for (int j = 0; j < rows; j++)
             {
-                // Divides the quad into quadrants. This stops overlapping or -
-                // - connecting to points the cross through the hole polygon.
-                if (Vector3.Distance(quadVerts[i], holeVerts[j]) > (maxDistance + marginForError))
+                Vector3 bl = controlPointsGrid[j][i];
+                Vector3 tl = controlPointsGrid[j + 1][i];
+                Vector3 tr = controlPointsGrid[j + 1][i + 1];
+                Vector3 br = controlPointsGrid[j][i + 1];
+
+                Vector3[] quadVerts = new Vector3[] { bl, tl, tr, br };
+                Vector3 forward = Vector3.Cross(Vector3.up, bl.DirectionToTarget(br));
+
+                Vector3 position = ProMaths.Average(quadVerts);
+                Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, -forward);
+
+                float xSize = Vector3.Distance(bl, br) * 0.5f;
+                float ySize = Vector3.Distance(bl, tl) * 0.5f;
+                float radius = xSize < ySize? xSize : ySize;
+
+                Vector3[] holeVerts = CreateNPolygon(sides, radius);
+
+                for (int k = 0; k < holeVerts.Length; k++)
                 {
-                    continue;
+                    holeVerts[k] += position;
+
+                    if(xSize < ySize)
+                    {
+                        // Scale 
+                        Vector3 point0 = holeVerts[k] - position;
+                        Vector3 v0 = Vector3.Scale(point0, new Vector3(1, columns, 1)) + position;
+                        holeVerts[k] = v0;
+                    }
+                    else if(xSize > ySize)
+                    {
+                        // Scale 
+                        Vector3 point0 = holeVerts[k] - position;
+                        Vector3 v0 = Vector3.Scale(point0, new Vector3(rows, 1, 1)) + position;
+                        holeVerts[k] = v0;
+                    }
+
+                    // Rotate to align with control points
+                    Vector3 euler = rotation.eulerAngles;
+                    Vector3 v = Quaternion.Euler(euler) * (holeVerts[k] - position) + position;
+                    holeVerts[k] = v;
+
+                    // Rotate to apply angle
+                    euler = Quaternion.AngleAxis(angle, forward).eulerAngles;
+                    Vector3 v1 = Quaternion.Euler(euler) * (holeVerts[k] - position) + position;
+                    holeVerts[k] = v1;
+
+                    // Scale 
+                    Vector3 point = holeVerts[k] - position;
+                    Vector3 v2 = Vector3.Scale(point, scale) + position;
+                    holeVerts[k] = v2;
+
                 }
 
-                reachablePoints[i].Add(j + 4);
+                holePoints.Add(holeVerts.ToList());
             }
         }
 
-        //for(int i = 0; i < reachablePoints.Count; i++)
-        //{
-        if (reachablePoints[1][0] == 4 /*&& reachablePoints[i][1] == sides*/)
-        {
-            reachablePoints[1] = reachablePoints[1].Skip(1).Concat(reachablePoints[1].Take(1)).ToList();
-        }
-        //}
+        ProBuilderMesh mesh = ProBuilderMesh.Create();
 
-        List<int> triangles = new List<int>();
-
-        List<Face> faces = new();
-
-        for (int i = 0; i < reachablePoints.Count; i++)
-        {
-            // TODO Start
-            // FIX: Triangle is missing for some polygons. This happens when there isn't a point adjacent to the maxDistance of a quad vert.
-
-            //int previous = quadVerts.GetPreviousControlPoint(i);
-            //triangles.Add(i);
-            //triangles.Add(reachablePoints[i][0]);
-            //triangles.Add(previous);
-
-            //faces.Add(new Face(new int[] { triangles[^3], triangles[^2], triangles[^1] }));
-
-            //Vector3 approx = Vector3.Lerp(holeVerts[reachablePoints[i][0]-4], holeVerts[reachablePoints[previous][^1]-4], 0.5f);
-
-            //if (Vector3.Distance(quadVerts[i], approx) < maxDistance + marginForError &&
-            //    Vector3.Distance(quadVerts[i], approx) > maxDistance - marginForError)
-            //{
-            //    triangles.Add(previous);
-            //    triangles.Add(reachablePoints[i][0]);
-            //    triangles.Add(reachablePoints[previous][^1]);
-
-            //    faces.Add(new Face(new int[] { triangles[^3], triangles[^2], triangles[^1] }));
-            //}
-
-            for (int j = 0; j < reachablePoints[i].Count - 1; j++)
-            {
-                int current = j;
-                int next = reachablePoints[i].NextIndex(current);
-
-                triangles.Add(i);
-                triangles.Add(reachablePoints[i][next]);
-                triangles.Add(reachablePoints[i][j]);
-
-                faces.Add(new Face(new int[] { triangles[^3], triangles[^2], triangles[^1] }));
-            }
-        }
-
-        for (int i = 0; i < holeVerts.Length; i++)
-        {
-            // Scale // Scaling should be done after calculating the triangles.
-            Vector3 point = holeVerts[i] - position;
-            Vector3 v = Vector3.Scale(point, scale) + position;
-            holeVerts[i] = v;
-        }
-
-        Vector3[] points = quadVerts.Concat(holeVerts).ToArray();
-
-        ProBuilderMesh mesh = ProBuilderMesh.Create(points, faces);
+        mesh.CreateShapeFromPolygon(controlPoints.ToList(), 0.1f, false, holePoints);
         mesh.ToMesh();
         mesh.Refresh();
 
