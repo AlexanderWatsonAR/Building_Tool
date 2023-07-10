@@ -7,7 +7,9 @@ using UnityEngine;
 public class etes : MonoBehaviour
 {
     [SerializeField, Range(4, 32)] private int m_Sides = 4;
-    [SerializeField, Range(0, 1)] private float m_Scale = 0.5f;
+    //[SerializeField, Range(0, 1)] private float m_Scale = 0.5f;
+    [SerializeField, Range(0, 1)] private float m_Width = 0.5f;
+    [SerializeField, Range(0, 1)] private float m_Height = 0.5f;
     [SerializeField, Range(0, 90)] private float m_Angle = 0;
 
     private void OnDrawGizmosSelected()
@@ -42,7 +44,12 @@ public class etes : MonoBehaviour
     {
         Vector3[] controlPoints = new Vector3[] { new Vector3(-10.5f, -10.5f, 0), new Vector3(-10.5f, 10.5f, 0), new Vector3(10.5f, 10.5f, 0), new Vector3(10.5f, -10.5f, 0) };
 
-        MeshMaker.HoleGrid0(controlPoints, Vector3.one * m_Scale, 1, 1, m_Sides, m_Angle);
+        for(int i = 0; i < controlPoints.Length; i++)
+        {
+            controlPoints[i] += transform.position;
+        }
+
+        MeshMaker.HoleGrid0(controlPoints, new Vector3(m_Width, m_Height, 0), 1, 1, m_Sides, m_Angle);
     }
 
 }
