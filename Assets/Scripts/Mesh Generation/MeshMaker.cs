@@ -358,7 +358,10 @@ public static class MeshMaker
                     {
                         // Scale 
                         Vector3 point0 = holeVerts[k] - position;
-                        Vector3 v0 = Vector3.Scale(point0, new Vector3(1, columns, 1)) + position;
+                        float t = angle / 45;
+                        float x = Mathf.Lerp(1, columns, t);
+                        float y = Mathf.Lerp(columns, 1, t);
+                        Vector3 v0 = Vector3.Scale(point0, new Vector3(x, y, 1)) + position;
                         holeVerts[k] = v0;
                     }
                     else if(xSize > ySize)

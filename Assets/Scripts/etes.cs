@@ -10,7 +10,7 @@ public class etes : MonoBehaviour
     //[SerializeField, Range(0, 1)] private float m_Scale = 0.5f;
     [SerializeField, Range(0, 0.999f)] private float m_Width = 0.5f;
     [SerializeField, Range(0, 0.999f)] private float m_Height = 0.5f;
-    [SerializeField, Range(0, 90)] private float m_Angle = 0;
+    [SerializeField, Range(0, 45)] private float m_Angle = 0;
     [SerializeField, Range(1, 10)] private int m_Columns = 1, m_Rows = 1;
 
     private void OnDrawGizmosSelected()
