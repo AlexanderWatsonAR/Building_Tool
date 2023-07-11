@@ -6,12 +6,12 @@ using UnityEngine;
 
 public class etes : MonoBehaviour
 {
-    [SerializeField, Range(4, 32)] private int m_Sides = 4;
-    //[SerializeField, Range(0, 1)] private float m_Scale = 0.5f;
-    [SerializeField, Range(0, 0.999f)] private float m_Width = 0.5f;
-    [SerializeField, Range(0, 0.999f)] private float m_Height = 0.5f;
-    [SerializeField, Range(0, 45)] private float m_Angle = 0;
-    [SerializeField, Range(1, 10)] private int m_Columns = 1, m_Rows = 1;
+    //[SerializeField, Range(4, 32)] private int m_Sides = 4;
+    ////[SerializeField, Range(0, 1)] private float m_Scale = 0.5f;
+    //[SerializeField, Range(0, 0.999f)] private float m_Width = 0.5f;
+    //[SerializeField, Range(0, 0.999f)] private float m_Height = 0.5f;
+    //[SerializeField, Range(0, 45)] private float m_Angle = 0;
+    //[SerializeField, Range(1, 10)] private int m_Columns = 1, m_Rows = 1;
 
     private void OnDrawGizmosSelected()
     {
@@ -43,14 +43,14 @@ public class etes : MonoBehaviour
 
     public void DoTest()
     {
-        Vector3[] controlPoints = new Vector3[] { new Vector3(-10.5f, -10.5f, 0), new Vector3(-10.5f, 10.5f, 0), new Vector3(10.5f, 10.5f, 0), new Vector3(10.5f, -10.5f, 0) };
+        //Vector3[] controlPoints = new Vector3[] { new Vector3(-10.5f, -10.5f, 0), new Vector3(-10.5f, 10.5f, 0), new Vector3(10.5f, 10.5f, 0), new Vector3(10.5f, -10.5f, 0) };
 
-        for(int i = 0; i < controlPoints.Length; i++)
-        {
-            controlPoints[i] += transform.position;
-        }
+        //for(int i = 0; i < controlPoints.Length; i++)
+        //{
+        //    controlPoints[i] += transform.position;
+        //}
 
-        MeshMaker.HoleGrid0(controlPoints, new Vector3(m_Width, m_Height, 0), m_Columns, m_Rows, m_Sides, m_Angle);
+        //MeshMaker.NPolyHoleGrid(controlPoints, new Vector3(m_Width, m_Height, 0), m_Columns, m_Rows, m_Sides, m_Angle);
     }
 
 }

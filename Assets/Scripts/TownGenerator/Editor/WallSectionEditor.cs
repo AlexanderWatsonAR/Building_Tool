@@ -40,6 +40,7 @@ public class WallSectionEditor : Editor
         SerializedProperty winRows = serializedObject.FindProperty("m_WindowRows");
         SerializedProperty winHeight = serializedObject.FindProperty("m_WindowHeight");
         SerializedProperty winWidth = serializedObject.FindProperty("m_WindowWidth");
+        SerializedProperty winSides = serializedObject.FindProperty("m_WindowSides");
         SerializedProperty winActive = serializedObject.FindProperty("m_IsWindowActive");
         SerializedProperty winFColumns = serializedObject.FindProperty("m_WindowFrameColumns");
         SerializedProperty winFRows = serializedObject.FindProperty("m_WindowFrameRows");
@@ -88,6 +89,7 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.LabelField("Number of Windows");
                 EditorGUILayout.IntSlider(winColumns, 1, 10, "Columns");
                 EditorGUILayout.IntSlider(winRows, 1, 10, "Rows");
+                EditorGUILayout.IntSlider(winSides, 3, 32, "Sides");
                 EditorGUILayout.LabelField("Size");
                 EditorGUILayout.Slider(winHeight, 0, 1, "Height");
                 EditorGUILayout.Slider(winWidth, 0, 1, "Width");

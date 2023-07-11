@@ -1,18 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using Unity.Burst.Intrinsics;
 using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor.MemoryProfiler;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
-using UnityEngine.UIElements;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
+
 using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class MeshMaker
@@ -291,18 +285,22 @@ public static class MeshMaker
         return cubes;
     }
 
-    public static List<Vector3[]> HoleGrid0(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, int sides, float angle, bool flipFace = false)
+    public static ProBuilderMesh NPolyHoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, int sides, float depth, bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();
         //holeGridControlPoints = new();
 
-        //if (cps.Length != 4)
-        //    return null;
+        if (cps.Length != 4)
+            return null;
 
-        //if (scale == Vector3.zero || columns == 0 || rows == 0)
-        //{
-        //    return Quad(controlPoints, flipFace);
-        //}
+        if (scale == Vector3.zero || columns == 0 || rows == 0)
+        {
+            return Quad(controlPoints, flipFace);
+        }
+
+        List<Vector3> combinedVertices = new();
+        
+        combinedVertices.AddRange(cps);
 
         int pointsWide = columns + 1;
         int pointsHigh = rows + 1;
@@ -312,22 +310,15 @@ public static class MeshMaker
 
         List<Vector3[]> controlPointsGrid = new List<Vector3[]>();
         List<Vector3[]> holePointsGrid = new List<Vector3[]>();
-        //List<int[]> cIndexGrid = new List<int[]>();
 
         for (int i = 0; i < leftPoints.Length; i++)
         {
             controlPointsGrid.Add(Vector3Extensions.LerpCollection(leftPoints[i], rightPoints[i], pointsWide));
-
-            //cIndexGrid.Add(new int[pointsWide]);
-            //cIndexGrid[i][0] = i;
-
-            //for (int j = 1; j < cIndexGrid[0].Length; j++)
-            //{
-            //    cIndexGrid[i][j] = cIndexGrid[i][j - 1] + pointsHigh;
-            //}
         }
 
         IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
+        IList<IList<int>> holeIndices = new List<IList<int>>();
+        int start = 4;
 
         for (int i = 0; i < columns; i++)
         {
@@ -352,54 +343,70 @@ public static class MeshMaker
 
                 for (int k = 0; k < holeVerts.Length; k++)
                 {
+                    // Position
                     holeVerts[k] += position;
 
+                    // Fix scaling.
+                    // Scale to the size of the box container.
                     if(xSize < ySize)
                     {
-                        // Scale 
                         Vector3 point0 = holeVerts[k] - position;
-                        float t = angle / 45;
-                        float x = Mathf.Lerp(1, columns, t);
-                        float y = Mathf.Lerp(columns, 1, t);
-                        Vector3 v0 = Vector3.Scale(point0, new Vector3(x, y, 1)) + position;
+                        Vector3 v0 = Vector3.Scale(point0, new Vector3(1, columns, 1)) + position;
                         holeVerts[k] = v0;
                     }
                     else if(xSize > ySize)
                     {
-                        // Scale 
                         Vector3 point0 = holeVerts[k] - position;
                         Vector3 v0 = Vector3.Scale(point0, new Vector3(rows, 1, 1)) + position;
                         holeVerts[k] = v0;
                     }
-
-                    // Rotate to align with control points
-                    Vector3 euler = rotation.eulerAngles;
-                    Vector3 v = Quaternion.Euler(euler) * (holeVerts[k] - position) + position;
-                    holeVerts[k] = v;
-
-                    // Rotate to apply angle
-                    euler = Quaternion.AngleAxis(angle, forward).eulerAngles;
-                    Vector3 v1 = Quaternion.Euler(euler) * (holeVerts[k] - position) + position;
-                    holeVerts[k] = v1;
 
                     // Scale 
                     Vector3 point = holeVerts[k] - position;
                     Vector3 v2 = Vector3.Scale(point, scale) + position;
                     holeVerts[k] = v2;
 
+                    // Rotate to align with control points
+                    Vector3 euler = rotation.eulerAngles;
+                    Vector3 v = Quaternion.Euler(euler) * (holeVerts[k] - position) + position;
+                    holeVerts[k] = v;
                 }
 
                 holePoints.Add(holeVerts.ToList());
+                holeIndices.Add(Enumerable.Range(start, holeVerts.Length).ToList());
+
+                combinedVertices.AddRange(holeVerts);
+                start += holeVerts.Length;
             }
         }
 
         ProBuilderMesh mesh = ProBuilderMesh.Create();
+        //mesh.positions = combinedVertices;
 
-        mesh.CreateShapeFromPolygon(controlPoints.ToList(), 0.1f, false, holePoints);
+        Vector3 normal = Vector3.Cross(Vector3.up, cps[0].DirectionToTarget(cps[3]));
+
+        //Vector3 normal = ProMaths.Normal(cps[3], cps[0], cps[1]);
+
+
+        //Face extrudeFace = mesh.CreatePolygonWithHole(new int[] { 0, 1, 2, 3 }, holeIndices);
+
+        // How can I calculate the face normal prior to generating the polygon?
+        mesh.CreateShapeFromPolygon(controlPoints.ToList(), 0, false, holePoints);
         mesh.ToMesh();
         mesh.Refresh();
 
-        return new List<Vector3[]>();
+        Vector3[] normals = mesh.GetNormals();
+
+        if (!Vector3Extensions.Approximately0(normals[0], normal, 0.1f))
+        {
+            mesh.faces[0].Reverse();
+        }
+
+        mesh.Extrude(new Face[] { mesh.faces[0] }, ExtrudeMethod.FaceNormal, depth);
+        mesh.ToMesh();
+        mesh.Refresh();
+
+        return mesh;
 
     }
     /// <summary>

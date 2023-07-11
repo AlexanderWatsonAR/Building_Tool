@@ -23,6 +23,15 @@ public static class Vector3Extensions
 
         return Mathf.Abs(dz) >= allowedDifference;
     }
+
+    public static bool Approximately0(Vector3 vector1, Vector3 vector2, float tolerance)
+    {
+        float sqrMagnitudeDifference = (vector1 - vector2).sqrMagnitude;
+        float sqrTolerance = tolerance * tolerance;
+
+        return sqrMagnitudeDifference <= sqrTolerance;
+    }
+
     /// <summary>
     /// Returns a normalized vector to the target.
     /// </summary>

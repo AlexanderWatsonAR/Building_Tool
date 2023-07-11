@@ -20,6 +20,7 @@ public class WallSection : MonoBehaviour
     // --------- Window Properties -------------
     [SerializeField, Range(0, 1)] private float m_WindowHeight;
     [SerializeField, Range(0, 1)] private float m_WindowWidth;
+    [SerializeField, Range(3, 32)] private int m_WindowSides = 3;
     [SerializeField, Range(1, 10)] private int m_WindowColumns, m_WindowRows;
     [SerializeField] private bool m_IsWindowActive;
     [SerializeField, Range(1, 10)] private int m_WindowFrameColumns, m_WindowFrameRows;
@@ -124,38 +125,41 @@ public class WallSection : MonoBehaviour
 
                 break;
             case WallElement.Window:
-                Vector3 windowScale = new Vector3(m_WindowWidth, m_WindowHeight, m_WindowWidth);
-                List<Vector3[]> holeGridControlPoints;
-                ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out holeGridControlPoints);
-                holeGridA.Extrude(new Face[] { holeGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
-                ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out _, true);
-                CombineMeshes.Combine(new ProBuilderMesh[] { holeGridA, holeGridB }, holeGridA);
-                Rebuild(holeGridA);
-                DestroyImmediate(holeGridB.gameObject);
+                //Vector3 windowScale = new Vector3(m_WindowWidth, m_WindowHeight, m_WindowWidth);
+                //List<Vector3[]> holeGridControlPoints;
+                //ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out holeGridControlPoints);
+                //holeGridA.Extrude(new Face[] { holeGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
+                //ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out _, true);
+                //CombineMeshes.Combine(new ProBuilderMesh[] { holeGridA, holeGridB }, holeGridA);
+
+                Vector3 winScale = new Vector3(m_WindowWidth, m_WindowHeight);
+                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, m_WallDepth);
+
+                Rebuild(polyHoleGrid);
 
                 if (!m_IsWindowActive)
                     return this;
 
-                float windowDepth = m_WallDepth * 0.5f;
+                //float windowDepth = m_WallDepth * 0.5f;
 
-                foreach (Vector3[] hole in holeGridControlPoints)
-                {
-                    GameObject win = new GameObject("Window", typeof(Window));
-                    win.transform.SetParent(transform, true);
-                    Vector3 dir = hole[0].DirectionToTarget(hole[3]);
-                    Vector3 forward = Vector3.Cross(Vector3.up, dir);
+                //foreach (Vector3[] hole in holeGridControlPoints)
+                //{
+                //    GameObject win = new GameObject("Window", typeof(Window));
+                //    win.transform.SetParent(transform, true);
+                //    Vector3 dir = hole[0].DirectionToTarget(hole[3]);
+                //    Vector3 forward = Vector3.Cross(Vector3.up, dir);
 
-                    for(int i = 0; i < hole.Length; i++)
-                    {
-                        hole[i] += forward * windowDepth;
-                    }
+                //    for(int i = 0; i < hole.Length; i++)
+                //    {
+                //        hole[i] += forward * windowDepth;
+                //    }
 
-                    Window window = win.GetComponent<Window>();
-                    window.Initialize(hole, windowDepth);
-                    window.SetFrameGrid(m_WindowFrameColumns, m_WindowFrameRows);
-                    window.SetFrameScale(m_WindowFrameScale);
-                    window.SetMaterials(m_WindowFrameMaterial, m_WindowPaneMaterial).Build();
-                }
+                //    Window window = win.GetComponent<Window>();
+                //    window.Initialize(hole, windowDepth);
+                //    window.SetFrameGrid(m_WindowFrameColumns, m_WindowFrameRows);
+                //    window.SetFrameScale(m_WindowFrameScale);
+                //    window.SetMaterials(m_WindowFrameMaterial, m_WindowPaneMaterial).Build();
+                //}
 
                 break;
             case WallElement.Empty:
