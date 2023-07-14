@@ -41,6 +41,7 @@ public class WallSectionEditor : Editor
         SerializedProperty winHeight = serializedObject.FindProperty("m_WindowHeight");
         SerializedProperty winWidth = serializedObject.FindProperty("m_WindowWidth");
         SerializedProperty winSides = serializedObject.FindProperty("m_WindowSides");
+        SerializedProperty winAngles = serializedObject.FindProperty("m_WindowAngle");
         SerializedProperty winActive = serializedObject.FindProperty("m_IsWindowActive");
         SerializedProperty winFColumns = serializedObject.FindProperty("m_WindowFrameColumns");
         SerializedProperty winFRows = serializedObject.FindProperty("m_WindowFrameRows");
@@ -91,8 +92,9 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.IntSlider(winRows, 1, 10, "Rows");
                 EditorGUILayout.IntSlider(winSides, 3, 32, "Sides");
                 EditorGUILayout.LabelField("Size");
-                EditorGUILayout.Slider(winHeight, 0, 1, "Height");
-                EditorGUILayout.Slider(winWidth, 0, 1, "Width");
+                EditorGUILayout.Slider(winHeight, 0, 0.999f, "Height");
+                EditorGUILayout.Slider(winWidth, 0, 0.999f, "Width");
+                EditorGUILayout.Slider(winAngles, -180, 180, "Angle");
 
                 winActive.boolValue = EditorGUILayout.Toggle("Is Active", winActive.boolValue);
 
@@ -105,8 +107,8 @@ public class WallSectionEditor : Editor
                         winFColumns.intValue = EditorGUILayout.IntSlider("Columns", winFColumns.intValue, 1, 10);
                         winFRows.intValue = EditorGUILayout.IntSlider("Rows", winFRows.intValue, 1, 10);
                         EditorGUILayout.LabelField("Size");
-                        float y = EditorGUILayout.Slider("Height", winFScale.vector3Value.y, 0, 1);
-                        float x = EditorGUILayout.Slider("Width", winFScale.vector3Value.x, 0, 1);
+                        float y = EditorGUILayout.Slider("Height", winFScale.vector3Value.y, 0, 0.999f);
+                        float x = EditorGUILayout.Slider("Width", winFScale.vector3Value.x, 0, 0.999f);
                         winFScale.vector3Value = new Vector3(x, y, winFScale.vector3Value.z);
                         EditorGUILayout.LabelField("Material");
                         EditorGUILayout.ObjectField(winPaneMat, new GUIContent("Pane"));

@@ -23,6 +23,7 @@ public class StoreyEditor : Editor
         SerializedProperty wallDepth = serializedObject.FindProperty("m_WallDepth");
         SerializedProperty wallMaterial = serializedObject.FindProperty("m_WallMaterial");
         SerializedProperty curvedCorners = serializedObject.FindProperty("m_CurvedCorners");
+        SerializedProperty curvedCornersSides = serializedObject.FindProperty("m_CurvedCornersSides");
         // End Wall
 
         // Floor
@@ -43,8 +44,9 @@ public class StoreyEditor : Editor
         if (m_ShowWall)
         {
             EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
-            EditorGUILayout.Slider(wallDepth, 0, 1, "Depth");
+            EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
             EditorGUILayout.PropertyField(curvedCorners);
+            EditorGUILayout.IntSlider(curvedCornersSides, 3, 15, "Sides");
             EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();

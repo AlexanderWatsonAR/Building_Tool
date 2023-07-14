@@ -18,16 +18,19 @@ public class WallSection : MonoBehaviour
     public WallElement WallElement => m_WallElement;
 
     // --------- Window Properties -------------
-    [SerializeField, Range(0, 1)] private float m_WindowHeight;
-    [SerializeField, Range(0, 1)] private float m_WindowWidth;
+    [SerializeField, Range(0, 0.999f)] private float m_WindowHeight;
+    [SerializeField, Range(0, 0.999f)] private float m_WindowWidth;
     [SerializeField, Range(3, 32)] private int m_WindowSides = 3;
     [SerializeField, Range(1, 10)] private int m_WindowColumns, m_WindowRows;
+    [SerializeField, Range(-180, 180)] private float m_WindowAngle;
+    [SerializeField] private bool m_WindowSmooth;
     [SerializeField] private bool m_IsWindowActive;
     [SerializeField, Range(1, 10)] private int m_WindowFrameColumns, m_WindowFrameRows;
     [SerializeField] private Vector3 m_WindowFrameScale;
     [SerializeField] private Material m_WindowPaneMaterial;
     [SerializeField] private Material m_WindowFrameMaterial;
 
+    public float WindowAngle => m_WindowAngle;
     public float WindowHeight => m_WindowHeight;
     public float WindowWidth => m_WindowWidth;
     public int WindowColumns => m_WindowColumns;
@@ -67,6 +70,7 @@ public class WallSection : MonoBehaviour
         m_WindowWidth = 0.5f;
         m_WindowColumns = 1;
         m_WindowRows = 1;
+        m_WindowAngle = 0;
         m_IsWindowActive = true;
         m_WindowFrameRows = 2;
         m_WindowFrameColumns = 2;
@@ -126,14 +130,16 @@ public class WallSection : MonoBehaviour
                 break;
             case WallElement.Window:
                 //Vector3 windowScale = new Vector3(m_WindowWidth, m_WindowHeight, m_WindowWidth);
-                //List<Vector3[]> holeGridControlPoints;
+                List<List<Vector3>> holePoints;
                 //ProBuilderMesh holeGridA = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out holeGridControlPoints);
                 //holeGridA.Extrude(new Face[] { holeGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_WallDepth);
                 //ProBuilderMesh holeGridB = MeshMaker.HoleGrid(m_ControlPoints, windowScale, m_WindowColumns, m_WindowRows, out _, true);
                 //CombineMeshes.Combine(new ProBuilderMesh[] { holeGridA, holeGridB }, holeGridA);
 
                 Vector3 winScale = new Vector3(m_WindowWidth, m_WindowHeight);
-                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, m_WallDepth);
+                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, m_WallDepth, m_WindowAngle, out holePoints);
+
+                Vector3[] points = MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one, 5, 5);
 
                 Rebuild(polyHoleGrid);
 

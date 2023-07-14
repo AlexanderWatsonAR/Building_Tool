@@ -62,7 +62,7 @@ public static class PolygonRecognition
         return IsPointInsidePolygon(polyTool.Positions, point);
     }
     /// <summary>
-    /// Assumes Polygon is orientated on the 'y'.
+    /// Assumes Polygon is orientated on the XZ plane.
     /// </summary>
     /// <param name="controlPoints"></param>
     /// <param name="point"></param>
