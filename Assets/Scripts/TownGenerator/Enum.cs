@@ -26,9 +26,14 @@ public enum TransformType
     Translation, Rotation, Scale
 }
 
+public enum RoofElement
+{
+    Tile, Window, Empty
+}
+
 public enum WallElement
 {
-    Wall, Door, Window, Empty
+    Wall, Doorway, Window, Extension, Empty
 }
 
 public enum PolyMode

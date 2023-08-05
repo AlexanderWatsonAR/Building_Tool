@@ -119,6 +119,10 @@ public class RoofEditor : Editor
             {
                 building.Build();
             }
+            else if(roof.TryGetComponent(out WallSection wallSection))
+            {
+                wallSection.Build();
+            }
             else
             {
                 roof.BuildFrame();

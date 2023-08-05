@@ -11,6 +11,7 @@ using UnityEngine.UIElements;
 [CustomEditor(typeof(WallSection))]
 public class WallSectionEditor : Editor
 {
+    private bool m_IsArchActiveFoldout = true;
     private bool m_IsDoorActiveFoldout = true;
     private bool m_IsWindowActiveFoldout = true;
 
@@ -27,6 +28,10 @@ public class WallSectionEditor : Editor
         SerializedProperty doorHeight = serializedObject.FindProperty("m_PedimentHeight");
         SerializedProperty doorWidth = serializedObject.FindProperty("m_SideWidth");
         SerializedProperty doorOffset = serializedObject.FindProperty("m_SideOffset");
+       // SerializedProperty doorArched = serializedObject.FindProperty("m_IsDoorArched");
+        SerializedProperty doorArchHeight = serializedObject.FindProperty("m_ArchHeight");
+        SerializedProperty doorArchSides = serializedObject.FindProperty("m_ArchSides");
+
         SerializedProperty doorActive = serializedObject.FindProperty("m_IsDoorActive");
         SerializedProperty doorScale = serializedObject.FindProperty("m_DoorScale");
         SerializedProperty doorHingePoint = serializedObject.FindProperty("m_DoorHingePoint");
@@ -51,13 +56,19 @@ public class WallSectionEditor : Editor
         SerializedProperty winFrameMat = serializedObject.FindProperty("m_WindowFrameMaterial");
         // End Window
 
+        // Extension
+        SerializedProperty exHeight = serializedObject.FindProperty("m_ExtendHeight");
+        SerializedProperty exWidth = serializedObject.FindProperty("m_ExtendWidth");
+        SerializedProperty exDistance = serializedObject.FindProperty("m_ExtendDistance");
+        // End Extension
+
         EditorGUILayout.PropertyField(element);
 
-        switch(section.WallElement)
+        switch (section.WallElement)
         {
             case WallElement.Wall:
                 break;
-            case WallElement.Door:
+            case WallElement.Doorway:
                 EditorGUILayout.LabelField("Number of Doors");
                 EditorGUILayout.IntSlider(doorColumns, 1, 10, "Columns");
                 EditorGUILayout.IntSlider(doorRows, 1, 10, "Rows");
@@ -66,25 +77,37 @@ public class WallSectionEditor : Editor
                 EditorGUILayout.PropertyField(doorHeight);
                 EditorGUILayout.PropertyField(doorWidth);
 
+                //doorArched.boolValue = EditorGUILayout.Toggle("Is Arched", doorArched.boolValue);
+                m_IsArchActiveFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsArchActiveFoldout, "Arch");
+
+                if(m_IsArchActiveFoldout)
+                {
+                    //EditorGUI.BeginDisabledGroup(!doorArched.boolValue);
+                    doorArchHeight.floatValue = EditorGUILayout.Slider("Height", doorArchHeight.floatValue, 0, 1);
+                    doorArchSides.intValue = EditorGUILayout.IntSlider("Sides", doorArchSides.intValue, 3, 32);
+                    //EditorGUI.EndDisabledGroup();
+                }
+                EditorGUILayout.EndFoldoutHeaderGroup();
+
                 doorActive.boolValue = EditorGUILayout.Toggle("Is Active", doorActive.boolValue);
 
-                if (doorActive.boolValue)
+                m_IsDoorActiveFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsDoorActiveFoldout, "Door");
+
+                if (m_IsDoorActiveFoldout)
                 {
-                    m_IsDoorActiveFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsDoorActiveFoldout, "Door");
+                    EditorGUI.BeginDisabledGroup(!doorActive.boolValue);
+                    doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
+                    EditorGUILayout.ObjectField(doorMaterial, new GUIContent("Material"));
 
-                    if (m_IsDoorActiveFoldout)
-                    {
-                        doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
-                        EditorGUILayout.ObjectField(doorMaterial, new GUIContent("Material"));
-
-                        EditorGUILayout.LabelField("Hinge");
-                        doorHingePoint.SetEnumValue((TransformPoint)EditorGUILayout.EnumPopup("Position", doorHingePoint.GetEnumValue<TransformPoint>()));
-                        doorHingeOffset.vector3Value = EditorGUILayout.Vector3Field("Offset", doorHingeOffset.vector3Value);
-                        doorHingeEulerAngles.vector3Value = EditorGUILayout.Vector3Field("Rotation", doorHingeEulerAngles.vector3Value);
-                    }
-
-                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    EditorGUILayout.LabelField("Hinge");
+                    doorHingePoint.SetEnumValue((TransformPoint)EditorGUILayout.EnumPopup("Position", doorHingePoint.GetEnumValue<TransformPoint>()));
+                    doorHingeOffset.vector3Value = EditorGUILayout.Vector3Field("Offset", doorHingeOffset.vector3Value);
+                    doorHingeEulerAngles.vector3Value = EditorGUILayout.Vector3Field("Rotation", doorHingeEulerAngles.vector3Value);
+                    EditorGUI.EndDisabledGroup();
                 }
+
+                EditorGUILayout.EndFoldoutHeaderGroup();
+
                 break;
             case WallElement.Window:
                 EditorGUILayout.LabelField("Number of Windows");
@@ -116,6 +139,11 @@ public class WallSectionEditor : Editor
                     }
                 }
 
+                break;
+            case WallElement.Extension:
+                EditorGUILayout.PropertyField(exWidth);
+                EditorGUILayout.PropertyField(exHeight);
+                EditorGUILayout.PropertyField(exDistance);
                 break;
         }
 

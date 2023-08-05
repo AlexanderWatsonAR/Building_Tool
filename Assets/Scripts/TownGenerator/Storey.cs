@@ -2,12 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
-using UnityEngine.Serialization;
-using static UnityEngine.UI.GridLayoutGroup;
+using UnityEngine.UIElements;
 
 [System.Serializable]
 public class Storey : MonoBehaviour
@@ -40,26 +38,26 @@ public class Storey : MonoBehaviour
 
     // Pillar
     [SerializeField] private float m_PillarWidth, m_PillarDepth;
+    [SerializeField, Range(3, 32)] private int m_PillarSides;
+    [SerializeField] private bool m_IsPillarSmooth;
     [SerializeField] private Material m_PillarMaterial;
 
     public Material PillarMaterial => m_PillarMaterial;
     public float PillarWidth => m_PillarWidth;
     public float PillarDepth => m_PillarDepth;
+    public int PillarSides => m_PillarSides;
+    public bool IsPillarSmooth => m_IsPillarSmooth;
     // End Pillar
 
     public int ID => m_StoreyID;
     public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
-
     public StoreyElement ActiveElements => m_ActiveElements;
-
     public bool AreWallsActive => IsElementActive(StoreyElement.Walls);
     public bool ArePillarsActive => IsElementActive(StoreyElement.Pillars);
     public bool IsFloorActive => IsElementActive(StoreyElement.Floor);
 
 
     List<Vector3[]> m_WallPoints;
-
-    //Vector3[] m_ConcaveCornerPoints;
 
 
     public Vector3[] InsidePoints
@@ -88,17 +86,27 @@ public class Storey : MonoBehaviour
         m_StoreyID = id;
     }
 
+    public void SetWallHeight(float height)
+    {
+        m_WallHeight = height;
+    }
+
     private void Reset()
     {
-        Initialize(-1, null, StoreyElement.Everything, 3, 0.5f, false, 4, null, 0.1f, null, 0.5f, 0.5f, null);
+        Initialize();
+    }
+
+    public Storey Initialize()
+    {
+        return Initialize(-1, null, StoreyElement.Everything, 3, 0.5f, false, 4, null, 0.1f, null, 0.5f, 0.5f, 4, false, null);
     }
 
     public Storey Initialize(Storey storey)
     {
-        return Initialize(storey.ID, storey.ControlPoints, storey.ActiveElements, storey.WallHeight, storey.WallDepth, storey.CurvedCorners, storey.CurvedCornersSides, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.PillarWidth, storey.PillarDepth, storey.PillarMaterial);
+        return Initialize(storey.ID, storey.ControlPoints, storey.ActiveElements, storey.WallHeight, storey.WallDepth, storey.CurvedCorners, storey.CurvedCornersSides, storey.WallMaterial, storey.FloorHeight, storey.FloorMaterial, storey.PillarWidth, storey.PillarDepth, storey.PillarSides, storey.IsPillarSmooth, storey.PillarMaterial);
     }
 
-    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, StoreyElement activeElements, float wallHeight, float wallDepth, bool curvedCorners, int cornerSides, Material wallMaterial, float floorHeight, Material floorMaterial, float pillarWidth, float pillarDepth, Material pillarMaterial)
+    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, StoreyElement activeElements, float wallHeight, float wallDepth, bool curvedCorners, int cornerSides, Material wallMaterial, float floorHeight, Material floorMaterial, float pillarWidth, float pillarDepth, int pillarSides, bool isPillarSmooth, Material pillarMaterial)
     {
         m_StoreyID = id;
         m_ControlPoints = controlPoints != null ? controlPoints.ToArray() : null;
@@ -115,6 +123,8 @@ public class Storey : MonoBehaviour
 
         m_PillarDepth = pillarDepth;
         m_PillarWidth = pillarWidth;
+        m_PillarSides = pillarSides;
+        m_IsPillarSmooth = isPillarSmooth;
         m_PillarMaterial = pillarMaterial;
 
         if (m_FloorMaterial == null)
@@ -142,9 +152,8 @@ public class Storey : MonoBehaviour
         transform.DeleteChildren();
         m_WallPoints.Clear();
         BuildPillars();
-        m_InsidePoints = m_InsidePoints ?? InsidePoints;
+        m_InsidePoints = InsidePoints;
         
-        //BuildWalls();
         BuildExternalWalls();
         BuildCorners();
         BuildFloor();
@@ -160,11 +169,37 @@ public class Storey : MonoBehaviour
         GameObject pillars = new GameObject("Pillars");
         pillars.transform.SetParent(transform, false);
 
-        //float topY = 0; 
-        Vector3 scale = new Vector3(m_PillarWidth, m_WallHeight, m_PillarDepth);
+        float halfWidth = m_PillarWidth * 0.5f;
+        float halfDepth = m_PillarDepth * 0.5f;
+
+        Vector3[] pillarPoints = new Vector3[]
+        {
+            new Vector3(-halfWidth, -halfDepth),
+            new Vector3(-halfWidth, halfDepth),
+            new Vector3(halfWidth, halfDepth),
+            new Vector3(halfWidth, -halfDepth)
+        };
+
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
+
+        if (m_PillarSides != 4)
+        {
+            pillarPoints = MeshMaker.CreateNPolygon(m_PillarSides, halfWidth, halfDepth); 
+        }
+
+        for (int i = 0; i < pillarPoints.Length; i++)
+        {
+            Vector3 euler = rotation.eulerAngles;
+            Vector3 v = Quaternion.Euler(euler) * pillarPoints[i];
+            pillarPoints[i] = v;
+        }
+
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            ProBuilderMesh pillar = ShapeGenerator.GenerateCube(PivotLocation.Center, scale);
+            ProBuilderMesh pillar = ProBuilderMesh.Create();
+            pillar.CreateShapeFromPolygon(pillarPoints, 0, false);
+            pillar.ToMesh();
+            Face[] faces = pillar.Extrude(pillar.faces, ExtrudeMethod.FaceNormal, m_WallHeight);
             pillar.name = "Pillar " + i.ToString();
             pillar.transform.SetParent(transform, true);
             pillar.transform.localPosition = m_ControlPoints[i].Position;
@@ -172,8 +207,13 @@ public class Storey : MonoBehaviour
             int index = m_ControlPoints.GetNext(i);
 
             pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_ControlPoints[index].Position);
-            pillar.transform.localPosition += m_WallHeight / 2 * Vector3.up;
             pillar.transform.SetParent(pillars.transform, true);
+
+            if(m_IsPillarSmooth)
+                Smoothing.ApplySmoothingGroups(pillar, faces, 360f / m_PillarSides);
+
+            pillar.ToMesh();
+            pillar.Refresh();
         }
     }
 
@@ -250,65 +290,6 @@ public class Storey : MonoBehaviour
             post.transform.SetParent(corners.transform, true);
 
         }
-    }
-
-    private void BuildWalls()
-    {
-        GameObject walls = new GameObject("Walls");
-        walls.transform.SetParent(transform, true);
-
-        Vector3 h = Vector3.up * m_WallHeight;
-
-        int[] concavePoints;
-        bool isConcave = m_ControlPoints.IsConcave(out concavePoints);
-
-        for (int i = 0; i < m_ControlPoints.Length; i++)
-        {
-            int current = i;
-            int next = m_ControlPoints.GetNext(i);
-
-            Vector3 first = m_InsidePoints[i];
-            Vector3 second = m_InsidePoints[i] + h;
-            Vector3 third = m_InsidePoints[next] + h;
-            Vector3 fourth = m_InsidePoints[next];
-
-            if (isConcave)
-            {
-                bool conditionA = concavePoints.Any(a => a == next);
-                bool conditionB = concavePoints.Any(b => b == current);
-
-                if (conditionA)
-                {
-                    int twoNext = m_ControlPoints.GetNext(next);
-
-                    if (Extensions.DoLinesIntersect(m_InsidePoints[current], m_InsidePoints[next], m_ControlPoints[twoNext].Position, m_ControlPoints[next].Position, out Vector3 intersection))
-                    {
-                        third = intersection + h;
-                        fourth = intersection;
-                    }
-                }
-                if (conditionB)
-                {
-                    int previous = m_ControlPoints.GetPrevious(current);
-
-                    if (Extensions.DoLinesIntersect(m_InsidePoints[current], m_InsidePoints[next], m_ControlPoints[previous].Position, m_ControlPoints[current].Position, out Vector3 intersection))
-                    {
-                        first = intersection;
-                        second = intersection + h;
-                    }
-                }
-
-            }
-
-            Vector3[] points = new Vector3[] { first, second, third, fourth };
-
-            GameObject wall = new GameObject("Wall " + i.ToString(), typeof(Wall));
-            wall.transform.SetParent(walls.transform, true);
-
-            wall.GetComponent<Wall>().Initialize(points, m_WallDepth, m_WallMaterial).Build();
-        }
-
-
     }
 
     private void BuildExternalWalls()

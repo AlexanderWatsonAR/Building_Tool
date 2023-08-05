@@ -74,8 +74,6 @@ public class Roof : MonoBehaviour
     public float GableScale => m_GableScale;
     // End Gable
 
-
-
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
     [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints;
 
@@ -159,8 +157,6 @@ public class Roof : MonoBehaviour
         m_SupportBeamDensity = roof.SupportBeamDensity;
         m_BeamMaterial = roof.m_BeamMaterial;
 
-        //m_ControlPoints = roof.ControlPoints.ToArray();
-        //m_OriginalControlPoints = m_ControlPoints.Clone() as ControlPoint[];
         m_TileHeight = roof.TileHeight;
         m_TileExtend = roof.TileExtend;
         m_TileFlipFace = roof.TileFlipFace;
@@ -177,58 +173,26 @@ public class Roof : MonoBehaviour
         if (m_ControlPoints == null)
             return new int[0];
 
-        int OpenGable = (int)RoofType.Gable;
+        int Gable = (int)RoofType.Gable;
         int Mansard = (int)RoofType.Mansard;
         int Dormer = (int)RoofType.Dormer;
         int MShaped = (int)RoofType.MShaped;
         int Pyramid = (int)RoofType.Pyramid;
         int PyramidHip = (int)RoofType.PyramidHip;
 
-        switch (m_ControlPoints.Length)
+        if(m_ControlPoints.Length == 4)
+            return new int[] { Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip };
+
+        if(m_ControlPoints.IsDescribableInOneLine(out _))
         {
-            case 4:
-                return new int[] { OpenGable, Mansard, Dormer, MShaped, Pyramid, PyramidHip };
-            case 5:
-                if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
-                {
-                    return new int[] { Mansard, Pyramid, PyramidHip };
-                }
-                return new int[] { Mansard };
-            case 6:
-                if (m_ControlPoints.IsLShaped(out _))
-                {
-                    if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
-                    {
-                        return new int[] { OpenGable, Mansard, Dormer, Pyramid, PyramidHip };
-                    }
-
-                    return new int[] { OpenGable, Mansard, Dormer };
-                }
-                if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
-                {
-                    return new int[] { Mansard, Pyramid, PyramidHip };
-                }
-                return new int[] { Mansard };
-            case 7:
-                if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
-                {
-                    return new int[] { Mansard, Pyramid, PyramidHip };
-                }
-                return new int[] { Mansard };
-            case 8:
-                if (m_ControlPoints.IsTShaped(out _) || m_ControlPoints.IsUShaped(out _) || m_ControlPoints.IsSimpleNShaped(out _))
-                {
-                    if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
-                    {
-                        return new int[] { OpenGable, Mansard, Dormer, Pyramid, PyramidHip };
-                    }
-
-                    return new int[] { OpenGable, Mansard, Dormer };
-                }
-                return new int[] { Mansard };
-            default:
-                return new int[] { OpenGable, Mansard, Dormer, Pyramid, PyramidHip };
+            if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+            {
+                return new int[] { Gable, Mansard, Dormer, Pyramid, PyramidHip };
+            }
+            return new int[] { Gable, Mansard, Dormer };
         }
+
+        return new int[] { Mansard };
     }
 
     public Roof BuildFrame()
@@ -246,6 +210,10 @@ public class Roof : MonoBehaviour
         if (TryGetComponent(out Building building))
         {
             m_LastStorey = building.GetComponents<Storey>()[^1];
+        }
+        else if(TryGetComponent(out WallSection wallSection))
+        {
+            m_LastStorey = wallSection.GetComponent<Storey>();
         }
         else
         {
@@ -344,7 +312,7 @@ public class Roof : MonoBehaviour
         roofTile.name = "Roof Tile";
         RoofTile tile = roofTile.AddComponent<RoofTile>();
         tile.SetControlPoints(points);
-        tile.GetComponent<Renderer>().material = TileMaterial;
+        tile.SetMaterial(TileMaterial);
         tile.transform.SetParent(transform, false);
         tile.Initialize(m_TileHeight, m_TileExtend).Extend(heightStart, heightEnd, widthStart, widthEnd).Build();
         m_Tiles.Add(tile);

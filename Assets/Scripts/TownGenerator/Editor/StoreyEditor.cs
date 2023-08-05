@@ -11,6 +11,8 @@ public class StoreyEditor : Editor
     private bool m_ShowFloor = true;
     private bool m_ShowPillar = true;
 
+     
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -34,6 +36,8 @@ public class StoreyEditor : Editor
         // Pillar
         SerializedProperty pillarWidth = serializedObject.FindProperty("m_PillarWidth");
         SerializedProperty pillarDepth = serializedObject.FindProperty("m_PillarDepth");
+        SerializedProperty pillarSides = serializedObject.FindProperty("m_PillarSides");
+        SerializedProperty pillarSmooth = serializedObject.FindProperty("m_IsPillarSmooth");
         SerializedProperty pillarMaterial = serializedObject.FindProperty("m_PillarMaterial");
         // End Pillar
 
@@ -43,10 +47,14 @@ public class StoreyEditor : Editor
         m_ShowWall = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowWall, "Wall");
         if (m_ShowWall)
         {
-            EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
+            if(!storey.TryGetComponent(out WallSection wallSection))
+            {
+                EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
+            }
             EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
             EditorGUILayout.PropertyField(curvedCorners);
             EditorGUILayout.IntSlider(curvedCornersSides, 3, 15, "Sides");
+            pillarSmooth.boolValue = EditorGUILayout.Toggle("Is Smooth", pillarSmooth.boolValue);
             EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
@@ -68,6 +76,7 @@ public class StoreyEditor : Editor
             {
                 EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
                 EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
+                EditorGUILayout.IntSlider(pillarSides, 3, 32, "Sides");
                 EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
             }
         EditorGUILayout.EndFoldoutHeaderGroup();
@@ -78,6 +87,10 @@ public class StoreyEditor : Editor
             if (storey.TryGetComponent(out Building building))
             {
                 building.Build();
+            }
+            else if(storey.TryGetComponent(out WallSection wallSection)) // If the storey is an extension. 
+            {
+                wallSection.Build();
             }
             else
             {

@@ -17,6 +17,9 @@ public static class PolygonRecognition
     /// <param name="controlPoints"></param>
     public static IEnumerable<Vector3> SortPointsClockwise(this IEnumerable<Vector3> controlPoints, Vector3? sortPoint = null)
     {
+        if (controlPoints.Count() <= 1)
+            return controlPoints;
+
         Vector3[] points = controlPoints.ToArray();
         Vector3 centre = ProMaths.Average(points);
 
