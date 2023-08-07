@@ -58,20 +58,9 @@ public class BuildingEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    // Should I migrate this stuff to the building tool editor?
     private void OnSceneGUI()
     {
-        //Event evt = Event.current;
-
-        //if (m_PolyMode == PolyMode.Edit)
-        //{
-        //    m_MouseCursor = MouseCursor.ArrowPlus;
-        //}
-        //else
-        //{
-        //    m_MouseCursor = MouseCursor.Arrow;
-        //}
-
-
         Input();
         Draw();
     }
