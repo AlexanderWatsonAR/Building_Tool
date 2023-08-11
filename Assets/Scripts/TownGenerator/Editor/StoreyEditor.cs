@@ -11,8 +11,6 @@ public class StoreyEditor : Editor
     private bool m_ShowFloor = true;
     private bool m_ShowPillar = true;
 
-     
-
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -21,9 +19,10 @@ public class StoreyEditor : Editor
         SerializedProperty activeElements = serializedObject.FindProperty("m_ActiveElements");
 
         // Wall
-        SerializedProperty wallHeight = serializedObject.FindProperty("m_WallHeight");
-        SerializedProperty wallDepth = serializedObject.FindProperty("m_WallDepth");
-        SerializedProperty wallMaterial = serializedObject.FindProperty("m_WallMaterial");
+        SerializedProperty wallData = serializedObject.FindProperty("m_WallData");
+        SerializedProperty wallHeight = wallData.FindPropertyRelative("m_Height");
+        SerializedProperty wallDepth = wallData.FindPropertyRelative("m_Depth");
+        SerializedProperty wallMaterial = wallData.FindPropertyRelative("m_Material");
         SerializedProperty curvedCorners = serializedObject.FindProperty("m_CurvedCorners");
         SerializedProperty curvedCornersSides = serializedObject.FindProperty("m_CurvedCornersSides");
         // End Wall
@@ -34,11 +33,13 @@ public class StoreyEditor : Editor
         // End Floor
 
         // Pillar
-        SerializedProperty pillarWidth = serializedObject.FindProperty("m_PillarWidth");
-        SerializedProperty pillarDepth = serializedObject.FindProperty("m_PillarDepth");
-        SerializedProperty pillarSides = serializedObject.FindProperty("m_PillarSides");
-        SerializedProperty pillarSmooth = serializedObject.FindProperty("m_IsPillarSmooth");
-        SerializedProperty pillarMaterial = serializedObject.FindProperty("m_PillarMaterial");
+        SerializedProperty pillarData = serializedObject.FindProperty("m_PillarData");
+
+        SerializedProperty pillarWidth = pillarData.FindPropertyRelative("m_Width");
+        SerializedProperty pillarDepth = pillarData.FindPropertyRelative("m_Depth");
+        SerializedProperty pillarSides = pillarData.FindPropertyRelative("m_Sides");
+        SerializedProperty pillarSmooth = pillarData.FindPropertyRelative("m_IsSmooth");
+        SerializedProperty pillarMaterial = pillarData.FindPropertyRelative("m_Material");
         // End Pillar
 
         EditorGUILayout.PropertyField(activeElements);
@@ -47,14 +48,13 @@ public class StoreyEditor : Editor
         m_ShowWall = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowWall, "Wall");
         if (m_ShowWall)
         {
-            if(!storey.TryGetComponent(out WallSection wallSection))
+            if(!storey.TryGetComponent(out WallSection _))
             {
                 EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
             }
             EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
             EditorGUILayout.PropertyField(curvedCorners);
             EditorGUILayout.IntSlider(curvedCornersSides, 3, 15, "Sides");
-            pillarSmooth.boolValue = EditorGUILayout.Toggle("Is Smooth", pillarSmooth.boolValue);
             EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
@@ -72,13 +72,21 @@ public class StoreyEditor : Editor
 
         EditorGUI.BeginDisabledGroup(!storey.ArePillarsActive);
         m_ShowPillar = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPillar, "Pillar");
-            if (m_ShowPillar)
-            {
-                EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
-                EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
-                EditorGUILayout.IntSlider(pillarSides, 3, 32, "Sides");
-                EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
-            }
+        if (m_ShowPillar)
+        {
+            //bool enterChildren = true;    
+            //while(pillarData.Next(enterChildren))
+            //{
+            //    enterChildren = false;
+            //    EditorGUILayout.PropertyField(pillarData);
+            //}
+            EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
+            EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
+            EditorGUILayout.IntSlider(pillarSides, 3, 32, "Sides");
+            pillarSmooth.boolValue = EditorGUILayout.Toggle("Is Smooth", pillarSmooth.boolValue);
+            EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
+
+        }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
 

@@ -179,7 +179,7 @@ public class WallSection : MonoBehaviour
                 if (!m_IsWindowActive)
                     return this;
 
-                //m_Points = MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one * 0.95f, m_WindowFrameColumns, m_WindowFrameRows);
+                MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one * 0.95f, m_WindowFrameColumns, m_WindowFrameRows);
 
                 //float windowDepth = m_WallDepth * 0.5f;
 
@@ -267,7 +267,7 @@ public class WallSection : MonoBehaviour
                 GameObject roofGO = new GameObject("Roof", typeof(Roof));
                 roofGO.transform.SetParent(transform, true);
                 roofGO.transform.localPosition = new Vector3(0, wallHeight, 0);
-                Roof roofExtension = roofGO.GetComponent<Roof>().Initialize(wallSectionRoof);
+                Roof roofExtension = roofGO.GetComponent<Roof>().Initialize(wallSectionRoof.Data);
                 roofExtension.SetControlPoints(points);
                 roofExtension.BuildFrame();
 

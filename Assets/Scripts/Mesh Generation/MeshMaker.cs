@@ -844,7 +844,6 @@ public static class MeshMaker
         int pointsHigh = rows + 1;
 
         // In this case, x is height, z is width.
-
         Vector3[] leftPoints = Vector3Extensions.LerpCollection(min, new Vector3(max.x, min.y, min.z), pointsHigh).ToArray(); // row start points
         Vector3[] rightPoints = Vector3Extensions.LerpCollection(new Vector3(min.x, min.y, max.z), max, pointsHigh).ToArray(); // row end points
 
@@ -870,7 +869,7 @@ public static class MeshMaker
 
         List<Vector3> intersectionPoints = new();
 
-        // Left right intersections.
+        // Top bottom intersections.
         for(int i = 0; i < columns; i++)
         {
             for(int j = 0; j < pointsCopy.Length; j++)
@@ -892,7 +891,7 @@ public static class MeshMaker
             }
         }
 
-        // Top bottom intersections.
+        // Left right intersections.
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < pointsCopy.Length; j++)
@@ -931,6 +930,7 @@ public static class MeshMaker
             }
         }
 
+        internalPoints = internalPoints.Distinct(new Vector3EqualityComparer(1)).ToList();
 
         for (int i = 0; i < columns; i++)
         {
@@ -942,6 +942,14 @@ public static class MeshMaker
                 Vector3 br = controlPointsGrid[j][i + 1];
 
                 Vector3[] quad = new Vector3[] { bl, tl, tr, br };
+                //Vector3 quadCentre = ProMaths.Average(quad);
+
+                //for (int k = 0; k < quad.Length; k++)
+                //{
+                //    Vector3 point = quad[k] - quadCentre;
+                //    Vector3 v = Vector3.Scale(point, Vector3.one * 1.1f) + quadCentre;
+                //    quad[k] = v;
+                //}
 
                 holePoints.Add(new List<Vector3>());
 
@@ -952,14 +960,6 @@ public static class MeshMaker
                         holePoints[^1].Add(internalPoints[k]);
                     }
                 }
-
-                //for (int k = 0; k < quad.Length; k++)
-                //{
-                //    if (points.IsPointInsidePolygon(quad[k]))
-                //    {
-                //        holePoints[^1].Add(quad[k]);
-                //    }
-                //}
 
                 Vector3 holeCentre = ProMaths.Average(holePoints[^1]);
 

@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEditor.Rendering;
 using Unity.VisualScripting;
 using TreeEditor;
+using Cinemachine.Editor;
 
 [CustomEditor(typeof(Roof))]
 public class RoofEditor : Editor
@@ -21,19 +22,19 @@ public class RoofEditor : Editor
         Roof roof = (Roof)target;
         serializedObject.Update();
 
-        SerializedProperty roofActive = serializedObject.FindProperty("m_IsRoofActive");
-        SerializedProperty frameType = serializedObject.FindProperty("m_FrameType");
-        SerializedProperty mansardHeight = serializedObject.FindProperty("m_MansardHeight");
-        SerializedProperty mansardScale = serializedObject.FindProperty("m_MansardScale");
-        SerializedProperty pyramidHeight = serializedObject.FindProperty("m_PyramidHeight");
-        SerializedProperty gableHeight = serializedObject.FindProperty("m_GableHeight");
-        SerializedProperty gableScale = serializedObject.FindProperty("m_GableScale");
-        SerializedProperty isFlipped = serializedObject.FindProperty("m_IsFlipped");
-        SerializedProperty isOpen = serializedObject.FindProperty("m_IsOpen");
+        SerializedProperty roofData = serializedObject.FindProperty("m_Data");
 
-        SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
-        SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
-        SerializedProperty tileMaterial = serializedObject.FindProperty("m_TileMaterial");
+        SerializedProperty roofActive = roofData.FindPropertyRelative("m_IsActive");
+        SerializedProperty frameType = roofData.FindPropertyRelative("m_RoofType");
+        SerializedProperty mansardHeight = roofData.FindPropertyRelative("m_MansardHeight");
+        SerializedProperty mansardScale = roofData.FindPropertyRelative("m_MansardScale");
+        SerializedProperty pyramidHeight = roofData.FindPropertyRelative("m_PyramidHeight");
+        SerializedProperty gableHeight = roofData.FindPropertyRelative("m_GableHeight");
+        SerializedProperty gableScale = roofData.FindPropertyRelative("m_GableScale");
+        SerializedProperty isFlipped = roofData.FindPropertyRelative("m_IsFlipped");
+        SerializedProperty isOpen = roofData.FindPropertyRelative("m_IsOpen");
+
+        SerializedProperty roofTileData = roofData.FindPropertyRelative("m_RoofTileData");
 
         roofActive.boolValue = EditorGUILayout.BeginToggleGroup("Is Active", roofActive.boolValue);
 
@@ -104,8 +105,7 @@ public class RoofEditor : Editor
             EditorGUILayout.Popup(0, noOptionsDisplay);
         }
 
-
-        DisplayTile(tileHeight, tileExtend, tileMaterial);
+        DisplayTile(roofTileData);
         EditorGUILayout.EndToggleGroup();
         ApplyRoofChanges(roof);
 
@@ -180,14 +180,29 @@ public class RoofEditor : Editor
         EditorGUILayout.EndFoldoutHeaderGroup();
     }
 
-    private void DisplayTile(SerializedProperty height, SerializedProperty extend, SerializedProperty mat)
+    private void DisplayTile(SerializedProperty roofTileData)
     {
         m_ShowTile = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowTile, "Tile");
         if (m_ShowTile)
         {
-            EditorGUILayout.Slider(height, 0, 10, "Height");
-            EditorGUILayout.Slider(extend, 0, 10, "Extend");
-            EditorGUILayout.ObjectField(mat, new GUIContent("Material"));
+            //SerializedProperty endProp = roofTileData.GetEndProperty();
+
+            bool enterChildren = true;
+            while (roofTileData.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                EditorGUILayout.PropertyField(roofTileData);
+
+                if (roofTileData.displayName == "Rows")
+                    break;
+
+                //if (roofTileData == endProp)
+                //    break;
+            }
+
+            //EditorGUILayout.Slider(height, 0, 10, "Height");
+            //EditorGUILayout.Slider(extend, 0, 10, "Extend");
+            //EditorGUILayout.ObjectField(mat, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
     }

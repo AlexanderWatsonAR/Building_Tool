@@ -79,13 +79,13 @@ public class Building : MonoBehaviour
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
             Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]).Build();
-            pos += (Vector3.up * storey.WallHeight);
+            pos += (Vector3.up * storey.WallData.Height);
         }
 
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(m_Roof).SetControlPoints(ControlPoints);
+        roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).SetControlPoints(ControlPoints);
         roofGO.GetComponent<Roof>().BuildFrame();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
@@ -99,12 +99,12 @@ public class Building : MonoBehaviour
         Initialize().Build();
     }
 
-    private void Building_OnAnyRoofChange(Roof roof)
+    private void Building_OnAnyRoofChange(RoofData data)
     {
         if (m_Roof == null && m_BuildingPolyPath == null)
             return;
         
-        m_Roof.Initialize(roof);
+        m_Roof.Initialize(data);
     }
 
     public void RevertBuilding()

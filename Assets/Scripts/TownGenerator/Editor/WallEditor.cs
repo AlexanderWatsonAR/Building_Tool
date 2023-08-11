@@ -11,25 +11,21 @@ public class WallEditor : Editor
         serializedObject.Update();
         Wall wall = (Wall)target;
 
-        SerializedProperty columns = serializedObject.FindProperty("m_Columns");
-        SerializedProperty rows = serializedObject.FindProperty("m_Rows");
-        SerializedProperty material = serializedObject.FindProperty("m_Material");
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        SerializedProperty columns = data.FindPropertyRelative("m_Columns");
+        SerializedProperty rows = data.FindPropertyRelative("m_Rows");
+        SerializedProperty material = data.FindPropertyRelative("m_Material");
 
         EditorGUILayout.LabelField("Wall Section Layout");
         EditorGUILayout.PropertyField(columns);
         EditorGUILayout.PropertyField(rows);
         EditorGUILayout.PropertyField(material);
 
-        int wColumns = wall.Columns;
-        int wRows = wall.Rows;
 
         if (serializedObject.ApplyModifiedProperties())
         {
-            if (columns.intValue != wColumns ||
-                rows.intValue != wRows)
-            {
-                wall.Build();
-            }
+            wall.Build();
         }
     }
 }
