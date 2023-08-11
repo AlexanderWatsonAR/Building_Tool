@@ -5,62 +5,87 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
-using UnityEngine.ProBuilder.Shapes;
-using UnityEngine.UIElements;
+using Vertex = UnityEngine.ProBuilder.Vertex;
 using Rando = UnityEngine.Random;
 using ProMaths = UnityEngine.ProBuilder.Math;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
+using UnityEditor;
+using UnityEngine.UI;
+using UnityEngine.ProBuilder.MeshOperations;
 
 [System.Serializable]
 public class Roof : MonoBehaviour
 {
-    [SerializeField] private float m_Height, m_MansardHeight, m_MansardScale;
-    [SerializeField] private RoofType m_FrameType;
-    [SerializeField] private GameObject m_CentreBeamPrefab;
-    [SerializeField] private GameObject m_SupportBeamPrefab;
-    [SerializeField] private Material m_RoofTileMaterial;
+    [SerializeField] private RoofData m_Data;
 
-    // Tile Data
-    [SerializeField] private float m_TileHeight, m_TileExtend;
-    [SerializeField] private bool m_TileFlipFace;
+    // Wall
+    [SerializeField] Storey m_LastStorey;
+    [SerializeField] List<Wall> m_Walls;
+    // End Wall
 
-    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
-    [SerializeField, HideInInspector] private Vector3[] m_OriginalControlPoints;
+    // Beam
+    [SerializeField, Range(0.01f, 10)] private float m_BeamWidth, m_BeamDepth;
+    [SerializeField, Range(0, 1)] private float m_SupportBeamDensity;
+    [SerializeField] private Material m_BeamMaterial;
+    public float BeamWidth => m_BeamWidth;
+    public float BeamDepth => m_BeamDepth;
+    public float SupportBeamDensity => m_SupportBeamDensity;
+    public Material BeamMaterial => m_BeamMaterial;
+    //End Beam
 
-    public float MansardScale => m_MansardScale;
-    public float MansardHeight => m_MansardHeight;
-    public float Height => m_Height;
-    public float TileHeight => m_TileHeight;
-    public float TileExtend => m_TileExtend;
-    public bool TileFlipFace => m_TileFlipFace;
-    public RoofType FrameType => m_FrameType;
-    public Material RoofTileMaterial => m_RoofTileMaterial;
-    public GameObject SupportBeamPrefab => m_SupportBeamPrefab;
-    public GameObject CentreBeamPrefab => m_CentreBeamPrefab;
+    private List<RoofTile> m_Tiles;
 
-    public IEnumerable<Vector3> ControlPoints => m_ControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints;
 
-    public event Action<Roof> OnAnyRoofChange; // Building should sub to this.
+    private Vector3[] m_TempOneLine;
+
+    public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
+    public RoofData Data => m_Data;
+
+    public Roof SetRoofActive(bool value)
+    {
+        m_Data.SetActive(value);
+        return this;
+    }
+
+    public Roof SetControlPoints(IEnumerable<ControlPoint> controlPoints)
+    {
+        ControlPoint[] points = controlPoints.ToArray();
+        m_ControlPoints = PolygonRecognition.Clone(points.ToArray());
+        m_OriginalControlPoints = PolygonRecognition.Clone(m_ControlPoints);
+        return this;
+    }
+
+    public event Action<RoofData> OnAnyRoofChange; // Building should sub to this.
 
     public void OnAnyRoofChange_Invoke()
     {
-        OnAnyRoofChange?.Invoke(this);
+        OnAnyRoofChange?.Invoke(m_Data);
     }
 
-    public Roof Initialize(Roof roof, IEnumerable<Vector3> controlPoints)
+    private void Reset()
     {
-        m_Height = roof.Height;
-        m_MansardHeight = roof.MansardHeight;
-        m_MansardScale = roof.MansardScale;
-        m_FrameType = roof.FrameType;
-        m_RoofTileMaterial = roof.RoofTileMaterial;
-        m_ControlPoints = controlPoints.ToArray();
-        m_OriginalControlPoints = m_ControlPoints;
-        m_CentreBeamPrefab = roof.CentreBeamPrefab;
-        m_SupportBeamPrefab = roof.SupportBeamPrefab;
-        m_TileHeight = roof.TileHeight;
-        m_TileExtend = roof.TileExtend;
-        m_TileFlipFace = roof.TileFlipFace;
+        Initialize();
+    }
+
+    public Roof Initialize()
+    {
+        m_Data = new RoofData();
+        m_Tiles = new List<RoofTile>();
+        m_Walls = new List<Wall>();
+
+        if (TryGetComponent(out Building building))
+        {
+            m_ControlPoints = PolygonRecognition.Clone(building.ControlPoints.ToArray());
+            m_OriginalControlPoints = PolygonRecognition.Clone(m_ControlPoints);
+        }
+
+        return this;
+    }
+
+    public Roof Initialize(RoofData data)
+    {
+        m_Data = new RoofData(data);
 
         return this;
     }
@@ -71,83 +96,66 @@ public class Roof : MonoBehaviour
     public int[] AvailableRoofFrames()
     {
         if (m_ControlPoints == null)
-            throw new NotImplementedException();
+            return new int[0];
 
-        int OpenGable = (int)RoofType.OpenGable;
+        int Gable = (int)RoofType.Gable;
         int Mansard = (int)RoofType.Mansard;
-        int Flat = (int)RoofType.Flat;
         int Dormer = (int)RoofType.Dormer;
         int MShaped = (int)RoofType.MShaped;
         int Pyramid = (int)RoofType.Pyramid;
         int PyramidHip = (int)RoofType.PyramidHip;
 
-        switch (ControlPoints.Count())
+        if(m_ControlPoints.Length == 4)
+            return new int[] { Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip };
+
+        if(m_ControlPoints.IsDescribableInOneLine(out _))
         {
-            case 4:
-                return new int[] { OpenGable, Mansard, Flat, Dormer, MShaped, Pyramid, PyramidHip };
-            case 5:
-                if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
-                {
-                    return new int[] { Mansard, Flat, Pyramid, PyramidHip };
-                }
-                return new int[] { Mansard, Flat };
-            case 6:
-                if (m_ControlPoints.IsPolygonLShaped(out _))
-                {
-                    if(m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
-                    {
-                        return new int[] { OpenGable, Mansard, Flat, Dormer, Pyramid, PyramidHip };
-                    }
-
-                    return new int[] { OpenGable, Mansard, Flat, Dormer };
-                }
-                if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
-                {
-                    return new int[] { Mansard, Flat, Pyramid, PyramidHip };
-                }
-                return new int[] { Mansard, Flat };
-            case 7:
-                if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
-                {
-                    return new int[] { Mansard, Flat, Pyramid, PyramidHip };
-                }
-                return new int[] { Mansard, Flat };
-            case 8:
-                if(m_ControlPoints.IsPolygonTShaped(out _) || m_ControlPoints.IsPolygonUShaped(out _))
-                {
-                    if (m_ControlPoints.IsPointInsidePolygon(m_ControlPoints.PolygonCentre()))
-                    {
-                        return new int[] { OpenGable, Mansard, Flat, Dormer, Pyramid, PyramidHip };
-                    }
-
-                    return new int[] { OpenGable, Mansard, Flat, Dormer };
-                }
-                return new int[] { Mansard, Flat };
-            default:
-                return new int[] { OpenGable, Mansard, Flat, Dormer, Pyramid, PyramidHip };
+            if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+            {
+                return new int[] { Gable, Mansard, Dormer, Pyramid, PyramidHip };
+            }
+            return new int[] { Gable, Mansard, Dormer };
         }
+
+        return new int[] { Mansard };
     }
 
-    public Roof ConstructFrame()
+    public Roof BuildFrame()
     {
-        Deconstruct();
+        transform.DeleteChildren();
 
-        m_ControlPoints = m_OriginalControlPoints;
+        m_Tiles.Clear();
+        m_Walls.Clear();
 
-        switch (m_FrameType)
+        if (!m_Data.IsActive)
+            return this;
+
+        m_ControlPoints.SetPositions(m_OriginalControlPoints);
+
+        if (TryGetComponent(out Building building))
         {
-            case RoofType.OpenGable:
-                BuildOpenGable();
+            m_LastStorey = building.GetComponents<Storey>()[^1];
+        }
+        else if(TryGetComponent(out WallSection wallSection))
+        {
+            m_LastStorey = wallSection.GetComponent<Storey>();
+        }
+        else
+        {
+            m_LastStorey = transform.parent.GetComponents<Storey>()[^1];
+        }
+
+        switch (m_Data.RoofType)
+        {
+            case RoofType.Gable:
+                BuildGable();
                 break;
             case RoofType.Mansard:
                 BuildMansard();
                 break;
-            case RoofType.Flat:
-                BuildFlat();
-                break;
             case RoofType.Dormer:
                 BuildMansard();
-                BuildOpenGable();
+                BuildGable();
                 break;
             case RoofType.MShaped:
                 BuildM();
@@ -167,568 +175,930 @@ public class Roof : MonoBehaviour
 
     private void BuildPyramid()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
+        Vector3 middle = ProMaths.Average(m_ControlPoints.GetPositions());
+        middle += (Vector3.up * m_Data.PyramidHeight);
 
-        GameObject roofFrame = new GameObject("Pyramid Roof Frame");
-        roofFrame.transform.SetParent(transform, false);
+        List<RoofTile> pyramidTiles = new();
 
-        Vector3 middle = ProMaths.Average(controlPointsArray);
-        middle += (Vector3.up * m_Height);
-
-        int steps = Mathf.FloorToInt(Vector3.Distance(controlPointsArray[0], controlPointsArray[1]) / 5);
-
-        for (int i = 1; i < controlPointsArray.Length; i++)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int next = controlPointsArray.GetNextControlPoint(i);
+            int next = m_ControlPoints.GetNext(i);
+            CreateRoofTile(new Vector3[] { m_ControlPoints[i].Position, middle, middle, m_ControlPoints[next].Position }, false, true, false, false);
+            pyramidTiles.Add(m_Tiles[^1]);
+        }
 
-            int tempSteps = Mathf.FloorToInt(Vector3.Distance(controlPointsArray[i], controlPointsArray[next]) / 5);
-
-            if (tempSteps > steps)
+        if (m_Data.RoofType == RoofType.PyramidHip)
+        {
+            foreach(RoofTile tile in pyramidTiles)
             {
-                steps = tempSteps;
+                tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend, false).Extend(false, false, false, false).Build();
             }
-        }
-
-        Beam[] supportBeams = new Beam[controlPointsArray.Length];
-
-        for(int i = 0; i < supportBeams.Length; i++)
-        {
-            supportBeams[i] = Beam.Create(m_SupportBeamPrefab, transform).Build(middle, controlPointsArray[i], steps);
-            supportBeams[i].transform.SetParent(roofFrame.transform, true);
-        }
-
-        GameObject tiles = new GameObject("Tiles");
-        tiles.transform.SetParent(transform, false);
-
-        for (int i = 0; i < supportBeams.Length; i++)
-        {
-            int next = controlPointsArray.GetNextControlPoint(i);
-
-            Extrudable[] extrudes = { supportBeams[i], supportBeams[next] };
-
-            GameObject tile = new GameObject("Tile " + i.ToString());
-            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudes).Extend(false, true, false, false);
-            roofTile.transform.SetParent(tiles.transform, true);
-            roofTile.SetMaterial(m_RoofTileMaterial);
-            roofTile.SetHeight(m_TileHeight);
-            roofTile.SetExtendDistance(m_TileExtend);
-            roofTile.StartConstruction();
         }
     }
 
     private void BuildMansard()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
+        ControlPoint[] scaledControlPoints = PolygonRecognition.Clone(m_ControlPoints);
+        scaledControlPoints = scaledControlPoints.ScalePolygon(m_Data.MansardScale);
 
-        GameObject roofFrame = new ("Mansard Roof Frame");
-        roofFrame.transform.SetParent(transform, false);
-
-        GameObject tiles = new ("Mansard Roof Tiles");
-        tiles.transform.SetParent(transform, false);
-
-        List<Extrudable> supportPoints = new();
-        Vector3[] startPositions = new Vector3[controlPointsArray.Length];
-
-        for (int i = 0; i < startPositions.Length; i++)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int previousPoint = controlPointsArray.GetPreviousControlPoint(i);
-            int nextPoint = controlPointsArray.GetNextControlPoint(i);
-
-            Vector3 a = controlPointsArray[i].GetDirectionToTarget(controlPointsArray[nextPoint]);
-            Vector3 b = controlPointsArray[i].GetDirectionToTarget(controlPointsArray[previousPoint]);
-            Vector3 c = Vector3.Lerp(a, b, 0.5f);
-
-            Vector3 pos = controlPointsArray[i] + c;
-
-            if (!controlPointsArray.IsPointInsidePolygon(pos))
-            {
-                pos = controlPointsArray[i] - c;
-            }
-
-            startPositions[i] = pos + (Vector3.up * m_MansardHeight);
-        }
-        float scale = m_MansardScale - 1;
-        // Scale
-        Vector3 transformPoint = ProMaths.Average(startPositions);
-        for (int i = 0; i < startPositions.Length; i++)
-        {
-            Vector3 point = startPositions[i] - transformPoint;
-            Vector3 v = (point * scale) + transformPoint;
-            startPositions[i] = point + v;
+            scaledControlPoints[i] += Vector3.up * m_Data.MansardHeight;
         }
 
-        for (int i = 0; i < controlPointsArray.Length; i++)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            Beam beam = Beam.Create(m_SupportBeamPrefab, transform).Build(startPositions[i], controlPointsArray[i], 1);
-            beam.transform.SetParent(roofFrame.transform, true);
-            supportPoints.Add(beam);
+            int next = m_ControlPoints.GetNext(i);
+            CreateRoofTile(new Vector3[] { m_ControlPoints[i].Position, scaledControlPoints[i].Position, scaledControlPoints[next].Position, m_ControlPoints[next].Position }, false, true, false, false);
+            m_Tiles.RemoveAt(m_Tiles.Count - 1);
         }
 
-        for (int i = 0; i < supportPoints.Count; i++)
+        if(m_Data.RoofType == RoofType.Mansard)
         {
-            int next = controlPointsArray.GetNextControlPoint(i);
-            Beam beam = Beam.Create(m_SupportBeamPrefab, transform).Build(supportPoints[i].transform.localPosition, supportPoints[next].transform.localPosition, 0);
-            beam.transform.SetParent(roofFrame.transform, true);
+            ProBuilderMesh top = ProBuilderMesh.Create();
+            top.name = "Lid";
+            top.CreateShapeFromPolygon(scaledControlPoints.GetPositions(), m_Data.RoofTileData.Height, false);
+            top.GetComponent<Renderer>().material = m_Data.RoofTileData.Material;
+            top.transform.SetParent(transform, false);
+            return;
         }
 
-        for (int i = 0; i < supportPoints.Count; i++)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            int next = controlPointsArray.GetNextControlPoint(i);
-            Extrudable[] extrudables = { supportPoints[i], supportPoints[next] };
-            GameObject tile = new GameObject("Tile " + i.ToString());
-
-            Tile roofTile = tile.AddComponent<Tile>().Initialize(extrudables).Extend(false, true, false, false);
-            roofTile.transform.SetParent(tiles.transform, true);
-            roofTile.SetMaterial(m_RoofTileMaterial);
-            roofTile.SetHeight(m_TileHeight);
-            roofTile.SetExtendDistance(m_TileExtend);
-            roofTile.StartConstruction();
-
+            scaledControlPoints[i] += Vector3.up * m_Data.RoofTileData.Height;
         }
 
-        m_ControlPoints = startPositions;
+        m_ControlPoints.SetPositions(scaledControlPoints);
     }
 
-    private void BuildOpenGable()
+    private void CreateRoofTiles(Vector3[] oneLine, int startIndex, int[][] indices, bool[][] extend)
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
+        int[] relativeIndices = m_ControlPoints.RelativeIndices(startIndex);
 
-        if (m_ControlPoints.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
+        for (int i = 0; i < indices.Length; i++)
         {
-            GameObject roofFrame = new GameObject("Roof Frame");
-            roofFrame.transform.SetParent(transform, false);
+            int[] tileIndices = indices[i];
+            bool[] tileExtend = extend[i];
 
-            GameObject tiles = new GameObject("Tiles");
-            tiles.transform.SetParent(transform, false);
+            if (tileIndices[1] == tileIndices[2] && m_Data.IsOpen)
+            {
+                tileIndices = tileIndices.Reverse().ToArray();
+                CreateWall(new Vector3[] { m_ControlPoints[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], m_ControlPoints[relativeIndices[tileIndices[3]]].Position });
+            }
 
-            List<Tile> roofTiles = new ();
+            CreateRoofTile(new Vector3[] { m_ControlPoints[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], m_ControlPoints[relativeIndices[tileIndices[3]]].Position }, tileExtend);
+        }
 
-            int supportSteps = 1;
-            int centreSteps = 1;
-            bool doesSupportHaveTC = m_SupportBeamPrefab.TryGetComponent(out TransformCurve tc);
-            bool doesCentreHaveTC = m_CentreBeamPrefab.TryGetComponent(out TransformCurve tc1);
-            
+    }
+
+    private void CreateRoofTile(Vector3[] points, bool[] extend)
+    {
+        if (extend.Length != 4)
+            return;
+
+        CreateRoofTile(points, extend[0], extend[1], extend[2], extend[3]);
+    }
+
+    private void CreateRoofTile(Vector3[] points, bool heightStart = false, bool heightEnd = true, bool widthStart = true, bool widthEnd = true)
+    {
+        ProBuilderMesh roofTile = ProBuilderMesh.Create();
+        roofTile.name = "Roof Tile";
+        RoofTile tile = roofTile.AddComponent<RoofTile>();
+        tile.SetControlPoints(points);
+        tile.SetMaterial(m_Data.RoofTileData.Material);
+        tile.transform.SetParent(transform, false);
+        tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend).Extend(heightStart, heightEnd, widthStart, widthEnd).Build();
+        m_Tiles.Add(tile);
+    }
+
+    private void CreateWall(Vector3[] points)
+    {
+        GameObject wall = new GameObject("Wall", typeof(Wall));
+        wall.transform.SetParent(transform, false);
+        WallData data = new WallData(m_LastStorey.WallData);
+        data.SetControlPoints(points);
+        wall.GetComponent<Wall>().Initialize(data).Build();
+        m_Walls.Add(wall.GetComponent<Wall>());
+    }
+
+    private void BuildGable()
+    {
+
+        if (m_ControlPoints.IsDescribableInOneLine(out Vector3[] oneLine))
+        {
+            for (int i = 0; i < oneLine.Length; i++)
+            {
+                oneLine[i] += Vector3.up * m_Data.GableHeight;
+            }
+
+            m_TempOneLine = oneLine;
+
             switch (oneLine.Length)
             {
                 case 2:
-                    if (oneLine.Length == 2) // Prevents scope error.
+                    if (!m_Data.IsOpen)
                     {
-                        Vector3 start = oneLine[0] + (Vector3.up * m_Height);
-                        Vector3 end = oneLine[1] + (Vector3.up * m_Height);
+                        Vector3 mid = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                        oneLine[0] = Vector3.Lerp(oneLine[0], mid, m_Data.GableScale);
+                        oneLine[1] = Vector3.Lerp(oneLine[1], mid, m_Data.GableScale);
+                    }
 
-                        float distance = Vector3.Distance(start, end);
-                        int possibleSteps = Mathf.FloorToInt(distance);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[3].Position, oneLine[1], oneLine[0], m_ControlPoints[0].Position });
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[1].Position, oneLine[0], oneLine[1], m_ControlPoints[2].Position });
 
-                        if(doesCentreHaveTC)
-                            centreSteps = possibleSteps;
-
-                        Beam centreBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, end, centreSteps);
-                        centreBeam.transform.SetParent(roofFrame.transform, true);
-
-                        Vector3[] localCentreBeamPoints = transform.InverseTransformPoints(centreBeam.ExtrusionPositions).ToArray();
-
-                        if (doesSupportHaveTC)
-                            supportSteps = possibleSteps;
-
-                        int size = localCentreBeamPoints.Length;
-
-                        Beam[] firstSupportBeamSet = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                        Beam[] secondSupportBeamSet = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                        Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[1], controlPointsArray[2], size).ToArray();
-                        Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[0], controlPointsArray[3], size).ToArray();
-                        
-                        for (int i = 0; i < size; i++)
-                        {
-                            Connector connector = new (new Beam[]
-                            { 
-                                firstSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsA[i], supportSteps),
-                                secondSupportBeamSet[i].Build(localCentreBeamPoints[i], endPointsB[i], supportSteps)
-                            });
-
-                            centreBeam.AddConnector(connector);
-                        }
-
-                        Beam[] combined = firstSupportBeamSet.Concat(secondSupportBeamSet).ToArray();
-
-                        foreach (Beam extruder in combined)
-                        {
-                            extruder.transform.SetParent(roofFrame.transform, true);
-                        }
-
-                        roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstSupportBeamSet, true).Extend(false, true, true, true));
-                        roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondSupportBeamSet).Extend(false, true, true, true));
+                    if (m_Data.IsOpen)
+                    {
+                        CreateWall(new Vector3[] { m_ControlPoints[1].Position, oneLine[0], oneLine[0], m_ControlPoints[0].Position });
+                        CreateWall(new Vector3[] { m_ControlPoints[3].Position, oneLine[1], oneLine[1], m_ControlPoints[2].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[0].Position, oneLine[0], oneLine[0], m_ControlPoints[1].Position });
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[2].Position, oneLine[1], oneLine[1], m_ControlPoints[3].Position });
                     }
                     break;
                 case 3:
-                    if (oneLine.Length == 3)
+                    if (m_ControlPoints.IsLShaped(out int index))
                     {
-                        Vector3 start = oneLine[0] + (Vector3.up * m_Height);
-                        Vector3 mid = oneLine[1] + (Vector3.up * m_Height);
-                        Vector3 end = oneLine[2] + (Vector3.up * m_Height);
-
-                        // Index Points
-                        bool isL = m_ControlPoints.IsPolygonLShaped(out int index);
-                        int next = m_ControlPoints.GetNextControlPoint(index);
-                        int twoNext = m_ControlPoints.GetNextControlPoint(next);
-                        int threeNext = m_ControlPoints.GetNextControlPoint(twoNext);
-                        int onePrevious = m_ControlPoints.GetPreviousControlPoint(index);
-                        int twoPrevious = m_ControlPoints.GetPreviousControlPoint(onePrevious);
-                        int threePrevious = m_ControlPoints.GetPreviousControlPoint(twoPrevious);
-
-                        // TODO: Merge steps & size variables.
-
-                        float distanceA = Vector3.Distance(start, mid);
-                        float distanceB = Vector3.Distance(mid, end);
-                        float average = (distanceA + distanceB) * 0.5f;
-                        int possibleSteps = Mathf.FloorToInt(average);
-
-                        if (doesCentreHaveTC)
-                            centreSteps = possibleSteps;
-
-                        if (doesSupportHaveTC)
-                            supportSteps = possibleSteps;
-
-                        Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(start, mid, centreSteps);
-                        firstBeam.transform.SetParent(roofFrame.transform, true);
-
-                        int size = firstBeam.ExtrusionPositions.Length;
-
-                        Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
-
-                        Beam[] first = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                        Beam[] second = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                        Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[next], controlPointsArray[index], size).ToArray();
-                        Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[twoNext], controlPointsArray[threeNext], size).ToArray();
-
-                        for (int i = 0; i < size; i++)
+                        if(!m_Data.IsOpen)
                         {
-                            Connector connector = new(new Beam[]
-                            {
-                                first[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
-                                second[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
-                            });
+                            Vector3 lp1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 lp2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
 
-                            firstBeam.AddConnector(connector);
-                        }
-                        
-                        Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform).Build(end, mid, centreSteps);
-                        secondBeam.transform.SetParent(roofFrame.transform, true);
-
-                        Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
-
-                        Beam[] third = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                        Beam[] fourth = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                        Vector3[] endPointsC = Vector3Extensions.LerpCollection(controlPointsArray[onePrevious], controlPointsArray[index], size).ToArray();
-                        Vector3[] endPointsD = Vector3Extensions.LerpCollection(controlPointsArray[twoPrevious], controlPointsArray[threePrevious], size).ToArray();
-
-                        for (int i = 0; i < size - 1; i++)
-                        {
-                            Connector connector = new(new Beam[]
-                            {
-                                third[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
-                                fourth[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
-                            });
-
-                            secondBeam.AddConnector(connector);
+                            oneLine[0] = Vector3.Lerp(oneLine[0], lp1, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], lp2, m_Data.GableScale);
                         }
 
-                        third[^1] = first[^1];
-                        fourth[^ 1] = second[^1];
-                        secondBeam.AddConnector(firstBeam.GetLastConnector());
+                        int[][] lIndices = GableData.lIndices;
+                        bool[][] lExtend = GableData.lExtend;
 
-                        Extrudable[] combined = first.Concat(second).Concat(third).Concat(fourth).ToArray();
-
-                        foreach (Extrudable extruder in combined)
-                        {
-                            extruder.transform.SetParent(roofFrame.transform, true);
-                        }
-
-                        roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(first, true).Extend(false, true, true, false));
-                        roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(second).Extend(false, true, true, false));
-                        roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(third).Extend(false, true, true, false));
-                        roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourth, true).Extend(false, true, true, false));
-
-                        // Suspend construction if the centre beam is being reshaped.
-                        firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
-                        firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
-                        secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
-                        secondBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
-
-                        firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
-                        firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
-                        secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
-                        secondBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
-
+                        CreateRoofTiles(oneLine, index, lIndices, lExtend);
                     }
                     break;
                 case 4:
-                    if (oneLine.Length == 4)
+                    if(m_ControlPoints.IsArrowShaped(out int[] arrowPointIndices))
                     {
-                        Vector3 first = oneLine[0] + (Vector3.up * m_Height);
-                        Vector3 second = oneLine[1] + (Vector3.up * m_Height);
-                        Vector3 third = oneLine[2] + (Vector3.up * m_Height);
-                        Vector3 fourth = oneLine[3] + (Vector3.up * m_Height);
-
-                        float distanceA = Vector3.Distance(first, fourth);
-                        float distanceB = Vector3.Distance(second, fourth);
-                        float distanceC = Vector3.Distance(third, fourth);
-                        float average = (distanceA + distanceB + distanceC) * 0.333333f;
-
-                        int possibleSteps = Mathf.FloorToInt(average);
-
-                        if (doesCentreHaveTC)
-                            centreSteps = possibleSteps;
-
-                        if (doesSupportHaveTC)
-                            supportSteps = possibleSteps;
-
-
-                        //steps = Mathf.FloorToInt(average); // multiply it by something? a 0 to 1 value, maybe? something specified by the player/dev.
-
-                        if (m_ControlPoints.IsPolygonTShaped(out int[] tPointIndices))
+                        if (!m_Data.IsOpen)
                         {
-                            // Indices
-                            int tPoint0Previous = m_ControlPoints.GetPreviousControlPoint(tPointIndices[0]);
-                            int tPoint0Previous1 = m_ControlPoints.GetPreviousControlPoint(tPoint0Previous);
-                            int tPoint0Next = m_ControlPoints.GetNextControlPoint(tPointIndices[0]);
-                            int tPoint1Previous = m_ControlPoints.GetPreviousControlPoint(tPointIndices[1]);
-                            int tPoint1Next = m_ControlPoints.GetNextControlPoint(tPointIndices[1]);
-                            int tPoint1Next1 = m_ControlPoints.GetNextControlPoint(tPoint1Next);
+                            Vector3 ap1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                            Vector3 ap2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                            Vector3 ap3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
 
-                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, fourth, centreSteps);
-                            int size = firstBeam.ExtrusionPositions.Length;
-                            Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
-
-                            // Supports
-                            Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                            Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[tPoint0Next], controlPointsArray[tPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[tPoint1Previous], controlPointsArray[tPointIndices[1]], size).ToArray();
-
-                            for (int i = 0; i < size; i++)
-                            {
-                                Connector connector = new(new Beam[]
-                                {
-                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
-                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
-                                });
-
-                                firstBeam.AddConnector(connector);
-                            }
-                            // Centre beams
-                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, fourth, centreSteps);
-                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(third, fourth, centreSteps);
-
-                            Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
-                            Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
-
-                            // Support Beams
-                            Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size-1).ToArray();
-                            Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size-1).ToArray();
-
-                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(controlPointsArray[tPoint0Previous], controlPointsArray[tPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(controlPointsArray[tPoint1Next], controlPointsArray[tPointIndices[1]], size).ToArray();
-
-                            for (int i = 0; i < size-1; i++)
-                            {
-                                thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps);
-                                fourthBeams[i].Build(localThirdBeamPoints[i], endPointsD[i], supportSteps);
-                            }
-
-                            localSecondBeamPoints = localSecondBeamPoints[..^1];
-                            Vector3[] longPoints = localSecondBeamPoints.Concat(localThirdBeamPoints.Reverse()).ToArray();
-                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(controlPointsArray[tPoint0Previous1], controlPointsArray[tPoint1Next1], longPoints.Length).ToArray();
-
-                            Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, longPoints.Length).ToArray();
-
-                            for(int i = 0; i < longPoints.Length; i++)
-                            {
-                                fifthBeams[i].Build(longPoints[i], endPointsE[i], supportSteps);
-                            }
-
-                            for (int i = 0; i < localSecondBeamPoints.Length; i++)
-                            {
-                                Connector connector = new(new Beam[]
-                                {
-                                    thirdBeams[i], fifthBeams[i]
-                                });
-                                secondBeam.AddConnector(connector);
-                            }
-
-                            int count = 0;
-                            for (int i = fifthBeams.Length-1; i > localSecondBeamPoints.Length; i--)
-                            {
-                                Connector connector = new(new Beam[]
-                                {
-                                    fourthBeams[count], fifthBeams[i]
-                                });
-
-                                thirdBeam.AddConnector(connector);
-                                count++;
-                            }
-
-                            Array.Resize(ref thirdBeams, thirdBeams.Length + 1);
-                            thirdBeams[^1] = firstBeams[^1];
-
-                            Array.Resize(ref fourthBeams, fourthBeams.Length + 1);
-                            fourthBeams[^1] = secondBeams[^1];
-
-                            List<Beam> combined = firstBeams.Concat(secondBeams).Concat(thirdBeams).Concat(fourthBeams).Concat(fifthBeams).ToList();
-                            combined.Add(firstBeam);
-                            combined.Add(secondBeam);
-                            combined.Add(thirdBeam);
-
-                            foreach (Extrudable extruder in combined)
-                            {
-                                extruder.transform.SetParent(roofFrame.transform, true);
-                            }
-
-                            roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, true));
-
-                            // Suspend construction if the centre beam is being reshaped.
-                            firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
-                            firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
-
-                            firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
-                            firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
+                            oneLine[0] = Vector3.Lerp(oneLine[0], ap1, m_Data.GableScale);
+                            oneLine[1] = Vector3.Lerp(oneLine[1], ap2, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], ap3, m_Data.GableScale);
                         }
 
-                        if (m_ControlPoints.IsPolygonUShaped(out int[] uPointIndices))
+                        int[][] indices = GableData.arrowIndices;
+                        bool[][] extend = GableData.arrowExtend;
+
+                        CreateRoofTiles(oneLine, arrowPointIndices[0], indices, extend);
+                    }
+            
+                    else if (m_ControlPoints.IsSimpleNShaped(out int[] simpleNPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
                         {
-                            // Indices
-                            int onePointPrevious = m_ControlPoints.GetPreviousControlPoint(uPointIndices[0]);
-                            int twoPointPrevious = m_ControlPoints.GetPreviousControlPoint(onePointPrevious);
-                            int threePointPrevious = m_ControlPoints.GetPreviousControlPoint(twoPointPrevious);
-                            int onePointNext = m_ControlPoints.GetNextControlPoint(uPointIndices[1]);
-                            int twoPointNext = m_ControlPoints.GetNextControlPoint(onePointNext);
-                            int threePointNext = m_ControlPoints.GetNextControlPoint(twoPointNext);
+                            Vector3 simpleNP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 simpleNP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
 
-                            Beam firstBeam = Beam.Create(m_CentreBeamPrefab, transform, "First Beam").Build(first, second, centreSteps);
-                            Beam secondBeam = Beam.Create(m_CentreBeamPrefab, transform, "Second Beam").Build(second, third, centreSteps);
-                            Beam thirdBeam = Beam.Create(m_CentreBeamPrefab, transform, "Third Beam").Build(fourth, third, centreSteps);
-
-                            int size = firstBeam.ExtrusionPositions.Length;
-                            Vector3[] localFirstBeamPoints = transform.InverseTransformPoints(firstBeam.ExtrusionPositions).ToArray();
-                            Vector3[] localSecondBeamPoints = transform.InverseTransformPoints(secondBeam.ExtrusionPositions).ToArray();
-                            Vector3[] localThirdBeamPoints = transform.InverseTransformPoints(thirdBeam.ExtrusionPositions).ToArray();
-
-                            // Supports
-                            Beam[] firstBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] secondBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] thirdBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] fourthBeams = Beam.Create(m_SupportBeamPrefab, transform, size - 1).ToArray();
-                            Beam[] fifthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-                            Beam[] sixthBeams = Beam.Create(m_SupportBeamPrefab, transform, size).ToArray();
-
-                            Vector3[] endPointsA = Vector3Extensions.LerpCollection(controlPointsArray[twoPointPrevious], controlPointsArray[threePointPrevious], size).ToArray();
-                            Vector3[] endPointsB = Vector3Extensions.LerpCollection(controlPointsArray[onePointPrevious], controlPointsArray[uPointIndices[0]], size).ToArray();
-                            Vector3[] endPointsC = Vector3Extensions.LerpCollection(controlPointsArray[threePointPrevious], controlPointsArray[threePointNext], size).ToArray();
-                            Vector3[] endPointsD = Vector3Extensions.LerpCollection(controlPointsArray[uPointIndices[0]], controlPointsArray[uPointIndices[1]], size).ToArray();
-                            Vector3[] endPointsE = Vector3Extensions.LerpCollection(controlPointsArray[twoPointNext], controlPointsArray[threePointNext], size).ToArray();
-                            Vector3[] endPointsF = Vector3Extensions.LerpCollection(controlPointsArray[onePointNext], controlPointsArray[uPointIndices[1]], size).ToArray();
-
-                            for (int i = 0; i < size; i++)
-                            {
-                                if (i < size - 1)
-                                {
-                                    Connector connectorA = new(new Beam[]
-                                    {
-                                    firstBeams[i].Build(localFirstBeamPoints[i], endPointsA[i], supportSteps),
-                                    secondBeams[i].Build(localFirstBeamPoints[i], endPointsB[i], supportSteps)
-                                    });
-
-                                    firstBeam.AddConnector(connectorA);
-
-                                    Connector connectorB = new(new Beam[]
-                                    {
-                                    thirdBeams[i].Build(localSecondBeamPoints[i], endPointsC[i], supportSteps),
-                                    fourthBeams[i].Build(localSecondBeamPoints[i], endPointsD[i], supportSteps)
-                                    });
-
-                                    secondBeam.AddConnector(connectorB);
-                                }
-
-                                Connector connectorC = new(new Beam[]
-                                {
-                                    fifthBeams[i].Build(localThirdBeamPoints[i], endPointsE[i], supportSteps),
-                                    sixthBeams[i].Build(localThirdBeamPoints[i], endPointsF[i], supportSteps)
-                                });
-
-                                thirdBeam.AddConnector(connectorC);
-                            }
-
-                            // The last element of first should be the same as the last element for third.
-                            Array.Resize(ref firstBeams, size);
-                            firstBeams[^1] = thirdBeams[0];
-
-                            Array.Resize(ref secondBeams, size);
-                            secondBeams[^1] = fourthBeams[0];
-
-                            Array.Resize(ref thirdBeams, size);
-                            thirdBeams[^1] = fifthBeams[^1];
-
-                            Array.Resize(ref fourthBeams, size);
-                            fourthBeams[^1] = sixthBeams[^1];
-
-                            Extrudable[] combined = firstBeams.Concat(secondBeams).Concat(thirdBeams).Concat(fourthBeams).Concat(fifthBeams).Concat(sixthBeams).ToArray();
-
-                            foreach (Extrudable extruder in combined)
-                            {
-                                extruder.transform.SetParent(roofFrame.transform, true);
-                            }
-
-                            roofTiles.Add(new GameObject("First Tile").AddComponent<Tile>().Initialize(firstBeams, true).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Second Tile").AddComponent<Tile>().Initialize(secondBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Third Tile").AddComponent<Tile>().Initialize(thirdBeams, true).Extend(false, true, false, false));
-                            roofTiles.Add(new GameObject("Fourth Tile").AddComponent<Tile>().Initialize(fourthBeams).Extend(false, true, false, false));
-                            roofTiles.Add(new GameObject("Fifth Tile").AddComponent<Tile>().Initialize(fifthBeams).Extend(false, true, true, false));
-                            roofTiles.Add(new GameObject("Sixth Tile").AddComponent<Tile>().Initialize(sixthBeams, true).Extend(false, true, true, false));
-
-                            firstBeam.OnConnectorBeginReshape += roofTiles[0].SuspendConstruction;
-                            firstBeam.OnConnectorBeginReshape += roofTiles[1].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[2].SuspendConstruction;
-                            secondBeam.OnConnectorBeginReshape += roofTiles[3].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[4].SuspendConstruction;
-                            thirdBeam.OnConnectorBeginReshape += roofTiles[5].SuspendConstruction;
-
-                            firstBeam.OnConnectorEndReshape += roofTiles[0].StartConstruction;
-                            firstBeam.OnConnectorEndReshape += roofTiles[1].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[2].StartConstruction;
-                            secondBeam.OnConnectorEndReshape += roofTiles[3].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[4].StartConstruction;
-                            thirdBeam.OnConnectorEndReshape += roofTiles[5].StartConstruction;
+                            oneLine[0] = Vector3.Lerp(oneLine[0], simpleNP1, m_Data.GableScale);
+                            oneLine[3] = Vector3.Lerp(oneLine[3], simpleNP2, m_Data.GableScale);
                         }
+
+                        int[][] indices = GableData.simpleNIndices;
+                        bool[][] extend = GableData.simpleNExtend;
+
+                        CreateRoofTiles(oneLine, simpleNPointIndices[0], indices, extend);
+                    }
+                    else if (m_ControlPoints.IsTShaped(out int[] tPointIndices))
+                    {
+                        if(!m_Data.IsOpen)
+                        {
+                            Vector3 tp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                            Vector3 tp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                            Vector3 tp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], tp1, m_Data.GableScale);
+                            oneLine[1] = Vector3.Lerp(oneLine[1], tp2, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], tp3, m_Data.GableScale);
+                        }
+
+                        int[][] indices = GableData.tIndices;
+                        bool[][] extend = GableData.tExtend;
+
+                        CreateRoofTiles(oneLine, tPointIndices[0], indices, extend);
+                    }
+                    else if (m_ControlPoints.IsUShaped(out int[] uPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 up1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 up2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], up1, m_Data.GableScale);
+                            oneLine[3] = Vector3.Lerp(oneLine[3], up2, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(uPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[2]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[4]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[5]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[1], oneLine[0], m_ControlPoints[indices[6]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+
+                        if(m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[6]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[2]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[3]].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[7]].Position }, false, true, false, false);
+                        }
+
+                    }
+                    else if (m_ControlPoints.IsYShaped(out int[] yPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 yp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                            Vector3 yp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                            Vector3 yp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], yp1, m_Data.GableScale);
+                            oneLine[1] = Vector3.Lerp(oneLine[1], yp2, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], yp3, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(yPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[3], oneLine[0], m_ControlPoints[indices[1]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[0], oneLine[3], m_ControlPoints[indices[3]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[3], oneLine[1], m_ControlPoints[indices[4]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[1], oneLine[3], m_ControlPoints[indices[6]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[7]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[1]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[1], oneLine[1], m_ControlPoints[indices[4]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[7]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[2]].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[1], oneLine[1], m_ControlPoints[indices[5]].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[8]].Position }, false, true, false, false);
+                        }
+                    }
+                    break;
+                case 5:
+                    if(m_ControlPoints.IsFShaped(out int[] fIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                            Vector3 c = Vector3.Lerp(oneLine[4], oneLine[3], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_Data.GableScale);
+                            oneLine[4] = Vector3.Lerp(oneLine[4], c, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(fIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[1]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[3]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[1], oneLine[3], m_ControlPoints[indices[4]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[3], oneLine[4], m_ControlPoints[indices[5]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[4], oneLine[3], m_ControlPoints[indices[7]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[3], oneLine[0], m_ControlPoints[indices[8]].Position }, false, true, false, true);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[8]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[1]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[5]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[9]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[2]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[6]].Position });
+                        }
+                    }
+
+                    else if (m_ControlPoints.IsSimpleMShaped(out int[] simpleMPointIndices))
+                    {
+
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 simpleMP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 simpleMP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], simpleMP1, m_Data.GableScale);
+                            oneLine[^1] = Vector3.Lerp(oneLine[^1], simpleMP2, m_Data.GableScale);
+                        }
+
+                        // Define a map of the indices from a single ref to a concave point.
+                        int[] indices = m_ControlPoints.RelativeIndices(simpleMPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[2]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[3], oneLine[4], m_ControlPoints[indices[3]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[4], oneLine[3], m_ControlPoints[indices[5]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[6]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[7]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[1], oneLine[0], m_ControlPoints[indices[8]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[8]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[3]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[4]].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[9]].Position }, false, true, false, false);
+                        }
+
+                    }
+                    else if (m_ControlPoints.IsXShaped(out int[] xPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 mid = ProMaths.Average(oneLine);
+
+                            for (int i = 0; i < oneLine.Length - 1; i++)
+                            {
+                                Vector3 xP = Vector3.Lerp(oneLine[i], mid, 0.5f);
+                                oneLine[i] = Vector3.Lerp(oneLine[i], xP, m_Data.GableScale);
+                            }
+
+                        }
+
+                        for (int i = 0; i < xPointIndices.Length; i++)
+                        {
+                            int current = xPointIndices[i];
+                            int previous = m_ControlPoints.GetPrevious(current);
+                            int next = m_ControlPoints.GetNext(current);
+                            int next1 = m_ControlPoints.GetNext(next);
+
+                            int previousOneLine = oneLine.GetPreviousControlPoint(i);
+                            previousOneLine = previousOneLine == oneLine.Length - 1 ? previousOneLine - 1 : previousOneLine;
+
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[4], oneLine[i], m_ControlPoints[next].Position }, false, true, false, true);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[previousOneLine], oneLine[4], m_ControlPoints[current].Position }, false, true, true, false);
+
+                            if (m_Data.IsOpen)
+                            {
+                                CreateWall(new Vector3[] { m_ControlPoints[next1].Position, oneLine[i], oneLine[i], m_ControlPoints[next].Position });
+                            }
+                            else
+                            {
+                                CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[i], oneLine[i], m_ControlPoints[next1].Position }, false, true, false, false);
+                            }
+                        }
+
+                    }
+                    break;
+                case 6:
+                    if (m_ControlPoints.IsNShaped(out int[] nPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 nP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 nP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], nP1, m_Data.GableScale);
+                            oneLine[^1] = Vector3.Lerp(oneLine[^1], nP2, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(nPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[0]].Position }, false, false, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[3], oneLine[4], m_ControlPoints[indices[2]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[4], oneLine[5], m_ControlPoints[indices[3]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[5], oneLine[4], m_ControlPoints[indices[5]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[6]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[4], oneLine[3], m_ControlPoints[indices[5]].Position }, false, false, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[7]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[1], oneLine[0], m_ControlPoints[indices[8]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+
+                        if(m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[8]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[3]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[9]].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[4]].Position }, false, true, false, false);
+                        }
+
+                    }
+                    else if (m_ControlPoints.IsEShaped(out int[] ePointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 eP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 eP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+                            Vector3 eP3 = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], eP1, m_Data.GableScale);
+                            oneLine[3] = Vector3.Lerp(oneLine[3], eP2, m_Data.GableScale);
+                            oneLine[5] = Vector3.Lerp(oneLine[5], eP3, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(ePointIndices[0]);
+                        
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[4], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[4], oneLine[5], m_ControlPoints[indices[2]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[5], oneLine[4], m_ControlPoints[indices[4]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[4], oneLine[2], m_ControlPoints[indices[5]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[6]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[8]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[9]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[1], oneLine[0], m_ControlPoints[indices[10]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+
+                        if(m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[10]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[2]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[6]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[10]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[11]].Position }, false, true, false, false); 
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[3]].Position }, false, true, false, false); 
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[7]].Position }, false, true, false, false);
+                        }
+
+                    }
+                    else if(m_ControlPoints.IsHShaped(out int[] hPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                            Vector3 c = Vector3.Lerp(oneLine[3], oneLine[4], 0.5f);
+                            Vector3 d = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_Data.GableScale);
+                            oneLine[3] = Vector3.Lerp(oneLine[3], c, m_Data.GableScale);
+                            oneLine[5] = Vector3.Lerp(oneLine[5], d, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(hPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[4], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[4], oneLine[5], m_ControlPoints[indices[2]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[5], oneLine[3], m_ControlPoints[indices[4]].Position }, false, true, true, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[4], m_ControlPoints[indices[6]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[4], oneLine[1], m_ControlPoints[indices[7]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[8]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[0], m_ControlPoints[indices[10]].Position }, false, true, true, true);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[10]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[8]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[4]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[2]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[10]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[11]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[9]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[5]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[5], oneLine[5], m_ControlPoints[indices[3]].Position });
+                        }
+                    }
+                    else if(m_ControlPoints.IsKShaped(out int[] kPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                            Vector3 c = Vector3.Lerp(oneLine[3], oneLine[5], 0.5f);
+                            Vector3 d = Vector3.Lerp(oneLine[4], oneLine[5], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_Data.GableScale);
+                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_Data.GableScale);
+                            oneLine[3] = Vector3.Lerp(oneLine[3], c, m_Data.GableScale);
+                            oneLine[4] = Vector3.Lerp(oneLine[4], d, m_Data.GableScale);
+                        }
+
+
+                        int[] indices = m_ControlPoints.RelativeIndices(kPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[5], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[5], oneLine[4], m_ControlPoints[indices[2]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[4], oneLine[5], m_ControlPoints[indices[4]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[5], oneLine[3], m_ControlPoints[indices[5]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[3], oneLine[1], m_ControlPoints[indices[7]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[8]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[0], m_ControlPoints[indices[10]].Position }, false, true, true, true);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[10]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[8]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[5]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[2]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[10]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[11]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[2], m_ControlPoints[indices[9]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[3], oneLine[3], m_ControlPoints[indices[6]].Position });
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[4], oneLine[4], m_ControlPoints[indices[3]].Position });
+                        }
+
+                    }
+                    break;
+                case 7:
+                    if (m_ControlPoints.IsMShaped(out int[] mPointIndices))
+                    {
+                        if (!m_Data.IsOpen)
+                        {
+                            Vector3 mP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                            Vector3 mP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                            oneLine[0] = Vector3.Lerp(oneLine[0], mP1, m_Data.GableScale);
+                            oneLine[^1] = Vector3.Lerp(oneLine[^1], mP2, m_Data.GableScale);
+                        }
+
+                        int[] indices = m_ControlPoints.RelativeIndices(mPointIndices[0]);
+
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[indices[0]].Position }, false, false, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[0]].Position, oneLine[2], oneLine[3], m_ControlPoints[indices[1]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[1]].Position, oneLine[3], oneLine[4], m_ControlPoints[indices[2]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[4], oneLine[5], m_ControlPoints[indices[2]].Position }, false, false, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[2]].Position, oneLine[5], oneLine[6], m_ControlPoints[indices[3]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[6], oneLine[5], m_ControlPoints[indices[5]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[5]].Position, oneLine[5], oneLine[4], m_ControlPoints[indices[6]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[6]].Position, oneLine[4], oneLine[3], m_ControlPoints[indices[7]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[7]].Position, oneLine[3], oneLine[2], m_ControlPoints[indices[8]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[8]].Position, oneLine[2], oneLine[1], m_ControlPoints[indices[9]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[9]].Position, oneLine[1], oneLine[0], m_ControlPoints[indices[10]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[1], m_ControlPoints[indices[0]].Position }, false, true, true, false);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[11]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[10]].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[indices[4]].Position, oneLine[6], oneLine[6], m_ControlPoints[indices[3]].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[3]].Position, oneLine[6], oneLine[6], m_ControlPoints[indices[4]].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[indices[10]].Position, oneLine[0], oneLine[0], m_ControlPoints[indices[11]].Position }, false, true, false, false);
+                        }
+
                     }
                     break;
             }
 
-            foreach (Tile roofTile in roofTiles)
+            // Repeating patterns
+            if(m_ControlPoints.IsZigZagShaped(out int[] zigZagIndices))
             {
-                roofTile.transform.SetParent(tiles.transform, false);
-                roofTile.SetMaterial(m_RoofTileMaterial);
-                roofTile.SetHeight(m_TileHeight);
-                roofTile.SetExtendDistance(m_TileExtend);
-                //roofTile.SetUVOffset(internalOffset, externalOffset);
-                roofTile.StartConstruction();
+                if (!m_Data.IsOpen)
+                {
+                    Vector3 zigP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 zigP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], zigP1, m_Data.GableScale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], zigP2, m_Data.GableScale);
+                }
+
+                int[] indices = m_ControlPoints.RelativeIndices(zigZagIndices[0]);
+                int previous = indices[^1];
+                int start = indices[^3];
+                int end = indices[^2];
+                
+                for (int i = 0; i < oneLine.Length-1; i++)
+                {
+                    if (i == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i + 1], m_ControlPoints[indices[i]].Position }, false, true, true, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[start].Position, oneLine[i + 1], oneLine[i], m_ControlPoints[end].Position }, false, true, false, true);
+
+                        if(m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i], m_ControlPoints[end].Position });
+                            
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[end].Position, oneLine[i], oneLine[i], m_ControlPoints[previous].Position }, false, true, false, false);
+                        }
+                    }
+                    else if(i == oneLine.Length-2)
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i + 1], m_ControlPoints[indices[i]].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[start].Position, oneLine[i + 1], oneLine[i], m_ControlPoints[end].Position }, false, true, true, false);
+                        
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[end -1].Position, oneLine[i+1], oneLine[i+1], m_ControlPoints[previous + 1].Position });
+
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[previous + 1].Position, oneLine[i+1], oneLine[i+1], m_ControlPoints[end-1].Position }, false, true, false, false);
+                        }
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i + 1], m_ControlPoints[indices[i]].Position }, false, true, false, false);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[start].Position, oneLine[i + 1], oneLine[i], m_ControlPoints[end].Position }, false, true, false, false);
+                    }
+
+                    previous = indices[i];
+                    start--;
+                    end--;
+                }
+
+            }
+            else if(m_ControlPoints.IsCrenelShaped(out int[] crenelIndices))
+            {
+                if (!m_Data.IsOpen)
+                {
+                    Vector3 crenelP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 crenelP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], crenelP1, m_Data.GableScale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], crenelP2, m_Data.GableScale);
+
+                    for (int i = 2; i < oneLine.Length -2; i+= 2)
+                    {
+                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[i+1], 0.5f);
+                        oneLine[i+1] = Vector3.Lerp(oneLine[i+1], a, m_Data.GableScale);
+                    }
+                }
+
+                int[] startIndices = m_ControlPoints.RelativeIndices(crenelIndices[0]);
+                int[] endIndices = m_ControlPoints.RelativeIndices(crenelIndices[^1]);
+
+                CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[^1]].Position, oneLine[0], oneLine[1], m_ControlPoints[startIndices[0]].Position }, false, true, false, false);
+                CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[^3]].Position, oneLine[1], oneLine[0], m_ControlPoints[startIndices[^2]].Position }, false, true, false, false);
+                CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[^4]].Position, oneLine[^2], oneLine[1], m_ControlPoints[startIndices[^3]].Position }, false, true, false, false);
+                CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[^5]].Position, oneLine[^1], oneLine[^2], m_ControlPoints[startIndices[^4]].Position }, false, true, false, false);
+                CreateRoofTile(new Vector3[] { m_ControlPoints[endIndices[0]].Position, oneLine[^2], oneLine[^1], m_ControlPoints[endIndices[1]].Position }, false, true, false, false);
+                CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[0]].Position, oneLine[1], oneLine[2], m_ControlPoints[startIndices[1]].Position }, false, true, false, false);
+
+                if(m_Data.IsOpen)
+                {
+                    CreateWall(new Vector3[] { m_ControlPoints[startIndices[^1]].Position, oneLine[0], oneLine[0], m_ControlPoints[startIndices[^2]].Position });
+                    CreateWall(new Vector3[] { m_ControlPoints[endIndices[2]].Position, oneLine[^1], oneLine[^1], m_ControlPoints[endIndices[1]].Position });
+                }
+                else
+                {
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[^2]].Position, oneLine[0], oneLine[0], m_ControlPoints[startIndices[^1]].Position }, false, true, false, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[endIndices[1]].Position, oneLine[^1], oneLine[^1], m_ControlPoints[endIndices[2]].Position }, false, true, false, false);
+                }
+
+                int fourCount = 0;
+                int twoCount = 0;
+
+                int length = ((crenelIndices.Length / 2) + 1) - 2;
+
+                for(int i = 0; i < length; i++)
+                {
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[4 + fourCount]].Position, oneLine[2 + twoCount], oneLine[4 + twoCount], m_ControlPoints[startIndices[5 + fourCount]].Position }, false, true, false, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[1 + fourCount]].Position, oneLine[2 + twoCount], oneLine[3 + twoCount], m_ControlPoints[startIndices[2 + fourCount]].Position }, false, true, false, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[3 + fourCount]].Position, oneLine[3 + twoCount], oneLine[2 + twoCount], m_ControlPoints[startIndices[4 + fourCount]].Position }, false, true, false, false);
+
+                    if (m_Data.IsOpen)
+                    {
+                        CreateWall(new Vector3[] { m_ControlPoints[startIndices[3 + fourCount]].Position, oneLine[3 + twoCount], oneLine[3 + twoCount], m_ControlPoints[startIndices[2 + fourCount]].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[startIndices[2 + fourCount]].Position, oneLine[3 + twoCount], oneLine[3 + twoCount], m_ControlPoints[startIndices[3 + fourCount]].Position }, false, true, false, false);
+                    }
+
+                    fourCount += 4;
+                    twoCount += 2;
+                }
+            }
+            else if(m_ControlPoints.IsAsteriskShaped(out int[] asteriskPointIndices))
+            {
+                if(!m_Data.IsOpen)
+                {
+                    for(int i = 0; i < oneLine.Length-1; i++)
+                    {
+                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[^1], 0.5f);
+                        oneLine[i] = Vector3.Lerp(oneLine[i], a, m_Data.GableScale);
+                    }
+                }
+
+                int count = oneLine.Length-2;
+                for(int i = 0; i < asteriskPointIndices.Length; i++)
+                {
+                    int current = asteriskPointIndices[i];
+                    int previous = m_ControlPoints.GetIndex(current - 1);
+                    int next = m_ControlPoints.GetIndex(current + 1);
+
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[^1], oneLine[i], m_ControlPoints[next].Position }, false, true, false, true);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[count], oneLine[^1], m_ControlPoints[current].Position }, false, true, true, false);
+                    count++;
+
+                    if(count > oneLine.Length-2)
+                    {
+                        count = 0;
+                    }
+
+                    int nextTwo = m_ControlPoints.GetIndex(current + 2);
+
+                    if (m_Data.IsOpen)
+                    { 
+                        CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[i], oneLine[i], m_ControlPoints[next].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[i], oneLine[i], m_ControlPoints[nextTwo].Position }, false, true, false, true);
+                    }
+                }
+            }
+            else if(m_ControlPoints.IsAntennaShaped(out int[] antPointIndices))
+            {
+                int length = oneLine.Length / 3;
+                int bIndex = 0;
+                int mIndex = 1;
+                int tIndex = 2;
+                for(int i = 0; i < length; i++)
+                {
+                    Vector3 a = Vector3.Lerp(oneLine[tIndex], oneLine[mIndex], 0.5f);
+                    Vector3 b = Vector3.Lerp(oneLine[bIndex], oneLine[mIndex], 0.5f);
+
+                    oneLine[tIndex] = Vector3.Lerp(oneLine[tIndex], a, m_Data.GableScale);
+                    oneLine[bIndex] = Vector3.Lerp(oneLine[bIndex], b, m_Data.GableScale);
+
+                    bIndex += 3;
+                    mIndex += 3;
+                    tIndex += 3;
+                }
+
+                // Middle Vertical
+                int current = m_ControlPoints.GetIndex(antPointIndices[0] - 4);
+                for(int i = 3; i < oneLine.Length - 3; i+= 3)
+                {
+                    int next = m_ControlPoints.GetIndex(current + 1);
+                    int nextTwo = m_ControlPoints.GetIndex(current + 2);
+                    int nextThree = m_ControlPoints.GetIndex(current + 3);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[i+1], oneLine[i], m_ControlPoints[next].Position }, false, true, false, true);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[i], oneLine[i+1], m_ControlPoints[nextThree].Position }, false, true, true, false);
+
+                    if(m_Data.IsOpen)
+                    {
+                        CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[i], oneLine[i], m_ControlPoints[next].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[i], oneLine[i], m_ControlPoints[nextTwo].Position }, false, true, false, false);
+                    }
+
+                    current = m_ControlPoints.GetIndex(current - 4);
+                }
+
+                current = m_ControlPoints.GetIndex(current - 3);
+                for (int i = oneLine.Length - 4; i > 3; i -= 3)
+                {
+                    int previous = m_ControlPoints.GetIndex(current - 1);
+                    int previousTwo = m_ControlPoints.GetIndex(current - 2);
+                    int previousThree = m_ControlPoints.GetIndex(current - 3);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i-1], m_ControlPoints[current].Position }, false, true, true, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previousThree].Position, oneLine[i-1], oneLine[i], m_ControlPoints[previousTwo].Position }, false, true, false, true);
+
+                    if (m_Data.IsOpen)
+                    {
+                        CreateWall(new Vector3[] { m_ControlPoints[previous].Position, oneLine[i], oneLine[i], m_ControlPoints[previousTwo].Position });
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[previousTwo].Position, oneLine[i], oneLine[i], m_ControlPoints[previous].Position }, false, true, false, false);
+                    }
+
+                    current = m_ControlPoints.GetIndex(current - 4);
+                }
+
+
+                // Middle Horizontal
+                current = m_ControlPoints.GetIndex(antPointIndices[0]);
+                int nextFive = m_ControlPoints.GetIndex(current + 5);
+                int index = 1;
+                int loop = (oneLine.Length / 3) - 1;
+                for (int i = 0; i < loop; i++)
+                {
+                    int previous = m_ControlPoints.GetIndex(current - 1);
+                    int next = m_ControlPoints.GetIndex(nextFive + 1);
+
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[previous].Position, oneLine[index + 3], oneLine[index], m_ControlPoints[current].Position }, false, true, false, false);
+                    CreateRoofTile(new Vector3[] { m_ControlPoints[nextFive].Position, oneLine[index], oneLine[index + 3], m_ControlPoints[next].Position }, false, true, false, false);
+
+                    current = m_ControlPoints.GetIndex(current - 4);
+                    nextFive = m_ControlPoints.GetIndex(nextFive + 4);
+                    index += 3;
+                }
+
+                // Ends
+                current = m_ControlPoints.GetIndex(antPointIndices[0]);
+                index = 0;
+
+                for (int i = 0; i < 2; i++)
+                {
+                    int next = m_ControlPoints.GetIndex(current + 1);
+                    int nextTwo = m_ControlPoints.GetIndex(current + 2);
+                    int nextThree = m_ControlPoints.GetIndex(current + 3);
+                    int nextFour = m_ControlPoints.GetIndex(current + 4);
+                    nextFive = m_ControlPoints.GetIndex(current + 5);
+
+                    if(i == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[index + 1], oneLine[index], m_ControlPoints[next].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index], oneLine[index + 2], m_ControlPoints[nextThree].Position }, false, true, true, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index + 2], oneLine[index + 1], m_ControlPoints[nextFive].Position }, false, true, true, false);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index], oneLine[index], m_ControlPoints[next].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[nextThree].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[index], oneLine[index], m_ControlPoints[nextTwo].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[nextThree].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[nextFour].Position }, false, true, false, false);
+                        }
+                    }
+                    else
+                    {
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[current].Position, oneLine[index + 1], oneLine[index + 2], m_ControlPoints[next].Position }, false, true, false, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index + 2], oneLine[index], m_ControlPoints[nextThree].Position }, false, true, true, true);
+                        CreateRoofTile(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index], oneLine[index + 1], m_ControlPoints[nextFive].Position }, false, true, true, false);
+
+                        if (m_Data.IsOpen)
+                        {
+                            CreateWall(new Vector3[] { m_ControlPoints[nextTwo].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[next].Position });
+                            CreateWall(new Vector3[] { m_ControlPoints[nextFour].Position, oneLine[index], oneLine[index], m_ControlPoints[nextThree].Position });
+                        }
+                        else
+                        {
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[next].Position, oneLine[index + 2], oneLine[index + 2], m_ControlPoints[nextTwo].Position }, false, true, false, false);
+                            CreateRoofTile(new Vector3[] { m_ControlPoints[nextThree].Position, oneLine[index], oneLine[index], m_ControlPoints[nextFour].Position }, false, true, false, false);
+                        }
+                    }
+
+                    index += oneLine.Length - 3;
+                    current = m_ControlPoints.GetIndex(current + (m_ControlPoints.Length/2));
+                }
+            }
+        }
+
+        if(!m_Data.IsOpen)
+        {
+            foreach (RoofTile tile in m_Tiles)
+            {
+                tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend).Extend(tile.ExtendHeightBeginning, tile.ExtendHeightEnd, false, false).Build();
+            }
+        }
+
+        if(m_Data.RoofType == RoofType.Dormer)
+        {
+            foreach(RoofTile tile in m_Tiles)
+            {
+                tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend, false).Extend(tile.ExtendHeightBeginning, false, tile.ExtendWidthBeginning, tile.ExtendWidthEnd).Build();
             }
 
-            //tiles.transform.localPosition = Vector3.up * 0.6f;
+            foreach(Wall wall in m_Walls)
+            {
+                Vector3[] points = wall.WallData.ControlPoints;
+
+                Vector3 dir = points[0].DirectionToTarget(points[3]);
+
+                points[0] += dir * 0.5f;
+                points[3] -= dir * 0.5f;
+
+                WallData data = new WallData(wall.WallData);
+                data.SetControlPoints(points);
+
+                wall.Initialize(data).Build();
+
+            }
         }
     }
 
@@ -737,96 +1107,132 @@ public class Roof : MonoBehaviour
     /// </summary>
     private void BuildM()
     {
-        Vector3[] controlPointsArray = m_ControlPoints.ToArray();
-        if (controlPointsArray.Length == 4)
+        if (m_ControlPoints.Length != 4)
+            return;
+
+        Vector3[] mPointsA = new Vector3[4];
+        Vector3[] mPointsB = new Vector3[4];
+
+        if (m_Data.IsFlipped)
         {
-            Vector3[] mPointsA = new Vector3[4];
-            Vector3[] mPointsB = new Vector3[4];
+            mPointsA[1] = m_ControlPoints[0].Position;
+            mPointsA[2] = m_ControlPoints[1].Position;
 
-            mPointsA[0] = controlPointsArray[0];
-            mPointsA[1] = controlPointsArray[1];
-            mPointsB[2] = controlPointsArray[2];
-            mPointsB[3] = controlPointsArray[3];
+            mPointsB[0] = m_ControlPoints[3].Position;
+            mPointsB[3] = m_ControlPoints[2].Position;
 
-            mPointsB[0] = Vector3.Lerp(mPointsA[0], mPointsB[3], 0.5f);
-            mPointsB[1] = Vector3.Lerp(mPointsA[1], mPointsB[2], 0.5f);
+            Vector3 midA = Vector3.Lerp(m_ControlPoints[0].Position, m_ControlPoints[3].Position, 0.5f);
+            Vector3 midB = Vector3.Lerp(m_ControlPoints[1].Position, m_ControlPoints[2].Position, 0.5f);
 
-            mPointsA[2] = mPointsB[1];
-            mPointsA[3] = mPointsB[0];
+            Vector3 dirA = m_ControlPoints[0].Position.DirectionToTarget(m_ControlPoints[3].Position);
+            Vector3 dirB = m_ControlPoints[1].Position.DirectionToTarget(m_ControlPoints[2].Position);
 
-            // Rotate Points 90
+            mPointsA[0] = midA - (dirA * m_Data.RoofTileData.Height);
+            mPointsA[3] = midB - (dirB * m_Data.RoofTileData.Height);
 
-            Vector3[] tempA = mPointsA.Clone() as Vector3[];
-
-            for (int i = 0; i < mPointsA.Length; i++)
-            {
-                int index = controlPointsArray.GetNextControlPoint(i);
-                tempA[i] = mPointsA[index];
-
-            }
-
-            mPointsA = tempA;
-
-            Vector3[] tempB = mPointsB.Clone() as Vector3[];
-
-            for (int i = 0; i < mPointsB.Length; i++)
-            {
-                int index = controlPointsArray.GetNextControlPoint(i);
-                tempB[i] = mPointsB[index];
-
-            }
-
-            mPointsB = tempB;
-
-            m_ControlPoints = mPointsA;
-            BuildOpenGable();
-            m_ControlPoints = mPointsB;
-            BuildOpenGable();
-
-            m_ControlPoints = controlPointsArray; // Reset. // Any reason to do this?
+            mPointsB[1] = midA + (dirA * m_Data.RoofTileData.Height);
+            mPointsB[2] = midB + (dirB * m_Data.RoofTileData.Height);
 
         }
+        else
+        {
+            mPointsA[0] = m_ControlPoints[0].Position;
+            mPointsA[3] = m_ControlPoints[3].Position;
+
+            mPointsB[1] = m_ControlPoints[1].Position;
+            mPointsB[2] = m_ControlPoints[2].Position;
+
+            Vector3 dirA = mPointsA[0].DirectionToTarget(mPointsB[1]);
+            Vector3 dirB = mPointsA[3].DirectionToTarget(mPointsB[2]);
+
+            Vector3 midA = Vector3.Lerp(mPointsA[0], mPointsB[1], 0.5f);
+            Vector3 midB = Vector3.Lerp(mPointsA[3], mPointsB[2], 0.5f);
+
+            mPointsA[1] = midA - (dirA * m_Data.RoofTileData.Height);
+            mPointsA[2] = midB - (dirB * m_Data.RoofTileData.Height);
+
+            mPointsB[0] = midA + (dirA * m_Data.RoofTileData.Height);
+            mPointsB[3] = midB + (dirB * m_Data.RoofTileData.Height);
+        }
+
+        List<Vector3[]> mArrays = new List<Vector3[]>();
+        mArrays.Add(mPointsA);
+        mArrays.Add(mPointsB);
+
+        int iterator = 0;
+        foreach (Vector3[] m in mArrays)
+        {
+            if (m.IsPolygonDescribableInOneLine(out Vector3[] oneLine))
+            {
+                Vector3 start = oneLine[0] + (Vector3.up * m_Data.GableHeight);
+                Vector3 end = oneLine[1] + (Vector3.up * m_Data.GableHeight);
+
+                if (m_Data.IsFlipped)
+                {
+                    if (iterator == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] });
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] }, false, false);
+
+                    }
+
+                    if (iterator == mArrays.Count - 1)
+                    {
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] }, false, false);
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] });
+                    }
+                }
+                else
+                {
+                    if (iterator == 0)
+                    {
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] });
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] }, false, false);
+                    }
+
+                    if (iterator == mArrays.Count - 1)
+                    {
+                        CreateRoofTile(new Vector3[] { m[3], end, start, m[0] }, false, false);
+                        CreateRoofTile(new Vector3[] { m[1], start, end, m[2] });
+                    }
+                }
+
+            }
+
+            iterator++;
+        }
+
+
     }
 
-    /// <summary>
-    /// Finds an avialable roof frame & sets the height to 0.
-    /// </summary>
-    private void BuildFlat()
+    private void OnDrawGizmosSelected()
     {
-        m_Height = 0;
-        int[] available = AvailableRoofFrames();
+        //if (m_TempVerts == null | m_TempVerts.Length == 0)
+        //    return;
+        if (m_ControlPoints == null)
+            return;
 
-        RoofType random = (RoofType) Rando.Range(0, available.Length);
 
-        while(random == RoofType.Flat || random == RoofType.Mansard)
+        for (int i = 0; i < m_ControlPoints.Length; i++)
         {
-            random = (RoofType)Rando.Range(0, available.Length);
+            Handles.color = Color.white;
+            Handles.Label(m_ControlPoints[i].Position + transform.localPosition, i.ToString());
         }
 
-        m_FrameType = random;
+        if (m_TempOneLine == null)
+            return;
 
-        ConstructFrame();
-    }
+        int itr = 0;
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 16;
+        style.normal.textColor = Color.red;
 
-    private void Deconstruct()
-    {
-        for (int i = 0; i < transform.childCount; i++)
+        foreach (Vector3 point in m_TempOneLine)
         {
-            GameObject child = transform.GetChild(i).gameObject;
-            if (Application.isEditor)
-            {
-                DestroyImmediate(child);
-            }
-            else
-            {
-                Destroy(child);
-            }
-
+            Handles.Label(point, itr.ToString(), style);
+            itr++;
+            //Handles.DrawSolidDisc(point, Vector3.up, 0.1f);
         }
 
-        if (transform.childCount > 0)
-        {
-            Deconstruct();
-        }
     }
 }

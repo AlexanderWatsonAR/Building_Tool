@@ -205,7 +205,7 @@ public class Tile : MonoBehaviour
 
             for (int i = 0; i < count; i += incriment)
             {
-                Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[i][1], m_VerticesData[i][0]);
+                Vector3 dir = Vector3Extensions.DirectionToTarget(m_VerticesData[i][1], m_VerticesData[i][0]);
                 startEnd.Add(m_VerticesData[i][0] + (dir * m_Extend));
             }
 
@@ -225,7 +225,7 @@ public class Tile : MonoBehaviour
 
             for (int i = 0; i < count; i += incriment)
             {
-                Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[i][^2], m_VerticesData[i][^1]);
+                Vector3 dir = Vector3Extensions.DirectionToTarget(m_VerticesData[i][^2], m_VerticesData[i][^1]);
                 startEnd.Add(m_VerticesData[i][^1] + (dir * m_Extend));
             }
 
@@ -244,7 +244,7 @@ public class Tile : MonoBehaviour
 
             for (int i = 0; i < count; i ++)
             {
-                Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[1][i], m_VerticesData[0][i]);
+                Vector3 dir = Vector3Extensions.DirectionToTarget(m_VerticesData[1][i], m_VerticesData[0][i]);
                 data.Add(m_VerticesData[0][i] + (dir * m_Extend));
             }
 
@@ -257,7 +257,7 @@ public class Tile : MonoBehaviour
             int count = m_VerticesData[0].Count;
             for (int i = 0; i < count; i++)
             {
-                Vector3 dir = Vector3Extensions.GetDirectionToTarget(m_VerticesData[^2][i], m_VerticesData[^1][i]);
+                Vector3 dir = Vector3Extensions.DirectionToTarget(m_VerticesData[^2][i], m_VerticesData[^1][i]);
                 data.Add(m_VerticesData[^1][i] + (dir * m_Extend));
             }
 
@@ -365,7 +365,7 @@ public class Tile : MonoBehaviour
             Vector3 firstPoint = points[first].position;
             Vector3 secondPoint = points[second].position;
 
-            Vector3 dir = Vector3Extensions.GetDirectionToTarget(firstPoint, secondPoint);
+            Vector3 dir = Vector3Extensions.DirectionToTarget(firstPoint, secondPoint);
 
             Vector3 projectedSecondPoint = secondPoint + (dir * m_Height);
 

@@ -5,112 +5,206 @@ using UnityEditor;
 using System.Linq;
 using UnityEditor.Rendering;
 using Unity.VisualScripting;
+using TreeEditor;
+using Cinemachine.Editor;
 
 [CustomEditor(typeof(Roof))]
 public class RoofEditor : Editor
 {
+    private bool m_ShowPyramid = true;
+    private bool m_ShowMansard = true;
+    private bool m_ShowGable = true;
+    private bool m_ShowMShaped = true;
+    private bool m_ShowTile = true;
+
     public override void OnInspectorGUI()
     {
-        //DrawDefaultInspector();
-
         Roof roof = (Roof)target;
         serializedObject.Update();
 
-        EditorGUILayout.ObjectField(serializedObject.FindProperty("m_CentreBeamPrefab"));
-        EditorGUILayout.ObjectField(serializedObject.FindProperty("m_SupportBeamPrefab"));
-        EditorGUILayout.ObjectField(serializedObject.FindProperty("m_RoofTileMaterial"));
+        SerializedProperty roofData = serializedObject.FindProperty("m_Data");
 
-        SerializedProperty frameType = serializedObject.FindProperty("m_FrameType");
+        SerializedProperty roofActive = roofData.FindPropertyRelative("m_IsActive");
+        SerializedProperty frameType = roofData.FindPropertyRelative("m_RoofType");
+        SerializedProperty mansardHeight = roofData.FindPropertyRelative("m_MansardHeight");
+        SerializedProperty mansardScale = roofData.FindPropertyRelative("m_MansardScale");
+        SerializedProperty pyramidHeight = roofData.FindPropertyRelative("m_PyramidHeight");
+        SerializedProperty gableHeight = roofData.FindPropertyRelative("m_GableHeight");
+        SerializedProperty gableScale = roofData.FindPropertyRelative("m_GableScale");
+        SerializedProperty isFlipped = roofData.FindPropertyRelative("m_IsFlipped");
+        SerializedProperty isOpen = roofData.FindPropertyRelative("m_IsOpen");
+
+        SerializedProperty roofTileData = roofData.FindPropertyRelative("m_RoofTileData");
+
+        roofActive.boolValue = EditorGUILayout.BeginToggleGroup("Is Active", roofActive.boolValue);
 
         int index = 0;
-        int value = (int) frameType.GetEnumValue<RoofType>();
-        string frameName = frameType.GetEnumName<RoofType>();
+        int value = (int)frameType.GetEnumValue<RoofType>();
 
         int[] frames = roof.AvailableRoofFrames();
-        string[] allOptions = frameType.enumNames;
-        string[] allOptionsDisplay = frameType.enumDisplayNames; // "Open Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
-        string[] options = new string[frames.Length];
-        string[] optionsDisplay = new string[frames.Length];
 
-        for (int i = 0; i < frames.Length; i++)
+        if (frames.Length > 0)
         {
-            optionsDisplay[i] = allOptionsDisplay[frames[i]];
-            options[i] = allOptions[frames[i]];
+            string[] allOptions = frameType.enumNames;
+            string[] allOptionsDisplay = frameType.enumDisplayNames; // "Gable", "Mansard", "Flat", "Dormer", "M Shaped", "Pyramid", "Pyramid Hip"
+            string[] options = new string[frames.Length];
+            string[] optionsDisplay = new string[frames.Length];
 
-            if (frames[i] == value)
+            for (int i = 0; i < frames.Length; i++)
             {
-                index = i;
+                optionsDisplay[i] = allOptionsDisplay[frames[i]];
+                options[i] = allOptions[frames[i]];
+
+                if (frames[i] == value)
+                {
+                    index = i;
+                }
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Frame Type");
+
+            if (index == -1)
+            {
+                index = 0;
+            }
+
+            int frameIndex = EditorGUILayout.Popup(index, optionsDisplay);
+
+            frameType.SetEnumValue((RoofType)frames[frameIndex]);
+
+            EditorGUILayout.EndHorizontal();
+
+            switch (frameType.enumValueIndex)
+            {
+                case (int)RoofType.Gable:
+                    DisplayGable(gableHeight, gableScale, isOpen);
+                    break;
+                case (int)RoofType.Mansard:
+                    DisplayMansard(mansardHeight, mansardScale);
+                    break;
+                case (int)RoofType.Dormer:
+                    DisplayMansard(mansardHeight, mansardScale);
+                    DisplayGable(gableHeight, gableScale, isOpen);
+                    break;
+                case (int)RoofType.MShaped:
+                    DisplayMShaped(gableHeight, isFlipped);
+                    break;
+                case (int)RoofType.Pyramid:
+                    DisplayPyramid(pyramidHeight);
+                    break;
+                case (int)RoofType.PyramidHip:
+                    DisplayMansard(mansardHeight, mansardScale);
+                    DisplayPyramid(pyramidHeight);
+                    break;
             }
         }
-
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Frame Type");
-
-        if (index == -1)
+        else
         {
-            index = 0;
+            string[] noOptionsDisplay = new string[] { "No Frame Type Available" };
+            EditorGUILayout.Popup(0, noOptionsDisplay);
         }
 
-        int frameIndex = EditorGUILayout.Popup(index, optionsDisplay);
+        DisplayTile(roofTileData);
+        EditorGUILayout.EndToggleGroup();
+        ApplyRoofChanges(roof);
 
-        frameType.SetEnumValue((RoofType)frames[frameIndex]);
+    }
 
-        EditorGUILayout.EndHorizontal();
-
-        if(frameType.enumValueIndex == (int)RoofType.Dormer || frameType.enumValueIndex == (int)RoofType.Mansard)
-        {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardHeight"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_MansardScale"));
-        }
-
-        if(frameType.enumValueIndex != (int)RoofType.Mansard)
-        {
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Height"));
-        }
-
-        EditorGUILayout.LabelField("Tile");
-
-        SerializedProperty tileHeight = serializedObject.FindProperty("m_TileHeight");
-        SerializedProperty tileExtend = serializedObject.FindProperty("m_TileExtend");
-
-        float tHeight = roof.TileHeight;
-        float tExtend = roof.TileExtend;
-
-        EditorGUILayout.PropertyField(tileExtend);
-        EditorGUILayout.PropertyField(tileHeight);
-
-        float mansardRoofScale = serializedObject.FindProperty("m_MansardScale").floatValue;
-        float mansardScale = roof.MansardScale;
-
-        float mansardRoofHeight = serializedObject.FindProperty("m_MansardHeight").floatValue;
-        float mansardheight = roof.MansardHeight;
-
-        float roofHeight = serializedObject.FindProperty("m_Height").floatValue;
-        float height = roof.Height;
-
-        RoofType roofType = serializedObject.FindProperty("m_FrameType").GetEnumValue<RoofType>();
-        RoofType type = roof.FrameType;
-
+    private void ApplyRoofChanges(Roof roof)
+    {
         if (serializedObject.ApplyModifiedProperties())
         {
-            if (height != roofHeight ||
-                mansardheight != mansardRoofHeight ||
-                type != roofType ||
-                tHeight != tileHeight.floatValue ||
-                tExtend != tileExtend.floatValue ||
-                mansardScale != mansardRoofScale)
+            if (roof.TryGetComponent(out Building building))
             {
-                if (roof.TryGetComponent(out Building building))
-                {
-                    building.Construct();
-                }
-                else
-                {
-                    roof.ConstructFrame();
-                    roof.OnAnyRoofChange_Invoke();
-                }
+                building.Build();
+            }
+            else if(roof.TryGetComponent(out WallSection wallSection))
+            {
+                wallSection.Build();
+            }
+            else
+            {
+                roof.BuildFrame();
+                roof.OnAnyRoofChange_Invoke();
             }
         }
+    }
+
+    private void DisplayMShaped(SerializedProperty height, SerializedProperty rotate)
+    {
+        m_ShowMShaped = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowMShaped, "M Shaped");
+        if (m_ShowMShaped)
+        {
+            EditorGUILayout.Slider(height, 0, 10, "Height");
+            EditorGUILayout.PropertyField(rotate);
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+    }
+
+    private void DisplayGable(SerializedProperty height, SerializedProperty scale, SerializedProperty isOpen)
+    {
+        m_ShowGable = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowGable, "Gable");
+        if (m_ShowGable)
+        {
+            EditorGUILayout.Slider(height, 0, 10, "Height");
+
+            if(!isOpen.boolValue)
+            {
+                EditorGUILayout.Slider(scale, 0, 1, "Scale");
+            }
+
+            EditorGUILayout.PropertyField(isOpen);
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+    }
+
+    private void DisplayPyramid(SerializedProperty height)
+    {
+        m_ShowPyramid = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPyramid, "Pyramid");
+        if (m_ShowPyramid)
+        {
+            EditorGUILayout.Slider(height, 0, 10, "Height");
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+    }//
+
+    private void DisplayMansard(SerializedProperty height, SerializedProperty scale)
+    {
+        m_ShowMansard = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowMansard, "Mansard");
+        if (m_ShowMansard)
+        {
+            EditorGUILayout.Slider(height, 0, 10, "Height");
+            EditorGUILayout.Slider(scale, 0, 2, "Scale");
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+    }
+
+    private void DisplayTile(SerializedProperty roofTileData)
+    {
+        m_ShowTile = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowTile, "Tile");
+        if (m_ShowTile)
+        {
+            //SerializedProperty endProp = roofTileData.GetEndProperty();
+
+            bool enterChildren = true;
+            while (roofTileData.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                EditorGUILayout.PropertyField(roofTileData);
+
+                if (roofTileData.displayName == "Rows")
+                    break;
+
+                //if (roofTileData == endProp)
+                //    break;
+            }
+
+            //EditorGUILayout.Slider(height, 0, 10, "Height");
+            //EditorGUILayout.Slider(extend, 0, 10, "Extend");
+            //EditorGUILayout.ObjectField(mat, new GUIContent("Material"));
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
     }
 
 

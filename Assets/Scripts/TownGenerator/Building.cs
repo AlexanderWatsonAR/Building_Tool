@@ -10,102 +10,107 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.Serialization;
 
-// Generic Building Base Class
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Storey), typeof(Roof))]
 public class Building : MonoBehaviour
 {
     [SerializeField, HideInInspector] private bool m_HasConstructed;
 
-    protected Polytool m_BuildingPolytool;
-    protected Storey[] m_Storeys;
-    protected Roof m_Roof;
+    [SerializeField] private PolyPath m_BuildingPolyPath;
+    [SerializeField] private List<Storey> m_Storeys;
+    [SerializeField] private Roof m_Roof;
+    [SerializeField] private bool m_HasInitialized;
 
     public bool HasConstructed => m_HasConstructed;
+    public ControlPoint[] ControlPoints => m_BuildingPolyPath.ControlPoints.ToArray();
+    public PolyPath PolyPath => m_BuildingPolyPath ?? new PolyPath();
 
-    public void SetBuildingMaterials(GameObject pillarPrefab, GameObject wallOutlinePrefab, Material colourSwatchMaterial)
+    private void Reset()
     {
-        //m_Storeys = GetComponents<Storey>();
-
-        //foreach (Storey storey in m_Storeys)
-        //{
-        //    storey.Initialize(wallOutlinePrefab, pillarPrefab);
-        //}
-
-        //m_ColourSwatchMaterial = colourSwatchMaterial;
+        m_BuildingPolyPath = new PolyPath();
+        m_Storeys = GetComponents<Storey>().ToList();
+        m_Roof = GetComponent<Roof>();
     }
 
-    public void Construct()
+    public Building Initialize()
     {
-        Deconstruct();
+        if (m_HasInitialized)
+            return this;
 
-        m_Storeys = GetComponents<Storey>();
-        m_Roof = GetComponent<Roof>();
-        m_BuildingPolytool = GetComponent<Polytool>();
+        m_BuildingPolyPath.CalculateForwards();
+        m_BuildingPolyPath.OnControlPointsChanged += Building_OnControlPointsChanged;
 
-        if (!m_BuildingPolytool.IsClockwise())
+        if(m_Storeys == null)
         {
-            IEnumerable<Vector3> reverseControlPoints = m_BuildingPolytool.ControlPoints;
-            reverseControlPoints.Reverse();
-            m_BuildingPolytool.SetControlPoints(reverseControlPoints);
+            m_Storeys.Add(gameObject.AddComponent<Storey>());
         }
+
+        if(m_Roof == null)
+        {
+            m_Roof = gameObject.AddComponent<Roof>();
+        }
+
+        int count = 0;
+        foreach(Storey storey in m_Storeys)
+        {
+            storey.SetControlPoints(ControlPoints);
+            storey.SetID(count);
+            count++;
+        }
+
+        m_Roof.SetControlPoints(ControlPoints).SetRoofActive(true);
+
+        m_HasInitialized = true;
+
+        return this;
+    }
+
+
+
+    public Building Build()
+    {
+        transform.DeleteChildren();
 
         Vector3 pos = Vector3.zero;
 
-        for (int i = 0; i < m_Storeys.Length; i++)
+        for (int i = 0; i < m_Storeys.Count; i++)
         {
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]).Contruct(m_BuildingPolytool.ControlPoints);
-            pos += storey.TopCentre;
+            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]).Build();
+            pos += (Vector3.up * storey.WallData.Height);
         }
-
-        Roof roof = GetComponent<Roof>();
 
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(roof, m_BuildingPolytool.ControlPoints).ConstructFrame();
+        roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).SetControlPoints(ControlPoints);
+        roofGO.GetComponent<Roof>().BuildFrame();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         m_HasConstructed = true;
+        return this;
     }
 
-    private void Building_OnAnyRoofChange(Roof obj)
+    private void Building_OnControlPointsChanged(List<ControlPoint> controlPoints)
     {
-        if (m_Roof == null && m_BuildingPolytool == null)
+        m_HasInitialized = false;
+        m_BuildingPolyPath.OnControlPointsChanged -= Building_OnControlPointsChanged;
+        Initialize().Build();
+    }
+
+    private void Building_OnAnyRoofChange(RoofData data)
+    {
+        if (m_Roof == null && m_BuildingPolyPath == null)
             return;
-
-        m_Roof.Initialize(obj, m_BuildingPolytool.ControlPoints);
+        
+        m_Roof.Initialize(data);
     }
 
-    public void RevertToPolyshape()
+    public void RevertBuilding()
     {
-        Deconstruct();
+        transform.DeleteChildren();
         m_HasConstructed = false;
     }
-
-    private void Deconstruct()
-    {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            GameObject child = transform.GetChild(i).gameObject;
-            if (Application.isEditor)
-            {
-                DestroyImmediate(child);
-            }
-            else
-            {
-                Destroy(child);
-            }
-
-        }
-
-        if (transform.childCount > 0)
-        {
-            Deconstruct();
-        }
-    }
-    
 
 }

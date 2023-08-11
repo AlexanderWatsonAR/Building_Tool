@@ -4,141 +4,99 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder;
+using System.Linq;
+using UnityEditor;
 
 [System.Serializable]
 public class Wall : MonoBehaviour
 {
-    // Idea: Use this class to add in doors, windows and other objects to the wall. 
+    [SerializeField] WallData m_Data;
 
-    [SerializeField] private GameObject m_WallOutlinePrefab;
-    [SerializeField] private float m_WallLength;
-    
-    [SerializeField] private bool m_HasInitialized;
-    [SerializeField] private GameObject m_OriginalWallOutlinePrefab;
-    [SerializeField] private float m_OriginalWallLength;
-    [SerializeField] private Vector3 m_OriginalLocalPosition;
-    [SerializeField] private Vector3 m_OriginalLocalEuler;
-    [SerializeField] private GameObject m_Wall;
-    private TransformCurve m_Curve;
+    //private List<Vector3[]> SubPoints
+    //{
+    //    get
+    //    {
+    //        if (m_Columns <= 0 && m_Rows <= 0) return null;
 
-    public GameObject WallOutlinePrefab => m_WallOutlinePrefab;
-    public float WallLength => m_WallLength;
+    //        m_SubPoints = MeshMaker.CreateGridFromControlPoints(m_Points, m_Columns, m_Rows);
 
+    //        return m_SubPoints;
+    //    }
+    //}
 
-    public Wall Initialize(Wall wall)
+    public WallData WallData => m_Data;
+
+    public Wall Initialize(WallData data)
     {
-        return Initialize(wall.WallOutlinePrefab, WallLength);
-    }    
-
-    public Wall Initialize(GameObject wallOutlinePrefab, float wallLength)
-    {
-        if(wallOutlinePrefab == null)
-            return null;
-
-        if (Application.isEditor)
-        {
-            DestroyImmediate(m_Wall);
-        }
-
-        m_Wall = Instantiate(wallOutlinePrefab);
-        m_WallOutlinePrefab = wallOutlinePrefab;
-        m_WallLength = wallLength;
-        m_Curve = GetComponent<TransformCurve>();
-
-        if(!m_HasInitialized)
-        {
-            m_OriginalWallOutlinePrefab = m_WallOutlinePrefab;
-            m_OriginalWallLength = m_WallLength;
-            m_HasInitialized = true;
-        }
-
+        m_Data = new WallData(data);
         return this;
     }
 
     public Wall Build()
     {
-        if (m_WallLength <= 0)
-            return this;
+        List<Vector3[]> subPoints = m_Data.SubPoints;
 
-        if (m_Wall.TryGetComponent(out Extrudable extrudable))
-            ExtrudeOutline(extrudable);
+        transform.DeleteChildren();
 
-        m_Wall.transform.SetParent(transform, false);
-
-        if(!m_HasInitialized)
+        for (int i = 0; i < m_Data.Columns; i++)
         {
-            m_OriginalLocalPosition = m_Wall.transform.localPosition;
-            m_OriginalLocalEuler = m_Wall.transform.localEulerAngles;
+            for (int j = 0; j < m_Data.Rows; j++)
+            {
+                Vector3 first = subPoints[j][i];
+                Vector3 second = subPoints[j + 1][i];
+                Vector3 third = subPoints[j + 1][i + 1];
+                Vector3 fourth = subPoints[j][i + 1];
+
+                Vector3[] points = new Vector3[] { first, second, third, fourth };
+
+                ProBuilderMesh wallSection = ProBuilderMesh.Create();
+                wallSection.name = "Wall Section " + i.ToString() + " " + j.ToString();
+                wallSection.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
+                
+                wallSection.transform.SetParent(transform, false);
+                wallSection.AddComponent<WallSection>().Initialize(points, m_Data.Depth).Build();
+            }
         }
 
-        for (int i = 0; i < m_Wall.transform.childCount; i++)
-        {
-            if (m_Wall.transform.GetChild(i).TryGetComponent(out Extrudable wallComponent))
-                ExtrudeOutline(wallComponent);
-        }
         return this;
     }
 
-    private void ExtrudeOutline(Extrudable extrudable)
+    private void OnDrawGizmosSelected()
     {
-        int steps = m_Curve != null ? 0 : 1;
+        //if (m_Points == null)
+        //    return;
 
-        extrudable.Extrude(ExtrudeMethod.FaceNormal, m_WallLength, steps);
+        //if (m_Rows != 0 && m_Columns != 0)
+        //{
+        //    List<Vector3[]> subPoints = SubPoints; // cols by rows
 
-        if (steps == 0)
-            extrudable.GetComponent<TransformCurve>().Reshape();
+        //    for (int i = 0; i < m_Columns; i++)
+        //    {
+        //        for (int j = 0; j < m_Rows; j++)
+        //        {
+        //            Vector3 first = subPoints[i + 0][j + 0];
+        //            Vector3 second = subPoints[i + 0][j + 1];
+        //            Vector3 third = subPoints[i + 1][j + 1];
+        //            Vector3 fourth = subPoints[i + 1][j + 0];
 
+        //            Vector3 dir = first.DirectionToTarget(fourth);
+        //            Vector3 cross = Vector3.Cross(Vector3.up, dir) * m_Depth;
+
+        //            first += cross;
+        //            second += cross;
+        //            third += cross;
+        //            fourth += cross;
+
+        //            first += transform.position;
+        //            second += transform.position;
+        //            third += transform.position;
+        //            fourth += transform.position;
+
+        //            Handles.DrawAAPolyLine(first, second, third, fourth);
+        //            Handles.DrawAAPolyLine(first, fourth);
+
+        //        }
+        //    }
+        //}
     }
-
-    //private void Reset()
-    //{
-    //    if (!m_HasInitialized)
-    //        return;
-
-    //    m_Wall.transform.localEulerAngles = m_OriginalLocalEuler;
-    //    m_Wall.transform.localPosition = m_OriginalLocalPosition;
-    //    m_WallOutlinePrefab = m_OriginalWallOutlinePrefab;
-    //    m_WallLength = m_OriginalWallLength;
-    //    Build();
-    //}
-
-    private void InsertOutline()
-    {
-
-    }
-
-    //private void ConstructWall()
-    //{
-    //    if (m_DoorPrefab != null)
-    //    {
-    //        GameObject aWall = m_Walls[0].transform.GetChild(0).gameObject;
-
-    //        GridLayoutGroup3D gridLayout = aWall.GetComponent<GridLayoutGroup3D>();
-
-    //        gridLayout.size = aWall.GetComponent<Renderer>().localBounds.size;
-    //        gridLayout.cellSize = new Vector3(gridLayout.size.x, 1, 1);
-    //        gridLayout.center = Vector3.zero;
-    //        gridLayout.spacing = Vector3.forward;
-
-    //        //gridLayout.enabled = false;
-
-    //        GameObject aDoor = Instantiate(m_DoorPrefab);
-    //        aDoor.transform.SetParent(aWall.transform);
-    //        aDoor.transform.localEulerAngles = Vector3.up * 90;
-    //        aDoor.GetComponent<LayoutElement3D>().center = new Vector3(0.4f, 1.5f, 0);
-
-    //        gridLayout.UpdateLayout();
-
-    //        List<GameObject> outlineList = new List<GameObject>();
-    //        outlineList.Add(aDoor.transform.GetChild(2).gameObject);
-
-    //        for (int i = 0; i < m_Walls[0].transform.childCount; i++)
-    //        {
-    //            if (m_Walls[0].transform.GetChild(i).GetComponent<ControlPointMesh>() != null)
-    //            {
-    //                m_Walls[0].transform.GetChild(i).GetComponent<ControlPointMesh>().InsertOutlines(outlineList, 0);
-    //            }
-    //        }
-    //    }
-    //}
 }

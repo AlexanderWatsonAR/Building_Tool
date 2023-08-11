@@ -10,6 +10,98 @@ using Edge = UnityEngine.ProBuilder.Edge;
 
 public static class ProBuilderExtensions
 {
+    public static IEnumerable<int> GetCoincidentVerticesFromPosition(this ProBuilderMesh proBuilderMesh, Vector3 position, float marginForError = 0.001f)
+    {
+        Vertex[] vertices = proBuilderMesh.GetVertices();
+
+        int firstIndex = 0;
+
+        for(int i = 0; i < vertices.Length; i++)
+        {
+            if (Vector3Extensions.Approximately(position, vertices[i].position, marginForError))
+            {
+                firstIndex = i;
+                break;
+            }
+
+            if (i == vertices.Length - 1)
+                throw new Exception("Position: " + position + " not found.");
+        }
+
+        List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { firstIndex });
+
+        return shared;
+    }
+
+    public static void SetPosition(this ProBuilderMesh proBuilderMesh, int index, Vector3 position)
+    {
+        List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { index });
+
+        if (shared.Count <= 0)
+            return;
+
+        Vertex[] vertices = proBuilderMesh.GetVertices();
+
+        for(int i = 0; i < shared.Count; i++)
+        {
+            vertices[shared[i]].position = position;
+        }
+
+        proBuilderMesh.SetVertices(vertices);
+        proBuilderMesh.ToMesh();
+    }
+
+    /// <summary>
+    /// Assumes Pivot location is at the centre.
+    /// </summary>
+    /// <param name="proBuilderMesh"></param>
+    public static void LocaliseVertices(this ProBuilderMesh proBuilderMesh, Vector3? transformPoint = null)
+    {
+        Transform t = proBuilderMesh.transform;
+        Vertex[] vertices = proBuilderMesh.GetVertices();
+
+        if(transformPoint == null)
+            transformPoint = ProMaths.Average(proBuilderMesh.positions);
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            // Scale
+            Vector3 point = vertices[i].position - transformPoint.Value;
+            Vector3 v = Vector3.Scale(point, t.localScale) + transformPoint.Value;
+            Vector3 offset = v - vertices[i].position;
+            vertices[i].position += offset;
+
+            // Rotation
+            Vector3 localEulerAngles = t.localEulerAngles;
+            Vector3 v1 = Quaternion.Euler(localEulerAngles) * (vertices[i].position - transformPoint.Value) + transformPoint.Value;
+            offset = v1 - vertices[i].position;
+            vertices[i].position += offset;
+
+            // Position
+            vertices[i].position += t.localPosition;
+        }
+
+        proBuilderMesh.SetVertices(vertices);
+        proBuilderMesh.ToMesh();
+
+        proBuilderMesh.transform.localPosition = Vector3.zero;
+        proBuilderMesh.transform.localEulerAngles = Vector3.zero;
+        proBuilderMesh.transform.localScale = Vector3.one;
+    }
+
+    public static Vector3[] GetDistinctVerts(this ProBuilderMesh proBuilderMesh, Face face)
+    {
+        Vector3[] positions = proBuilderMesh.positions.ToArray();
+        Vector3[] verts = new Vector3[face.distinctIndexes.Count];
+
+        for(int i = 0; i < face.distinctIndexes.Count; i++)
+        {
+            verts[i] = positions[face.distinctIndexes[i]];
+        }
+
+        return verts;
+    }
+
     public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, Vector3 transformPoint, float scale)
     {
         ScaleVertices(proBuilderMesh, faces, transformPoint, Vector3.one * scale);
@@ -93,39 +185,8 @@ public static class ProBuilderExtensions
     {
         ScaleVertices(proBuilderMesh, indices, transformPoint, Vector3.one * scale);
     }
-
     public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Vector3 scale)
     {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
-        List<Vector3> selectedVerts = new List<Vector3>();
-
-        foreach (int i in indices)
-        {
-            selectedVerts.Add(positions[i]);
-        }
-
-        int[] indicesArray = indices.ToArray();
-        for (int i = 0; i < selectedVerts.Count; i++)
-        {
-            Vector3 point = selectedVerts[i] - transformPoint;
-            Vector3 v = Vector3.Scale(point, scale) + transformPoint;
-            //positions[indicesArray[i]] = point + v;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
-        }
-
-        //proBuilderMesh.RebuildWithPositionsAndFaces(positions, proBuilderMesh.faces);
-        //proBuilderMesh.ToMesh();
-        //proBuilderMesh.Refresh();
-
-
-        //proBuilderMesh.transform.TransformVertex(Vertex vertex)
-    }
-
-    public static void ScaleVerticesAlt(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Vector3 scale)
-    {
-        // TODO: check if more cost effective than other scale funcs.
-
         Vertex[] points = proBuilderMesh.GetVertices();
         List<Vector3> selectedVerts = new List<Vector3>();
 
@@ -133,7 +194,7 @@ public static class ProBuilderExtensions
         {
             selectedVerts.Add(points[i].position);
         }
-
+        
         int[] indicesArray = indices.ToArray();
         for (int i = 0; i < selectedVerts.Count; i++)
         {
@@ -151,7 +212,6 @@ public static class ProBuilderExtensions
 
         proBuilderMesh.SetVertices(points);
         proBuilderMesh.ToMesh();
-        proBuilderMesh.Refresh();
     }
 
     public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 scale)
@@ -271,46 +331,54 @@ public static class ProBuilderExtensions
         RotateVertices(proBuilderMesh, indices, transformPoint, eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 eulerAngles)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, TransformPoint transformPoint, Vector3 eulerAngles)
     {
         Vector3[] positions = proBuilderMesh.positions.ToArray();
         List<Vector3> selectedVerts = new List<Vector3>();
 
-        foreach (int i in indices)
+        foreach (int i in distinctIndices)
         {
             selectedVerts.Add(positions[i]);
         }
 
         Vector3 rotatePoint = transformPoint.PointToVector3(selectedVerts);
 
-        RotateVertices(proBuilderMesh, indices, rotatePoint, eulerAngles);
+        RotateVertices(proBuilderMesh, distinctIndices, rotatePoint, eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Quaternion rotation)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, TransformPoint transformPoint, Quaternion rotation)
     {
-        RotateVertices(proBuilderMesh, indices, transformPoint, rotation.eulerAngles);
+        RotateVertices(proBuilderMesh, distinctIndices, transformPoint, rotation.eulerAngles);
     }
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Quaternion rotation)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, Vector3 transformPoint, Quaternion rotation)
     {
-        RotateVertices(proBuilderMesh, indices, transformPoint, rotation.eulerAngles);
+        RotateVertices(proBuilderMesh, distinctIndices, transformPoint, rotation.eulerAngles);
     }
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, Vector3 transformPoint, Vector3 eulerAngles)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, Vector3 transformPoint, Vector3 eulerAngles)
     {
-        Vector3[] positions = proBuilderMesh.positions.ToArray();
+        Vertex[] points = proBuilderMesh.GetVertices();
         List<Vector3> selectedVerts = new List<Vector3>();
 
-        foreach (int i in indices)
+        foreach (int i in distinctIndices)
         {
-            selectedVerts.Add(positions[i]);
+            selectedVerts.Add(points[i].position);
         }
 
-        int[] indicesArray = indices.ToArray();
+        int[] indicesArray = distinctIndices.ToArray();
         for (int i = 0; i < selectedVerts.Count; i++)
         {
             Vector3 v = Quaternion.Euler(eulerAngles) * (selectedVerts[i] - transformPoint) + transformPoint;
-            Vector3 offset = v - selectedVerts[i];
-            proBuilderMesh.TranslateVertices(new int[] { indicesArray[i] }, offset);
+            List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { indicesArray[i] });
+
+            for (int j = 0; j < shared.Count; j++)
+            {
+                points[shared[j]].position = v;
+            }
         }
+
+        proBuilderMesh.SetVertices(points);
+        proBuilderMesh.ToMesh();
+
     }
     /// <summary>
     /// 0 = top left. 1 = top right. 2 = bottom right. 3 = bottom left

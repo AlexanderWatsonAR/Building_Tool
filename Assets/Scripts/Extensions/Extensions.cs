@@ -8,9 +8,75 @@ using UnityEngine.InputSystem.HID;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
+using UnityEngine.UIElements;
 
 public static class Extensions
 {
+
+    public static float PolygonLength(this IEnumerable<Vector3> controlPoints)
+    {
+        float distance = 0;
+
+        Vector3[] points = controlPoints.ToArray();
+
+        for(int i = 0; i < points.Length; i++)
+        {
+            int next = points.GetNextControlPoint(i);
+            distance += Vector3.Distance(points[i], points[next]);
+        }
+        
+        return distance;
+    }
+
+    public static float PolygonLength (this IEnumerable<ControlPoint> controlPoints)
+    {
+        return PolygonLength(controlPoints.GetPositions());
+    }
+
+    /// <summary>
+    /// 2D line intersection on the XZ plane
+    /// </summary>
+    /// <param name="line1Start"></param>
+    /// <param name="line1End"></param>
+    /// <param name="line2Start"></param>
+    /// <param name="line2End"></param>
+    /// <param name="intersection"></param>
+    /// <returns></returns>
+    public static bool DoLinesIntersect(Vector3 line1Start, Vector3 line1End, Vector3 line2Start, Vector3 line2End, out Vector3 intersection, bool isInfinite = true)
+    {
+        intersection = Vector3.zero;
+        float denominator = ((line1End.x - line1Start.x) * (line2End.z - line2Start.z)) - ((line1End.z - line1Start.z) * (line2End.x - line2Start.x));
+
+        if (denominator == 0f)
+        {
+            // The lines are parallel or coincident, so no intersection point exists
+            return false;
+        }
+
+        float ua = (((line2End.x - line2Start.x) * (line1Start.z - line2Start.z)) - ((line2End.z - line2Start.z) * (line1Start.x - line2Start.x))) / denominator;
+		float ub = (((line1End.x - line1Start.x) * (line1Start.z - line2Start.z)) - ((line1End.z - line1Start.z) * (line1Start.x - line2Start.x))) / denominator;
+
+        float intersectionX = line1Start.x + (ua * (line1End.x - line1Start.x));
+        float intersectionZ = line1Start.z + (ua * (line1End.z - line1Start.z));
+        intersection = new Vector3(intersectionX, line1Start.y, intersectionZ);
+
+        if(isInfinite)
+        {
+            return true;
+        }
+        else if (ua >= 0f && ua <= 1f && ub >= 0f && ub <= 1f) // Does the intersection point lies within both line segments?
+        {
+            return true;
+        }
+		else
+		{
+			intersection = Vector3.zero;
+		}
+
+        // The intersection point is outside the range of at least one of the line segments
+        return false;
+    }
+
     public static void DeleteChildren(this Transform transform)
     {
         for (int i = 0; i < transform.childCount; i++)
@@ -379,7 +445,7 @@ public static class Extensions
 
         Vector3 a = positions[edge.a];
         Vector3 b = positions[edge.b];
-        Vector3 dir = a.GetDirectionToTarget(b);
+        Vector3 dir = a.DirectionToTarget(b);
 
         Vector3 scale = Vector3.zero;
 
@@ -606,23 +672,38 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Assumes polygon is aligned to the 'Z' plane.
+    /// Assumes polygon is on the XZ plane
     /// points need to be organised either clockwise or anti-clockwise for this to work.
     /// </summary>
-    /// <param name="points"></param>
+    /// <param name="controlPoints"></param>
     /// <returns></returns>
-    public static bool IsPolygonClockwise(IEnumerable<Vector3> points)
+    public static bool IsPolygonClockwise(this IEnumerable<Vector3> controlPoints)
     {
-        Vector3[] pointsArray = points.ToArray();
+        Vector3[] points = controlPoints.ToArray();
 
-        float sum = 0;
-        for (int i = 0; i < pointsArray.Length; i++)
+        float temp = 0;
+        bool isClockwise = false;
+
+        for (int i = 0; i < points.Length; i++)
         {
-            Vector3 current = pointsArray[i];
-            Vector3 next = pointsArray[(i + 1) % pointsArray.Length];
-            sum += (next.x - current.x) * (next.y + current.y);
+            if (i != points.Length - 1)
+            {
+                float mulA = points[i].x * points[i + 1].z;
+                float mulB = points[i + 1].x * points[i].z;
+                temp = temp + (mulA - mulB);
+            }
+            else
+            {
+                float mulA = points[i].x * points[i].z;
+                float mulB = points[0].x * points[i].z;
+                temp = temp + (mulA - mulB);
+            }
         }
-        return sum > 0;
+        temp /= 2;
+
+        isClockwise = temp < 0 ? false : true;
+
+        return isClockwise;
     }
 
     /// <summary>

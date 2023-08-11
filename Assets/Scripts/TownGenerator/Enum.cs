@@ -2,9 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Flags]
+public enum StoreyElement
+{
+    Nothing = 0, Walls = 1, Floor = 2, Pillars = 4, Everything = ~0
+}
 public enum RoofType
 {
-    OpenGable, Mansard, Flat, Dormer, MShaped, Pyramid, PyramidHip
+    Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip
 }
 public enum Axis
 {
@@ -21,7 +26,17 @@ public enum TransformType
     Translation, Rotation, Scale
 }
 
+public enum RoofElement
+{
+    Tile, Window, Empty
+}
+
 public enum WallElement
 {
-    Wall, Door, Window, Empty
+    Wall, Doorway, Window, Extension, Empty
+}
+
+public enum PolyMode
+{
+    Draw, Edit, Show, Hide
 }
