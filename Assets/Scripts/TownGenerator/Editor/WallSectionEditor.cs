@@ -130,9 +130,7 @@ public class WallSectionEditor : Editor
                         winFColumns.intValue = EditorGUILayout.IntSlider("Columns", winFColumns.intValue, 1, 10);
                         winFRows.intValue = EditorGUILayout.IntSlider("Rows", winFRows.intValue, 1, 10);
                         EditorGUILayout.LabelField("Size");
-                        float y = EditorGUILayout.Slider("Height", winFScale.vector3Value.y, 0, 0.999f);
-                        float x = EditorGUILayout.Slider("Width", winFScale.vector3Value.x, 0, 0.999f);
-                        winFScale.vector3Value = new Vector3(x, y, winFScale.vector3Value.z);
+                        winFScale.floatValue = EditorGUILayout.Slider("Frame Scale", winFScale.floatValue, 0, 0.999f);
                         EditorGUILayout.LabelField("Material");
                         EditorGUILayout.ObjectField(winPaneMat, new GUIContent("Pane"));
                         EditorGUILayout.ObjectField(winFrameMat, new GUIContent("Frame"));

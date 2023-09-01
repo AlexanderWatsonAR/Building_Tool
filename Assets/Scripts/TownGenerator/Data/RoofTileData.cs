@@ -23,16 +23,16 @@ public class RoofTileData
     public int Rows => m_Rows;
 
 
-    public RoofTileData() : this (0.25f, 1, 1, 0.25f)
+    public RoofTileData() : this (0.25f, 1, 1, 0.25f, null)
     {
 
     }
 
-    public RoofTileData(RoofTileData data) : this (data.Height, data.Columns, data.Rows, data.m_Extend, data.ExtendHeightBeginning, data.ExtendHeightEnd, data.ExtendWidthBeginning, data.ExtendWidthEnd)
+    public RoofTileData(RoofTileData data) : this (data.Height, data.Columns, data.Rows, data.m_Extend, data.Material, data.ExtendHeightBeginning, data.ExtendHeightEnd, data.ExtendWidthBeginning, data.ExtendWidthEnd)
     {
 
     }
-    public RoofTileData(float height, int columns, int rows, float extend, bool heightBeginning = false, bool heightEnd = true, bool widthBeginning = true, bool widthEnd = true)
+    public RoofTileData(float height, int columns, int rows, float extend, Material material, bool heightBeginning = false, bool heightEnd = true, bool widthBeginning = true, bool widthEnd = true)
     {
         m_Height = height;
         m_Columns = columns;
@@ -42,7 +42,12 @@ public class RoofTileData
         m_ExtendHeightEnd = heightEnd;
         m_ExtendWidthBeginning = widthBeginning;
         m_ExtendWidthEnd = widthEnd;
+        m_Material = material;
     }
 
+    public void SetMaterial(Material material)
+    {
+        m_Material = material;
+    }
 
 }

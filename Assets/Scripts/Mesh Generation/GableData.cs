@@ -53,8 +53,8 @@ public static class GableData
     {
         new int[] { 0, 1, 2, 1 },
         new int[] { 1, 2, 3, 2 },
-        new int[] { 3, 3, 2, 3 },
-        new int[] { 4, 2, 1, 4 },
+        new int[] { 3, 3, 2, 4 },
+        new int[] { 4, 2, 1, 5 },
         new int[] { 5, 1, 0, 6 },
         new int[] { 7, 0, 1, 0 },
         new int[] { 2, 3, 3, 3 },

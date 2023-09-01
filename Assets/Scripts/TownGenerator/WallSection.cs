@@ -26,7 +26,7 @@ public class WallSection : MonoBehaviour
     [SerializeField] private bool m_WindowSmooth;
     [SerializeField] private bool m_IsWindowActive;
     [SerializeField, Range(1, 10)] private int m_WindowFrameColumns, m_WindowFrameRows;
-    [SerializeField] private Vector3 m_WindowFrameScale;
+    [SerializeField] private float m_WindowFrameScale;
     [SerializeField] private Material m_WindowPaneMaterial;
     [SerializeField] private Material m_WindowFrameMaterial;
 
@@ -44,7 +44,11 @@ public class WallSection : MonoBehaviour
     [SerializeField, Range(0, 1)] private float m_ExtendWidth;
     // --------- End of Extension --------------
 
+    // Temp variables for testing
     List<IList<Vector3>> m_Points;
+    List<Vector3> m_Grid;
+    Vector3 m_Centre;
+    // end of temp
 
     // --------- Door Properties ---------------
     // Doorway
@@ -74,7 +78,6 @@ public class WallSection : MonoBehaviour
     public int DoorRows => m_DoorRows;
 
     // --------- End of Door Properties ---------------
-
     public WallSection Initialize(IEnumerable<Vector3> controlPoints, float wallDepth)
     {
         m_ControlPoints = controlPoints == null ? m_ControlPoints : controlPoints.ToArray();
@@ -90,7 +93,7 @@ public class WallSection : MonoBehaviour
         m_IsWindowActive = true;
         m_WindowFrameRows = 2;
         m_WindowFrameColumns = 2;
-        m_WindowFrameScale = Vector3.one * 0.95f;
+        m_WindowFrameScale = 0.95f;
         m_WindowPaneMaterial = BuiltinMaterials.defaultMaterial;
         m_WindowFrameMaterial = BuiltinMaterials.defaultMaterial;
         // End Window
@@ -170,6 +173,7 @@ public class WallSection : MonoBehaviour
                 List<List<Vector3>> holePoints;
                 Vector3 winScale = new Vector3(m_WindowWidth, m_WindowHeight);
                 ProBuilderMesh polyHoleGridA = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, m_WindowAngle, out holePoints, false);
+                //Vector3 norm = polyHoleGridA.GetVertices(polyHoleGridA.faces[0].distinctIndexes)[0].normal;
                 polyHoleGridA.Extrude(polyHoleGridA.faces, ExtrudeMethod.FaceNormal, m_WallDepth);
                 ProBuilderMesh polyHoleGridB = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, m_WindowAngle, out _, true);
                 CombineMeshes.Combine(new ProBuilderMesh[] { polyHoleGridA, polyHoleGridB }, polyHoleGridA);
@@ -179,7 +183,28 @@ public class WallSection : MonoBehaviour
                 if (!m_IsWindowActive)
                     return this;
 
-                MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one * 0.95f, m_WindowFrameColumns, m_WindowFrameRows);
+                // Window Size.
+                float width = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[3]) / m_WindowColumns) * m_WindowWidth;
+                float height = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[1]) / m_WindowRows) * m_WindowHeight;
+
+                IList<IList<Vector3>> frame = MeshMaker.TestPolyFrame(holePoints[0], height, width, Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows);
+
+                ProBuilderMesh frameMesh = ProBuilderMesh.Create();
+                frameMesh.transform.SetParent(transform, true);
+                frameMesh.CreateShapeFromPolygon(holePoints[0], m_WallDepth, false, frame);
+                frameMesh.ToMesh();
+                frameMesh.Refresh();
+                frameMesh.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
+
+                //m_Points = MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows, out _);
+                //m_Centre = Math.Average(holePoints[0]);
+
+                //ProBuilderMesh mesh = ProBuilderMesh.Create();
+                //mesh.transform.SetParent(transform, true);
+                //mesh.CreateShapeFromPolygon(holePoints[0], 0, false, m_Points);
+                //mesh.ToMesh();
+                //mesh.Refresh();
+
 
                 //float windowDepth = m_WallDepth * 0.5f;
 
@@ -306,32 +331,81 @@ public class WallSection : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (m_ProBuilderMesh == null)
+        //if (m_ProBuilderMesh == null)
+        //    return;
+
+        //if (m_Points == null)
+        //    return;
+
+        //for (int i = 0; i < m_Points.Count(); i++)
+        //{
+        //    for (int j = 0; j < m_Points[i].Count(); j++)
+        //    {
+        //        //Handles.DotHandleCap(0, m_Points[i][j], Quaternion.identity, 0.01f, EventType.Repaint);
+        //    }
+
+        //}
+
+        //List<Vector3> positions = m_ProBuilderMesh.positions.ToList();
+
+        //GUIStyle style = new GUIStyle();
+        //style.fontSize = 18;
+        //style.normal.textColor = Color.red;
+
+        //for(int i = 0; i < m_ProBuilderMesh.faces[0].distinctIndexes.Count(); i++)
+        //{
+        //    int index = m_ProBuilderMesh.faces[0].distinctIndexes[i];
+
+        //    Handles.Label(positions[index], index.ToString(), style);
+        //}
+
+        if (m_Grid == null)
             return;
 
-        if (m_Points == null)
-            return;
-
-        for (int i = 0; i < m_Points.Count(); i++)
+        for(int x = 0; x < m_Grid.Count; x++) // cols
         {
-            for (int j = 0; j < m_Points[i].Count(); j++)
-            {
-                Handles.DotHandleCap(0, m_Points[i][j], Quaternion.identity, 0.05f, EventType.Repaint);
-            }
+            Handles.color = Color.yellow;
+            Handles.DotHandleCap(0, m_Grid[x], Quaternion.identity, 0.02f, EventType.Repaint);
 
+            //for(int y = 0; y < m_Grid.GetLength(1)-1; y++) // rows
+            //{
+            //    Vector3 bl = m_Grid[x,y];
+            //    Vector3 tl = m_Grid[x, y + 1];
+            //    Vector3 tr = m_Grid[x + 1, y + 1];
+            //    Vector3 br = m_Grid[x + 1, y];
+
+            //    Vector3[] quad = new Vector3[] { bl, tl, tr, br };
+
+            //    Handles.DrawAAPolyLine(quad);
+            //    Handles.DrawAAPolyLine(quad[0], quad[3]);
+            //}
         }
 
-        List<Vector3> positions = m_ProBuilderMesh.positions.ToList();
+        //Vector3 forward = Vector3.Cross(m_ControlPoints[0].DirectionToTarget(m_ControlPoints[3]), Vector3.up);
+        //Quaternion rotation = Quaternion.FromToRotation(Vector3.up, forward);
 
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 18;
-        style.normal.textColor = Color.red;
+        //for (int i = 0; i < m_WindowFrameColumns; i++)
+        //{
+        //    for(int j = 0; j < m_WindowFrameRows; j++)
+        //    {
+        //        Vector3 bl = m_Grid[j][i];
+        //        Vector3 tl = m_Grid[j + 1][i];
+        //        Vector3 tr = m_Grid[j + 1][i + 1];
+        //        Vector3 br = m_Grid[j][i + 1];
 
-        for(int i = 0; i < m_ProBuilderMesh.faces[0].distinctIndexes.Count(); i++)
-        {
-            int index = m_ProBuilderMesh.faces[0].distinctIndexes[i];
+        //        Vector3[] quad = new Vector3[] { bl, tl, tr, br };
 
-            Handles.Label(positions[index], index.ToString(), style);
-        }
+
+        //        for (int k = 0; k < quad.Length; k++)
+        //        {
+        //            Vector3 euler = rotation.eulerAngles;
+        //            Vector3 v = Quaternion.Euler(euler) * (quad[k] - m_Centre) + m_Centre;
+        //            quad[k] = v;
+        //        }
+
+        //        Handles.DrawAAPolyLine(quad);
+        //        Handles.DrawAAPolyLine(quad[0], quad[3]);
+        //    }
+        //}
     }
 }

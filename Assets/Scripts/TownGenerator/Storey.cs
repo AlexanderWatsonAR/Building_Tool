@@ -22,7 +22,6 @@ public class Storey : MonoBehaviour
     [SerializeField, Range(3, 15)] private int m_CurvedCornersSides;
 
     public WallData WallData => m_WallData;
-
     public int CurvedCornersSides => m_CurvedCornersSides;
     public bool CurvedCorners => m_CurvedCorners;
     // End Wall
@@ -158,6 +157,7 @@ public class Storey : MonoBehaviour
         for (int i = 0; i < m_ControlPoints.Length; i++)
         {
             ProBuilderMesh pillar = ProBuilderMesh.Create();
+            pillar.name = "Pillar " + i.ToString();
             pillar.AddComponent<Pillar>().Initialize(m_PillarData).Build();
             pillar.transform.SetParent(transform, true);
             pillar.transform.localPosition = m_ControlPoints[i].Position;
@@ -309,7 +309,6 @@ public class Storey : MonoBehaviour
             wall.transform.SetParent(walls.transform, true);
             WallData data = new WallData(m_WallData);
             data.SetControlPoints(points);
-            data.SetSubPoints(MeshMaker.CreateGridFromControlPoints(data.ControlPoints, data.Columns, data.Rows));
             wall.GetComponent<Wall>().Initialize(data).Build();
         }
     }

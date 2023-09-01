@@ -12,6 +12,10 @@ using UnityEngine.UIElements;
 
 public static class Extensions
 {
+    public static bool ApproximatelyEqual(float a, float b, float tolerance = 0.001f)
+    {
+        return Mathf.Abs(a - b) < tolerance;
+    }
 
     public static float PolygonLength(this IEnumerable<Vector3> controlPoints)
     {

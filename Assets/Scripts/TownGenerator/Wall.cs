@@ -11,18 +11,19 @@ using UnityEditor;
 public class Wall : MonoBehaviour
 {
     [SerializeField] WallData m_Data;
+    private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
-    //private List<Vector3[]> SubPoints
-    //{
-    //    get
-    //    {
-    //        if (m_Columns <= 0 && m_Rows <= 0) return null;
+    private List<Vector3[]> SubPoints
+    {
+        get
+        {
+            if (m_Data.Columns <= 0 && m_Data.Rows <= 0) return null;
 
-    //        m_SubPoints = MeshMaker.CreateGridFromControlPoints(m_Points, m_Columns, m_Rows);
+            m_SubPoints = MeshMaker.CreateGridFromControlPoints(m_Data.ControlPoints, m_Data.Columns, m_Data.Rows);
 
-    //        return m_SubPoints;
-    //    }
-    //}
+            return m_SubPoints;
+        }
+    }
 
     public WallData WallData => m_Data;
 
@@ -34,7 +35,7 @@ public class Wall : MonoBehaviour
 
     public Wall Build()
     {
-        List<Vector3[]> subPoints = m_Data.SubPoints;
+        List<Vector3[]> subPoints = SubPoints;
 
         transform.DeleteChildren();
 

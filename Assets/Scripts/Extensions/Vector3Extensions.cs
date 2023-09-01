@@ -7,7 +7,8 @@ using UnityEngine.ProBuilder;
 
 public static class Vector3Extensions
 {
-    public static bool Approximately(Vector3 vector1, Vector3 vector2, float tolerance)
+
+    public static bool Approximately(Vector3 vector1, Vector3 vector2, float tolerance = 0.001f)
     {
         float sqrMagnitudeDifference = (vector1 - vector2).sqrMagnitude;
         float sqrTolerance = tolerance * tolerance;

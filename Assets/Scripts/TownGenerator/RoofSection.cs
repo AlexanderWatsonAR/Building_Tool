@@ -49,10 +49,17 @@ public class RoofSection : MonoBehaviour
     {
         transform.DeleteChildren();
 
-        if (m_ControlPoints[1] == m_ControlPoints[2])
+        Vector3[] controlPointsCopy = new Vector3[] { m_ControlPoints[0], m_ControlPoints[1], m_ControlPoints[2], m_ControlPoints[3] };
+
+        if (controlPointsCopy[1] == controlPointsCopy[2])
         {
             m_ControlPoints = new Vector3[] { m_ControlPoints[0], m_ControlPoints[1], m_ControlPoints[3] };
             m_TopPoints = new Vector3[] { m_TopPoints[0], m_TopPoints[1], m_TopPoints[3] };
+        }
+        else if (controlPointsCopy[0] == controlPointsCopy[3])
+        {
+            m_ControlPoints = new Vector3[] { m_ControlPoints[0], m_ControlPoints[1], m_ControlPoints[2] };
+            m_TopPoints = new Vector3[] { m_TopPoints[0], m_TopPoints[1], m_TopPoints[2] };
         }
 
         switch (m_RoofElement)

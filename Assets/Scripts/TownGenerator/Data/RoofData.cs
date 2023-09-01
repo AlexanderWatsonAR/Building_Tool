@@ -39,7 +39,6 @@ public class RoofData
     }
     public RoofData(RoofTileData roofTileData, RoofType type, float mansardHeight, float mansardScale, float pyramidHeight, float gableHeight, float gableScale, bool isOpen, bool isFlipped, bool isActive)
     {
-
         m_RoofTileData = roofTileData;
         m_RoofType = type;
         m_MansardHeight = mansardHeight;
@@ -50,7 +49,6 @@ public class RoofData
         m_IsFlipped = isFlipped;
         m_IsOpen = isOpen;
         m_IsActive = isActive;
-
     }
     public void SetActive(bool isActive = true)
     {

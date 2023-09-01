@@ -57,12 +57,12 @@ public static class PolygonRecognition
     /// <summary>
     /// Uses World Coords. 2D calculation.
     /// </summary>
-    /// <param name="polyShape"></param>
+    /// <param name="path"></param>
     /// <param name="point"></param>
     /// <returns></returns>
-    public static bool IsPointInside(this PolyPath polyTool, Vector3 point)
+    public static bool IsPointInside(this PolyPath path, Vector3 point)
     {
-        return IsPointInsidePolygon(polyTool.Positions, point);
+        return IsPointInsidePolygon(path.Positions, point);
     }
     /// <summary>
     /// Assumes Polygon is orientated on the XZ plane.
@@ -77,7 +77,7 @@ public static class PolygonRecognition
         bool c = false;
         for (int i = 0; i < controlPointsArray.Length; j = i++)
         {
-            c ^= controlPointsArray[i].z > point.z ^ controlPointsArray[j].z > point.z && point.x < (controlPointsArray[j].x - controlPointsArray[i].x) * (point.z - controlPointsArray[i].z) / (controlPointsArray[j].z - controlPointsArray[i].z) + controlPointsArray[i].x;
+            c ^= controlPointsArray[i].z >= point.z ^ controlPointsArray[j].z >= point.z && point.x <= (controlPointsArray[j].x - controlPointsArray[i].x) * (point.z - controlPointsArray[i].z) / (controlPointsArray[j].z - controlPointsArray[i].z) + controlPointsArray[i].x;
         }
         return c;
     }
