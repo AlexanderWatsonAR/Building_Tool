@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Vector3EqualityComparer : IEqualityComparer<Vector3>
@@ -10,10 +9,11 @@ public class Vector3EqualityComparer : IEqualityComparer<Vector3>
     {
         m_Tolerance = tolerance;
     }
-    public bool Equals(Vector3 v1, Vector3 v2)
+    public bool Equals(Vector3 a, Vector3 b)
     {
-        bool result =  Vector3.Distance(v1, v2) < m_Tolerance;
-        //Debug.Log($"Comparing {v1} and {v2}. Result: {result}");
+        float distance = Vector3.Distance(a, b);
+        bool result = distance < m_Tolerance;
+        Debug.Log(distance);
         return result;
     }
     public int GetHashCode(Vector3 vector)

@@ -184,17 +184,21 @@ public class WallSection : MonoBehaviour
                     return this;
 
                 // Window Size.
-                float width = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[3]) / m_WindowColumns) * m_WindowWidth;
-                float height = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[1]) / m_WindowRows) * m_WindowHeight;
+                //float width = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[3]) / m_WindowColumns) * m_WindowWidth;
+                //float height = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[1]) / m_WindowRows) * m_WindowHeight;
 
-                IList<IList<Vector3>> frame = MeshMaker.TestPolyFrame(holePoints[0], height, width, Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows);
+                Vector3 min, max;
+                MeshMaker.MinMax(holePoints[0], out min, out max);
+                float height = max.y - min.y;
+                float width = (max.x - min.x) + (max.z - min.z);
 
-                ProBuilderMesh frameMesh = ProBuilderMesh.Create();
-                frameMesh.transform.SetParent(transform, true);
-                frameMesh.CreateShapeFromPolygon(holePoints[0], m_WallDepth, false, frame);
-                frameMesh.ToMesh();
-                frameMesh.Refresh();
-                frameMesh.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
+                ProBuilderMesh frameMeshA = MeshMaker.PolyFrameGrid(holePoints[0], height, width, Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows);
+                frameMeshA.transform.SetParent(transform, true);
+                frameMeshA.Extrude(frameMeshA.faces, ExtrudeMethod.FaceNormal, m_WallDepth);
+                frameMeshA.ToMesh();
+                frameMeshA.Refresh();
+
+                frameMeshA.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
 
                 //m_Points = MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows, out _);
                 //m_Centre = Math.Average(holePoints[0]);

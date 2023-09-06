@@ -821,7 +821,7 @@ public static class MeshMaker
         }
     }
 
-    public static IList<IList<Vector3>> TestPolyFrame(IEnumerable<Vector3> polyPoints, float polyHeight, float polyWidth, Vector3 scale, int columns, int rows)
+    public static ProBuilderMesh PolyFrameGrid(IEnumerable<Vector3> polyPoints, float polyHeight, float polyWidth, Vector3 scale, int columns, int rows, bool flipFace = false)
     {
         Vector3[] points = polyPoints.ToArray();
         Vector3 normal = points.CalculatePolygonFaceNormal();
@@ -883,252 +883,41 @@ public static class MeshMaker
 
                 for( int i = 0; i < quad.Length; i++)
                 {
+                    int next = quad.GetNextControlPoint(i);
+
                     if (pointsCopy.IsPointInsidePolygon(quad[i]))
                     {
                         hole.Add(quad[i]);
+                    }
+
+                    if (SearchPolygonForIntersections(pointsCopy, quad[i], quad[next], out Vector3[] interPoints))
+                    {
+                        hole.AddRange(interPoints);
                     }
                 }
 
                 if (hole.Count == 0)
                     continue;
 
-                Vector3 intersection;
-                bool containsBL = hole.Any(x => x == bl);
-                bool containsTL = hole.Any(x => x == tl);
-                bool containsTR = hole.Any(x => x == tr);
-                bool containsBR = hole.Any(x => x == br);
-
-                switch (hole.Count)
+                for (int i = 0; i < pointsCopy.Length; i++)
                 {
-                    case 1:
-                        {
-                            for (int i = 0; i < pointsCopy.Length; i++)
-                            {
-                                if (quad.IsPointInsidePolygon(pointsCopy[i]))
-                                {
-                                    hole.Add(pointsCopy[i]);
-                                }
-                            }
+                    float distA = UnityEditor.HandleUtility.DistancePointLine(pointsCopy[i], bl, tl);
+                    float distB = UnityEditor.HandleUtility.DistancePointLine(pointsCopy[i], tl, tr);
+                    float distC = UnityEditor.HandleUtility.DistancePointLine(pointsCopy[i], tr, br);
+                    float distD = UnityEditor.HandleUtility.DistancePointLine(pointsCopy[i], br, bl);
 
-                            if (containsBL)
-                            {
-                                Vector3 line1End = bl + bl.DirectionToTarget(br) * cellWidth;
-
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    if (SearchPolygonForIntersection(pointsCopy, bl, line1End, out intersection))
-                                    {
-                                        hole.Add(intersection);
-                                    }
-
-                                    line1End = bl + bl.DirectionToTarget(tl) * cellHeight;
-                                }
-                            }
-                            if (containsTL)
-                            {
-                                Vector3 line1End = tl + tl.DirectionToTarget(tr) * cellWidth;
-
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    if (SearchPolygonForIntersection(pointsCopy, tl, line1End, out intersection))
-                                    {
-                                        hole.Add(intersection);
-                                    }
-
-                                    line1End = tl + tl.DirectionToTarget(bl) * cellHeight;
-                                }
-                            }
-                            if (containsTR)
-                            {
-                                Vector3 line1End = tr + tr.DirectionToTarget(tl) * cellWidth;
-
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    if (SearchPolygonForIntersection(pointsCopy, tr, line1End, out intersection))
-                                    {
-                                        hole.Add(intersection);
-                                    }
-
-                                    line1End = tr + tr.DirectionToTarget(br) * cellHeight;
-                                }
-                            }
-                            if (containsBR)
-                            {
-                                Vector3 line1End = br + br.DirectionToTarget(bl) * cellWidth;
-
-                                for (int i = 0; i < 2; i++)
-                                {
-                                    if (SearchPolygonForIntersection(pointsCopy, br, line1End, out intersection))
-                                    {
-                                        hole.Add(intersection);
-                                    }
-
-                                    line1End = br + br.DirectionToTarget(tr) * cellHeight;
-                                }
-                            }
-                        }
-                        break;
-                    case 2:
-                        {
-                            for (int i = 0; i < pointsCopy.Length; i++)
-                            {
-                                if (quad.IsPointInsidePolygon(pointsCopy[i]))
-                                {
-                                    hole.Add(pointsCopy[i]);
-                                }
-                            }
-
-                            if (containsBL && containsTL)
-                            {
-                                Vector3 line1End = bl + bl.DirectionToTarget(br) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, bl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = tl + tl.DirectionToTarget(tr) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-
-                            if (containsTL && containsTR)
-                            {
-                                Vector3 line1End = tl + tl.DirectionToTarget(bl) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = tr + tr.DirectionToTarget(br) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tr, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-
-                            if (containsTR && containsBR)
-                            {
-                                Vector3 line1End = tr + tr.DirectionToTarget(tl) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tr, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = br + br.DirectionToTarget(bl) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, br, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-
-                            if (containsBR && containsBL)
-                            {
-                                Vector3 line1End = br + br.DirectionToTarget(tr) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, br, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = bl + bl.DirectionToTarget(tl) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, bl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-                        }
-                        break;
-                    case 3:
-                        {
-                            for (int i = 0; i < pointsCopy.Length; i++)
-                            {
-                                if (quad.IsPointInsidePolygon(pointsCopy[i]))
-                                {
-                                    hole.Add(pointsCopy[i]);
-                                }
-                            }
-
-                            if (containsTL && containsTR && containsBR) // 
-                            {
-                                Vector3 line1End = tl + tl.DirectionToTarget(bl) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = br + br.DirectionToTarget(bl) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, br, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-
-                            if (containsTR && containsBR && containsBL)//
-                            {
-                                Vector3 line1End = tr + tr.DirectionToTarget(tl) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tr, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = bl + bl.DirectionToTarget(tl) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, bl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-
-                            if (containsBR && containsBL && containsTL)//
-                            {
-                                Vector3 line1End = br + br.DirectionToTarget(tr) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, br, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = tl + tl.DirectionToTarget(tr) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-
-                            if (containsBL && containsTL && containsTR)//
-                            {
-                                Vector3 line1End = bl + bl.DirectionToTarget(br) * cellWidth;
-
-                                if (SearchPolygonForIntersection(pointsCopy, bl, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-
-                                line1End = tr + tr.DirectionToTarget(br) * cellHeight;
-
-                                if (SearchPolygonForIntersection(pointsCopy, tr, line1End, out intersection))
-                                {
-                                    hole.Add(intersection);
-                                }
-                            }
-                        }
-                        break;
+                    if (quad.IsPointInsidePolygon(pointsCopy[i]) ||
+                        distA == 0 || distB == 0 || distC == 0 || distD == 0)
+                    {
+                        hole.Add(pointsCopy[i]);
+                    }
                 }
 
-                hole = hole.Distinct().ToList();
+                hole = hole.Distinct(0.001f).ToList();
+
+                if (hole.Count <= 2)
+                    continue;
+
                 hole = hole.SortPointsClockwise().ToList();
 
                 Vector3 holeCentre = ProMaths.Average(hole);
@@ -1152,241 +941,46 @@ public static class MeshMaker
             }
         }
 
-        return holePoints;
+        ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create();
+        proBuilderMesh.CreateShapeFromPolygon(points, 0, flipFace, holePoints);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
+
+        Vector3 aveNormal = ProMaths.Average(proBuilderMesh.GetNormals());
+
+        if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
+        {
+            proBuilderMesh.faces[0].Reverse();
+        }
+
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
+
+        return proBuilderMesh;
     }
 
-    private static bool SearchPolygonForIntersection(IEnumerable<Vector3> polygon, Vector3 line1Start, Vector3 line1End, out Vector3 intersection)
+    private static bool SearchPolygonForIntersections(IEnumerable<Vector3> polygon, Vector3 line1Start, Vector3 line1End, out Vector3[] intersectionPoints)
     {
         Vector3[] points = polygon.ToArray();
-        intersection = Vector3.zero;
+        intersectionPoints = new Vector3[0];
+        List<Vector3> listOfIntersections = new();
+        bool anyIntersectionsFound = false;
 
         for(int i = 0; i < points.Length; i++)
         {
             int next = points.GetNextControlPoint(i);
 
-            if (Extensions.DoLinesIntersect(line1Start, line1End, points[i], points[next], out Vector3 inter, false))
+            // Fix: This may interect multiple lines of the polygon.
+            if (Extensions.DoLinesIntersect(line1Start, line1End, points[i], points[next], out Vector3 intersection, false))
             {
-                intersection = inter;
-                return true;
-            }
-        }
-        return false;
-    }
-    public static List<IList<Vector3>> PolyFrameGrid(IEnumerable<Vector3> polygonPoints, Vector3 scale, int columns, int rows, out List<Vector3[]> grid, Vector3? normal = null, bool flipFace = false)
-    {
-        Vector3[] points = polygonPoints.ToArray();
-        if (!normal.HasValue)
-            normal = points.CalculatePolygonFaceNormal();
-        Vector3 centre = ProMaths.Average(points);
-
-        // Orientate the points so it is on the XZ plane. // Required for the intersection method.
-        //Quaternion rotation = Quaternion.FromToRotation(normal.Value, Vector3.up);
-        Quaternion rotationA = Quaternion.FromToRotation(normal.Value, Vector3.forward);
-        Quaternion rotationB = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
-
-        Quaternion inverseRotationA = Quaternion.FromToRotation(Vector3.up, Vector3.forward);
-        Quaternion inverseRotationB = Quaternion.FromToRotation(Vector3.forward, normal.Value);
-
-        for (int i = 0; i < points.Length; i++)
-        {
-            // First rotate the polygon to face along the 'z'.
-            // This way we know, when the rotate it to the face 'y', the z will be the height.
-            Vector3 euler = rotationA.eulerAngles;
-            Vector3 v = Quaternion.Euler(euler) * (points[i] - centre) + centre;
-            points[i] = v;
-        }
-
-        for (int i = 0; i < points.Length; i++)
-        {
-            Vector3 euler = rotationB.eulerAngles;
-            Vector3 v = Quaternion.Euler(euler) * (points[i] - centre) + centre;
-            points[i] = v;
-        }
-
-        Vector3 min, max;
-        MinMax(points, out min, out max);
-
-        int pointsWide = columns + 1;
-        int pointsHigh = rows + 1;
-
-        // In this case, x is width, z is height.
-        Vector3[] leftPoints = Vector3Extensions.LerpCollection(min, new Vector3(min.x, min.y, max.z), pointsHigh).ToArray(); // row start points
-        Vector3[] rightPoints = Vector3Extensions.LerpCollection(new Vector3(max.x, min.y, min.z), max, pointsHigh).ToArray(); // row end points
-
-        List<Vector3[]> controlPointsGrid = new List<Vector3[]>();
-
-        for (int i = 0; i < leftPoints.Length; i++)
-        {
-            controlPointsGrid.Add(Vector3Extensions.LerpCollection(leftPoints[i], rightPoints[i], pointsWide));
-        }
-
-        List<IList<Vector3>> holePoints = new();
-
-        Vector3[] pointsCopy = new Vector3[points.Length];
-        Array.Copy(points, pointsCopy, points.Length);
-
-        for (int i = 0; i < pointsCopy.Length; i++)
-        {
-            Vector3 point = pointsCopy[i] - centre;
-            Vector3 v = Vector3.Scale(point, Vector3.one * 0.999f) + centre;
-            pointsCopy[i] = v;
-        }
-
-        List<Vector3> intersectionPoints = new();
-
-        // Left right intersections.
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < pointsCopy.Length; j++)
-            {
-                int next = pointsCopy.GetNextControlPoint(j);
-
-                Vector3 line1Start = controlPointsGrid[i][0];
-                Vector3 line1End = controlPointsGrid[i][^1];
-
-                if (Extensions.DoLinesIntersect(line1Start, line1End, pointsCopy[j], pointsCopy[next], out Vector3 lRIntersection, false))
-                {
-                    intersectionPoints.Add(lRIntersection);
-                }
-
-                if (Extensions.DoLinesIntersect(line1End, line1Start, pointsCopy[j], pointsCopy[next], out Vector3 rLIntersection, false))
-                {
-                    intersectionPoints.Add(rLIntersection);
-                }
+                listOfIntersections.Add(intersection);
+                anyIntersectionsFound = true;
             }
         }
 
-        // Top bottom intersections.
-        for (int i = 0; i < columns; i++)
-        {
-            for (int j = 0; j < pointsCopy.Length; j++)
-            {
-                int next = pointsCopy.GetNextControlPoint(j);
+        intersectionPoints = listOfIntersections.ToArray();
 
-                Vector3 line1Start = controlPointsGrid[0][i]; // [first_row][current_column]
-                Vector3 line1End = controlPointsGrid[^1][i]; // [last_row][current_column]
-
-                if (Extensions.DoLinesIntersect(line1Start, line1End, pointsCopy[j], pointsCopy[next], out Vector3 bTIntersection, false))
-                {
-                    intersectionPoints.Add(bTIntersection);
-                }
-
-                if (Extensions.DoLinesIntersect(line1End, line1Start, pointsCopy[j], pointsCopy[next], out Vector3 tBIntersection, false))
-                {
-                    intersectionPoints.Add(tBIntersection);
-                }
-            }
-        }
-
-        intersectionPoints.AddRange(pointsCopy);
-
-        for (int i = 0; i < columns; i++)
-        {
-            for (int j = 0; j < rows; j++)
-            {
-                Vector3 point = controlPointsGrid[j][i] - centre;
-                Vector3 v = Vector3.Scale(point, Vector3.one * 0.999f) + centre;
-                controlPointsGrid[j][i] = v;
-                intersectionPoints.Add(v);
-            }
-        }
-
-        List<Vector3> internalPoints = new();
-
-        for (int i = 0; i < intersectionPoints.Count; i++)
-        {
-            if (points.IsPointInsidePolygon(intersectionPoints[i]))
-            {
-                internalPoints.Add(intersectionPoints[i]);
-            }
-        }
-
-        float tolerance = 0.01f;
-        internalPoints = internalPoints.Distinct(new Vector3EqualityComparer(tolerance)).ToList();
-        //internalPoints = internalPoints.Distinct().ToList();
-
-        for (int i = 0; i < columns; i++)
-        {
-            for (int j = 0; j < rows; j++)
-            {
-                Vector3 bl = controlPointsGrid[j][i];
-                Vector3 tl = controlPointsGrid[j + 1][i];
-                Vector3 tr = controlPointsGrid[j + 1][i + 1];
-                Vector3 br = controlPointsGrid[j][i + 1];
-
-                Vector3[] quad = new Vector3[] { bl, tl, tr, br };
-                List<Vector3> hole = new List<Vector3>();
-
-                for(int k = 0; k < internalPoints.Count; k++)
-                {
-                    float distA = UnityEditor.HandleUtility.DistancePointLine(internalPoints[k], bl, tl);
-                    float distB = UnityEditor.HandleUtility.DistancePointLine(internalPoints[k], tl, tr);
-                    float distC = UnityEditor.HandleUtility.DistancePointLine(internalPoints[k], tr, br);
-                    float distD = UnityEditor.HandleUtility.DistancePointLine(internalPoints[k], br, bl);
-
-                    if (quad.IsPointInsidePolygon(internalPoints[k]) ||
-                        Extensions.ApproximatelyEqual(distA, 0) ||
-                        Extensions.ApproximatelyEqual(distB, 0) ||
-                        Extensions.ApproximatelyEqual(distC, 0) ||
-                        Extensions.ApproximatelyEqual(distD, 0) ||
-                        Vector3Extensions.Approximately(internalPoints[k], bl, tolerance) ||
-                        Vector3Extensions.Approximately(internalPoints[k], tl, tolerance) ||
-                        Vector3Extensions.Approximately(internalPoints[k], tr, tolerance) ||
-                        Vector3Extensions.Approximately(internalPoints[k], br, tolerance))
-                    {
-                        hole.Add(internalPoints[k]);
-                    }
-                }
-
-                if (hole.Count <= 2)
-                    continue;
-
-                holePoints.Add(hole);
-
-                Vector3 holeCentre = ProMaths.Average(holePoints[^1]);
-
-                for (int k = 0; k < holePoints[^1].Count(); k++)
-                {
-                    Vector3 point = holePoints[^1][k] - holeCentre;
-                    Vector3 v = Vector3.Scale(point, scale) + holeCentre;
-                    holePoints[^1][k] = v;
-                }
-
-                for (int k = 0; k < holePoints[^1].Count(); k++)
-                {
-                    Vector3 euler = inverseRotationA.eulerAngles;
-                    Vector3 v = Quaternion.Euler(euler) * (holePoints[^1][k] - centre) + centre;
-                    holePoints[^1][k] = v;
-                }
-
-                for (int k = 0; k < holePoints[^1].Count(); k++)
-                {
-                    Vector3 euler = inverseRotationB.eulerAngles;
-                    Vector3 v = Quaternion.Euler(euler) * (holePoints[^1][k] - centre) + centre;
-                    holePoints[^1][k] = v;
-                }
-
-                holePoints[^1] = holePoints[^1].SortPointsClockwise().ToList();
-            }
-        }
-
-        for (int i = 0; i < points.Length; i++)
-        {
-            Vector3 euler = inverseRotationA.eulerAngles;
-            Vector3 v = Quaternion.Euler(euler) * (points[i] - centre) + centre;
-            points[i] = v;
-        }
-
-        for (int i = 0; i < points.Length; i++)
-        {
-            Vector3 euler = inverseRotationB.eulerAngles;
-            Vector3 v = Quaternion.Euler(euler) * (points[i] - centre) + centre;
-            points[i] = v;
-        }
-
-        grid = controlPointsGrid;
-
-        return holePoints;
+        return anyIntersectionsFound;
     }
 
     public static ProBuilderMesh HoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, out List<Vector3[]> holeGridControlPoints, bool flipFace = false)
