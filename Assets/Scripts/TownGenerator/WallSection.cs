@@ -7,6 +7,8 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using System.Linq;
 using UnityEngine.ProBuilder.Shapes;
+using ProMaths = UnityEngine.ProBuilder.Math;
+using UnityEngine.UIElements;
 
 public class WallSection : MonoBehaviour
 {
@@ -183,54 +185,25 @@ public class WallSection : MonoBehaviour
                 if (!m_IsWindowActive)
                     return this;
 
-                // Window Size.
-                //float width = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[3]) / m_WindowColumns) * m_WindowWidth;
-                //float height = (Vector3.Distance(m_ControlPoints[0], m_ControlPoints[1]) / m_WindowRows) * m_WindowHeight;
+                GameObject win = new GameObject("Window", typeof(Window));
+                win.transform.SetParent(transform, true);
+                Window window = win.GetComponent<Window>();
+                window.Initialize(holePoints[0], m_WallDepth);
+                window.SetFrameGrid(m_WindowFrameColumns, m_WindowFrameRows);
+                window.SetFrameScale(m_WindowFrameScale);
+                window.SetMaterials(m_WindowFrameMaterial, m_WindowPaneMaterial).Build();
 
-                Vector3 min, max;
-                MeshMaker.MinMax(holePoints[0], out min, out max);
-                float height = max.y - min.y;
-                float width = (max.x - min.x) + (max.z - min.z);
+                Vector3 winPosition = ProMaths.Average(holePoints[0]);
 
-                ProBuilderMesh frameMeshA = MeshMaker.PolyFrameGrid(holePoints[0], height, width, Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows);
-                frameMeshA.transform.SetParent(transform, true);
-                frameMeshA.Extrude(frameMeshA.faces, ExtrudeMethod.FaceNormal, m_WallDepth);
-                frameMeshA.ToMesh();
-                frameMeshA.Refresh();
+                for (int i = 1; i < holePoints.Count; i++)
+                {
+                    Window instanceWin = Instantiate(window);
+                    instanceWin.transform.SetParent(transform, true);
+                    Vector3 position = ProMaths.Average(holePoints[i]);
+                    instanceWin.SetControlPoints(holePoints[i]);
+                    instanceWin.SetFramePosition(position - winPosition);
 
-                frameMeshA.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
-
-                //m_Points = MeshMaker.PolyFrameGrid(holePoints[0], Vector3.one * m_WindowFrameScale, m_WindowFrameColumns, m_WindowFrameRows, out _);
-                //m_Centre = Math.Average(holePoints[0]);
-
-                //ProBuilderMesh mesh = ProBuilderMesh.Create();
-                //mesh.transform.SetParent(transform, true);
-                //mesh.CreateShapeFromPolygon(holePoints[0], 0, false, m_Points);
-                //mesh.ToMesh();
-                //mesh.Refresh();
-
-
-                //float windowDepth = m_WallDepth * 0.5f;
-
-                //foreach (Vector3[] hole in holeGridControlPoints)
-                //{
-                //    GameObject win = new GameObject("Window", typeof(Window));
-                //    win.transform.SetParent(transform, true);
-                //    Vector3 dir = hole[0].DirectionToTarget(hole[3]);
-                //    Vector3 forward = Vector3.Cross(Vector3.up, dir);
-
-                //    for(int i = 0; i < hole.Length; i++)
-                //    {
-                //        hole[i] += forward * windowDepth;
-                //    }
-
-                //    Window window = win.GetComponent<Window>();
-                //    window.Initialize(hole, windowDepth);
-                //    window.SetFrameGrid(m_WindowFrameColumns, m_WindowFrameRows);
-                //    window.SetFrameScale(m_WindowFrameScale);
-                //    window.SetMaterials(m_WindowFrameMaterial, m_WindowPaneMaterial).Build();
-                //}
-
+                }
                 break;
             case WallElement.Extension:
                 List<List<Vector3>> wallHole;

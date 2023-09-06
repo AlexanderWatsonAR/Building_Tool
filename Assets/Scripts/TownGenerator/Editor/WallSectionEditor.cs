@@ -70,8 +70,8 @@ public class WallSectionEditor : Editor
                 break;
             case WallElement.Doorway:
                 EditorGUILayout.LabelField("Number of Doors");
-                EditorGUILayout.IntSlider(doorColumns, 1, 10, "Columns");
-                EditorGUILayout.IntSlider(doorRows, 1, 10, "Rows");
+                EditorGUILayout.IntSlider(doorColumns, 1, 5, "Columns");
+                EditorGUILayout.IntSlider(doorRows, 1, 5, "Rows");
                 EditorGUILayout.LabelField("Size");
                 EditorGUILayout.PropertyField(doorOffset);
                 EditorGUILayout.PropertyField(doorHeight);
@@ -84,7 +84,7 @@ public class WallSectionEditor : Editor
                 {
                     //EditorGUI.BeginDisabledGroup(!doorArched.boolValue);
                     doorArchHeight.floatValue = EditorGUILayout.Slider("Height", doorArchHeight.floatValue, 0, 1);
-                    doorArchSides.intValue = EditorGUILayout.IntSlider("Sides", doorArchSides.intValue, 3, 32);
+                    doorArchSides.intValue = EditorGUILayout.IntSlider("Sides", doorArchSides.intValue, 3, 16);
                     //EditorGUI.EndDisabledGroup();
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
@@ -111,9 +111,9 @@ public class WallSectionEditor : Editor
                 break;
             case WallElement.Window:
                 EditorGUILayout.LabelField("Number of Windows");
-                EditorGUILayout.IntSlider(winColumns, 1, 10, "Columns");
-                EditorGUILayout.IntSlider(winRows, 1, 10, "Rows");
-                EditorGUILayout.IntSlider(winSides, 3, 32, "Sides");
+                EditorGUILayout.IntSlider(winColumns, 1, 5, "Columns");
+                EditorGUILayout.IntSlider(winRows, 1, 5, "Rows");
+                EditorGUILayout.IntSlider(winSides, 3, 16, "Sides");
                 EditorGUILayout.LabelField("Size");
                 EditorGUILayout.Slider(winHeight, 0, 0.999f, "Height");
                 EditorGUILayout.Slider(winWidth, 0, 0.999f, "Width");
@@ -127,8 +127,8 @@ public class WallSectionEditor : Editor
 
                     if (m_IsWindowActiveFoldout)
                     {
-                        winFColumns.intValue = EditorGUILayout.IntSlider("Columns", winFColumns.intValue, 1, 10);
-                        winFRows.intValue = EditorGUILayout.IntSlider("Rows", winFRows.intValue, 1, 10);
+                        winFColumns.intValue = EditorGUILayout.IntSlider("Columns", winFColumns.intValue, 1, 5);
+                        winFRows.intValue = EditorGUILayout.IntSlider("Rows", winFRows.intValue, 1, 5);
                         EditorGUILayout.LabelField("Size");
                         winFScale.floatValue = EditorGUILayout.Slider("Frame Scale", winFScale.floatValue, 0, 0.999f);
                         EditorGUILayout.LabelField("Material");

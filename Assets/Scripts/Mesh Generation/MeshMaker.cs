@@ -821,7 +821,7 @@ public static class MeshMaker
         }
     }
 
-    public static ProBuilderMesh PolyFrameGrid(IEnumerable<Vector3> polyPoints, float polyHeight, float polyWidth, Vector3 scale, int columns, int rows, bool flipFace = false)
+    public static ProBuilderMesh PolyFrameGrid(IEnumerable<Vector3> polyPoints, float polyHeight, float polyWidth, float scale, int columns, int rows, bool flipFace = false)
     {
         Vector3[] points = polyPoints.ToArray();
         Vector3 normal = points.CalculatePolygonFaceNormal();
@@ -925,7 +925,7 @@ public static class MeshMaker
                 for (int i = 0; i < hole.Count(); i++)
                 {
                     Vector3 point = hole[i] - holeCentre;
-                    Vector3 v = Vector3.Scale(point, scale) + holeCentre;
+                    Vector3 v = Vector3.Scale(point, Vector3.one * scale) + holeCentre;
                     hole[i] = v;
                 }
 
