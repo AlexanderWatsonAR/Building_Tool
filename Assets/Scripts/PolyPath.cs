@@ -125,7 +125,7 @@ public class PolyPath
         m_ControlPoints.Add(new ControlPoint(position));
     }
 
-    public void ReverseControlPoints()
+    public void ValidateControlPoints()
     {
         if (IsClockwise())
             return;
@@ -160,7 +160,7 @@ public class PolyPath
             return;
 
         if (!IsClockwise())
-            ReverseControlPoints();
+            ValidateControlPoints();
 
         Vector3[] points = Positions;
 
@@ -183,11 +183,6 @@ public class PolyPath
             m_ControlPoints[i].SetForward(inbetweenForward);
         }
     }
-
-    //private void OnDrawGizmosSelected()
-    //{
-
-    //}
 
     /// <summary>
     /// Do the control points move clockwise?

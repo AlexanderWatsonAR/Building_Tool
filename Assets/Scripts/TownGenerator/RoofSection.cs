@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
+using ProMaths = UnityEngine.ProBuilder.Math;
 
 public class RoofSection : MonoBehaviour
 {
@@ -15,12 +17,18 @@ public class RoofSection : MonoBehaviour
     [SerializeField, HideInInspector] private float m_SectionHeight;
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
 
-    // --------- Window Properties -------------
+    // --------- Window Hole Properties -------------
     [SerializeField, Range(0, 0.999f)] private float m_WindowHeight;
     [SerializeField, Range(0, 0.999f)] private float m_WindowWidth;
     [SerializeField, Range(3, 32)] private int m_WindowSides = 3;
     [SerializeField, Range(1, 10)] private int m_WindowColumns, m_WindowRows;
-    //---------- End of Windows Properties -----------
+    //---------- End of Window Hole Properties -----------
+
+    // --------- Window Properties--------------------
+    [SerializeField] private WindowData m_WindowData;
+    //---------- End of Window Properties -----------
+
+
     public RoofElement RoofElement => m_RoofElement;
 
     public RoofSection Initialize(IEnumerable<Vector3> controlPoints, float sectionHeight)
@@ -30,11 +38,16 @@ public class RoofSection : MonoBehaviour
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
         m_RoofElement = RoofElement.Tile;
 
-        // Window
+        // Window hole
         m_WindowHeight = 0.5f;
         m_WindowWidth = 0.5f;
         m_WindowColumns = 1;
         m_WindowRows = 1;
+
+        // Window
+        Material def = BuiltinMaterials.defaultMaterial;
+        m_WindowData = new WindowData(WindowElement.Everything, null, 2, 2, 0.95f, 0.95f, m_SectionHeight, m_SectionHeight * 0.5f, m_SectionHeight  * 0.25f, m_SectionHeight * 0.2f, 90, def, def, def, def );
+        
 
         return this;
     }
@@ -71,12 +84,30 @@ public class RoofSection : MonoBehaviour
                 m_ProBuilderMesh.Refresh();
                 break;
             case RoofElement.Window:
-                //List<List<Vector3>> holePoints;
+                List<List<Vector3>> holePoints;
                 Vector3 winScale = new Vector3(m_WindowWidth, m_WindowHeight);
-                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, 0, out _, true);
+                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, 0, out holePoints, true);
+                polyHoleGrid.ToMesh();
+                polyHoleGrid.Refresh();
+                Vector3 calculatedNormal = m_ControlPoints.CalculatePolygonFaceNormal();
+                polyHoleGrid.MatchFaceToNormal(calculatedNormal);
+                polyHoleGrid.Extrude(polyHoleGrid.faces, ExtrudeMethod.FaceNormal, m_SectionHeight);
+                polyHoleGrid.ToMesh();
                 Rebuild(polyHoleGrid);
                 SetCornerPoints();
                 m_ProBuilderMesh.Refresh();
+
+                WindowData windowData = new WindowData(m_WindowData);
+                windowData.SetControlPoints(holePoints[0]);
+
+                ProBuilderMesh win = ProBuilderMesh.Create();
+                win.name = "Window";
+                win.transform.SetParent(transform, true);
+                Window window = win.AddComponent<Window>();
+                window.Initialize(windowData).Build();
+                win.transform.localPosition = Vector3.zero;
+
+
                 break;
             case RoofElement.Empty:
                 m_ProBuilderMesh.Clear();

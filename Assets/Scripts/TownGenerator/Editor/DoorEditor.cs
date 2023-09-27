@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Rendering;
-using UnityEngine.UIElements;
 
 [CustomEditor(typeof(Door))]
 public class DoorEditor : Editor
@@ -16,18 +15,21 @@ public class DoorEditor : Editor
         serializedObject.Update();
         Door door = (Door)target;
 
-        m_HingePosition = serializedObject.FindProperty("m_HingePosition").vector3Value;
-        Vector3 forward = serializedObject.FindProperty("m_Forward").vector3Value;
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        m_HingePosition = data.FindPropertyRelative("m_HingePosition").vector3Value;
+        Vector3 forward = data.FindPropertyRelative("m_Forward").vector3Value;
         m_HingeRotation = Quaternion.LookRotation(forward, Vector3.up);
 
-        SerializedProperty doorScale = serializedObject.FindProperty("m_Scale");
-        SerializedProperty hingeOffset = serializedObject.FindProperty("m_HingeOffset");
-        SerializedProperty hingeEulerAngles = serializedObject.FindProperty("m_HingeEulerAngles");
-        SerializedProperty hingePoint = serializedObject.FindProperty("m_HingePoint");
+        SerializedProperty doorScale = data.FindPropertyRelative("m_Scale");
+        SerializedProperty hingeOffset = data.FindPropertyRelative("m_HingeOffset");
+        SerializedProperty hingeEulerAngles = data.FindPropertyRelative("m_HingeEulerAngles");
+        SerializedProperty hingePoint = data.FindPropertyRelative("m_HingePoint");
 
-        doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
+        EditorGUILayout.PropertyField(doorScale);
+        //doorScale.vector3Value = EditorGUILayout.Vector3Field("Scale", doorScale.vector3Value);
         EditorGUILayout.LabelField("Hinge");
-        door.HingePoint = (TransformPoint) EditorGUILayout.EnumPopup("Position", hingePoint.GetEnumValue<TransformPoint>());
+        door.DoorData.HingePoint = (TransformPoint) EditorGUILayout.EnumPopup("Position", hingePoint.GetEnumValue<TransformPoint>());
         hingeOffset.vector3Value = EditorGUILayout.Vector3Field("Offset", hingeOffset.vector3Value);
         hingeEulerAngles.vector3Value = EditorGUILayout.Vector3Field("Rotation", hingeEulerAngles.vector3Value);
 
@@ -45,7 +47,8 @@ public class DoorEditor : Editor
     private void Draw()
     {
         serializedObject.Update();
-        SerializedProperty hingeOffset = serializedObject.FindProperty("m_HingeOffset");
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+        SerializedProperty hingeOffset = data.FindPropertyRelative("m_HingeOffset");
         Vector3 position = Handles.DoPositionHandle(m_HingePosition + hingeOffset.vector3Value, m_HingeRotation);
         hingeOffset.vector3Value = position - m_HingePosition;
         serializedObject.ApplyModifiedProperties();

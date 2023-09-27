@@ -2,16 +2,65 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem.HID;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
-using UnityEngine.UIElements;
+using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static void MinMax(IEnumerable<Vector3> points, out Vector3 min, out Vector3 max)
+    {
+        Vector3[] vectors = points.ToArray();
+
+        min = vectors[0];
+        max = vectors[0];
+
+        for (int i = 1; i < vectors.Length; i++)
+        {
+            if (min.x > vectors[i].x)
+                min.x = vectors[i].x;
+            if (min.y > vectors[i].y)
+                min.y = vectors[i].y;
+            if (min.z > vectors[i].z)
+                min.z = vectors[i].z;
+
+            if (max.x < vectors[i].x)
+                max.x = vectors[i].x;
+            if (max.y < vectors[i].y)
+                max.y = vectors[i].y;
+            if (max.z < vectors[i].z)
+                max.z = vectors[i].z;
+        }
+    }
+
+
+    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> polygon, float scaleFactor, Vector3? scalePoint = null)
+    {
+        return ScalePolygon(polygon, Vector3.one * scaleFactor, scalePoint);
+    }
+
+    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> polygon, Vector3 scaleFactor, Vector3? scalePoint = null)
+    {
+        Vector3[] points = polygon.ToArray();
+
+        if(scalePoint == null)
+        {
+            scalePoint = ProMaths.Average(polygon.ToArray());
+        }
+
+        for( int i = 0; i < points.Length; i++)
+        {
+            // Scale
+            Vector3 point = points[i] - scalePoint.Value;
+            Vector3 v = Vector3.Scale(point, scaleFactor) + scalePoint.Value;
+            points[i] = v;
+        }
+
+        return points;
+    }
+
     public static bool ApproximatelyEqual(float a, float b, float tolerance = 0.001f)
     {
         return Mathf.Abs(a - b) < tolerance;
@@ -102,6 +151,18 @@ public static class Extensions
         {
             DeleteChildren(transform);
         }
+    }
+
+    public static Transform[] GetAllChildren(this Transform transform)
+    {
+        Transform[] children = new Transform[transform.childCount];
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            children[i] = transform.GetChild(i);
+        }
+
+        return children;
     }
 
     public static Vector3 CheckAxis(this Axis direction)
@@ -444,6 +505,8 @@ public static class Extensions
         edgeList.Add(edge);
 
         //Face bevelFace = Bevel.BevelEdges(proBuilderMesh, edgeList, size)[0];
+
+        
 
         Vector3[] positions = proBuilderMesh.positions.ToArray();
 

@@ -7,7 +7,6 @@ using UnityEngine.ProBuilder;
 using System.Linq;
 using UnityEditor;
 
-[System.Serializable]
 public class Wall : MonoBehaviour
 {
     [SerializeField] WallData m_Data;

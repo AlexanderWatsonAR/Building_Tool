@@ -1,66 +1,101 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
 public class WindowData
 {
-    [SerializeField, Range(0, 0.999f)] private float m_Height;
-    [SerializeField, Range(0, 0.999f)] private float m_Width;
-    [SerializeField, Range(3, 32)] private int m_Sides = 3;
-    [SerializeField, Range(1, 10)] private int m_Columns, m_Rows;
-    [SerializeField, Range(-180, 180)] private float m_Angle;
-    [SerializeField] private bool m_IsSmooth;
-    [SerializeField] private bool m_IsActive;
-    [SerializeField, Range(1, 10)] private int m_FrameColumns, m_FrameRows;
-    [SerializeField] private Vector3 m_FrameScale;
-    [SerializeField] private Material m_PaneMaterial;
-    [SerializeField] private Material m_FrameMaterial;
+    [SerializeField] private Vector3[] m_ControlPoints;
+    [SerializeField] private WindowElement m_ActiveElements;
+    [SerializeField, Range(1, 5)] private int m_Columns, m_Rows;
+    [SerializeField, Range(0, 0.999f)] private float m_OuterFrameScale, m_InnerFrameScale;
+    [SerializeField, Range(0, 0.999f)] private float m_OuterFrameDepth, m_InnerFrameDepth, m_PaneDepth;
+    [SerializeField] private Material m_OuterFrameMaterial, m_InnerFrameMaterial, m_PaneMaterial, m_ShuttersMaterial;
+    [SerializeField, Range(0, 0.999f)] private float m_ShuttersDepth;
+    [SerializeField, Range(0, 180)] private float m_ShuttersAngle;
 
-    public float Height => m_Height;
-    public float Width => m_Width;
-    public int Sides => m_Sides;
+
+    public Vector3[] ControlPoints => m_ControlPoints;
     public int Columns => m_Columns;
     public int Rows => m_Rows;
-    public float Angle => m_Angle;
-    public bool IsSmooth => m_IsSmooth;
-    public bool IsActive => m_IsActive;
-    public int FrameColumns => m_FrameColumns;
-    public int FrameRows => m_FrameRows;
-    public Vector3 FrameScale => m_FrameScale;
-    public Material FrameMaterial => m_FrameMaterial;
+    public float OuterFrameScale => m_OuterFrameScale;
+    public float InnerFrameScale => m_InnerFrameScale;
+    public float OuterFrameDepth => m_OuterFrameDepth;
+    public float InnerFrameDepth => m_InnerFrameDepth;
+    public float PaneDepth => m_PaneDepth;
+    public float ShuttersDepth => m_ShuttersDepth;
+    public float ShuttersAngle => m_ShuttersAngle;
+    public Material OuterFrameMaterial => m_OuterFrameMaterial;
+    public Material InnerFrameMaterial => m_InnerFrameMaterial;
     public Material PaneMaterial => m_PaneMaterial;
+    public Material ShuttersMaterial => m_ShuttersMaterial;
+    public WindowElement ActiveElements => m_ActiveElements;
 
-    public WindowData() : this (0.5f, 0.5f, 3, 1, 1, 0, false, true, 2, 2, Vector3.one * 0.9f, null, null)
+    public bool IsOuterFrameActive => IsElementActive(WindowElement.OuterFrame);
+    public bool IsInnerFrameActive => IsElementActive(WindowElement.InnerFrame);
+    public bool IsPaneActive => IsElementActive(WindowElement.Pane);
+    public bool AreShuttersActive => IsElementActive(WindowElement.Shutters);
+
+    public WindowData() : this (WindowElement.Everything, new Vector3[0], 2, 2, 0.95f, 0.95f, 0.4f, 0.2f, 0.1f, 0.2f, 90f, null, null, null, null)
     {
 
     }
-    public WindowData(WindowData data) : this (data.Height, data.Width, data.Sides, data.Columns, data.Rows, data.Angle, data.IsSmooth, data.IsActive, data.FrameColumns, data.FrameRows, data.FrameScale, data.PaneMaterial, data.FrameMaterial)
+    public WindowData(WindowData data) : this
+    (
+        data.ActiveElements,
+        data.ControlPoints,
+        data.Columns,
+        data.Rows,
+        data.OuterFrameScale,
+        data.InnerFrameScale,
+        data.OuterFrameDepth,
+        data.InnerFrameDepth,
+        data.PaneDepth,
+        data.ShuttersDepth,
+        data.ShuttersAngle,
+        data.OuterFrameMaterial,
+        data.InnerFrameMaterial,
+        data.PaneMaterial,
+        data.ShuttersMaterial)
     {
 
     }
-    public WindowData(float height, float width, int sides, int columns, int rows, float angle, bool isSmooth, bool isActive, int frameColumns, int frameRows, Vector3 frameScale, Material paneMaterial, Material frameMaterial)
+    public WindowData(WindowElement activeElements, IEnumerable<Vector3> controlPoints, int columns, int rows, float outerFrameScale, float innerFrameScale, float outerFrameDepth, float innerFrameDepth, float paneDepth, float shuttersDepth, float shuttersAngle, Material outerFrameMat, Material innerFrameMat, Material paneMat, Material shuttersMat)
     {
-        m_Height = height;
-        m_Width = width;
-        m_Sides = sides;
+        m_ActiveElements = activeElements;
+        m_ControlPoints = controlPoints == null ? new Vector3[0] : controlPoints.ToArray();
         m_Columns = columns;
         m_Rows = rows;
-        m_Angle = angle;
-        m_IsSmooth = isSmooth;
-        m_IsActive = isActive;
-        m_FrameColumns = frameColumns;
-        m_FrameRows = frameRows;
-        m_FrameScale = frameScale;
-        m_PaneMaterial = paneMaterial;
-        m_FrameMaterial = frameMaterial;
+        m_OuterFrameScale = outerFrameScale;
+        m_InnerFrameScale = innerFrameScale;
+        m_OuterFrameDepth = outerFrameDepth;
+        m_InnerFrameDepth = innerFrameDepth;
+        m_PaneDepth = paneDepth;
+        m_ShuttersDepth = shuttersDepth;
+        m_ShuttersAngle = shuttersAngle;
+        m_OuterFrameMaterial = outerFrameMat;
+        m_InnerFrameMaterial = innerFrameMat;
+        m_PaneMaterial = paneMat;
+        m_ShuttersMaterial = shuttersMat;
     }
-    public void SetFrameMaterial(Material material)
+
+    public void SetControlPoints(IEnumerable<Vector3> controlPoints)
     {
-        m_FrameMaterial = material;
+        m_ControlPoints = controlPoints.ToArray();
     }
-    public void SetPaneMaterial(Material material)
+
+    public void SetMaterials(Material outerFrame, Material innerFrame, Material pane, Material shutters)
     {
-        m_PaneMaterial = material;
+        m_OuterFrameMaterial = outerFrame;
+        m_InnerFrameMaterial = innerFrame;
+        m_PaneMaterial = pane;
+        m_ShuttersMaterial = shutters;
     }
+
+    private bool IsElementActive(WindowElement windowElement)
+    {
+        return m_ActiveElements == WindowElement.Nothing ? false : (m_ActiveElements & windowElement) != 0;
+    }
+
 }

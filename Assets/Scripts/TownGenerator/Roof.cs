@@ -13,7 +13,6 @@ using UnityEngine.UI;
 using UnityEngine.ProBuilder.MeshOperations;
 using TMPro;
 
-[System.Serializable]
 public class Roof : MonoBehaviour
 {
     [SerializeField] private RoofData m_Data;
@@ -118,6 +117,11 @@ public class Roof : MonoBehaviour
                 return new int[] { Gable, Mansard, Dormer, Pyramid, PyramidHip };
             }
             return new int[] { Gable, Mansard, Dormer };
+        }
+
+        if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+        {
+            return new int[] {  Mansard, Pyramid, PyramidHip };
         }
 
         return new int[] { Mansard };
@@ -247,6 +251,7 @@ public class Roof : MonoBehaviour
             {
                 tileIndices = tileIndices.Reverse().ToArray();
                 CreateWall(new Vector3[] { m_ControlPoints[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], m_ControlPoints[relativeIndices[tileIndices[3]]].Position });
+                continue;
             }
 
             CreateRoofTile(new Vector3[] { m_ControlPoints[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], m_ControlPoints[relativeIndices[tileIndices[3]]].Position }, tileExtend);

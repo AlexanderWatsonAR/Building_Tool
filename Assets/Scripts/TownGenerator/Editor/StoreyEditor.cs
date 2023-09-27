@@ -55,7 +55,7 @@ public class StoreyEditor : Editor
             EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
             EditorGUILayout.PropertyField(curvedCorners);
             EditorGUILayout.IntSlider(curvedCornersSides, 3, 15, "Sides");
-            EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
+            //EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
@@ -65,7 +65,7 @@ public class StoreyEditor : Editor
         if (m_ShowFloor)
         {
             EditorGUILayout.Slider(floorHeight, 0.00001f, 1, "Height");
-            EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
+            //EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
@@ -84,7 +84,7 @@ public class StoreyEditor : Editor
             EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
             EditorGUILayout.IntSlider(pillarSides, 3, 32, "Sides");
             pillarSmooth.boolValue = EditorGUILayout.Toggle("Is Smooth", pillarSmooth.boolValue);
-            EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
+            //EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
 
         }
         EditorGUILayout.EndFoldoutHeaderGroup();

@@ -10,6 +10,23 @@ using Edge = UnityEngine.ProBuilder.Edge;
 
 public static class ProBuilderExtensions
 {
+    /// <summary>
+    /// Sometimes the generated promesh has a normal that points in the opposite direction to what is expected.
+    /// This checks the normal & flips it if it is incorrect.
+    /// Note: This will only work for a polygon.
+    /// </summary>
+    /// <param name="proBuilderMesh"></param>
+    /// <param name="normal"></param>
+    public static void MatchFaceToNormal(this ProBuilderMesh proBuilderMesh, Vector3 normal)
+    {
+        Vector3 aveNormal = ProMaths.Average(proBuilderMesh.GetNormals());
+
+        if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
+        {
+            proBuilderMesh.faces[0].Reverse();
+        }
+    }
+
     public static IEnumerable<int> GetCoincidentVerticesFromPosition(this ProBuilderMesh proBuilderMesh, Vector3 position, float marginForError = 0.001f)
     {
         Vertex[] vertices = proBuilderMesh.GetVertices();

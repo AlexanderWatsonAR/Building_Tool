@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UHandleUtil = UnityEditor.HandleUtility;
 using static UnityEditor.PlayerSettings;
 using UnityEditor.PackageManager.UI;
 
@@ -17,6 +18,7 @@ public class BuildingEditor : Editor
     private Color m_CP_Invalid = Color.red;
     private bool m_IsValidPoint;
     MouseCursor m_MouseCursor;
+    private List<Vector3> m_LocalControlPointPositions;
     [SerializeField] private PolyMode m_PolyMode = PolyMode.Hide;
 
     public override void OnInspectorGUI()
@@ -31,15 +33,25 @@ public class BuildingEditor : Editor
                 EditorGUILayout.HelpBox("Click to draw points", MessageType.Info);
                 break;
             case PolyMode.Edit:
+                if (GUILayout.Button("Quit Edit"))
+                {
+                    m_PolyPath.PolyMode = PolyMode.Hide;
+                    SceneView.RepaintAll();
+                }
                 EditorGUILayout.HelpBox("Move points to update the poly building's shape", MessageType.Info);
                 break;
-            case PolyMode.Show:
-                EditorGUILayout.HelpBox("Show", MessageType.Info);
-                break;
             case PolyMode.Hide:
-                EditorGUILayout.HelpBox("Hide", MessageType.Info);
+                if (GUILayout.Button("Edit Poly Building"))
+                {
+                    m_PolyPath.PolyMode = PolyMode.Edit;
+                    SceneView.RepaintAll();
+                }
+                EditorGUILayout.HelpBox("Editing the shape of the building will erase changes made to the building.", MessageType.Warning);
+
                 break;
         }
+
+
 
         EditorGUILayout.BeginHorizontal();
 
@@ -63,6 +75,7 @@ public class BuildingEditor : Editor
     {
         Input();
         Draw();
+        Edit();
     }
 
     private void Input()
@@ -71,18 +84,17 @@ public class BuildingEditor : Editor
             return;
 
         Event currentEvent = Event.current;
-        
-        Ray ray = UnityEditor.HandleUtility.GUIPointToWorldRay(currentEvent.mousePosition);
 
-        float size = UnityEditor.HandleUtility.GetHandleSize(ray.GetPoint(1)) * 0.05f;
+        Ray ray = UHandleUtil.GUIPointToWorldRay(currentEvent.mousePosition);
+        float size = UHandleUtil.GetHandleSize(ray.GetPoint(1)) * 0.05f;
 
         bool didHit = Physics.Raycast(ray, out RaycastHit hit);
 
-        if(didHit)
+        if (didHit)
         {
             Vector3 hp = m_Building.transform.InverseTransformPoint(hit.point);
 
-            if(ValidatePoint(hp))
+            if (ValidatePoint(hp))
             {
                 Handles.color = m_CP_Valid;
                 m_IsValidPoint = true;
@@ -92,7 +104,7 @@ public class BuildingEditor : Editor
                 Handles.color = m_CP_Invalid;
                 m_IsValidPoint = false;
             }
-            
+
         }
         else
         {
@@ -111,15 +123,15 @@ public class BuildingEditor : Editor
             {
                 Vector3 point = m_Building.transform.InverseTransformPoint(hit.point);
 
-                if(m_PolyPath.ControlPointCount >= 3)
+                if (m_PolyPath.ControlPointCount >= 3)
                 {
                     float dis = Vector3.Distance(point, m_PolyPath.GetPositionAt(0));
 
-                    if(dis <= 1)
+                    if (dis <= 1)
                     {
-                        m_PolyMode = PolyMode.Edit;
-                        m_PolyPath.PolyMode = PolyMode.Edit;
-                        m_PolyPath.ReverseControlPoints();
+                        m_PolyMode = PolyMode.Hide;
+                        m_PolyPath.PolyMode = PolyMode.Hide;
+                        m_PolyPath.ValidateControlPoints();
                         m_Building.Initialize().Build();
                         return;
                     }
@@ -143,32 +155,15 @@ public class BuildingEditor : Editor
 
     private void Draw()
     {
-        if (m_PolyPath.ControlPointCount == 0 || m_PolyMode == PolyMode.Hide)
+        if (m_PolyPath.ControlPointCount == 0 || m_PolyMode != PolyMode.Draw)
             return;
 
-        List<Vector3> localPositions = m_PolyPath.LocalPositions(m_Building.transform);
-        float y = localPositions[0].y;
+        DrawHandles();
+        ConnectTheDots();
 
-        for (int i = 0; i < localPositions.Count; i++)
+        if (m_PolyMode == PolyMode.Draw)
         {
-            float size = UnityEditor.HandleUtility.GetHandleSize(m_PolyPath.GetPositionAt(i)) * 0.05f;
-
-            Vector3 pos = Handles.FreeMoveHandle(localPositions[i], Quaternion.identity, size, Vector3.up, Handles.DotHandleCap);
-            pos = new Vector3(pos.x, y, pos.z);
-            Vector3 worldPos = m_Building.transform.TransformPoint(pos);
-
-            if(worldPos != m_PolyPath.GetPositionAt(i))
-            {
-                m_Building.PolyPath.SetPositionAt(i, worldPos);
-            }  
-        }
-
-        if (m_PolyPath.ControlPointCount < 1)
-            return;
-
-        if(m_PolyMode == PolyMode.Draw && m_PolyPath.ControlPointCount > 0)
-        {
-            if(m_IsValidPoint)
+            if (m_IsValidPoint)
             {
                 Handles.color = m_CP_Valid;
             }
@@ -176,17 +171,51 @@ public class BuildingEditor : Editor
             {
                 Handles.color = m_CP_Invalid;
             }
-            Handles.DrawDottedLine(localPositions[^1], m_MousePosition, 1);
+            Handles.DrawDottedLine(m_LocalControlPointPositions[^1], m_MousePosition, 1);
             Handles.color = Color.white;
         }
+    }
 
-        Handles.DrawAAPolyLine(localPositions.ToArray());
+    private void Edit()
+    {
+        if (m_PolyMode != PolyMode.Edit || m_PolyPath.ControlPointCount == 0)
+            return;
+
+        DrawHandles();
+        ConnectTheDots();
 
         if (m_PolyPath.ControlPointCount >= 3 && m_PolyMode != PolyMode.Draw)
         {
-            Handles.DrawAAPolyLine(localPositions[0], localPositions[^1]);
+            Handles.DrawAAPolyLine(m_LocalControlPointPositions[0], m_LocalControlPointPositions[^1]);
         }
 
+    }
+
+    private void DrawHandles()
+    {
+        m_LocalControlPointPositions = m_PolyPath.LocalPositions(m_Building.transform);
+        float y = m_LocalControlPointPositions[0].y;
+
+        for (int i = 0; i < m_LocalControlPointPositions.Count; i++)
+        {
+            float size = UHandleUtil.GetHandleSize(m_PolyPath.GetPositionAt(i)) * 0.05f;
+
+            Vector3 pos = Handles.FreeMoveHandle(m_LocalControlPointPositions[i], Quaternion.identity, size, Vector3.up, Handles.DotHandleCap);
+
+            // This is for when the user is repositioning the handle in the scene.
+            pos = new Vector3(pos.x, y, pos.z);
+            Vector3 worldPos = m_Building.transform.TransformPoint(pos);
+
+            if (worldPos != m_PolyPath.GetPositionAt(i))
+            {
+                m_Building.PolyPath.SetPositionAt(i, worldPos);
+            }
+        }
+    }
+
+    private void ConnectTheDots()
+    {
+        Handles.DrawAAPolyLine(m_LocalControlPointPositions.ToArray());
     }
 
     private bool ValidatePoint(Vector3 point)
@@ -194,9 +223,9 @@ public class BuildingEditor : Editor
         if (m_PolyPath.ControlPointCount == 0)
             return true;
 
-        if(m_PolyPath.ControlPointCount >= 3)
+        if (m_PolyPath.ControlPointCount >= 3)
         {
-            if(Vector3.Distance(point, m_PolyPath.GetPositionAt(0)) <= 1)
+            if (Vector3.Distance(point, m_PolyPath.GetPositionAt(0)) <= 1)
             {
                 return true;
             }
@@ -212,9 +241,9 @@ public class BuildingEditor : Editor
             }
         }
 
-        for (int i = 0; i < m_PolyPath.ControlPointCount-1; i++)
+        for (int i = 0; i < m_PolyPath.ControlPointCount - 1; i++)
         {
-            float dis = HandleUtility.DistancePointLine(point, m_PolyPath.GetPositionAt(i), m_PolyPath.GetPositionAt(i + 1));
+            float dis = UHandleUtil.DistancePointLine(point, m_PolyPath.GetPositionAt(i), m_PolyPath.GetPositionAt(i + 1));
 
             if (dis <= 1)
             {

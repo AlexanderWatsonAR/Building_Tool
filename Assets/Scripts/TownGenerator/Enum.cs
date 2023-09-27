@@ -7,6 +7,13 @@ public enum StoreyElement
 {
     Nothing = 0, Walls = 1, Floor = 2, Pillars = 4, Everything = ~0
 }
+
+[System.Flags]
+public enum WindowElement
+{
+    Nothing = 0, OuterFrame = 1, InnerFrame = 2, Pane = 4, Shutters = 8, Everything = ~0
+}
+
 public enum RoofType
 {
     Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip
@@ -38,5 +45,5 @@ public enum WallElement
 
 public enum PolyMode
 {
-    Draw, Edit, Show, Hide
+    Draw, Edit, Hide
 }

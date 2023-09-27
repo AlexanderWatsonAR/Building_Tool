@@ -14,7 +14,6 @@ public class ControlPoint
     public Vector3 Up => Vector3.up;
     public Vector3 Right => m_Right;
 
-
     public ControlPoint(ControlPoint controlPoint)
     {
         m_Position = controlPoint.Position;

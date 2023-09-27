@@ -20,6 +20,7 @@ public class Building : MonoBehaviour
     [SerializeField] private List<Storey> m_Storeys;
     [SerializeField] private Roof m_Roof;
     [SerializeField] private bool m_HasInitialized;
+    [SerializeField] private MaterialPalette m_Palette;
 
     public bool HasConstructed => m_HasConstructed;
     public ControlPoint[] ControlPoints => m_BuildingPolyPath.ControlPoints.ToArray();
@@ -30,6 +31,7 @@ public class Building : MonoBehaviour
         m_BuildingPolyPath = new PolyPath();
         m_Storeys = GetComponents<Storey>().ToList();
         m_Roof = GetComponent<Roof>();
+        m_Palette = ScriptableObject.CreateInstance<MaterialPalette>().Initialize();
     }
 
     public Building Initialize()
@@ -65,8 +67,6 @@ public class Building : MonoBehaviour
         return this;
     }
 
-
-
     public Building Build()
     {
         transform.DeleteChildren();
@@ -96,7 +96,7 @@ public class Building : MonoBehaviour
     {
         m_HasInitialized = false;
         m_BuildingPolyPath.OnControlPointsChanged -= Building_OnControlPointsChanged;
-        Initialize().Build();
+        Build();
     }
 
     private void Building_OnAnyRoofChange(RoofData data)
@@ -104,7 +104,7 @@ public class Building : MonoBehaviour
         if (m_Roof == null && m_BuildingPolyPath == null)
             return;
         
-        m_Roof.Initialize(data);
+        m_Roof.Initialize(data).BuildFrame();
     }
 
     public void RevertBuilding()

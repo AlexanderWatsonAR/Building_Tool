@@ -19,7 +19,7 @@ public class RoofTileEditor : Editor
         EditorGUILayout.LabelField("Roof Section Layout");
         EditorGUILayout.PropertyField(columns);
         EditorGUILayout.PropertyField(rows);
-        EditorGUILayout.PropertyField(material);
+        //EditorGUILayout.PropertyField(material);
 
         if(serializedObject.ApplyModifiedProperties())
         {

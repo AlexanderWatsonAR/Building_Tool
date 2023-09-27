@@ -6,9 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
-using UnityEngine.UIElements;
 
-[System.Serializable]
 public class Storey : MonoBehaviour
 {
     [SerializeField, HideInInspector] private int m_StoreyID;

@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.ProBuilder;
 using UnityEditor.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
+using System.Linq;
 
 public class PolyBuildingEditorWindow : EditorWindow
 {
@@ -13,7 +14,6 @@ public class PolyBuildingEditorWindow : EditorWindow
     List<ProBuilderMesh> m_MeshesToCombine = new();
 
     [MenuItem("Tools/PolyBuilding Window")]
-
     public static void ShowWindow()
     {
         GetWindow(typeof(PolyBuildingEditorWindow), false, "PolyBuilding");
@@ -33,12 +33,26 @@ public class PolyBuildingEditorWindow : EditorWindow
 
         if(GUILayout.Button("Make Game Ready"))
         {
-            m_MeshesToCombine.Clear();
+            //m_MeshesToCombine.Clear();
             ProBuilderMesh gameReadyBuilding = ProBuilderMesh.Create();
+            gameReadyBuilding.name = m_ActiveBuilding.name + " GR";
 
-            FindProBuilderMeshesInHierarchy(m_ActiveBuilding.transform);
+            List<ProBuilderMesh> allBuildingBits = m_ActiveBuilding.gameObject.GetComponentsInChildren<ProBuilderMesh>().ToList();
+            List<ProBuilderMesh> usableBuildingBits = new List<ProBuilderMesh>();
 
-            CombineMeshes.Combine(m_MeshesToCombine, gameReadyBuilding);
+            usableBuildingBits.Add(gameReadyBuilding);
+
+            foreach (ProBuilderMesh mesh in allBuildingBits)
+            {
+                if(mesh.positions.Count > 0)
+                {
+                    usableBuildingBits.Add(mesh);
+                }
+            }
+
+            //FindProBuilderMeshesInHierarchy(m_ActiveBuilding.transform);
+
+            List<ProBuilderMesh> output = CombineMeshes.Combine(usableBuildingBits, gameReadyBuilding);
             gameReadyBuilding.ToMesh();
             gameReadyBuilding.Refresh();
             
@@ -51,16 +65,11 @@ public class PolyBuildingEditorWindow : EditorWindow
 
         EditorGUI.EndDisabledGroup();
 
-        //GUILayout.Label("Heading", EditorStyles.boldLabel);
-        //GUILayout.Label(text);
-        //toggle = EditorGUILayout.BeginToggleGroup("Settings", toggle);
+        if (GUILayout.Button("Material Presets"))
+        {
+            MaterialPresetWindow.ShowWindow();
 
-        //customText = EditorGUILayout.TextField("Text Field", customText);
-        //slider = EditorGUILayout.IntSlider("Custom Slider", slider, -5, 5);
-
-        //EditorGUILayout.EndToggleGroup();
-
-
+        }
     }
 
     private void FindProBuilderMeshesInHierarchy(Transform parent)
@@ -81,7 +90,11 @@ public class PolyBuildingEditorWindow : EditorWindow
 
     private void OnSelectionChange()
     {
-        m_IsActiveGameObjectABuilding = Selection.activeGameObject.TryGetComponent(out Building building);
+        if (Selection.activeGameObject == null)
+            return;
+
+        if(Selection.activeGameObject.TryGetComponent(out Building building))
+            m_IsActiveGameObjectABuilding = true;
 
         if(m_IsActiveGameObjectABuilding)
             m_ActiveBuilding = building;

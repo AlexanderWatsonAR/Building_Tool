@@ -17,10 +17,12 @@ public class WallEditor : Editor
         SerializedProperty rows = data.FindPropertyRelative("m_Rows");
         SerializedProperty material = data.FindPropertyRelative("m_Material");
 
-        EditorGUILayout.LabelField("Wall Section Layout");
+        EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(columns);
         EditorGUILayout.PropertyField(rows);
-        EditorGUILayout.PropertyField(material);
+        EditorGUI.indentLevel--;
+        //EditorGUILayout.PropertyField(material);
 
 
         if (serializedObject.ApplyModifiedProperties())
