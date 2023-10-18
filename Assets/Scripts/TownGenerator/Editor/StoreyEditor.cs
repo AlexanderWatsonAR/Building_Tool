@@ -16,6 +16,9 @@ public class StoreyEditor : Editor
         serializedObject.Update();
         Storey storey = (Storey)target;
 
+        // Consider this implementation of storey
+        //EditorGUILayout.PropertyField(serializedObject.FindProperty("testList"), new GUIContent("Title"));
+
         SerializedProperty activeElements = serializedObject.FindProperty("m_ActiveElements");
 
         // Wall
@@ -23,7 +26,7 @@ public class StoreyEditor : Editor
         SerializedProperty wallHeight = wallData.FindPropertyRelative("m_Height");
         SerializedProperty wallDepth = wallData.FindPropertyRelative("m_Depth");
         SerializedProperty wallMaterial = wallData.FindPropertyRelative("m_Material");
-        SerializedProperty curvedCorners = serializedObject.FindProperty("m_CurvedCorners");
+        SerializedProperty cornerType = serializedObject.FindProperty("m_CornerType");
         SerializedProperty curvedCornersSides = serializedObject.FindProperty("m_CurvedCornersSides");
         // End Wall
 
@@ -53,7 +56,7 @@ public class StoreyEditor : Editor
                 EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
             }
             EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
-            EditorGUILayout.PropertyField(curvedCorners);
+            EditorGUILayout.PropertyField(cornerType);
             EditorGUILayout.IntSlider(curvedCornersSides, 3, 15, "Sides");
             //EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }

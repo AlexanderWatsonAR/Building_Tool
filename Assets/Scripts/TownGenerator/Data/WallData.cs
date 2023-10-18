@@ -7,13 +7,13 @@ using UnityEngine.ProBuilder;
 [System.Serializable]
 public class WallData
 {
-    [SerializeField] private Vector3[] m_ControlPoints;
+    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, Range(1, 10)] private int m_Columns, m_Rows;
     [SerializeField, Range(1, 100)] private float m_Height;
     [SerializeField, Range(0, 1)] private float m_Depth;
     [SerializeField] Material m_Material;
 
-    public Vector3[] ControlPoints => m_ControlPoints;
+    public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public Material Material => m_Material;
     public float Height => m_Height;
     public float Depth => m_Depth;

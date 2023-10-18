@@ -856,13 +856,14 @@ public static class MeshMaker
         return polygon;
     }
 
-    public static List<IList<Vector3>> SpiltPolygon(IEnumerable<Vector3> polygon, float polygonHeight, float polygonWidth, int columns, int rows)
+    public static List<IList<Vector3>> SpiltPolygon(IEnumerable<Vector3> polygon, float polygonWidth, float polygonHeight, int columns, int rows, Vector3? polygonPosition = null, Vector3? polygonNormal = null)
     {
         List<IList<Vector3>> polygons = new();
 
         Vector3[] points = polygon.ToArray();
-        Vector3 normal = points.CalculatePolygonFaceNormal();
-        Vector3 position = ProMaths.Average(points);
+        Vector3 normal = polygonNormal.HasValue ? polygonNormal.Value : polygon.CalculatePolygonFaceNormal();
+
+        Vector3 position = polygonPosition.HasValue ? polygonPosition.Value : ProMaths.Average(points);
 
         Vector3[] pointsCopy = new Vector3[points.Length];
         Array.Copy(points, pointsCopy, points.Length);
@@ -904,6 +905,7 @@ public static class MeshMaker
             }
         }
 
+        int[] concavePoints = points.GetConcaveIndexPoints();
 
         for (int x = 0; x < columns; x++)
         {
@@ -956,6 +958,31 @@ public static class MeshMaker
 
                 poly = poly.SortPointsClockwise().ToList();
 
+                // if the poly contains a concave point it should be first in the order.
+                if (concavePoints.Length > 0)
+                {
+                    for(int i = 0; i < concavePoints.Length; i++)
+                    {
+                        if(poly.Contains(pointsCopy[i]))
+                        {
+                            int index = poly.FindIndex(x => x == pointsCopy[i]);
+                            poly.RemoveAt(index);
+                            //poly = poly.SortPointsClockwise(pointsCopy[i]).ToList();
+                            //poly.Insert(0, pointsCopy[i]);
+                            //Vector3 centroid = ProMaths.Average(poly);
+                           
+                            List<Vector3> sortedPoly = new List<Vector3>();
+                            sortedPoly.Add(pointsCopy[i]);
+
+                            for(int j = 0; j < poly.Count; j++)
+                            {
+                                Debug.Log(CalculateAngle(sortedPoly[0], poly[j]));
+                            }
+
+                        }
+                    }
+                }
+
                 for (int i = 0; i < poly.Count(); i++)
                 {
                     Vector3 point = poly[i] - position;
@@ -970,6 +997,18 @@ public static class MeshMaker
 
         return polygons;
 
+    }
+
+    private static float CalculateAngle(Vector3 origin, Vector3 point)
+    {
+        Vector3 toPoint = origin.DirectionToTarget(point);
+        float angle = Vector3.SignedAngle(Vector3.forward, toPoint, Vector3.up);
+        if (angle < 0)
+        {
+            angle += 360; // Ensure the angle is positive
+        }
+        
+        return angle;
     }
 
     public static ProBuilderMesh PolyFrameGrid(IEnumerable<Vector3> polyPoints, float polyHeight, float polyWidth, float scale, int columns, int rows, bool flipFace = false)
@@ -1092,7 +1131,7 @@ public static class MeshMaker
         //    }
         //}
 
-        List<IList<Vector3>> holePoints = SpiltPolygon(polyPoints, polyHeight, polyWidth, columns, rows);
+        List<IList<Vector3>> holePoints = SpiltPolygon(polyPoints, polyWidth, polyHeight, columns, rows);
 
         foreach(IList<Vector3> hole in holePoints)
         {
@@ -1142,7 +1181,7 @@ public static class MeshMaker
         {
             int next = points.GetNextControlPoint(i);
 
-            // Fix: This may interect multiple lines of the polygon.
+            // Fix: This may intersect multiple lines of the polygon.
             if (Extensions.DoLinesIntersect(lineStart, lineEnd, points[i], points[next], out Vector3 intersection, false))
             {
                 listOfIntersections.Add(intersection);

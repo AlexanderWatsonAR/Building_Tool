@@ -40,6 +40,7 @@ public class Door : MonoBehaviour
         m_DoorMesh.Refresh();
 
         ProBuilderMesh inside = ProBuilderMesh.Create();
+        inside.transform.SetParent(transform, false);
         inside.CreateShapeFromPolygon(m_Data.ControlPoints, 0, true);
         inside.ToMesh();
         inside.Refresh();
@@ -58,9 +59,11 @@ public class Door : MonoBehaviour
         m_DoorMesh.Refresh();
 
         // Handle
-        float size = m_Data.Height * 0.05f;
+        float size = m_Data.HandleSize * m_Data.HandleScale;
         Vector3[] points = MeshMaker.CreateNPolygon(8, size, size);
         Vector3 position = ProMaths.Average(points);
+
+        // This is aligning the handle points with the door
         Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, m_Data.Forward);
 
         for(int i  = 0; i < points.Length; i++)
@@ -83,8 +86,12 @@ public class Door : MonoBehaviour
         m_DoorHandleMesh.ToMesh();
         m_DoorHandleMesh.Refresh();
 
-        m_DoorHandleMesh.transform.localPosition = m_Data.Centre + (m_Data.Forward * m_Data.Depth);
+        m_DoorHandleMesh.transform.localPosition = m_Data.HandlePosition;
+        //m_DoorHandleMesh.transform.localPosition = m_Data.Centre + (m_Data.Forward * m_Data.Depth);
         m_DoorHandleMesh.LocaliseVertices();
+        m_DoorHandleMesh.Refresh();
+        m_DoorHandleMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
+        m_DoorHandleMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
         m_DoorHandleMesh.Refresh();
 
         return this;

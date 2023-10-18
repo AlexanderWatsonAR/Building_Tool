@@ -7,6 +7,7 @@ using UEColor = UnityEngine.Color;
 using UnityEngine.ProBuilder;
 using System;
 using UnityEngine.Rendering;
+using System.Drawing;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -18,8 +19,11 @@ public class PolyPath
     [SerializeField] private bool m_IsClosedLoop;
     [SerializeField] private PolyMode m_PolyMode;
 
-    public event Action<List<ControlPoint>> OnControlPointsChanged;
+    [SerializeField] private bool m_IsPathValid;
 
+    public bool IsPathValid => m_IsPathValid;
+
+    public event Action<List<ControlPoint>> OnControlPointsChanged;
 
     public PolyPath(bool isClosedLoop = true)
     {
@@ -77,26 +81,54 @@ public class PolyPath
         {
             for (int i = 0; i < localPoints.Count; i++)
             {
+                // Position
+                localPoints[i] += t.localPosition;
+
                 // Scale
                 Vector3 point = localPoints[i] - t.localPosition;
                 Vector3 v = Vector3.Scale(point, t.localScale) + t.localPosition;
-                Vector3 offset = v - localPoints[i];
-                localPoints[i] += offset;
+                Vector3 scaleOffset = v - localPoints[i];
+                localPoints[i] += scaleOffset;
 
                 // Rotation
                 Vector3 localEulerAngles = t.localEulerAngles;
                 Vector3 v1 = Quaternion.Euler(localEulerAngles) * (localPoints[i] - t.localPosition) + t.localPosition;
-                offset = v1 - localPoints[i];
-                localPoints[i] += offset;
-
-                // Position
-                localPoints[i] += t.localPosition;
+                Vector3 rotateOffset = v1 - localPoints[i];
+                localPoints[i] += rotateOffset;
             }
 
             t = t.parent;
         }
 
         return localPoints;
+    }
+
+    public Vector3 LocalPosition(Transform t, Vector3 globalPoint)
+    {
+        Vector3 localPoint = globalPoint;
+
+        //Traverse the parents.
+        while (t != null)
+        {
+            // Position
+            localPoint += t.localPosition;
+
+            // Scale
+            Vector3 point = localPoint - t.localPosition;
+            Vector3 v = Vector3.Scale(point, t.localScale) + t.localPosition;
+            Vector3 scaleOffset = v - localPoint;
+            localPoint += scaleOffset;
+
+            // Rotation
+            Vector3 localEulerAngles = t.localEulerAngles;
+            Vector3 v1 = Quaternion.Euler(localEulerAngles) * (localPoint - t.localPosition) + t.localPosition;
+            Vector3 rotateOffset = v1 - localPoint;
+            localPoint += rotateOffset;
+
+            t = t.parent;
+        }
+
+        return localPoint;
     }
 
     public void ShiftControlPoints()
@@ -120,18 +152,110 @@ public class PolyPath
     {
         m_ControlPoints = controlPoints.ToList();
     }
+
+    public void SetControlPoints(IEnumerable<Vector3> positions)
+    {
+        if (positions.Count() != m_ControlPoints.Count)
+            return;
+
+        Vector3[] points = positions.ToArray();
+
+        for(int i = 0; i < m_ControlPoints.Count; i++)
+        {
+            m_ControlPoints[i].SetPosition(points[i]);
+        }
+    }
+
     public void AddControlPoint(Vector3 position)
     {
         m_ControlPoints.Add(new ControlPoint(position));
     }
 
-    public void ValidateControlPoints()
+    public bool IsValidPath()
     {
-        if (IsClockwise())
-            return;
+        if (!IsClockwise())
+            m_ControlPoints.Reverse(1, m_ControlPoints.Count - 1);
 
-        m_ControlPoints.Reverse();
+        m_IsPathValid = true;
+
+        if (m_ControlPoints.Count < 3)
+        {
+            m_IsPathValid = false;
+            return false;
+        } 
+
+        for(int i = 0; i < m_ControlPoints.Count; i++)
+        {
+            for (int j = 0; j < m_ControlPoints.Count; j++)
+            {
+                if (i == j)
+                    continue;
+
+                if(Vector3.Distance(GetPositionAt(i), GetPositionAt(j)) <= 1)
+                {
+                    m_IsPathValid = false;
+                    return m_IsPathValid;
+                }
+            }
+        }
+
+        for (int i = 0; i < m_ControlPoints.Count; i++)
+        {
+            for (int j = 0; j < m_ControlPoints.Count; j++)
+            {
+                int next = m_ControlPoints.GetNext(j);
+                Vector3 point = GetPositionAt(i);
+                Vector3 lineStart = GetPositionAt(j);
+                Vector3 lineEnd = GetPositionAt(next);
+
+                if (point == lineStart || point == lineEnd)
+                    continue;
+
+                float distanceFromLine = UnityEditor.HandleUtility.DistancePointLine(GetPositionAt(i), GetPositionAt(j), GetPositionAt(next));
+
+                if (distanceFromLine <= 1)
+                {
+                    m_IsPathValid = false;
+                    return m_IsPathValid;
+                }
+
+            }
+        }
+
+        for (int i = 0; i < m_ControlPoints.Count; i++)
+        {
+            for (int j = 0; j < m_ControlPoints.Count; j++)
+            {
+                int previous = m_ControlPoints.GetPrevious(i);
+                int next = m_ControlPoints.GetNext(j);
+
+                Vector3 line1Start = GetPositionAt(previous);
+                Vector3 line1End = GetPositionAt(i);
+                Vector3 line2Start = GetPositionAt(j);
+                Vector3 line2End = GetPositionAt(next);
+
+                if (Extensions.DoLinesIntersect(line1Start, line1End, line2Start, line2End, out Vector3 intersection, false))
+                {
+                    float mag = intersection.magnitude;
+
+                    if(Extensions.ApproximatelyEqual(mag, line1Start.magnitude) ||
+                       Extensions.ApproximatelyEqual(mag, line1End.magnitude) ||
+                       Extensions.ApproximatelyEqual(mag, line2Start.magnitude) ||
+                       Extensions.ApproximatelyEqual(mag, line2End.magnitude))
+                    {
+                        continue;
+                    }
+
+                    m_IsPathValid = false;
+                    return m_IsPathValid;
+                }
+
+            }
+        }
+
+        return m_IsPathValid;
     }
+
 
     public void RemoveControlPointAt(int index)
     {
@@ -145,13 +269,87 @@ public class PolyPath
 
     public void SetPositionAt(int index, Vector3 position)
     {
+        if (index < 0 || index > m_ControlPoints.Count)
+            return;
+
         m_ControlPoints[index].SetPosition(position);
         OnControlPointsChanged?.Invoke(m_ControlPoints);
+
+        m_IsPathValid = true; // Assume the path is valid
+
+        // Check if the path is valid for constructing a building
+        for (int i = 0; i < ControlPointCount; i++)
+        {
+            if (i == index)
+                continue;
+
+            float dis = Vector3.Distance(position, GetPositionAt(i));
+
+            if (dis <= 1)
+            {
+                m_IsPathValid = false;
+                return;
+            }
+        }
+
+        for (int i = 0; i < ControlPointCount - 1; i++)
+        {
+            int next = m_ControlPoints.GetNext(i);
+            if (i == index || next == index)
+                continue;
+
+            float dis = UnityEditor.HandleUtility.DistancePointLine(position, GetPositionAt(i), GetPositionAt(i + 1));
+
+            if (dis <= 1)
+            {
+                m_IsPathValid = false;
+                return;
+            }
+        }
+
+        int previousIndex = m_ControlPoints.GetPrevious(index);
+        int nextIndex = m_ControlPoints.GetNext(index);
+
+        for (int i = 0; i < ControlPointCount; i++)
+        {
+            if (i == index)
+                continue;
+
+            int previous = m_ControlPoints.GetPrevious(i);
+            int next = m_ControlPoints.GetNext(i);
+
+            // Notes on intersection:
+            // the indexed point can be intersecting a line of which it is a part of.
+            // I.E. it can only be between 2 other/different points.
+            Vector3 intersection;
+
+            if (Extensions.DoLinesIntersect(GetPositionAt(previousIndex), GetPositionAt(index), GetPositionAt(i), GetPositionAt(next), out intersection, false))
+            {
+                if (intersection != GetPositionAt(previousIndex) && intersection != position)
+                    m_IsPathValid = false;
+            }
+
+            if (Extensions.DoLinesIntersect(GetPositionAt(index), GetPositionAt(nextIndex), GetPositionAt(i), GetPositionAt(next), out intersection, false))
+            {
+                if (intersection != GetPositionAt(nextIndex) && intersection != position && position != GetPositionAt(previous))
+                    m_IsPathValid = false;
+            }
+        }
     }
 
     public Vector3 GetPositionAt(int index)
     {
         return m_ControlPoints[index].Position;
+    }
+
+    public Vector3 GetLastPosition()
+    {
+        return m_ControlPoints[^1].Position;
+    }
+
+    public Vector3 GetFirstPosition()
+    {
+        return m_ControlPoints[0].Position;
     }
 
     public void CalculateForwards()
@@ -160,7 +358,7 @@ public class PolyPath
             return;
 
         if (!IsClockwise())
-            ValidateControlPoints();
+            IsValidPath();
 
         Vector3[] points = Positions;
 

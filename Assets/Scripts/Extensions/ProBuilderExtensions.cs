@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
+using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using Edge = UnityEngine.ProBuilder.Edge;
 
@@ -25,6 +26,11 @@ public static class ProBuilderExtensions
         {
             proBuilderMesh.faces[0].Reverse();
         }
+    }
+
+    public static ActionResult CreateShapeFromPolygon (this ProBuilderMesh mesh, IEnumerable<ControlPoint> controlPoints, float extrude, bool flipNormals)
+    {
+        return mesh.CreateShapeFromPolygon(controlPoints.GetPositions(), extrude, flipNormals);
     }
 
     public static IEnumerable<int> GetCoincidentVerticesFromPosition(this ProBuilderMesh proBuilderMesh, Vector3 position, float marginForError = 0.001f)
@@ -48,6 +54,18 @@ public static class ProBuilderExtensions
         List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { firstIndex });
 
         return shared;
+    }
+
+    public static IList<int> GetAllDistinctIndices(this ProBuilderMesh proBuilderMesh)
+    {
+        List<int> distinctIndices = new();
+
+        foreach(Face f in proBuilderMesh.faces)
+        {
+            distinctIndices.AddRange(f.distinctIndexes);
+        }
+
+        return distinctIndices;
     }
 
     public static void SetPosition(this ProBuilderMesh proBuilderMesh, int index, Vector3 position)

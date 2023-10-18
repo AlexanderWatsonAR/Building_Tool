@@ -5,6 +5,12 @@ using UnityEngine;
 
 public static class GableData
 {
+    // How the arrays work:
+
+    // "new int[] { 0, 1, 0, 1 }"
+    // In the above example, the first & last points reference the control points / path points of the building.
+    // The middle 2 points reference the one line points.
+
     // Indices
     public static readonly int[][] lIndices = new int[][]
     {
@@ -174,6 +180,22 @@ public static class GableData
         new int[] { 11, 0, 1, 0 },
         new int[] { 3, 6, 6, 4 },
         new int[] { 10, 0, 0, 11 }
+    };
+
+    public static readonly int[][] interYIndices = new int[][]
+    {
+        new int[] { 7, 0, 1, 8},
+        new int[] { 5, 1, 0, 6},
+        new int[] { 8, 1, 2, 9},
+        new int[] { 0, 2, 3, 1},
+        new int[] { 1, 3, 4, 2},
+        new int[] { 3, 4, 3, 4},
+        new int[] { 5, 1, 3, 4},
+        new int[] { 9, 2, 5, 10},
+        new int[] { 11, 5, 2, 0},
+        new int[] { 6, 0, 0, 7},
+        new int[] { 2, 4, 4, 3},
+        new int[] { 10, 5, 5, 11}
     };
 
     // Extensions
@@ -353,4 +375,20 @@ public static class GableData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
+    public static readonly bool[][] interYExtend = new bool[][]
+{
+        new bool[] {  false, true, true, false },
+        new bool[] { false, true, false, true },
+        new bool[] { false, true, false, false },
+        new bool[] {  false, true, false, false },
+        new bool[] {  false, true, false, true },
+        new bool[] {  false, true, true, false },
+        new bool[] {  false, true, false, false },
+        new bool[] {  false, true, false, true },
+        new bool[] {  false, true, true, false },
+        new bool[] {  false, true, false, true },
+        new bool[] {  false, true, false, true },
+        new bool[] {  false, true, false, true }
+};
+
 }

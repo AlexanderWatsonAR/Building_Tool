@@ -5,11 +5,11 @@ using UnityEngine;
 [System.Serializable]
 public class StoreyData
 {
-    [SerializeField] private WallData m_WallData;
-    [SerializeField] private PillarData m_PillarData;
+    [SerializeField] private WallData m_Wall;
+    [SerializeField] private PillarData m_Pillar;
 
-    public WallData WallData => m_WallData;
-    public PillarData PillarData => m_PillarData;
+    public WallData WallData => m_Wall;
+    public PillarData PillarData => m_Pillar;
 
     public StoreyData() : this (new WallData(), new PillarData())
     {
@@ -23,7 +23,7 @@ public class StoreyData
 
     public StoreyData(WallData wallData, PillarData pillarData)
     {
-        m_WallData = wallData;
-        m_PillarData = pillarData;
+        m_Wall = wallData;
+        m_Pillar = pillarData;
     }
 }

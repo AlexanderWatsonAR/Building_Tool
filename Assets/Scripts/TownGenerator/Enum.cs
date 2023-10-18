@@ -14,6 +14,17 @@ public enum WindowElement
     Nothing = 0, OuterFrame = 1, InnerFrame = 2, Pane = 4, Shutters = 8, Everything = ~0
 }
 
+[System.Flags]
+public enum DoorElement
+{
+    Nothing = 0, Door = 1, Frame = 2, Handle = 4, Everything = ~0
+}
+
+public enum FloorMode
+{
+    Hide, Show
+}
+
 public enum RoofType
 {
     Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip
@@ -40,10 +51,15 @@ public enum RoofElement
 
 public enum WallElement
 {
-    Wall, Doorway, Window, Extension, Empty
+    Wall, Doorway, Archway, Window, Extension, Empty
 }
 
 public enum PolyMode
 {
     Draw, Edit, Hide
+}
+
+public enum CornerType
+{
+    Point, Round, Flat
 }

@@ -24,8 +24,8 @@ public class BuildingToolEditor : EditorTool
                 m_IconContent = new GUIContent()
                 {
                     image = EditorGUIUtility.IconContent("Packages/com.unity.probuilder/Content/Icons/Tools/PolyShape/CreatePolyShape.png").image,
-                    text = "Create Poly Building",
-                    tooltip = "Create Poly Building"
+                    text = "Edit Poly Building",
+                    tooltip = "Edit Poly Building"
                 };
             return m_IconContent;
         }
@@ -36,19 +36,6 @@ public class BuildingToolEditor : EditorTool
         if (!(window is SceneView))
             return;
 
-        Building building = (Building)target;
-        PolyMode mode = building.PolyPath.PolyMode;
-
-        switch(mode)
-        {
-            case PolyMode.Draw:
-                m_MouseCursor = MouseCursor.ArrowPlus;
-                break;
-            default:
-                m_MouseCursor = MouseCursor.Arrow;
-            break;
-        }
-
         if (Event.current.type == EventType.Repaint)
         {
             Rect sceneViewRect = window.position;
@@ -56,6 +43,20 @@ public class BuildingToolEditor : EditorTool
             sceneViewRect.y = 0;
             EditorGUIUtility.AddCursorRect(sceneViewRect, m_MouseCursor);
         }
+    }
+
+    public override void OnActivated()
+    {
+        Building building = (Building)target;
+        building.PolyPath.PolyMode = PolyMode.Edit;
+        m_MouseCursor = MouseCursor.ArrowPlus;
+    }
+
+    public override void OnWillBeDeactivated()
+    {
+        Building building = (Building)target;
+        building.PolyPath.PolyMode = PolyMode.Hide;
+        m_MouseCursor = MouseCursor.Arrow;
     }
 
     private void OnEnable()

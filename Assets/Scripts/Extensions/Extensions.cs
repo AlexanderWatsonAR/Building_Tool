@@ -653,7 +653,6 @@ public static class Extensions
 
         return localPoints;
     }
-
     /// <summary>
     /// Assumes polygon is convex. This is for a face with more than 3 points.
     /// </summary>

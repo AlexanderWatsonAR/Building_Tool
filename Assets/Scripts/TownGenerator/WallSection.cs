@@ -112,7 +112,16 @@ public class WallSection : MonoBehaviour
         m_ArchHeight = 1;
 
         m_IsDoorActive = true;
-        m_DoorData = new DoorData(null, m_FaceNormal, right, m_WallDepth, 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, defaultMat);
+        //m_DoorData = new DoorData(null, m_FaceNormal, right, m_WallDepth, 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, defaultMat);
+
+        m_DoorData = new DoorData()
+        {
+            Forward = m_FaceNormal,
+            Right = right,
+            HingePoint = TransformPoint.Left,
+            Material = defaultMat,
+
+        };
 
         m_DoorFrameInsideScale = m_DoorData.Scale;
         m_DoorFrameDepth = m_WallDepth * 1.1f;
@@ -164,10 +173,13 @@ public class WallSection : MonoBehaviour
                     {
                         ProBuilderMesh doorPro = ProBuilderMesh.Create();
                         doorPro.name = "Door";
-                        doorPro.transform.SetParent(transform, true);
+                        doorPro.transform.SetParent(transform, false);
                         Door door = doorPro.AddComponent<Door>();
                         DoorData data = new DoorData(m_DoorData);
-                        data.SetControlPoints(controlPoints);
+                        {
+                            data.ControlPoints = controlPoints.ToArray();
+                        }
+
                         door.Initialize(data).Build();
 
                         // Frame
@@ -177,7 +189,7 @@ public class WallSection : MonoBehaviour
 
                         ProBuilderMesh doorFrameMesh = ProBuilderMesh.Create();
                         doorFrameMesh.name = "Frame";
-                        doorFrameMesh.transform.SetParent(doorPro.transform, true);
+                        doorFrameMesh.transform.SetParent(doorPro.transform, false);
                         doorFrameMesh.CreateShapeFromPolygon(controlPoints, 0, false, holePoints);
                         doorFrameMesh.ToMesh();
                         doorFrameMesh.Refresh();
@@ -210,7 +222,7 @@ public class WallSection : MonoBehaviour
 
                     ProBuilderMesh win = ProBuilderMesh.Create();
                     win.name = "Window";
-                    win.transform.SetParent(transform, true);
+                    win.transform.SetParent(transform, false);
                     Window window = win.AddComponent<Window>();
                     window.Initialize(windowData).Build();
                     Vector3 winPosition = ProMaths.Average(holePoints[0]);
@@ -218,10 +230,10 @@ public class WallSection : MonoBehaviour
                     for (int i = 1; i < holePoints.Count; i++)
                     {
                         Window instanceWin = Instantiate(window);
-                        instanceWin.transform.SetParent(transform, true);
                         Vector3 position = ProMaths.Average(holePoints[i]);
                         instanceWin.WindowData.SetControlPoints(holePoints[i]);
                         instanceWin.SetPosition(position - winPosition);
+                        instanceWin.transform.SetParent(transform, false);
                     }
 
                 }
@@ -345,6 +357,8 @@ public class WallSection : MonoBehaviour
         m_ProBuilderMesh.RebuildWithPositionsAndFaces(mesh.positions, mesh.faces);
         m_ProBuilderMesh.ToMesh();
         m_ProBuilderMesh.Refresh();
+        //m_ProBuilderMesh.CenterPivot(m_ProBuilderMesh.GetAllDistinctIndices().ToArray());
+
         DestroyImmediate(mesh.gameObject);
         return this;
     }

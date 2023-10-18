@@ -7,13 +7,13 @@ using UnityEngine.ProBuilder;
 [System.Serializable]
 public class PillarData
 {
-    [SerializeField] private Vector3[] m_ControlPoints;
-    [SerializeField] private float m_Height;
-    [SerializeField] private float m_Width;
-    [SerializeField] private float m_Depth;
+    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
+    [SerializeField, Range(0, 100)] private float m_Height;
+    [SerializeField, Range(0, 10)] private float m_Width;
+    [SerializeField, Range(0, 10)] private float m_Depth;
     [SerializeField, Range(3, 32)] private int m_Sides;
     [SerializeField] private bool m_IsSmooth;
-    [SerializeField] private Material m_Material;
+    [SerializeField,HideInInspector] private Material m_Material;
 
     public Vector3[] ControlPoints => m_ControlPoints;
     public float Width => m_Width;

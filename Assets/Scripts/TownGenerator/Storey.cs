@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,16 @@ public class Storey : MonoBehaviour
     // Wall
     [SerializeField] private WallData m_WallData; 
     [SerializeField] private Vector3[] m_InsidePoints;
-    [SerializeField] private bool m_CurvedCorners;
+    [SerializeField] private CornerType m_CornerType;
+    //[SerializeField] private bool m_CurvedCorners;
     [SerializeField, Range(3, 15)] private int m_CurvedCornersSides;
+
+    public List<StoreyData> testList = new();
 
     public WallData WallData => m_WallData;
     public int CurvedCornersSides => m_CurvedCornersSides;
-    public bool CurvedCorners => m_CurvedCorners;
+    public CornerType CornerType => m_CornerType;
+    //public bool CurvedCorners => m_CurvedCorners;
     // End Wall
 
     // Floor
@@ -46,7 +51,6 @@ public class Storey : MonoBehaviour
 
 
     List<Vector3[]> m_WallPoints;
-
 
     public Vector3[] InsidePoints
     {
@@ -86,22 +90,22 @@ public class Storey : MonoBehaviour
 
     public Storey Initialize()
     {
-        return Initialize(-1, null, StoreyElement.Everything, new WallData(), false, 4, 0.1f, null, new PillarData());
+        return Initialize(-1, null, StoreyElement.Everything, new WallData(), CornerType.Point, 4, 0.1f, null, new PillarData());
     }
 
     public Storey Initialize(Storey storey)
     {
-        return Initialize(storey.ID, storey.ControlPoints, storey.ActiveElements, storey.WallData, storey.CurvedCorners, storey.CurvedCornersSides, storey.FloorHeight, storey.FloorMaterial, storey.PillarData);
+        return Initialize(storey.ID, storey.ControlPoints, storey.ActiveElements, storey.WallData, storey.CornerType, storey.CurvedCornersSides, storey.FloorHeight, storey.FloorMaterial, storey.PillarData);
     }
 
-    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, StoreyElement activeElements, WallData wallData, bool curvedCorners, int cornerSides, float floorHeight, Material floorMaterial, PillarData pillarData)
+    public Storey Initialize(int id, IEnumerable<ControlPoint> controlPoints, StoreyElement activeElements, WallData wallData, CornerType cornerType, int cornerSides, float floorHeight, Material floorMaterial, PillarData pillarData)
     {
         m_StoreyID = id;
         m_ControlPoints = controlPoints != null ? controlPoints.ToArray() : null;
         m_ActiveElements = activeElements;
 
         m_WallData = wallData;
-        m_CurvedCorners = curvedCorners;
+        m_CornerType = cornerType;
         m_CurvedCornersSides = cornerSides;
 
         m_FloorMaterial = floorMaterial;
@@ -157,11 +161,11 @@ public class Storey : MonoBehaviour
             ProBuilderMesh pillar = ProBuilderMesh.Create();
             pillar.name = "Pillar " + i.ToString();
             pillar.AddComponent<Pillar>().Initialize(m_PillarData).Build();
-            pillar.transform.SetParent(transform, true);
+            pillar.transform.SetParent(pillars.transform, false);
             pillar.transform.localPosition = m_ControlPoints[i].Position;
             int index = m_ControlPoints.GetNext(i);
             pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_ControlPoints[index].Position);
-            pillar.transform.SetParent(pillars.transform, true);
+            
         }
     }
 
@@ -174,7 +178,7 @@ public class Storey : MonoBehaviour
             return;
 
         GameObject corners = new GameObject("Corners");
-        corners.transform.SetParent(transform, true);
+        corners.transform.SetParent(transform, false);
 
         bool isConcave = m_ControlPoints.IsConcave(out int[] concavePoints);
 
@@ -197,6 +201,7 @@ public class Storey : MonoBehaviour
             int numberOfSamples = m_CurvedCornersSides + 1;
 
             Vector3[] cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[current][0] + crossB, intersection };
+            Vector3[] flatPoints = new Vector3[] { cornerPoints[0], cornerPoints[1], cornerPoints[2] };
             Vector3[] curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[1], cornerPoints[3], cornerPoints[2], numberOfSamples);
             Vector3[] points = new Vector3[curveyPoints.Length + 1];
             points[0] = cornerPoints[0];
@@ -208,6 +213,7 @@ public class Storey : MonoBehaviour
                     Extensions.DoLinesIntersect(m_WallPoints[current][0], m_WallPoints[current][1], m_WallPoints[previous][0], m_WallPoints[previous][1], out intersection);
                     cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1], intersection };
                     curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[2], cornerPoints[3], cornerPoints[0], numberOfSamples);
+                    flatPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1] };
                     points[0] = cornerPoints[1];
                 }
 
@@ -220,22 +226,31 @@ public class Storey : MonoBehaviour
 
             points = points.SortPointsClockwise().ToArray();
             cornerPoints = cornerPoints.SortPointsClockwise().ToArray();
+            flatPoints = flatPoints.SortPointsClockwise().ToArray();
 
             ProBuilderMesh post = ProBuilderMesh.Create();
             post.name = "Corner";
-            if (m_CurvedCorners)
+
+            switch (m_CornerType)
             {
-                post.CreateShapeFromPolygon(points, 0, false);
-                Face[] extrudeFaces = post.Extrude(new Face[] { post.faces[0] }, ExtrudeMethod.FaceNormal, m_WallData.Height);
-                //Smoothing.ApplySmoothingGroups(post, extrudeFaces, 360);
+                case CornerType.Point:
+                    post.CreateShapeFromPolygon(cornerPoints, m_WallData.Height, false);
+                    break;
+                case CornerType.Round:
+                    post.CreateShapeFromPolygon(points, 0, false);
+                    Face[] extrudeFaces = post.Extrude(new Face[] { post.faces[0] }, ExtrudeMethod.FaceNormal, m_WallData.Height);
+                    //Smoothing.ApplySmoothingGroups(post, extrudeFaces, 360);
+                    break;
+                case CornerType.Flat:
+                    post.CreateShapeFromPolygon(flatPoints, m_WallData.Height, false);
+                    break;
             }
-            else
-                post.CreateShapeFromPolygon(cornerPoints, m_WallData.Height, false);
+                
             post.GetComponent<Renderer>().sharedMaterial = m_WallData.Material;
             post.ToMesh();
             post.Refresh();
 
-            post.transform.SetParent(corners.transform, true);
+            post.transform.SetParent(corners.transform, false);
 
         }
     }
@@ -248,7 +263,7 @@ public class Storey : MonoBehaviour
         Vector3 h = m_WallData.Height * Vector3.up;
 
         GameObject walls = new GameObject("Walls");
-        walls.transform.SetParent(transform, true);
+        walls.transform.SetParent(transform, false);
 
         // Construct the walls 
         for (int i = 0; i < m_ControlPoints.Length; i++)
@@ -302,12 +317,17 @@ public class Storey : MonoBehaviour
             m_WallPoints.Add(new Vector3[] { bottomLeft, bottomRight });
 
             Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
+            
 
-            GameObject wall = new GameObject("Wall " + i.ToString(), typeof(Wall));
-            wall.transform.SetParent(walls.transform, true);
+            ProBuilderMesh wall = ProBuilderMesh.Create();
+            wall.name = "Wall " + i.ToString();
+            wall.AddComponent<Wall>();
+            wall.transform.SetParent(walls.transform, false);
             WallData data = new WallData(m_WallData);
             data.SetControlPoints(points);
             wall.GetComponent<Wall>().Initialize(data).Build();
+
+            
         }
     }
 
@@ -318,16 +338,21 @@ public class Storey : MonoBehaviour
 
         ProBuilderMesh floor = ProBuilderMesh.Create();
         floor.name = "Floor";
-        floor.transform.SetParent(transform, false);
-        Vector3[] positions = PolygonRecognition.GetPositions(m_ControlPoints);
-        for (int i = 0; i < positions.Length; i++)
+
+        ControlPoint[] points = new ControlPoint[m_ControlPoints.Length];
+        Array.Copy(m_ControlPoints, points, points.Length);
+
+        for (int i = 0; i < points.Length; i++)
         {
-            positions[i] += m_ControlPoints[i].Forward * (m_WallData.Depth * 0.5f);
+            points[i] += points[i].Forward * (m_WallData.Depth * 0.5f);
         }
-        floor.CreateShapeFromPolygon(positions, m_FloorHeight, false);
-        floor.GetComponent<Renderer>().sharedMaterial = m_FloorMaterial;
-        floor.ToMesh();
-        floor.Refresh();
+
+
+        floor.AddComponent<Floor>().Initialize(new FloorData() { ControlPoints = points }).Build();
+
+        floor.transform.SetParent(transform, false);
+        floor.transform.localPosition = Vector3.zero;
+        
     }
 
     private bool IsElementActive(StoreyElement storeyElement)

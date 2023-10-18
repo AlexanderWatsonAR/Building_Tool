@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UHandleUtil = UnityEditor.HandleUtility;
-using static UnityEditor.PlayerSettings;
-using UnityEditor.PackageManager.UI;
+using HandleUtil = UnityEditor.HandleUtility;
+using UnityEditor.ProBuilder;
+using UnityEngine.Rendering;
+using System.Linq;
 
 // Add Poly path stuff
 [CustomEditor(typeof(Building))]
@@ -18,8 +19,12 @@ public class BuildingEditor : Editor
     private Color m_CP_Invalid = Color.red;
     private bool m_IsValidPoint;
     MouseCursor m_MouseCursor;
-    private List<Vector3> m_LocalControlPointPositions;
+    private Vector3[] m_GlobalControlPointPositions;
     [SerializeField] private PolyMode m_PolyMode = PolyMode.Hide;
+
+    [SerializeField] private bool m_IsValidPolygon;
+    [SerializeField] private bool m_IsAHandleSelected;
+    [SerializeField] private int m_SelectedHandle = -1;
 
     public override void OnInspectorGUI()
     {
@@ -35,9 +40,24 @@ public class BuildingEditor : Editor
             case PolyMode.Edit:
                 if (GUILayout.Button("Quit Edit"))
                 {
-                    m_PolyPath.PolyMode = PolyMode.Hide;
+                    QuitEdit();
                     SceneView.RepaintAll();
                 }
+
+                EditorGUI.BeginDisabledGroup(m_SelectedHandle == -1);
+
+                if (GUILayout.Button("Remove Point"))
+                {
+                    m_Building.PolyPath.RemoveControlPointAt(m_SelectedHandle-1);
+                    if(m_Building.PolyPath.IsValidPath())
+                    {
+                        m_Building.Rebuild();
+                    }
+                    SceneView.RepaintAll();
+                }
+
+                EditorGUI.EndDisabledGroup();
+
                 EditorGUILayout.HelpBox("Move points to update the poly building's shape", MessageType.Info);
                 break;
             case PolyMode.Hide:
@@ -51,7 +71,7 @@ public class BuildingEditor : Editor
                 break;
         }
 
-
+        EditorGUI.BeginDisabledGroup(!m_Building.isActiveAndEnabled);
 
         EditorGUILayout.BeginHorizontal();
 
@@ -66,6 +86,8 @@ public class BuildingEditor : Editor
         }
 
         EditorGUILayout.EndHorizontal();
+
+        EditorGUI.EndDisabledGroup();
 
         serializedObject.ApplyModifiedProperties();
     }
@@ -85,16 +107,18 @@ public class BuildingEditor : Editor
 
         Event currentEvent = Event.current;
 
-        Ray ray = UHandleUtil.GUIPointToWorldRay(currentEvent.mousePosition);
-        float size = UHandleUtil.GetHandleSize(ray.GetPoint(1)) * 0.05f;
+        Ray ray = HandleUtil.GUIPointToWorldRay(currentEvent.mousePosition);
+        float size = HandleUtil.GetHandleSize(ray.GetPoint(1)) * 0.05f;
 
-        bool didHit = Physics.Raycast(ray, out RaycastHit hit);
+        // Map the free move handle position to the XZ plane.
+        Plane plane = new Plane(Vector3.up, Vector3.zero); // XZ plane (upward)
+        bool didHit = plane.Raycast(ray, out float enter);
+        Vector3 hit = ray.GetPoint(enter);
+        //bool didHit = Physics.Raycast(ray, out RaycastHit hit);
 
         if (didHit)
         {
-            Vector3 hp = m_Building.transform.InverseTransformPoint(hit.point);
-
-            if (ValidatePoint(hp))
+            if (ValidatePoint(hit))
             {
                 Handles.color = m_CP_Valid;
                 m_IsValidPoint = true;
@@ -112,7 +136,13 @@ public class BuildingEditor : Editor
             m_IsValidPoint = false;
         }
 
-        Handles.DotHandleCap(-1, ray.GetPoint(1), Quaternion.identity, size, currentEvent.type);
+        Vector3 sceneCamPos = SceneView.lastActiveSceneView.camera.transform.position;
+        Vector3 handlePos = ray.GetPoint(1);
+
+        Quaternion handleRot = Quaternion.LookRotation(handlePos.DirectionToTarget(sceneCamPos));
+
+        BuildingHandles.TestSolidCircleHandleCap(-1, handlePos, handleRot, size, currentEvent.type);
+
         Handles.color = Color.white;
 
         m_MousePosition = ray.GetPoint(1);
@@ -121,30 +151,24 @@ public class BuildingEditor : Editor
         {
             if (didHit)
             {
-                Vector3 point = m_Building.transform.InverseTransformPoint(hit.point);
-
                 if (m_PolyPath.ControlPointCount >= 3)
                 {
-                    float dis = Vector3.Distance(point, m_PolyPath.GetPositionAt(0));
+                    float dis = Vector3.Distance(hit, m_PolyPath.GetPositionAt(0));
 
                     if (dis <= 1)
                     {
                         m_PolyMode = PolyMode.Hide;
                         m_PolyPath.PolyMode = PolyMode.Hide;
-                        m_PolyPath.ValidateControlPoints();
+                        m_PolyPath.IsValidPath();
                         m_Building.Initialize().Build();
+                        
                         return;
                     }
                 }
 
-                if (ValidatePoint(point))
+                if (m_IsValidPoint)
                 {
-                    m_PolyPath.AddControlPoint(point);
-                    m_IsValidPoint = true;
-                }
-                else
-                {
-                    m_IsValidPoint = false;
+                    m_PolyPath.AddControlPoint(hit);
                 }
             }
         }
@@ -163,15 +187,8 @@ public class BuildingEditor : Editor
 
         if (m_PolyMode == PolyMode.Draw)
         {
-            if (m_IsValidPoint)
-            {
-                Handles.color = m_CP_Valid;
-            }
-            else
-            {
-                Handles.color = m_CP_Invalid;
-            }
-            Handles.DrawDottedLine(m_LocalControlPointPositions[^1], m_MousePosition, 1);
+            Handles.color = m_IsValidPoint ? m_CP_Valid : m_CP_Invalid;
+            Handles.DrawDottedLine(m_GlobalControlPointPositions[^1], m_MousePosition, 1);
             Handles.color = Color.white;
         }
     }
@@ -181,41 +198,75 @@ public class BuildingEditor : Editor
         if (m_PolyMode != PolyMode.Edit || m_PolyPath.ControlPointCount == 0)
             return;
 
+        Handles.color = m_Building.PolyPath.IsPathValid ? Color.white : m_CP_Invalid;
+        
+
         DrawHandles();
         ConnectTheDots();
 
         if (m_PolyPath.ControlPointCount >= 3 && m_PolyMode != PolyMode.Draw)
         {
-            Handles.DrawAAPolyLine(m_LocalControlPointPositions[0], m_LocalControlPointPositions[^1]);
+            Handles.DrawAAPolyLine(m_GlobalControlPointPositions[0], m_GlobalControlPointPositions[^1]);
         }
 
     }
 
     private void DrawHandles()
     {
-        m_LocalControlPointPositions = m_PolyPath.LocalPositions(m_Building.transform);
-        float y = m_LocalControlPointPositions[0].y;
+        Vector3[] controlPoints = m_Building.ControlPoints.GetPositions();
+        m_GlobalControlPointPositions = m_Building.transform.TransformPoints(controlPoints).ToArray();
 
-        for (int i = 0; i < m_LocalControlPointPositions.Count; i++)
+        Vector3 centre = UnityEngine.ProBuilder.Math.Average(m_GlobalControlPointPositions);
+
+        for (int i = 0; i < m_GlobalControlPointPositions.Length; i++)
         {
-            float size = UHandleUtil.GetHandleSize(m_PolyPath.GetPositionAt(i)) * 0.05f;
+            float size = HandleUtil.GetHandleSize(m_PolyPath.GetPositionAt(i)) * 0.05f;
 
-            Vector3 pos = Handles.FreeMoveHandle(m_LocalControlPointPositions[i], Quaternion.identity, size, Vector3.up, Handles.DotHandleCap);
+            Color handleColour = Handles.color;
+            Handles.color = m_SelectedHandle == i+1 ? Color.yellow : handleColour; 
+            Vector3 globalPoint = Handles.FreeMoveHandle(i+1, m_GlobalControlPointPositions[i], Quaternion.identity, size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
 
-            // This is for when the user is repositioning the handle in the scene.
-            pos = new Vector3(pos.x, y, pos.z);
-            Vector3 worldPos = m_Building.transform.TransformPoint(pos);
+            Handles.color = handleColour;
+            Vector3 localPoint = m_Building.transform.InverseTransformPoint(globalPoint);
 
-            if (worldPos != m_PolyPath.GetPositionAt(i))
+            // How we detect if the control point has changed.
+            if (localPoint != m_PolyPath.GetPositionAt(i))
             {
-                m_Building.PolyPath.SetPositionAt(i, worldPos);
+                // Map the free move handle position to the XZ plane.
+                Plane plane = new Plane(Vector3.up, Vector3.zero); // XZ plane (upward)
+                Ray ray = HandleUtil.GUIPointToWorldRay(Event.current.mousePosition);
+
+                if (plane.Raycast(ray, out float enter))
+                {
+                    Vector3 rayPoint = ray.GetPoint(enter);
+                    Vector3 localRay = m_Building.transform.InverseTransformPoint(rayPoint);
+
+                    m_Building.PolyPath.SetPositionAt(i, rayPoint);
+                   // Debug.Log("Handle: " + i + " Position: " + localRay);
+                }
+
             }
         }
+
+        //if (m_PolyMode != PolyMode.Edit)
+        //    return;
+
+        //Vector3 closestPoint = HandleUtil.ClosestPointToPolyLine(m_GlobalControlPointPositions);
+
+        //Handles.DotHandleCap(-1, closestPoint, Quaternion.identity, 0.1f, Event.current.type);
+
+       // m_IsAHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_GlobalControlPointPositions.Length +1? true : false;
+
+        if(GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_GlobalControlPointPositions.Length + 1)
+        {
+            m_SelectedHandle = GUIUtility.hotControl;
+        }
+
     }
 
     private void ConnectTheDots()
     {
-        Handles.DrawAAPolyLine(m_LocalControlPointPositions.ToArray());
+        Handles.DrawAAPolyLine(m_GlobalControlPointPositions.ToArray());
     }
 
     private bool ValidatePoint(Vector3 point)
@@ -243,10 +294,23 @@ public class BuildingEditor : Editor
 
         for (int i = 0; i < m_PolyPath.ControlPointCount - 1; i++)
         {
-            float dis = UHandleUtil.DistancePointLine(point, m_PolyPath.GetPositionAt(i), m_PolyPath.GetPositionAt(i + 1));
+            float dis = HandleUtil.DistancePointLine(point, m_PolyPath.GetPositionAt(i), m_PolyPath.GetPositionAt(i + 1));
 
             if (dis <= 1)
             {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < m_PolyPath.ControlPointCount; i++)
+        {
+            int next = m_PolyPath.ControlPoints.GetNext(i);
+
+            if (Extensions.DoLinesIntersect(m_PolyPath.GetLastPosition(), point, m_PolyPath.GetPositionAt(i), m_PolyPath.GetPositionAt(next), out Vector3 intersection, false))
+            {
+                if (intersection == m_PolyPath.GetLastPosition())
+                    return true;
+
                 return false;
             }
         }
@@ -260,18 +324,29 @@ public class BuildingEditor : Editor
         m_PolyPath = m_Building.PolyPath;
         m_PolyPathProp = serializedObject.FindProperty("m_BuildingPolyPath");
     }
-
-    private void OnSelectionChanged()
+    private void OnDisable()
     {
-        Selection.activeGameObject = m_Building.gameObject;
+        QuitEdit();
 
-        EditorApplication.delayCall += () =>
-        {
-            Selection.activeGameObject = m_Building.gameObject;
-
-            if (Selection.activeGameObject != null)
-                Debug.Log(Selection.activeGameObject.name);
-
-        };
     }
+
+    private void QuitEdit()
+    {
+        m_PolyPath.PolyMode = PolyMode.Hide;
+        m_SelectedHandle = -1;
+    }
+
+    //private void OnSelectionChanged()
+    //{
+    //    Selection.activeGameObject = m_Building.gameObject;
+
+    //    EditorApplication.delayCall += () =>
+    //    {
+    //        Selection.activeGameObject = m_Building.gameObject;
+
+    //        if (Selection.activeGameObject != null)
+    //            Debug.Log(Selection.activeGameObject.name);
+
+    //    };
+    //}
 }

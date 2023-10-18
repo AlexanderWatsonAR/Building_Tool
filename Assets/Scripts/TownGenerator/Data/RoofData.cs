@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 [System.Serializable]
@@ -53,5 +54,14 @@ public class RoofData
     public void SetActive(bool isActive = true)
     {
         m_IsActive = isActive;
+    }
+
+    public bool IsGable
+    {
+        get
+        {
+            return m_RoofType == RoofType.Gable || m_RoofType == RoofType.Dormer || m_RoofType == RoofType.MShaped;
+        }
+        
     }
 }

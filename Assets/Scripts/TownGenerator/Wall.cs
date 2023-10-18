@@ -52,8 +52,8 @@ public class Wall : MonoBehaviour
                 ProBuilderMesh wallSection = ProBuilderMesh.Create();
                 wallSection.name = "Wall Section " + i.ToString() + " " + j.ToString();
                 wallSection.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
-                
                 wallSection.transform.SetParent(transform, false);
+                
                 wallSection.AddComponent<WallSection>().Initialize(points, m_Data.Depth).Build();
             }
         }

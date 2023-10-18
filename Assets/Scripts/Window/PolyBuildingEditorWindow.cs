@@ -6,12 +6,12 @@ using UnityEngine.ProBuilder;
 using UnityEditor.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class PolyBuildingEditorWindow : EditorWindow
 {
     Building m_ActiveBuilding;
     private bool m_IsActiveGameObjectABuilding;
-    List<ProBuilderMesh> m_MeshesToCombine = new();
 
     [MenuItem("Tools/PolyBuilding Window")]
     public static void ShowWindow()
@@ -23,39 +23,19 @@ public class PolyBuildingEditorWindow : EditorWindow
     {
         if(GUILayout.Button("New Poly Building"))
         {
-            GameObject building = new GameObject("Poly Building", typeof(Building));
+            ProBuilderMesh building = ProBuilderMesh.Create();
+            building.name = "Poly Building";
+            building.AddComponent<Building>();
             Building build = building.GetComponent<Building>();
             build.PolyPath.PolyMode = PolyMode.Draw;
-            Selection.activeGameObject = building;
+            Selection.activeGameObject = building.gameObject;
         }
 
         EditorGUI.BeginDisabledGroup(!m_IsActiveGameObjectABuilding);
 
-        if(GUILayout.Button("Make Game Ready"))
+        if(GUILayout.Button("Merge"))
         {
-            //m_MeshesToCombine.Clear();
-            ProBuilderMesh gameReadyBuilding = ProBuilderMesh.Create();
-            gameReadyBuilding.name = m_ActiveBuilding.name + " GR";
-
-            List<ProBuilderMesh> allBuildingBits = m_ActiveBuilding.gameObject.GetComponentsInChildren<ProBuilderMesh>().ToList();
-            List<ProBuilderMesh> usableBuildingBits = new List<ProBuilderMesh>();
-
-            usableBuildingBits.Add(gameReadyBuilding);
-
-            foreach (ProBuilderMesh mesh in allBuildingBits)
-            {
-                if(mesh.positions.Count > 0)
-                {
-                    usableBuildingBits.Add(mesh);
-                }
-            }
-
-            //FindProBuilderMeshesInHierarchy(m_ActiveBuilding.transform);
-
-            List<ProBuilderMesh> output = CombineMeshes.Combine(usableBuildingBits, gameReadyBuilding);
-            gameReadyBuilding.ToMesh();
-            gameReadyBuilding.Refresh();
-            
+            MergeWindow.ShowWindow();
         }
 
         if (GUILayout.Button("Export"))
@@ -69,22 +49,6 @@ public class PolyBuildingEditorWindow : EditorWindow
         {
             MaterialPresetWindow.ShowWindow();
 
-        }
-    }
-
-    private void FindProBuilderMeshesInHierarchy(Transform parent)
-    {
-        if (parent.TryGetComponent(out ProBuilderMesh mesh))
-        {
-            m_MeshesToCombine.Add(mesh);
-        }
-
-        for (int i = 0; i < parent.childCount; i++)
-        {
-            Transform child = parent.GetChild(i);
-
-            // Recursively traverse the child's hierarchy
-            FindProBuilderMeshesInHierarchy(child);
         }
     }
 

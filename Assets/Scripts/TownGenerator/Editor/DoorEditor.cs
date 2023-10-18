@@ -47,10 +47,11 @@ public class DoorEditor : Editor
     private void Draw()
     {
         serializedObject.Update();
+        Door door = target as Door;
         SerializedProperty data = serializedObject.FindProperty("m_Data");
         SerializedProperty hingeOffset = data.FindPropertyRelative("m_HingeOffset");
-        Vector3 position = Handles.DoPositionHandle(m_HingePosition + hingeOffset.vector3Value, m_HingeRotation);
-        hingeOffset.vector3Value = position - m_HingePosition;
+        Vector3 position = Handles.DoPositionHandle(door.transform.TransformPoint(m_HingePosition + hingeOffset.vector3Value), m_HingeRotation);
+        hingeOffset.vector3Value = door.transform.InverseTransformPoint(position - m_HingePosition);
         serializedObject.ApplyModifiedProperties();
     }
 

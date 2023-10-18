@@ -153,7 +153,7 @@ public class Window : MonoBehaviour
         if(m_Data.AreShuttersActive)
         {
             // Shutters
-            List<IList<Vector3>> shutterVertices = MeshMaker.SpiltPolygon(points, m_Height, m_Width, 2, 1);
+            List<IList<Vector3>> shutterVertices = MeshMaker.SpiltPolygon(points, m_Width, m_Height, 2, 1);
 
             foreach(IList<Vector3> shutter in shutterVertices)
             {
@@ -165,8 +165,28 @@ public class Window : MonoBehaviour
 
             Vector3 right = Vector3.Cross(m_Normal, Vector3.up);
 
-            DoorData rightShutterData = new DoorData(shutterVertices[0], m_Normal, right, m_Data.ShuttersDepth, 1, TransformPoint.Right, Vector3.zero, -Vector3.up * m_Data.ShuttersAngle, m_Data.ShuttersMaterial);
-            DoorData leftShutterData = new DoorData(shutterVertices[1], m_Normal, right, m_Data.ShuttersDepth, 1, TransformPoint.Left, Vector3.zero, Vector3.up * m_Data.ShuttersAngle, m_Data.ShuttersMaterial);
+            DoorData rightShutterData = new DoorData()
+            {
+                ControlPoints = shutterVertices[0].ToArray(),
+                Forward = m_Normal,
+                Right = right,
+                Depth = m_Data.ShuttersDepth,
+                Scale = 1,
+                HingePoint = TransformPoint.Right,
+                HingeEulerAngles = -Vector3.up * m_Data.ShuttersAngle,
+                Material = m_Data.ShuttersMaterial
+            };
+
+            DoorData leftShutterData = new DoorData()
+            {
+                ControlPoints = shutterVertices[1].ToArray(),
+                Forward = m_Normal,
+                Right = right,
+                Depth = m_Data.ShuttersDepth,
+                Scale = 1,
+                HingeEulerAngles = Vector3.up * m_Data.ShuttersAngle,
+                Material = m_Data.ShuttersMaterial
+            };
 
             m_RightShutter = ProBuilderMesh.Create();
             m_RightShutter.name = "Right shutter";
