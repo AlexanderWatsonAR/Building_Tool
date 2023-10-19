@@ -52,14 +52,15 @@ public class FloorEditor : Editor
 
     private void BuildWalls()
     {
+        // Indices are + 1 out
         int[] indices = m_SelectedHandles.ToArray();
         float width = 0.1f;
 
         // for 3 selected handles.
         //for(int i = 0; i < indices.Length-1; i++)
         {
-            Vector3 wallAStart = m_Floor.Split[indices[0]];
-            Vector3 wallAEnd = m_Floor.Split[indices[1]];
+            Vector3 wallAStart = m_Floor.Split[indices[0]-1];
+            Vector3 wallAEnd = m_Floor.Split[indices[1]-1];
 
             Vector3 dirA = wallAStart.DirectionToTarget(wallAEnd);
 
@@ -74,7 +75,7 @@ public class FloorEditor : Editor
             wallAPoints[3] += wallADir * -width; //br
 
             Vector3 wallBStart = wallAEnd;
-            Vector3 wallBEnd = m_Floor.Split[indices[2]];
+            Vector3 wallBEnd = m_Floor.Split[indices[2] - 1];
 
             Vector3 dirB = wallBStart.DirectionToTarget(wallBEnd);
 
@@ -90,23 +91,28 @@ public class FloorEditor : Editor
 
             if(Extensions.DoLinesIntersect(wallAPoints[0], wallAPoints[3], wallBPoints[3], wallBPoints[0], out Vector3 first))
             {
-                Debug.Log("First intersection found");
+                //Debug.Log("First intersection found");
             }
 
             if (Extensions.DoLinesIntersect(wallAPoints[1], wallAPoints[2], wallBPoints[2], wallBPoints[1], out Vector3 second))
             {
-                Debug.Log("Second intersection found");
+               // Debug.Log("Second intersection found");
             }
 
             if (Extensions.DoLinesIntersect(wallAPoints[1], wallAPoints[2], wallBPoints[3], wallBPoints[0], out Vector3 third))
             {
-                Debug.Log("Third intersection found");
+               // Debug.Log("Third intersection found");
             }
 
             if (Extensions.DoLinesIntersect(wallAPoints[0], wallAPoints[3], wallBPoints[1], wallBPoints[2], out Vector3 fourth))
             {
-                Debug.Log("Fourth intersection found");
+               // Debug.Log("Fourth intersection found");
             }
+
+            //float dot = Vector3.Dot(dirA, dirB);
+            //float rads = Mathf.Acos(dot);
+            //float degrees = Mathf.Rad2Deg * rads;
+            //Debug.Log(degrees);
 
             Vector3[] cornerPoints = new Vector3[] { first, second, third, fourth };
 
