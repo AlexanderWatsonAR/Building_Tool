@@ -14,9 +14,9 @@ public class WallData
     [SerializeField] Material m_Material;
 
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
-    public Material Material => m_Material;
-    public float Height => m_Height;
-    public float Depth => m_Depth;
+    public Material Material { get { return m_Material; } set { m_Material = value; } }
+    public float Height { get { return m_Height; } set { m_Height = value; } }
+    public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public int Columns => m_Columns;
     public int Rows => m_Rows;
 
@@ -37,6 +37,29 @@ public class WallData
         m_Depth = depth;
         m_Material = material;
     }
+
+    public Vector3[] BottomPoints()
+    {
+        int bl = 0;
+        int tl = 1;
+        int tr = 2;
+        int br = 3;
+
+        Vector3[] bottom = new Vector3[4];
+
+        bottom[bl] = m_ControlPoints[bl];
+        bottom[br] = m_ControlPoints[br];
+
+        Vector3 dir = bottom[bl].DirectionToTarget(bottom[br]);
+        Vector3 forward = Vector3.Cross(Vector3.up, dir);
+
+        bottom[tl] = bottom[bl] + (forward * m_Depth);
+        bottom[tr] = bottom[br] + (forward * m_Depth);
+
+        return bottom;
+
+    }
+
     public void SetControlPoints(IEnumerable<Vector3> controlPoints)
     {
         m_ControlPoints = controlPoints.ToArray();

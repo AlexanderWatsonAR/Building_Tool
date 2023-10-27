@@ -76,6 +76,9 @@ public static class PolygonRecognition
                 float rads = Mathf.Acos(dot);
                 float degrees = Mathf.Rad2Deg * rads;
 
+                // idea: try using this instead. 
+                //float angle = Vector3.Angle(dir, keyDirection);
+
                 if (degrees > angle)
                 {
                     pathPoints.Add(i);

@@ -6,6 +6,8 @@ using UnityEngine.ProBuilder;
 using Unity.VisualScripting;
 using System.Linq;
 using UnityEngine.ProBuilder.MeshOperations;
+using System.ComponentModel.Composition.Hosting;
+using log4net.Util;
 
 [CustomEditor(typeof(Floor))]
 public class FloorEditor : Editor
@@ -17,12 +19,21 @@ public class FloorEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        DrawDefaultInspector();
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        SerializedProperty columns = data.FindPropertyRelative("m_Columns");
+        SerializedProperty rows = data.FindPropertyRelative("m_Rows");
+
+        EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(columns);
+        EditorGUILayout.PropertyField(rows);
+        EditorGUI.indentLevel--;
 
         // Add in controls for generating walls.
         // Maybe a button? or drop down?
 
-        if(m_Mode == FloorMode.Hide)
+        if (m_Mode == FloorMode.Hide)
         {
             if (GUILayout.Button("Add a Wall"))
             {
@@ -32,13 +43,14 @@ public class FloorEditor : Editor
         }
         if(m_Mode == FloorMode.Show)
         {
-            bool isDisabled = m_SelectedHandles.Count != 3;
+            bool isDisabled = m_SelectedHandles.Count < 2;
 
             EditorGUI.BeginDisabledGroup(isDisabled);
 
             if (GUILayout.Button("Build Wall"))
             {
-                BuildWalls();
+                Build();
+               // BuildWalls();
                 m_SelectedHandles.Clear();
                 m_Mode = FloorMode.Hide;
                 SceneView.RepaintAll();
@@ -47,6 +59,156 @@ public class FloorEditor : Editor
             EditorGUI.EndDisabledGroup();
         }
 
+        if(serializedObject.ApplyModifiedProperties())
+        {
+            m_Floor.Build();
+        }
+
+    }
+
+    private ControlPoint[] CalculateControlPoints()
+    {
+        int[] indices = m_SelectedHandles.ToArray();
+
+        ControlPoint[] controlPoints = new ControlPoint[indices.Length];
+
+        for(int i = 0; i < controlPoints.Length; i++)
+        {
+            controlPoints[i] = new ControlPoint(m_Floor.Split[indices[i] - 1]);
+        }
+
+        controlPoints[^1].SetForward(Vector3.Cross(controlPoints[^2].DirectionToTarget(controlPoints[^1]), Vector3.up));
+
+        for (int i = 0; i < controlPoints.Length -1; i++)
+        {
+            int next = i + 1;
+
+            controlPoints[i].SetForward(Vector3.Cross(controlPoints[i].DirectionToTarget(controlPoints[next]), Vector3.up));
+        }
+
+        return controlPoints;
+    }
+
+    private void Build()
+    {
+        ControlPoint[] controlPoints = CalculateControlPoints();
+
+        float depth = 0.1f;
+        float height = 3;
+
+        int bl = 0;
+        int tl = 1;
+        int tr = 2;
+        int br = 3;
+
+        List<Vector3> startEndPoints = new List<Vector3>();
+        startEndPoints.Add(controlPoints[0].Position + (controlPoints[0].Forward * depth));
+
+        Vector3[][] corners = new Vector3[controlPoints.Length][];
+        bool[] isRightCorner = new bool[controlPoints.Length];
+
+        for(int i = 1; i < controlPoints.Length-1; i++)
+        {
+            int previous = i - 1;
+            int next = i + 1;
+
+            bool isRight = Vector3.Cross(controlPoints[previous].DirectionToTarget(controlPoints[i]), controlPoints[previous].DirectionToTarget(controlPoints[next])).z > 0;
+
+            isRightCorner[i] = isRight;
+
+            Vector3 dirA = Vector3.Cross(Vector3.up, controlPoints[previous].DirectionToTarget(controlPoints[i]));
+            Vector3 dirB = Vector3.Cross(Vector3.up, controlPoints[i].DirectionToTarget(controlPoints[next]));
+            Vector3 dirC = controlPoints[next].DirectionToTarget(controlPoints[i]);
+            Vector3 dirD = controlPoints[previous].DirectionToTarget(controlPoints[i]);
+
+            Vector3[] cornerPoints = new Vector3[4];
+
+            if (isRight)
+            {
+                cornerPoints[bl] = controlPoints[i].Position + (dirA * -depth);
+                cornerPoints[tr] = controlPoints[i].Position + (dirB * -depth);
+                cornerPoints[br] = controlPoints[i].Position;
+                Extensions.DoLinesIntersect(cornerPoints[bl], cornerPoints[bl] + (dirD * -depth), cornerPoints[tr], cornerPoints[tr] + (dirC * -depth), out cornerPoints[tl]);
+
+                startEndPoints.Add(cornerPoints[bl]); // 1st wall ends at bl
+                startEndPoints.Add(cornerPoints[tr]); // 2nd wall starts at tr
+            }
+            else
+            {
+                cornerPoints[br] = controlPoints[i].Position;
+                cornerPoints[bl] = cornerPoints[br] + (controlPoints[previous].Forward * -depth);
+                cornerPoints[tl] = cornerPoints[bl] + (controlPoints[next].Forward * -depth);
+
+                //cornerPoints[br] = controlPoints[i].Position + (dirD * (-depth * 0.5f));
+                //cornerPoints[bl] = cornerPoints[br] + controlPoints[previous].Forward * depth;
+
+                //Vector3 dirF = Vector3.Cross(cornerPoints[bl].DirectionToTarget(controlPoints[next].Position), Vector3.up);
+
+                //cornerPoints[tl] = cornerPoints[bl] + (dirF * -depth);
+
+                Extensions.DoLinesIntersect(cornerPoints[br], cornerPoints[br] + (dirD * depth), cornerPoints[tl], cornerPoints[tl] + (dirC * depth), out cornerPoints[tr]);
+
+                startEndPoints.Add(cornerPoints[br]); // 1st wall ends at bl
+                startEndPoints.Add(cornerPoints[br]); // 2nd wall ends at bl
+            }
+
+            corners[i] = cornerPoints;
+        }
+
+        startEndPoints.Add(controlPoints[^1].Position + (controlPoints[^1].Forward * depth));
+
+        int count = 0;
+
+        Wall[] walls = new Wall[controlPoints.Length];
+
+        for(int i = 0; i < startEndPoints.Count-1; i += 2)
+        {
+            int next = i + 1;
+            Vector3 wallStart = startEndPoints[i];
+            Vector3 wallEnd = startEndPoints[next];
+
+            Vector3[] wallPoints = new Vector3[] { wallStart, wallStart + (Vector3.up * height), wallEnd + (Vector3.up * height), wallEnd };
+
+            ProBuilderMesh wall = ProBuilderMesh.Create();
+            wall.name = "Wall " + count.ToString();
+            wall.AddComponent<Wall>();
+            WallData data = new WallData()
+            {
+                ControlPoints = wallPoints,
+                Material = BuiltinMaterials.defaultMaterial,
+                Depth = depth,
+                Height = height
+            };
+            wall.GetComponent<Wall>().Initialize(data).Build();
+            walls[count] = wall.GetComponent<Wall>();
+            count++;
+        }
+
+
+        for( int i = 1; i < controlPoints.Length-1; i++)
+        {
+            Vector3[] corner = corners[i];
+
+            if (!isRightCorner[i])
+            {
+                //corner[tl] = walls[i].WallData.BottomPoints()[tl];
+
+                //GameObject marker = new GameObject("Wall tl");
+                //marker.transform.position = walls[i].WallData.BottomPoints()[tl] + (Vector3.up * height);
+
+                //GameObject marker1 = new GameObject("corner tl");
+                //marker1.transform.position = corner[tl] + (Vector3.up * height);
+            }
+
+            ProBuilderMesh cornerMesh = ProBuilderMesh.Create();
+            cornerMesh.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
+            cornerMesh.name = "Corner";
+            cornerMesh.CreateShapeFromPolygon(corner, height, false);
+            cornerMesh.ToMesh();
+            cornerMesh.Refresh();
+            cornerMesh.SetSelectedVertices(new int[] { br });
+
+        }
 
     }
 
@@ -54,67 +216,75 @@ public class FloorEditor : Editor
     {
         // Indices are + 1 out
         int[] indices = m_SelectedHandles.ToArray();
-        float width = 0.1f;
+        float depth = 0.1f;
+        float height = 3;
 
-        // for 3 selected handles.
-        //for(int i = 0; i < indices.Length-1; i++)
+        int bl = 0;
+        int tl = 1;
+        int tr = 2;
+        int br = 3;
+
+        for (int i = 0; i < indices.Length -2; i++)
         {
-            Vector3 wallAStart = m_Floor.Split[indices[0]-1];
-            Vector3 wallAEnd = m_Floor.Split[indices[1]-1];
-
+            // first wall
+            Vector3 wallAStart = m_Floor.Split[indices[i] - 1];
+            Vector3 wallAEnd = m_Floor.Split[indices[i + 1] - 1];
             Vector3 dirA = wallAStart.DirectionToTarget(wallAEnd);
+            Vector3 wallAFaceNormal = Vector3.Cross(Vector3.up, dirA);
 
-            //Use cross product of the direction to find the bottom 4 points of the wall.
-            // First Wall
-            Vector3 wallADir = Vector3.Cross(Vector3.up, dirA);
+            wallAStart += wallAFaceNormal * (-depth * 0.5f);
+            wallAEnd += wallAFaceNormal * (-depth * 0.5f);
 
             Vector3[] wallAPoints = new Vector3[] { wallAStart, wallAStart, wallAEnd, wallAEnd };
-            wallAPoints[0] += wallADir * -width; // bl
-            wallAPoints[1] += wallADir * width; // tl
-            wallAPoints[2] += wallADir * width; // tr
-            wallAPoints[3] += wallADir * -width; //br
+            wallAPoints[1] += wallAFaceNormal * depth; // tl
+            wallAPoints[2] += wallAFaceNormal * depth; // tr
 
+            // second wall
             Vector3 wallBStart = wallAEnd;
-            Vector3 wallBEnd = m_Floor.Split[indices[2] - 1];
-
+            Vector3 wallBEnd = m_Floor.Split[indices[i + 2] - 1];
             Vector3 dirB = wallBStart.DirectionToTarget(wallBEnd);
+            Vector3 wallBFaceNormal = Vector3.Cross(Vector3.up, dirB);
 
-            Vector3 wallBDir = Vector3.Cross(Vector3.up, dirB);
+            wallBStart += wallBFaceNormal * (-depth * 0.5f);
+            wallBEnd += wallBFaceNormal * (-depth * 0.5f);
 
             Vector3[] wallBPoints = new Vector3[] { wallBStart, wallBStart, wallBEnd, wallBEnd };
-            wallBPoints[0] += wallBDir * -width; // bl
-            wallBPoints[1] += wallBDir * width; // tl
-            wallBPoints[2] += wallBDir * width; // tr
-            wallBPoints[3] += wallBDir * -width; // br
+            wallBPoints[1] += wallBFaceNormal * depth; // tl
+            wallBPoints[2] += wallBFaceNormal * depth; // tr
 
-            // These intersections will define the corner points
+            // WallAPoints[3] is equal to WallBPoints[0]
 
-            if(Extensions.DoLinesIntersect(wallAPoints[0], wallAPoints[3], wallBPoints[3], wallBPoints[0], out Vector3 first))
+            Vector3 aStartToBEnd = wallAStart.DirectionToTarget(wallBEnd);
+            Vector3 cross = Vector3.Cross(dirA, aStartToBEnd); // By looking a the z value we can determine if the angle is moving left or right
+
+            Vector3[] cornerPoints = new Vector3[4];
+
+            if (cross.z > 0)
             {
-                //Debug.Log("First intersection found");
-            }
+                Vector3 middle = m_Floor.Split[indices[i + 1] - 1];
 
-            if (Extensions.DoLinesIntersect(wallAPoints[1], wallAPoints[2], wallBPoints[2], wallBPoints[1], out Vector3 second))
+                dirA = middle.DirectionToTarget(m_Floor.Split[indices[i] - 1]);
+                dirB = middle.DirectionToTarget(m_Floor.Split[indices[i + 2] - 1]);
+
+                Vector3 dirC = Vector3.Lerp(dirA, dirB, 0.5f);
+                Vector3 dirD = Vector3.Cross(Vector3.up, dirC);
+
+                cornerPoints[bl] = middle + (dirD * depth);
+                cornerPoints[tl] = middle + (dirC * -depth);
+                cornerPoints[tr] = middle + (dirD * -depth);
+                cornerPoints[br] = middle + (dirC * depth);
+
+                // Right
+
+            }
+            else
             {
-               // Debug.Log("Second intersection found");
+                //// Left
+                //cornerPoints[bl] = wallAPoints[tr];
+                //Extensions.DoLinesIntersect(wallAPoints[tl], wallAPoints[tr], wallBPoints[tl], wallBPoints[tr], out cornerPoints[1]);
+                //Extensions.DoLinesIntersect(wallAPoints[bl], wallAPoints[br], wallBPoints[bl], wallBPoints[br], out cornerPoints[2]);
+                //cornerPoints[br] = wallAPoints[br];
             }
-
-            if (Extensions.DoLinesIntersect(wallAPoints[1], wallAPoints[2], wallBPoints[3], wallBPoints[0], out Vector3 third))
-            {
-               // Debug.Log("Third intersection found");
-            }
-
-            if (Extensions.DoLinesIntersect(wallAPoints[0], wallAPoints[3], wallBPoints[1], wallBPoints[2], out Vector3 fourth))
-            {
-               // Debug.Log("Fourth intersection found");
-            }
-
-            //float dot = Vector3.Dot(dirA, dirB);
-            //float rads = Mathf.Acos(dot);
-            //float degrees = Mathf.Rad2Deg * rads;
-            //Debug.Log(degrees);
-
-            Vector3[] cornerPoints = new Vector3[] { first, second, third, fourth };
 
             cornerPoints = cornerPoints.SortPointsClockwise().ToArray();
 
@@ -124,6 +294,7 @@ public class FloorEditor : Editor
             corner.CreateShapeFromPolygon(cornerPoints, 3, false);
             corner.ToMesh();
             corner.Refresh();
+
 
             ProBuilderMesh wallA = ProBuilderMesh.Create();
             wallA.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
@@ -139,6 +310,38 @@ public class FloorEditor : Editor
             wallB.ToMesh();
             wallB.Refresh();
 
+
+            //Debug.Log(dot);
+
+            //float normalizedAngle = (angle - min) / (max - min);
+
+            //wallPoints[2] += dir * (-depth * normalizedAngle);
+            //wallPoints[3] += dir * (-depth * normalizedAngle);
+
+            //if (i != 0 && indices.Length >= 3)
+            //{
+            //    // Reduce start
+            //    Vector3 dirPrevious = wallStart.DirectionToTarget(m_Floor.Split[indices[i - 1] - 1]);
+
+            //    float angle = Vector3.Angle(dir, dirPrevious);
+            //    float normalizedAngle = (angle - min) / (max - min);
+
+            //    wallPoints[0] += dir * (depth * normalizedAngle);
+            //    wallPoints[1] += dir * (depth * normalizedAngle);
+            //}
+
+
+            //ProBuilderMesh wall = ProBuilderMesh.Create();
+            //wall.name = "Wall " + i.ToString();
+            //wall.AddComponent<Wall>();
+            //WallData data = new WallData()
+            //{
+            //    ControlPoints = wallPoints,
+            //    Material = BuiltinMaterials.defaultMaterial,
+            //    Depth = depth,
+            //    Height = height
+            //};
+            //wall.GetComponent<Wall>().Initialize(data).Build();
         }
     }
 
@@ -177,6 +380,7 @@ public class FloorEditor : Editor
         Vector3 sceneCamPos = SceneView.lastActiveSceneView.camera.transform.position;
 
         int controlID = 1;
+
 
         foreach (Vector3 point in m_Floor.Split)
         {

@@ -342,10 +342,10 @@ public class Storey : MonoBehaviour
         ControlPoint[] points = new ControlPoint[m_ControlPoints.Length];
         Array.Copy(m_ControlPoints, points, points.Length);
 
-        for (int i = 0; i < points.Length; i++)
-        {
-            points[i] += points[i].Forward * (m_WallData.Depth * 0.5f);
-        }
+        //for (int i = 0; i < points.Length; i++)
+        //{
+        //    points[i] += points[i].Forward * (m_WallData.Depth * 0.5f);
+        //}
 
 
         floor.AddComponent<Floor>().Initialize(new FloorData() { ControlPoints = points }).Build();

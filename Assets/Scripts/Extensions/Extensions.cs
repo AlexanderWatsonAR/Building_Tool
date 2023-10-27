@@ -661,7 +661,6 @@ public static class Extensions
     public static Vector3 CalculatePolygonFaceNormal(this IEnumerable<Vector3> vertices)
     {
         Vector3[] verts = vertices.ToArray();
-        Vector3 faceNormal = Vector3.zero;
         Vector3 normal = Vector3.zero;
 
         for (int i = 0; i < verts.Length; i++)
@@ -674,8 +673,7 @@ public static class Extensions
             normal.z += (current.x - next.x) * (current.y + next.y);
         }
 
-        faceNormal = normal.normalized;
-        return faceNormal;
+        return normal.normalized;
     }
     /// <summary>
     /// 

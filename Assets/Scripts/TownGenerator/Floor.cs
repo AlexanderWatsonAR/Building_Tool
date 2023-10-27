@@ -24,6 +24,8 @@ public class Floor : MonoBehaviour
 
     public Floor Build()
     {
+        transform.DeleteChildren();
+
         Vector3 min, max;
         Extensions.MinMax(m_Data.ControlPoints.GetPositions(), out min, out max);
 
@@ -34,7 +36,7 @@ public class Floor : MonoBehaviour
 
         Vector3 pos = Vector3.Lerp(min, max, 0.5f);
 
-        List<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), size, size, 10, 10, pos, Vector3.up);
+        List<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), size, size, m_Data.Columns, m_Data.Rows, pos, Vector3.up);
 
         List<Vector3> list = new();
 
@@ -44,12 +46,13 @@ public class Floor : MonoBehaviour
 
             FloorSectionData sectionData = new FloorSectionData(polygon, m_Data.Height);
             ProBuilderMesh sectionMesh = ProBuilderMesh.Create();
+            sectionMesh.name = "Floor Section";
             sectionMesh.transform.SetParent(transform, true);
             sectionMesh.AddComponent<FloorSection>().Initialize(sectionData).Build();
             sectionMesh.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
         }
 
-        m_Split = list.ToArray();
+        m_Split = list.Distinct().ToArray();
 
         // TODO: We want a way for the user to insert a hole into the floor.
         // The hole should be modifiable, so that the user can adjust its size, shape & position.

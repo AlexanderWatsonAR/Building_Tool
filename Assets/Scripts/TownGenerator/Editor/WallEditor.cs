@@ -6,6 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(Wall))]
 public class WallEditor : Editor
 {
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
