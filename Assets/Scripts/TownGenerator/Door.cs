@@ -30,22 +30,15 @@ public class Door : MonoBehaviour
 
     public Door Build()
     {
-        m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, 0, false);
-        m_DoorMesh.ToMesh();
-        m_DoorMesh.Refresh();
-        m_DoorMesh.MatchFaceToNormal(m_Data.Forward);
+        m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward);
+
+        ProBuilderMesh inside = Instantiate(m_DoorMesh);
+        inside.faces[0].Reverse();
 
         m_DoorMesh.Extrude(m_DoorMesh.faces, ExtrudeMethod.FaceNormal, m_Data.Depth);
         m_DoorMesh.ToMesh();
         m_DoorMesh.Refresh();
 
-        ProBuilderMesh inside = ProBuilderMesh.Create();
-        inside.transform.SetParent(transform, false);
-        inside.CreateShapeFromPolygon(m_Data.ControlPoints, 0, true);
-        inside.ToMesh();
-        inside.Refresh();
-        inside.MatchFaceToNormal(-m_Data.Forward);
-        
         CombineMeshes.Combine(new ProBuilderMesh[] { m_DoorMesh, inside }, m_DoorMesh);
         DestroyImmediate(inside.gameObject);
 
@@ -72,12 +65,10 @@ public class Door : MonoBehaviour
             points[i] = v;
         }
 
-        m_DoorHandleMesh.CreateShapeFromPolygon(points, 0, false);
-        m_DoorHandleMesh.ToMesh();
-        m_DoorHandleMesh.Refresh();
-        m_DoorHandleMesh.MatchFaceToNormal(m_Data.Forward);
+        m_DoorHandleMesh.CreateShapeFromPolygon(points, m_Data.Forward);
         m_DoorHandleMesh.Extrude(m_DoorHandleMesh.faces, ExtrudeMethod.FaceNormal, 0.1f);
         m_DoorHandleMesh.ToMesh();
+        m_DoorHandleMesh.Refresh();
 
         IList<Edge> edgeList = m_DoorHandleMesh.faces[0].edges.ToList();
 

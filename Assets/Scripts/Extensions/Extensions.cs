@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
+using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions

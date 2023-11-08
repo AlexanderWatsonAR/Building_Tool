@@ -12,6 +12,7 @@ using UnityEditor;
 using UnityEngine.UI;
 using UnityEngine.ProBuilder.MeshOperations;
 using TMPro;
+using UnityEngine.Rendering;
 
 public class Roof : MonoBehaviour
 {
@@ -41,12 +42,6 @@ public class Roof : MonoBehaviour
 
     public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
     public RoofData Data => m_Data;
-
-    public Roof SetRoofActive(bool value)
-    {
-        m_Data.SetActive(value);
-        return this;
-    }
 
     public Roof SetControlPoints(IEnumerable<ControlPoint> controlPoints)
     {
@@ -85,6 +80,11 @@ public class Roof : MonoBehaviour
         return this;
     }
 
+    public void Initialize(IData data)
+    {
+        m_Data = new RoofData(data as RoofData);
+    }
+
     public Roof Initialize(RoofData data)
     {
         m_Data = new RoofData(data);
@@ -108,7 +108,7 @@ public class Roof : MonoBehaviour
         int Pyramid = (int)RoofType.Pyramid;
         int PyramidHip = (int)RoofType.PyramidHip;
 
-        if(m_ControlPoints.Length == 4)
+        if(m_ControlPoints.FindPathPoints().Count() == 4)
             return new int[] { Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip };
 
         if(m_ControlPoints.IsDescribableInOneLine(out _))
@@ -911,9 +911,6 @@ public class Roof : MonoBehaviour
     /// </summary>
     private void BuildM()
     {
-        if (m_ControlPoints.Length != 4)
-            return;
-
         Vector3[] mPointsA = new Vector3[4];
         Vector3[] mPointsB = new Vector3[4];
 

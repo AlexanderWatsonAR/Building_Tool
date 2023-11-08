@@ -46,7 +46,7 @@ public class RoofSection : MonoBehaviour
 
         // Window
         Material def = BuiltinMaterials.defaultMaterial;
-        m_WindowData = new WindowData(WindowElement.Everything, null, 2, 2, 0.95f, 0.95f, m_SectionHeight, m_SectionHeight * 0.5f, m_SectionHeight  * 0.25f, m_SectionHeight * 0.2f, 90, def, def, def, def );
+        //m_WindowData = new WindowData(WindowElement.Everything, null, 2, 2, 0.95f, 0.95f, m_SectionHeight, m_SectionHeight * 0.5f, m_SectionHeight  * 0.25f, m_SectionHeight * 0.2f, 90, def, def, def, def );
         
 
         return this;

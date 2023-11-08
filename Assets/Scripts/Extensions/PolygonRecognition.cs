@@ -7,6 +7,7 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 using UnityEngine.Rendering;
 using Unity.VisualScripting;
 using System;
+using UnityEngine.UIElements;
 
 public static class PolygonRecognition
 {
@@ -1092,10 +1093,29 @@ public static class PolygonRecognition
 
         return true;
     }
-
+    /// <summary>
+    /// Only for polygons on the XZ plane.
+    /// </summary>
+    /// <param name="controlPoints"></param>
+    /// <returns></returns>
     public static int[] GetConcaveIndexPoints(this IEnumerable<Vector3> controlPoints)
     {
         Vector3[] points = controlPoints.ToArray();
+
+        Vector3 normal = points.CalculatePolygonFaceNormal();
+
+        if(normal != Vector3.up || normal != Vector3.down)
+        {
+            Vector3 position = ProMaths.Average(points);
+            Quaternion rotation = Quaternion.FromToRotation(normal, Vector3.up);
+
+            for(int i = 0; i < points.Length; i++)
+            {
+                Vector3 firstEuler = rotation.eulerAngles;
+                Vector3 v = Quaternion.Euler(firstEuler) * (points[i] - position) + position;
+                points[i] = v;
+            }
+        }
 
         List<int> indices = new List<int>();
 

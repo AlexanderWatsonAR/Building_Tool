@@ -124,7 +124,7 @@ public class Building : MonoBehaviour
             count++;
         }
 
-        m_Roof.SetControlPoints(ControlPoints).SetRoofActive(true);
+        m_Roof.SetControlPoints(ControlPoints);
 
         //m_ProBuilderMesh.SetPivot(m_PivotPosition); 
         //m_ProBuilderMesh.ToMesh();
@@ -186,10 +186,10 @@ public class Building : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        for (int i = 0; i < PolyPath.ControlPointCount; i++)
-        {
-            Handles.Label(transform.TransformPoint(PolyPath.GetPositionAt(i)), i.ToString(), EditorStyles.largeLabel);
-        }
+        //for (int i = 0; i < PolyPath.ControlPointCount; i++)
+        //{
+        //    Handles.Label(transform.TransformPoint(PolyPath.GetPositionAt(i)), i.ToString(), EditorStyles.largeLabel);
+        //}
     }
 
 }

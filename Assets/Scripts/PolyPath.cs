@@ -382,38 +382,73 @@ public class PolyPath
         }
     }
 
+    ///// <summary>
+    ///// Do the control points move clockwise?
+    ///// </summary>
+    ///// <param name="polygonControlPoints"></param>
+    ///// <returns></returns>
+    //public bool IsClockwise()
+    //{
+    //    Vector3[] points = Positions;
+
+    //    float temp = 0;
+    //    bool isClockwise = false;
+
+    //    for (int i = 0; i < points.Length; i++)
+    //    {
+    //        if (i != points.Length - 1)
+    //        {
+    //            float mulA = points[i].x * points[i + 1].z;
+    //            float mulB = points[i + 1].x * points[i].z;
+    //            temp = temp + (mulA - mulB);
+    //        }
+    //        else
+    //        {
+    //            float mulA = points[i].x * points[i].z;
+    //            float mulB = points[0].x * points[i].z;
+    //            temp = temp + (mulA - mulB);
+    //        }
+    //    }
+    //    temp /= 2;
+
+    //    isClockwise = temp < 0 ? false : true;
+
+    //    return isClockwise;
+    //}
+
     /// <summary>
-    /// Do the control points move clockwise?
+    /// Control points are required to be on the XZ plane.
     /// </summary>
-    /// <param name="polygonControlPoints"></param>
-    /// <returns></returns>
     public bool IsClockwise()
     {
         Vector3[] points = Positions;
 
-        float temp = 0;
-        bool isClockwise = false;
+        float sum = 0f;
 
         for (int i = 0; i < points.Length; i++)
         {
-            if (i != points.Length - 1)
-            {
-                float mulA = points[i].x * points[i + 1].z;
-                float mulB = points[i + 1].x * points[i].z;
-                temp = temp + (mulA - mulB);
-            }
-            else
-            {
-                float mulA = points[i].x * points[i].z;
-                float mulB = points[0].x * points[i].z;
-                temp = temp + (mulA - mulB);
-            }
+            Vector3 current = points[i];
+            Vector3 next = points[(i + 1) % points.Length]; // To handle the wrap-around for the last vertex
+            Vector3 previous = points[(i - 1 + points.Length) % points.Length]; // To handle the wrap-around for the first vertex
+
+            Vector3 edge1 = next - current;
+            Vector3 edge2 = previous - current;
+
+            sum += Vector3.Cross(edge1, edge2).y; // We use .y since we're on the XZ plane
         }
-        temp /= 2;
 
-        isClockwise = temp < 0 ? false : true;
+        if(sum > 0)
+        {
+            Debug.Log("Clockwise");
+        }
+        else
+        {
+            Debug.Log("Counter-clockwise");
+        }
 
-        return isClockwise;
+        return sum > 0f;
+
+        // if sum is equal to 0 polygon is degenerate or collinear.
     }
 
 }

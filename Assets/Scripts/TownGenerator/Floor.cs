@@ -11,6 +11,9 @@ public class Floor : MonoBehaviour
 {
     [SerializeField] private FloorData m_Data;
 
+    [SerializeField] private Vector3 m_Position;
+    [SerializeField] private float m_Size;
+
     [SerializeField] private Vector3[] m_Split;
 
     public Vector3[] Split => m_Split;
@@ -19,6 +22,7 @@ public class Floor : MonoBehaviour
     {
         m_Data = data;
         m_Split = new Vector3[0];
+        m_Position = Vector3.zero;
         return this;
     }
 
@@ -32,11 +36,11 @@ public class Floor : MonoBehaviour
         float width = max.x - min.x;
         float height = max.z - min.z;
 
-        float size = width > height ? width : height;
+        m_Size = width > height ? width : height;
 
-        Vector3 pos = Vector3.Lerp(min, max, 0.5f);
+        m_Position = Vector3.Lerp(min, max, 0.5f);
 
-        List<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), size, size, m_Data.Columns, m_Data.Rows, pos, Vector3.up);
+        List<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), m_Size, m_Size, m_Data.Columns, m_Data.Rows, m_Position, Vector3.up);
 
         List<Vector3> list = new();
 
@@ -62,6 +66,29 @@ public class Floor : MonoBehaviour
         // each floor section can have a hole
 
         return this;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Vector3[] square = new Vector3[]
+        {
+            m_Position + new Vector3(-m_Size * 0.5f, 0, -m_Size * 0.5f),
+            m_Position + new Vector3(-m_Size * 0.5f, 0, m_Size * 0.5f),
+            m_Position + new Vector3(m_Size * 0.5f, 0, m_Size * 0.5f),
+            m_Position + new Vector3(m_Size * 0.5f, 0, -m_Size * 0.5f)
+        };
+
+        //Handles.DrawAAPolyLine(square);
+        //Handles.DrawAAPolyLine(square[0], square[3]);
+
+        for(int x = 0; x < m_Data.Columns; x++)
+        {
+            for(int y = 0; y < m_Data.Rows; y++)
+            {
+
+            }
+        }
+
     }
 
 }

@@ -6,8 +6,6 @@ using UnityEngine.ProBuilder;
 using Unity.VisualScripting;
 using System.Linq;
 using UnityEngine.ProBuilder.MeshOperations;
-using System.ComponentModel.Composition.Hosting;
-using log4net.Util;
 
 [CustomEditor(typeof(Floor))]
 public class FloorEditor : Editor
@@ -102,7 +100,7 @@ public class FloorEditor : Editor
         int br = 3;
 
         List<Vector3> startEndPoints = new List<Vector3>();
-        startEndPoints.Add(controlPoints[0].Position + (controlPoints[0].Forward * depth));
+        startEndPoints.Add(controlPoints[0].Position + (controlPoints[0].Forward * (depth*0.5f)));
 
         Vector3[][] corners = new Vector3[controlPoints.Length][];
         bool[] isRightCorner = new bool[controlPoints.Length];
@@ -116,46 +114,56 @@ public class FloorEditor : Editor
 
             isRightCorner[i] = isRight;
 
-            Vector3 dirA = Vector3.Cross(Vector3.up, controlPoints[previous].DirectionToTarget(controlPoints[i]));
-            Vector3 dirB = Vector3.Cross(Vector3.up, controlPoints[i].DirectionToTarget(controlPoints[next]));
-            Vector3 dirC = controlPoints[next].DirectionToTarget(controlPoints[i]);
-            Vector3 dirD = controlPoints[previous].DirectionToTarget(controlPoints[i]);
+            Vector3 dirA = Vector3.Cross(controlPoints[previous].DirectionToTarget(controlPoints[i]), Vector3.up);
+            Vector3 dirB = Vector3.Cross(controlPoints[i].DirectionToTarget(controlPoints[next]), Vector3.up);
+            Vector3 dirC = controlPoints[i].DirectionToTarget(controlPoints[next]);
+            Vector3 dirD = controlPoints[i].DirectionToTarget(controlPoints[previous]);
+            Vector3 dirE = Vector3.Lerp(dirC, dirD, 0.5f);
 
             Vector3[] cornerPoints = new Vector3[4];
 
             if (isRight)
             {
-                cornerPoints[bl] = controlPoints[i].Position + (dirA * -depth);
-                cornerPoints[tr] = controlPoints[i].Position + (dirB * -depth);
                 cornerPoints[br] = controlPoints[i].Position;
+                cornerPoints[bl] = cornerPoints[br] + (dirA * depth);
+                cornerPoints[tr] = cornerPoints[br] + (dirB * depth);
+
                 Extensions.DoLinesIntersect(cornerPoints[bl], cornerPoints[bl] + (dirD * -depth), cornerPoints[tr], cornerPoints[tr] + (dirC * -depth), out cornerPoints[tl]);
+
+                Vector3 offset = cornerPoints[br] - Math.Average(cornerPoints);
+
+                for(int j = 0; j < cornerPoints.Length; j++)
+                {
+                    cornerPoints[j] += offset;
+                }
 
                 startEndPoints.Add(cornerPoints[bl]); // 1st wall ends at bl
                 startEndPoints.Add(cornerPoints[tr]); // 2nd wall starts at tr
             }
             else
             {
-                cornerPoints[br] = controlPoints[i].Position;
-                cornerPoints[bl] = cornerPoints[br] + (controlPoints[previous].Forward * -depth);
-                cornerPoints[tl] = cornerPoints[bl] + (controlPoints[next].Forward * -depth);
+                cornerPoints[bl] = controlPoints[i].Position;
+                cornerPoints[br] = cornerPoints[bl] + (dirA * -depth);
+                cornerPoints[tl] = cornerPoints[bl] + (dirB * -depth);
 
-                //cornerPoints[br] = controlPoints[i].Position + (dirD * (-depth * 0.5f));
-                //cornerPoints[bl] = cornerPoints[br] + controlPoints[previous].Forward * depth;
+                Extensions.DoLinesIntersect(cornerPoints[br], cornerPoints[br] + (dirD * -depth), cornerPoints[tl], cornerPoints[tl] + (dirC * -depth), out cornerPoints[tr]);
 
-                //Vector3 dirF = Vector3.Cross(cornerPoints[bl].DirectionToTarget(controlPoints[next].Position), Vector3.up);
+                Vector3 offset = cornerPoints[bl] - Math.Average(cornerPoints);
 
-                //cornerPoints[tl] = cornerPoints[bl] + (dirF * -depth);
+                for (int j = 0; j < cornerPoints.Length; j++)
+                {
+                    cornerPoints[j] += offset;
+                }
 
-                Extensions.DoLinesIntersect(cornerPoints[br], cornerPoints[br] + (dirD * depth), cornerPoints[tl], cornerPoints[tl] + (dirC * depth), out cornerPoints[tr]);
 
-                startEndPoints.Add(cornerPoints[br]); // 1st wall ends at bl
-                startEndPoints.Add(cornerPoints[br]); // 2nd wall ends at bl
+                startEndPoints.Add(cornerPoints[bl]); // 1st wall ends at bl
+                startEndPoints.Add(cornerPoints[bl]); // 2nd wall ends at bl
             }
 
             corners[i] = cornerPoints;
         }
 
-        startEndPoints.Add(controlPoints[^1].Position + (controlPoints[^1].Forward * depth));
+        startEndPoints.Add(controlPoints[^1].Position + (controlPoints[^1].Forward * (depth*0.5f)));
 
         int count = 0;
 

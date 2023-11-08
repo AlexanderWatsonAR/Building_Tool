@@ -17,9 +17,9 @@ public class Window : MonoBehaviour
     [SerializeField] private ProBuilderMesh m_Pane;
     [SerializeField] private ProBuilderMesh m_LeftShutter, m_RightShutter;
 
-    private Vector3 m_Normal;
     private float m_Height, m_Width;
     private Vector3 m_Min, m_Max;
+    private Vector3 m_Position;
 
     public float Height => m_Height;
     public float Width => m_Width;
@@ -33,12 +33,10 @@ public class Window : MonoBehaviour
         {
             Vector3[] scaledPoints = new Vector3[m_Data.ControlPoints.Length];
 
-            Vector3 centre = UnityEngine.ProBuilder.Math.Average(m_Data.ControlPoints);
-
             for(int i = 0; i < scaledPoints.Length; i++)
             {
-                Vector3 point = m_Data.ControlPoints[i] - centre;
-                Vector3 v = Vector3.Scale(point, Vector3.one * m_Data.OuterFrameScale) + centre;
+                Vector3 point = m_Data.ControlPoints[i] - m_Position;
+                Vector3 v = Vector3.Scale(point, Vector3.one * m_Data.OuterFrameScale) + m_Position;
                 scaledPoints[i] = v;
             }
 
@@ -52,7 +50,7 @@ public class Window : MonoBehaviour
         Extensions.MinMax(m_Data.ControlPoints, out m_Min, out m_Max);
         m_Height = m_Max.y - m_Min.y;
         m_Width = m_Max.x - m_Min.x + (m_Max.z - m_Min.z);
-        m_Normal = m_Data.ControlPoints.CalculatePolygonFaceNormal();
+        m_Position = Vector3.Lerp(m_Min, m_Max, 0.5f);
 
         return this;
     }
@@ -96,6 +94,7 @@ public class Window : MonoBehaviour
     {
         transform.DeleteChildren();
 
+
         if (m_Data.ActiveElements == WindowElement.Nothing)
             return this;
 
@@ -110,11 +109,12 @@ public class Window : MonoBehaviour
 
             List<IList<Vector3>> holePoints = new();
             holePoints.Add(ScaledControlPoints);
-            m_OuterFrame.CreateShapeFromPolygon(m_Data.ControlPoints, 0, false, holePoints);
-            m_OuterFrame.ToMesh();
-            m_OuterFrame.Refresh();
-            m_OuterFrame.MatchFaceToNormal(m_Normal);
-            m_OuterFrame.Extrude(new Face[] { m_OuterFrame.faces[0] }, ExtrudeMethod.IndividualFaces, m_Data.OuterFrameDepth);
+            m_OuterFrame.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward, holePoints);
+            ProBuilderMesh backFrame = Instantiate(m_OuterFrame);
+            backFrame.faces[0].Reverse();
+            m_OuterFrame.Extrude(m_OuterFrame.faces, ExtrudeMethod.FaceNormal, m_Data.OuterFrameDepth);
+            CombineMeshes.Combine(new ProBuilderMesh[] { m_OuterFrame, backFrame }, m_OuterFrame);
+            DestroyImmediate(backFrame.gameObject);
             m_OuterFrame.ToMesh();
             m_OuterFrame.Refresh();
         }
@@ -122,10 +122,10 @@ public class Window : MonoBehaviour
         if(m_Data.IsInnerFrameActive)
         {
             // Inner Frame
-            m_InnerFrame = MeshMaker.PolyFrameGrid(points, m_Height, m_Width, m_Data.InnerFrameScale, m_Data.Columns, m_Data.Rows);
+            m_InnerFrame = MeshMaker.PolyFrameGrid(points, m_Height, m_Width, m_Data.InnerFrameScale, m_Data.InnerFrameColumns, m_Data.InnerFrameRows, m_Position, m_Data.Forward);
             ProBuilderMesh gridCover = Instantiate(m_InnerFrame);
             gridCover.faces[0].Reverse();
-            m_InnerFrame.Extrude(new Face[] { m_InnerFrame.faces[0] }, ExtrudeMethod.IndividualFaces, m_Data.InnerFrameDepth);
+            m_InnerFrame.Extrude(m_InnerFrame.faces, ExtrudeMethod.FaceNormal, m_Data.InnerFrameDepth);
             CombineMeshes.Combine(new ProBuilderMesh[] { m_InnerFrame, gridCover }, m_InnerFrame);
             DestroyImmediate(gridCover.gameObject);
             m_InnerFrame.transform.SetParent(transform, false);
@@ -141,11 +141,12 @@ public class Window : MonoBehaviour
             m_Pane.transform.SetParent(transform, false);
             m_Pane.name = "Pane";
             m_Pane.GetComponent<Renderer>().sharedMaterial = m_Data.PaneMaterial;
-            m_Pane.CreateShapeFromPolygon(points, 0, false);
-            m_Pane.ToMesh();
-            m_Pane.Refresh();
-            m_Pane.MatchFaceToNormal(m_Normal);
-            m_Pane.Extrude(new Face[] { m_Pane.faces[0] }, ExtrudeMethod.IndividualFaces, m_Data.PaneDepth);
+            m_Pane.CreateShapeFromPolygon(points, m_Data.Forward);
+            ProBuilderMesh backPane = Instantiate(m_Pane);
+            backPane.faces[0].Reverse();
+            m_Pane.Extrude(m_Pane.faces, ExtrudeMethod.FaceNormal, m_Data.PaneDepth);
+            CombineMeshes.Combine(new ProBuilderMesh[] { m_Pane, backPane }, m_Pane);
+            DestroyImmediate(backPane.gameObject);
             m_Pane.ToMesh();
             m_Pane.Refresh();
         }
@@ -153,22 +154,26 @@ public class Window : MonoBehaviour
         if(m_Data.AreShuttersActive)
         {
             // Shutters
-            List<IList<Vector3>> shutterVertices = MeshMaker.SpiltPolygon(points, m_Width, m_Height, 2, 1);
+            List<IList<Vector3>> shutterVertices = MeshMaker.SpiltPolygon(points, m_Width, m_Height, 2, 1, m_Position, m_Data.Forward);
 
-            foreach(IList<Vector3> shutter in shutterVertices)
+            for (int i = 0; i < shutterVertices.Count; i++)
             {
-                for (int i = 0; i < shutter.Count; i++)
+                IList<Vector3> shutter = shutterVertices[i];
+
+                for (int j = 0; j < shutter.Count; j++)
                 {
-                    shutter[i] = shutter[i] + (m_Normal * m_Data.OuterFrameDepth);
+                    shutter[j] += m_Data.Forward * m_Data.OuterFrameDepth;
                 }
+
+                shutterVertices[i] = shutter;
             }
 
-            Vector3 right = Vector3.Cross(m_Normal, Vector3.up);
+            Vector3 right = Vector3.Cross(m_Data.Forward, Vector3.up);
 
             DoorData rightShutterData = new DoorData()
             {
                 ControlPoints = shutterVertices[0].ToArray(),
-                Forward = m_Normal,
+                Forward = m_Data.Forward,
                 Right = right,
                 Depth = m_Data.ShuttersDepth,
                 Scale = 1,
@@ -180,10 +185,11 @@ public class Window : MonoBehaviour
             DoorData leftShutterData = new DoorData()
             {
                 ControlPoints = shutterVertices[1].ToArray(),
-                Forward = m_Normal,
+                Forward = m_Data.Forward,
                 Right = right,
                 Depth = m_Data.ShuttersDepth,
                 Scale = 1,
+                HingePoint = TransformPoint.Left,
                 HingeEulerAngles = Vector3.up * m_Data.ShuttersAngle,
                 Material = m_Data.ShuttersMaterial
             };

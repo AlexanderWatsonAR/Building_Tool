@@ -29,6 +29,7 @@ public class WallSection : MonoBehaviour
 
     [SerializeField] private WindowData m_WindowData;
 
+    public int WindowSides => m_WindowSides;
     public float WindowAngle => m_WindowAngle;
     public float WindowHeight => m_WindowHeight;
     public float WindowWidth => m_WindowWidth;
@@ -83,7 +84,7 @@ public class WallSection : MonoBehaviour
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
 
         Vector3 right = m_ControlPoints[0].DirectionToTarget(m_ControlPoints[3]);
-        m_FaceNormal = Vector3.Cross(Vector3.up, right);
+        m_FaceNormal = Vector3.Cross(right, Vector3.up);
 
         Material defaultMat = BuiltinMaterials.defaultMaterial;
 
@@ -93,7 +94,17 @@ public class WallSection : MonoBehaviour
         m_WindowColumns = 1;
         m_WindowRows = 1;
         m_WindowAngle = 0;
-        m_WindowData = new WindowData(WindowElement.Everything, null, 2, 2, 0.95f, 0.95f, m_WallDepth, m_WallDepth * 0.5f, m_WallDepth * 0.25f, m_WallDepth * 0.2f, 90, defaultMat, defaultMat, defaultMat, defaultMat);
+        m_WindowData = new WindowData()
+        {
+            Forward = m_FaceNormal,
+            OuterFrameDepth = m_WallDepth,
+            InnerFrameDepth = m_WallDepth * 0.5f,
+            PaneDepth = m_WallDepth * 0.25f,
+            OuterFrameMaterial = defaultMat,
+            InnerFrameMaterial = defaultMat,
+            PaneMaterial = defaultMat,
+            ShuttersMaterial = defaultMat
+        };
 
         // End Window
 

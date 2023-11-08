@@ -4,7 +4,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 [System.Serializable]
-public class RoofData
+public class RoofData: IData
 {
     [SerializeField] private bool m_IsActive;
     [SerializeField] private RoofType m_RoofType;
@@ -30,7 +30,7 @@ public class RoofData
     public RoofType RoofType => m_RoofType;
     public float GableScale => m_GableScale;
 
-    public RoofData() : this (new RoofTileData(), RoofType.Mansard, 1, 1, 1, 1, 0.75f, false, false, false )
+    public RoofData() : this (new RoofTileData(), RoofType.Mansard, 1, 1, 1, 1, 0.75f, false, false, true )
     {
 
     }

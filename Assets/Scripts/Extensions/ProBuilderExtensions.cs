@@ -28,9 +28,34 @@ public static class ProBuilderExtensions
         }
     }
 
-    public static ActionResult CreateShapeFromPolygon (this ProBuilderMesh mesh, IEnumerable<ControlPoint> controlPoints, float extrude, bool flipNormals)
+    public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IEnumerable<ControlPoint> controlPoints, float extrude, bool flipNormals)
     {
-        return mesh.CreateShapeFromPolygon(controlPoints.GetPositions(), extrude, flipNormals);
+        return proBuilderMesh.CreateShapeFromPolygon(controlPoints.GetPositions(), extrude, flipNormals);
+    }
+
+    public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IList<Vector3> points, Vector3 normal, IList<IList<Vector3>> holePoints = null)
+    {
+        ActionResult result = ActionResult.NoSelection;
+
+        if(holePoints != null)
+        {
+            result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
+        }
+        else
+        {
+            result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false);
+        }
+
+        if(result == ActionResult.Success)
+        {
+            proBuilderMesh.ToMesh();
+            proBuilderMesh.Refresh();
+            proBuilderMesh.MatchFaceToNormal(normal);
+            proBuilderMesh.ToMesh();
+            proBuilderMesh.Refresh();
+        }
+
+        return result;
     }
 
     public static IEnumerable<int> GetCoincidentVerticesFromPosition(this ProBuilderMesh proBuilderMesh, Vector3 position, float marginForError = 0.001f)
@@ -124,7 +149,7 @@ public static class ProBuilderExtensions
         proBuilderMesh.transform.localScale = Vector3.one;
     }
 
-    public static Vector3[] GetDistinctVerts(this ProBuilderMesh proBuilderMesh, Face face)
+    public static Vector3[] FaceToVertices(this ProBuilderMesh proBuilderMesh, Face face)
     {
         Vector3[] positions = proBuilderMesh.positions.ToArray();
         Vector3[] verts = new Vector3[face.distinctIndexes.Count];

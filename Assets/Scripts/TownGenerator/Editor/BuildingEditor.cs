@@ -128,7 +128,6 @@ public class BuildingEditor : Editor
                 Handles.color = m_CP_Invalid;
                 m_IsValidPoint = false;
             }
-
         }
         else
         {
@@ -223,11 +222,13 @@ public class BuildingEditor : Editor
             float size = HandleUtil.GetHandleSize(m_PolyPath.GetPositionAt(i)) * 0.05f;
 
             Color handleColour = Handles.color;
-            Handles.color = m_SelectedHandle == i+1 ? Color.yellow : handleColour; 
+
+            Handles.color = m_SelectedHandle == i+1 ? Color.yellow : handleColour;
             Vector3 globalPoint = Handles.FreeMoveHandle(i+1, m_GlobalControlPointPositions[i], Quaternion.identity, size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
 
             Handles.color = handleColour;
             Vector3 localPoint = m_Building.transform.InverseTransformPoint(globalPoint);
+
 
             // How we detect if the control point has changed.
             if (localPoint != m_PolyPath.GetPositionAt(i))
@@ -245,6 +246,15 @@ public class BuildingEditor : Editor
                    // Debug.Log("Handle: " + i + " Position: " + localRay);
                 }
 
+            }
+
+            // Highlight the first control point. The first point is important for shape recognition.
+            if (i == 0)
+            {
+                handleColour = Handles.color;
+                Handles.color = Color.blue;
+                Handles.DrawWireDisc(globalPoint, Vector3.up, size*1.5f, 5f);
+                Handles.color = handleColour;
             }
         }
 

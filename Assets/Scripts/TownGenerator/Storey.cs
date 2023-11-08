@@ -189,10 +189,12 @@ public class Storey : MonoBehaviour
             int next = m_ControlPoints.GetNext(i);
 
             Vector3 dirA = m_WallPoints[current][0].DirectionToTarget(m_WallPoints[current][1]);
-            Vector3 crossA = Vector3.Cross(Vector3.up, dirA) * m_WallData.Depth;
+            //Vector3 crossA = Vector3.Cross(Vector3.up, dirA) * m_WallData.Depth;
+            Vector3 crossA = Vector3.Cross(dirA, Vector3.up) * m_WallData.Depth;
 
             Vector3 dirB = m_WallPoints[previous][0].DirectionToTarget(m_WallPoints[previous][1]);
-            Vector3 crossB = Vector3.Cross(Vector3.up, dirB) * m_WallData.Depth;
+            //Vector3 crossB = Vector3.Cross(Vector3.up, dirB) * m_WallData.Depth;
+            Vector3 crossB = Vector3.Cross(dirB, Vector3.up) * m_WallData.Depth;
 
             Vector3 intersection;
 
@@ -277,10 +279,12 @@ public class Storey : MonoBehaviour
             Vector3 onePreviousInside = m_InsidePoints[previous];
 
             Vector3 nextForward = m_InsidePoints[i].DirectionToTarget(oneNextInside);
-            Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallData.Depth;
+            //Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallData.Depth;
+            Vector3 nextRight = Vector3.Cross(nextForward, Vector3.up) * m_WallData.Depth;
 
             Vector3 previousForward = m_InsidePoints[i].DirectionToTarget(onePreviousInside);
-            Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_WallData.Depth;
+            //Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_WallData.Depth;
+            Vector3 previousRight = Vector3.Cross(Vector3.up, previousForward) * m_WallData.Depth;
 
             Vector3 bottomLeft = m_InsidePoints[i];
             Vector3 topLeft = bottomLeft + h;

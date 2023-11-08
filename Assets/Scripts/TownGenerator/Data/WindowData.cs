@@ -7,29 +7,30 @@ using UnityEngine;
 public class WindowData
 {
     [SerializeField] private Vector3[] m_ControlPoints;
+    [SerializeField, HideInInspector] private Vector3 m_Forward;
     [SerializeField] private WindowElement m_ActiveElements;
-    [SerializeField, Range(1, 5)] private int m_Columns, m_Rows;
+    [SerializeField, Range(1, 5)] private int m_InnerFrameColumns, m_InnerFrameRows;
     [SerializeField, Range(0, 0.999f)] private float m_OuterFrameScale, m_InnerFrameScale;
     [SerializeField, Range(0, 0.999f)] private float m_OuterFrameDepth, m_InnerFrameDepth, m_PaneDepth;
     [SerializeField] private Material m_OuterFrameMaterial, m_InnerFrameMaterial, m_PaneMaterial, m_ShuttersMaterial;
     [SerializeField, Range(0, 0.999f)] private float m_ShuttersDepth;
     [SerializeField, Range(0, 180)] private float m_ShuttersAngle;
 
-
     public Vector3[] ControlPoints => m_ControlPoints;
-    public int Columns => m_Columns;
-    public int Rows => m_Rows;
+    public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
+    public int InnerFrameColumns => m_InnerFrameColumns;
+    public int InnerFrameRows => m_InnerFrameRows;
     public float OuterFrameScale => m_OuterFrameScale;
     public float InnerFrameScale => m_InnerFrameScale;
-    public float OuterFrameDepth => m_OuterFrameDepth;
-    public float InnerFrameDepth => m_InnerFrameDepth;
-    public float PaneDepth => m_PaneDepth;
-    public float ShuttersDepth => m_ShuttersDepth;
+    public float OuterFrameDepth { get { return m_OuterFrameDepth; } set { m_OuterFrameDepth = value; } }
+    public float InnerFrameDepth { get { return m_InnerFrameDepth; } set { m_InnerFrameDepth = value; } }
+    public float PaneDepth { get { return m_PaneDepth; } set { m_PaneDepth = value; } }
+    public float ShuttersDepth { get { return m_ShuttersDepth; } set { m_ShuttersDepth = value; } }
     public float ShuttersAngle => m_ShuttersAngle;
-    public Material OuterFrameMaterial => m_OuterFrameMaterial;
-    public Material InnerFrameMaterial => m_InnerFrameMaterial;
-    public Material PaneMaterial => m_PaneMaterial;
-    public Material ShuttersMaterial => m_ShuttersMaterial;
+    public Material OuterFrameMaterial { get { return m_OuterFrameMaterial; } set { m_OuterFrameMaterial = value; } }
+    public Material InnerFrameMaterial { get { return m_InnerFrameMaterial; } set { m_InnerFrameMaterial = value; } }
+    public Material PaneMaterial { get { return m_PaneMaterial; } set { m_PaneMaterial = value; } }
+    public Material ShuttersMaterial { get { return m_ShuttersMaterial; } set { m_ShuttersMaterial = value; } }
     public WindowElement ActiveElements => m_ActiveElements;
 
     public bool IsOuterFrameActive => IsElementActive(WindowElement.OuterFrame);
@@ -37,16 +38,17 @@ public class WindowData
     public bool IsPaneActive => IsElementActive(WindowElement.Pane);
     public bool AreShuttersActive => IsElementActive(WindowElement.Shutters);
 
-    public WindowData() : this (WindowElement.Everything, new Vector3[0], 2, 2, 0.95f, 0.95f, 0.4f, 0.2f, 0.1f, 0.2f, 90f, null, null, null, null)
+    public WindowData() : this (WindowElement.Everything, Vector3.forward, new Vector3[0], 2, 2, 0.95f, 0.95f, 0.4f, 0.2f, 0.1f, 0.2f, 90f, null, null, null, null)
     {
 
     }
     public WindowData(WindowData data) : this
     (
         data.ActiveElements,
+        data.Forward,
         data.ControlPoints,
-        data.Columns,
-        data.Rows,
+        data.InnerFrameColumns,
+        data.InnerFrameRows,
         data.OuterFrameScale,
         data.InnerFrameScale,
         data.OuterFrameDepth,
@@ -61,12 +63,13 @@ public class WindowData
     {
 
     }
-    public WindowData(WindowElement activeElements, IEnumerable<Vector3> controlPoints, int columns, int rows, float outerFrameScale, float innerFrameScale, float outerFrameDepth, float innerFrameDepth, float paneDepth, float shuttersDepth, float shuttersAngle, Material outerFrameMat, Material innerFrameMat, Material paneMat, Material shuttersMat)
+    public WindowData(WindowElement activeElements, Vector3 forward, IEnumerable<Vector3> controlPoints, int columns, int rows, float outerFrameScale, float innerFrameScale, float outerFrameDepth, float innerFrameDepth, float paneDepth, float shuttersDepth, float shuttersAngle, Material outerFrameMat, Material innerFrameMat, Material paneMat, Material shuttersMat)
     {
         m_ActiveElements = activeElements;
+        m_Forward = forward;
         m_ControlPoints = controlPoints == null ? new Vector3[0] : controlPoints.ToArray();
-        m_Columns = columns;
-        m_Rows = rows;
+        m_InnerFrameColumns = columns;
+        m_InnerFrameRows = rows;
         m_OuterFrameScale = outerFrameScale;
         m_InnerFrameScale = innerFrameScale;
         m_OuterFrameDepth = outerFrameDepth;

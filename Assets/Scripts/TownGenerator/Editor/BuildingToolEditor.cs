@@ -30,9 +30,10 @@ public class BuildingToolEditor : EditorTool
             return m_IconContent;
         }
     }
-
     public override void OnToolGUI(EditorWindow window)
     {
+        
+
         if (!(window is SceneView))
             return;
 
@@ -44,26 +45,22 @@ public class BuildingToolEditor : EditorTool
             EditorGUIUtility.AddCursorRect(sceneViewRect, m_MouseCursor);
         }
     }
-
     public override void OnActivated()
     {
         Building building = (Building)target;
         building.PolyPath.PolyMode = PolyMode.Edit;
         m_MouseCursor = MouseCursor.ArrowPlus;
     }
-
     public override void OnWillBeDeactivated()
     {
         Building building = (Building)target;
         building.PolyPath.PolyMode = PolyMode.Hide;
         m_MouseCursor = MouseCursor.Arrow;
     }
-
     private void OnEnable()
     {
         
     }
-
     private void OnDisable()
     {
         
