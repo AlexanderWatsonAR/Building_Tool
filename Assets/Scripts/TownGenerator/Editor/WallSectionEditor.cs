@@ -23,7 +23,7 @@ public class WallSectionEditor : Editor
 
         WallSectionSerializedProperties serialProps = new WallSectionSerializedProperties(section);
 
-        WindowData windowData = section.WindowData;
+        WindowData windowData = section.Data.WindowData;
 
         EditorGUILayout.PropertyField(serialProps.WallElement, new GUIContent("Section"));
 

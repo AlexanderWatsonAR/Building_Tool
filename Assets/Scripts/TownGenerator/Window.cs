@@ -8,7 +8,7 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UIElements;
 
-public class Window : MonoBehaviour
+public class Window : MonoBehaviour, IBuildable
 {
     [SerializeField] private WindowData m_Data;
 
@@ -43,9 +43,9 @@ public class Window : MonoBehaviour
             return scaledPoints;
         }
     }
-    public Window Initialize(WindowData data)
+    public IBuildable Initialize(IData data)
     {
-        m_Data = data;
+        m_Data = data as WindowData;
 
         Extensions.MinMax(m_Data.ControlPoints, out m_Min, out m_Max);
         m_Height = m_Max.y - m_Min.y;
@@ -90,13 +90,13 @@ public class Window : MonoBehaviour
         }
     }
 
-    public Window Build()
+    public void Build()
     {
         transform.DeleteChildren();
 
 
         if (m_Data.ActiveElements == WindowElement.Nothing)
-            return this;
+            return;
 
         Vector3[] points = m_Data.IsOuterFrameActive ? ScaledControlPoints : m_Data.ControlPoints;
 
@@ -206,7 +206,5 @@ public class Window : MonoBehaviour
             Door leftShutter = m_LeftShutter.AddComponent<Door>();
             leftShutter.Initialize(leftShutterData).Build();
         }
-
-        return this;
     }
 }

@@ -1,6 +1,6 @@
 
-public interface IBuildingComponent
+public interface IBuildable
 {
-    void Initialize(IData data);
+    IBuildable Initialize(IData data);
     void Build();
 }

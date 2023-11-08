@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class WindowData
+public class WindowData : IData
 {
     [SerializeField] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3 m_Forward;

@@ -8,6 +8,8 @@ public class WindowSerializedProperties
     [SerializeField] SerializedObject m_SerializedObject;
     [SerializeField] SerializedProperty m_Data;
 
+    public SerializedProperty Data => m_Data;
+
     public SerializedProperty ActiveElements { get { return m_Data.FindPropertyRelative("m_ActiveElements"); } }
     public SerializedProperty InnerFrameColumns { get { return m_Data.FindPropertyRelative("m_InnerFrameColumns"); } }
     public SerializedProperty InnerFrameRows { get { return m_Data.FindPropertyRelative("m_InnerFrameRows"); } }

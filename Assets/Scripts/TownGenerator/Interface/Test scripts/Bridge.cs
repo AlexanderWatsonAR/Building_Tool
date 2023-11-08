@@ -3,14 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bridge : MonoBehaviour, IBuildingComponent
+public class Bridge : MonoBehaviour, IBuildable
 {
     BridgeData bridgeData;
 
 
-    public void Initialize(IData data)
+    public IBuildable Initialize(IData data)
     {
         bridgeData = data as BridgeData;
+        return this;
     }
 
     public void Build()
