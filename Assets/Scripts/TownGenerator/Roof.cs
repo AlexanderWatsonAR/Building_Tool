@@ -13,11 +13,13 @@ using UnityEngine.UI;
 using UnityEngine.ProBuilder.MeshOperations;
 using TMPro;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Rendering.Universal;
 
-public class Roof : MonoBehaviour
+public class Roof : MonoBehaviour, IBuildable
 {
     [SerializeField] private RoofData m_Data;
-
     // Wall
     [SerializeField] private Storey m_LastStorey;
     [SerializeField] private List<Wall> m_Walls;
@@ -34,22 +36,7 @@ public class Roof : MonoBehaviour
     //End Beam
 
     [SerializeField] private List<RoofTile> m_Tiles;
-
-    [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
-    [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints;
-
-    private Vector3[] m_TempOneLine;
-
-    public IEnumerable<ControlPoint> ControlPoints => m_ControlPoints;
     public RoofData Data => m_Data;
-
-    public Roof SetControlPoints(IEnumerable<ControlPoint> controlPoints)
-    {
-        ControlPoint[] points = controlPoints.ToArray();
-        m_ControlPoints = PolygonRecognition.Clone(points.ToArray());
-        m_OriginalControlPoints = PolygonRecognition.Clone(m_ControlPoints);
-        return this;
-    }
 
     public event Action<RoofData> OnAnyRoofChange; // Building should sub to this.
 
@@ -60,45 +47,26 @@ public class Roof : MonoBehaviour
 
     private void Reset()
     {
-        Initialize();
+        Initialize(new RoofData());
     }
 
-    public Roof Initialize()
-    {
-        m_Data = new RoofData();
-        m_Tiles = new List<RoofTile>();
-        m_Walls = new List<Wall>();
-
-        m_Data.RoofTileData.SetMaterial(BuiltinMaterials.defaultMaterial);
-
-        //if (TryGetComponent(out Building building))
-        //{
-        //    m_ControlPoints = PolygonRecognition.Clone(building.LocalControlPoints);
-        //    m_OriginalControlPoints = PolygonRecognition.Clone(m_ControlPoints);
-        //}
-
-        return this;
-    }
-
-    public void Initialize(IData data)
+    public IBuildable Initialize(IData data)
     {
         m_Data = new RoofData(data as RoofData);
-    }
+        m_Data.TileData.Material = BuiltinMaterials.defaultMaterial;
 
-    public Roof Initialize(RoofData data)
-    {
-        m_Data = new RoofData(data);
-
-
+        m_Tiles = new List<RoofTile>();
+        m_Walls = new List<Wall>();
         return this;
     }
+
     /// <summary>
     /// Determines frame types that can be applied to this building.
     /// </summary>
     /// <returns></returns>
     public int[] AvailableRoofFrames()
     {
-        if (m_ControlPoints == null)
+        if (m_Data.ControlPoints == null | m_Data.ControlPoints.Length == 0)
             return new int[0];
 
         int Gable = (int)RoofType.Gable;
@@ -108,19 +76,19 @@ public class Roof : MonoBehaviour
         int Pyramid = (int)RoofType.Pyramid;
         int PyramidHip = (int)RoofType.PyramidHip;
 
-        if(m_ControlPoints.FindPathPoints().Count() == 4)
+        if(m_Data.ControlPoints.FindPathPoints().Count() == 4)
             return new int[] { Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip };
 
-        if(m_ControlPoints.IsDescribableInOneLine(out _))
+        if(m_Data.ControlPoints.IsDescribableInOneLine(out _))
         {
-            if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+            if (m_Data.ControlPoints.IsPointInside(m_Data.ControlPoints.Centre()))
             {
                 return new int[] { Gable, Mansard, Dormer, Pyramid, PyramidHip };
             }
             return new int[] { Gable, Mansard, Dormer };
         }
 
-        if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+        if (m_Data.ControlPoints.IsPointInside(m_Data.ControlPoints.Centre()))
         {
             return new int[] {  Mansard, Pyramid, PyramidHip };
         }
@@ -128,7 +96,7 @@ public class Roof : MonoBehaviour
         return new int[] { Mansard };
     }
 
-    public Roof BuildFrame()
+    public void Build()
     {
         transform.DeleteChildren();
 
@@ -138,9 +106,9 @@ public class Roof : MonoBehaviour
         m_Walls.Clear();
 
         if (!m_Data.IsActive)
-            return this;
+            return;
 
-        m_ControlPoints.SetPositions(m_OriginalControlPoints);
+        m_Data.ControlPoints.SetPositions(m_Data.OriginalControlPoints);
 
         if (TryGetComponent(out Building building))
         {
@@ -179,21 +147,30 @@ public class Roof : MonoBehaviour
                 break;
 
         }
-
-        return this;
     }
 
     private void BuildPyramid()
     {
-        Vector3 middle = ProMaths.Average(m_ControlPoints.GetPositions());
+        Vector3 middle = ProMaths.Average(m_Data.ControlPoints.GetPositions());
         middle += (Vector3.up * m_Data.PyramidHeight);
 
         List<RoofTile> pyramidTiles = new();
 
-        for (int i = 0; i < m_ControlPoints.Length; i++)
+        for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            int next = m_ControlPoints.GetNext(i);
-            CreateRoofTile(new Vector3[] { m_ControlPoints[i].Position, middle, middle, m_ControlPoints[next].Position }, false, true, false, false);
+            int next = m_Data.ControlPoints.GetNext(i);
+
+            RoofTileData data = new RoofTileData(m_Data.TileData)
+            {
+                ControlPoints = new Vector3[] { m_Data.ControlPoints[i].Position, middle, middle, m_Data.ControlPoints[next].Position },
+                ExtendHeightBeginning = false,
+                ExtendHeightEnd = true,
+                ExtendWidthBeginning = false,
+                ExtendWidthEnd = false
+
+            };
+
+            CreateRoofTile(data);
             pyramidTiles.Add(m_Tiles[^1]);
         }
 
@@ -201,25 +178,38 @@ public class Roof : MonoBehaviour
         {
             foreach(RoofTile tile in pyramidTiles)
             {
-                tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend, false).Extend(false, false, false, false).Build();
+                tile.Data.ExtendHeightEnd = false;
+                tile.Build();
             }
         }
     }
 
     private void BuildMansard()
     {
-        ControlPoint[] scaledControlPoints = PolygonRecognition.Clone(m_ControlPoints);
+        ControlPoint[] scaledControlPoints = PolygonRecognition.Clone(m_Data.ControlPoints);
         scaledControlPoints = scaledControlPoints.ScalePolygon(m_Data.MansardScale);
 
-        for (int i = 0; i < m_ControlPoints.Length; i++)
+        for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
             scaledControlPoints[i] += Vector3.up * m_Data.MansardHeight;
         }
 
-        for (int i = 0; i < m_ControlPoints.Length; i++)
+        for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            int next = m_ControlPoints.GetNext(i);
-            CreateRoofTile(new Vector3[] { m_ControlPoints[i].Position, scaledControlPoints[i].Position, scaledControlPoints[next].Position, m_ControlPoints[next].Position }, false, true, false, false);
+            int next = m_Data.ControlPoints.GetNext(i);
+
+            RoofTileData data = new RoofTileData(m_Data.TileData)
+            {
+                ControlPoints = new Vector3[] { m_Data.ControlPoints[i].Position, scaledControlPoints[i].Position, scaledControlPoints[next].Position, m_Data.ControlPoints[next].Position },
+                ExtendHeightBeginning = false,
+                ExtendHeightEnd = true,
+                ExtendWidthBeginning = false,
+                ExtendWidthEnd = false
+
+            };
+
+            CreateRoofTile(data);
+
             m_Tiles.RemoveAt(m_Tiles.Count - 1);
         }
 
@@ -227,23 +217,23 @@ public class Roof : MonoBehaviour
         {
             ProBuilderMesh top = ProBuilderMesh.Create();
             top.name = "Lid";
-            top.CreateShapeFromPolygon(scaledControlPoints.GetPositions(), m_Data.RoofTileData.Height, false);
-            top.GetComponent<Renderer>().material = m_Data.RoofTileData.Material;
+            top.CreateShapeFromPolygon(scaledControlPoints.GetPositions(), m_Data.TileData.Height, false);
+            top.GetComponent<Renderer>().material = m_Data.TileData.Material;
             top.transform.SetParent(transform, false);
             return;
         }
 
-        for (int i = 0; i < m_ControlPoints.Length; i++)
+        for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            scaledControlPoints[i] += Vector3.up * m_Data.RoofTileData.Height;
+            scaledControlPoints[i] += Vector3.up * m_Data.TileData.Height;
         }
 
-        m_ControlPoints.SetPositions(scaledControlPoints);
+        m_Data.ControlPoints.SetPositions(scaledControlPoints);
     }
 
     private void CreateRoofTiles(Vector3[] oneLine, int startIndex, int[][] indices, bool[][] extend)
     {
-        ControlPoint[] points = m_Data.IsGable ? m_ControlPoints.FindPathPoints().ToArray() : m_ControlPoints;
+        ControlPoint[] points = m_Data.IsGable ? m_Data.ControlPoints.FindPathPoints().ToArray() : m_Data.ControlPoints;
 
         int[] relativeIndices = points.RelativeIndices(startIndex);
 
@@ -259,27 +249,39 @@ public class Roof : MonoBehaviour
                 continue;
             }
 
-            CreateRoofTile(new Vector3[] { points[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], points[relativeIndices[tileIndices[3]]].Position }, tileExtend);
+            RoofTileData data = new RoofTileData(m_Data.TileData)
+            {
+                ControlPoints = new Vector3[] { points[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], points[relativeIndices[tileIndices[3]]].Position },
+                ExtendHeightBeginning = tileExtend[0],
+                ExtendHeightEnd = tileExtend[1],
+                ExtendWidthBeginning = tileExtend[2],
+                ExtendWidthEnd = tileExtend[3]
+            };
+
+            CreateRoofTile(data);
         }
     }
 
-    private void CreateRoofTile(Vector3[] points, bool[] extend)
+    private void CreateRoofTile(Vector3[] points, bool heightBeginning = false, bool heightEnd = true, bool widthBeginning = true, bool widthEnd = true)
     {
-        if (extend.Length != 4)
-            return;
+        RoofTileData data = new RoofTileData(m_Data.TileData)
+        {
+            ControlPoints = points,
+            ExtendHeightBeginning = heightBeginning,
+            ExtendHeightEnd = heightEnd,
+            ExtendWidthBeginning = widthBeginning,
+            ExtendWidthEnd = widthEnd
+        };
 
-        CreateRoofTile(points, extend[0], extend[1], extend[2], extend[3]);
+        CreateRoofTile(data);
     }
 
-    private void CreateRoofTile(Vector3[] points, bool heightStart = false, bool heightEnd = true, bool widthStart = true, bool widthEnd = true)
+    private void CreateRoofTile(RoofTileData data)
     {
-        ProBuilderMesh roofTile = ProBuilderMesh.Create();
-        roofTile.name = "Roof Tile";
-        RoofTile tile = roofTile.AddComponent<RoofTile>();
-        tile.SetControlPoints(points);
-        tile.SetMaterial(m_Data.RoofTileData.Material);
-        tile.transform.SetParent(transform, false);
-        tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend).Extend(heightStart, heightEnd, widthStart, widthEnd).Build();
+        ProBuilderMesh probuilderMesh = ProBuilderMesh.Create();
+        probuilderMesh.transform.SetParent(transform, false);
+        RoofTile tile = probuilderMesh.AddComponent<RoofTile>();
+        tile.Initialize(data).Build();
         m_Tiles.Add(tile);
     }
 
@@ -295,16 +297,16 @@ public class Roof : MonoBehaviour
 
     private void BuildGable()
     {
-        if (m_ControlPoints.IsDescribableInOneLine(out Vector3[] oneLine))
+        if (m_Data.ControlPoints.IsDescribableInOneLine(out Vector3[] oneLine))
         {
-            ControlPoint[] pathPoints = m_ControlPoints.FindPathPoints().ToArray();
+            ControlPoint[] pathPoints = m_Data.ControlPoints.FindPathPoints().ToArray();
 
             for (int i = 0; i < oneLine.Length; i++)
             {
                 oneLine[i] += Vector3.up * m_Data.GableHeight;
             }
 
-            m_TempOneLine = oneLine;
+            //m_TempOneLine = oneLine;
 
             switch (oneLine.Length)
             {
@@ -315,6 +317,7 @@ public class Roof : MonoBehaviour
                         oneLine[0] = Vector3.Lerp(oneLine[0], mid, m_Data.GableScale);
                         oneLine[1] = Vector3.Lerp(oneLine[1], mid, m_Data.GableScale);
                     }
+
 
                     CreateRoofTile(new Vector3[] { pathPoints[3].Position, oneLine[1], oneLine[0], pathPoints[0].Position });
                     CreateRoofTile(new Vector3[] { pathPoints[1].Position, oneLine[0], oneLine[1], pathPoints[2].Position });
@@ -877,7 +880,9 @@ public class Roof : MonoBehaviour
         {
             foreach (RoofTile tile in m_Tiles)
             {
-                tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend).Extend(tile.ExtendHeightBeginning, tile.ExtendHeightEnd, false, false).Build();
+                tile.Data.ExtendWidthBeginning = false;
+                tile.Data.ExtendWidthEnd = false;
+                tile.Build();
             }
         }
 
@@ -885,7 +890,9 @@ public class Roof : MonoBehaviour
         {
             foreach(RoofTile tile in m_Tiles)
             {
-                tile.Initialize(m_Data.RoofTileData.Height, m_Data.RoofTileData.Extend, false).Extend(tile.ExtendHeightBeginning, false, tile.ExtendWidthBeginning, tile.ExtendWidthEnd).Build();
+                tile.Data.IsInside = false;
+                tile.Data.ExtendHeightEnd = false;
+                tile.Build();
             }
 
             foreach(Wall wall in m_Walls)
@@ -916,32 +923,32 @@ public class Roof : MonoBehaviour
 
         if (m_Data.IsFlipped)
         {
-            mPointsA[1] = m_ControlPoints[0].Position;
-            mPointsA[2] = m_ControlPoints[1].Position;
+            mPointsA[1] = m_Data.ControlPoints[0].Position;
+            mPointsA[2] = m_Data.ControlPoints[1].Position;
 
-            mPointsB[0] = m_ControlPoints[3].Position;
-            mPointsB[3] = m_ControlPoints[2].Position;
+            mPointsB[0] = m_Data.ControlPoints[3].Position;
+            mPointsB[3] = m_Data.ControlPoints[2].Position;
 
-            Vector3 midA = Vector3.Lerp(m_ControlPoints[0].Position, m_ControlPoints[3].Position, 0.5f);
-            Vector3 midB = Vector3.Lerp(m_ControlPoints[1].Position, m_ControlPoints[2].Position, 0.5f);
+            Vector3 midA = Vector3.Lerp(m_Data.ControlPoints[0].Position, m_Data.ControlPoints[3].Position, 0.5f);
+            Vector3 midB = Vector3.Lerp(m_Data.ControlPoints[1].Position, m_Data.ControlPoints[2].Position, 0.5f);
 
-            Vector3 dirA = m_ControlPoints[0].Position.DirectionToTarget(m_ControlPoints[3].Position);
-            Vector3 dirB = m_ControlPoints[1].Position.DirectionToTarget(m_ControlPoints[2].Position);
+            Vector3 dirA = m_Data.ControlPoints[0].Position.DirectionToTarget(m_Data.ControlPoints[3].Position);
+            Vector3 dirB = m_Data.ControlPoints[1].Position.DirectionToTarget(m_Data.ControlPoints[2].Position);
 
-            mPointsA[0] = midA - (dirA * m_Data.RoofTileData.Height);
-            mPointsA[3] = midB - (dirB * m_Data.RoofTileData.Height);
+            mPointsA[0] = midA - (dirA * m_Data.TileData.Height);
+            mPointsA[3] = midB - (dirB * m_Data.TileData.Height);
 
-            mPointsB[1] = midA + (dirA * m_Data.RoofTileData.Height);
-            mPointsB[2] = midB + (dirB * m_Data.RoofTileData.Height);
+            mPointsB[1] = midA + (dirA * m_Data.TileData.Height);
+            mPointsB[2] = midB + (dirB * m_Data.TileData.Height);
 
         }
         else
         {
-            mPointsA[0] = m_ControlPoints[0].Position;
-            mPointsA[3] = m_ControlPoints[3].Position;
+            mPointsA[0] = m_Data.ControlPoints[0].Position;
+            mPointsA[3] = m_Data.ControlPoints[3].Position;
 
-            mPointsB[1] = m_ControlPoints[1].Position;
-            mPointsB[2] = m_ControlPoints[2].Position;
+            mPointsB[1] = m_Data.ControlPoints[1].Position;
+            mPointsB[2] = m_Data.ControlPoints[2].Position;
 
             Vector3 dirA = mPointsA[0].DirectionToTarget(mPointsB[1]);
             Vector3 dirB = mPointsA[3].DirectionToTarget(mPointsB[2]);
@@ -949,11 +956,11 @@ public class Roof : MonoBehaviour
             Vector3 midA = Vector3.Lerp(mPointsA[0], mPointsB[1], 0.5f);
             Vector3 midB = Vector3.Lerp(mPointsA[3], mPointsB[2], 0.5f);
 
-            mPointsA[1] = midA - (dirA * m_Data.RoofTileData.Height);
-            mPointsA[2] = midB - (dirB * m_Data.RoofTileData.Height);
+            mPointsA[1] = midA - (dirA * m_Data.TileData.Height);
+            mPointsA[2] = midB - (dirB * m_Data.TileData.Height);
 
-            mPointsB[0] = midA + (dirA * m_Data.RoofTileData.Height);
-            mPointsB[3] = midB + (dirB * m_Data.RoofTileData.Height);
+            mPointsB[0] = midA + (dirA * m_Data.TileData.Height);
+            mPointsB[3] = midB + (dirB * m_Data.TileData.Height);
         }
 
         List<Vector3[]> mArrays = new List<Vector3[]>();
@@ -1002,38 +1009,5 @@ public class Roof : MonoBehaviour
 
             iterator++;
         }
-
-
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        //if (m_TempVerts == null | m_TempVerts.Length == 0)
-        //    return;
-        if (m_ControlPoints == null)
-            return;
-
-
-        for (int i = 0; i < m_ControlPoints.Length; i++)
-        {
-            Handles.color = Color.white;
-            Handles.Label(m_ControlPoints[i].Position + transform.localPosition, i.ToString());
-        }
-
-        if (m_TempOneLine == null)
-            return;
-
-        int itr = 0;
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 16;
-        style.normal.textColor = Color.red;
-
-        foreach (Vector3 point in m_TempOneLine)
-        {
-            Handles.Label(point, itr.ToString(), style);
-            itr++;
-            //Handles.DrawSolidDisc(point, Vector3.up, 0.1f);
-        }
-
     }
 }

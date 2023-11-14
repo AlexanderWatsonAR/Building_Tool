@@ -37,7 +37,7 @@ public static class ProBuilderExtensions
     {
         ActionResult result = ActionResult.NoSelection;
 
-        if(holePoints != null)
+        if (holePoints != null)
         {
             result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
         }
@@ -46,14 +46,11 @@ public static class ProBuilderExtensions
             result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false);
         }
 
-        if(result == ActionResult.Success)
-        {
-            proBuilderMesh.ToMesh();
-            proBuilderMesh.Refresh();
-            proBuilderMesh.MatchFaceToNormal(normal);
-            proBuilderMesh.ToMesh();
-            proBuilderMesh.Refresh();
-        }
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
+        proBuilderMesh.MatchFaceToNormal(normal);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
 
         return result;
     }

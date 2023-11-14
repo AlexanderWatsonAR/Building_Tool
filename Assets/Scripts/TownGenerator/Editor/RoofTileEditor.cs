@@ -12,14 +12,14 @@ public class RoofTileEditor : Editor
 
         RoofTile tile = (RoofTile)target;
 
-        SerializedProperty columns = serializedObject.FindProperty("m_Columns");
-        SerializedProperty rows = serializedObject.FindProperty("m_Rows");
-        SerializedProperty material = serializedObject.FindProperty("m_Material");
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        SerializedProperty columns = data.FindPropertyRelative("m_Columns");
+        SerializedProperty rows = data.FindPropertyRelative("m_Rows");
 
         EditorGUILayout.LabelField("Roof Section Layout");
         EditorGUILayout.PropertyField(columns);
         EditorGUILayout.PropertyField(rows);
-        //EditorGUILayout.PropertyField(material);
 
         if(serializedObject.ApplyModifiedProperties())
         {

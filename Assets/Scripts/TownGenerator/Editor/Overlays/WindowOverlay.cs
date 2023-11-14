@@ -5,7 +5,8 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Overlays;
-using UnityEngine.Rendering;
+using UnityEditor.Rendering;
+using Unity.VisualScripting;
 
 [Overlay(typeof(SceneView), "Window", true)]
 public class WindowOverlay : Overlay, ITransientOverlay
@@ -18,13 +19,15 @@ public class WindowOverlay : Overlay, ITransientOverlay
 
         WindowSerializedProperties props = new WindowSerializedProperties(m_Window);
 
-        Display(root, props, m_Window.WindowData, m_Window, this);
+        Display(root, props, m_Window, this);
 
         return root;
     }
 
-    public static void Display(VisualElement root, WindowSerializedProperties props, WindowData winData, IBuildable buildable, Overlay overlay)
+    public static void Display(VisualElement root, WindowSerializedProperties props, IBuildable buildable, Overlay overlay)
     {
+        WindowData winData = (WindowData)props.Data.GetUnderlyingValue();
+
         EnumFlagsField activeWinElements = new EnumFlagsField() { tooltip = "Active Elements" };
         activeWinElements.BindProperty(props.ActiveElements);
         activeWinElements.RegisterValueChangedCallback((ChangeEvent<System.Enum> evt) => { if (evt.newValue != evt.previousValue) { buildable.Build(); overlay.displayed = false; } overlay.displayed = true; });

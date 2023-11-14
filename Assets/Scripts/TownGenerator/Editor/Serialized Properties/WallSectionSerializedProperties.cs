@@ -8,19 +8,22 @@ public class WallSectionSerializedProperties
     [SerializeField] SerializedObject m_SerializedObject;
     [SerializeField] private SerializedProperty m_WallSectionData;
     [SerializeField] WindowSerializedProperties m_WindowSerializedProperties;
+    [SerializeField] DoorSerializedProperties m_DoorSerializedProperties;
 
     public WindowSerializedProperties WindowSerializedProperties => m_WindowSerializedProperties;
+    public DoorSerializedProperties DoorSerializedProperties => m_DoorSerializedProperties;
     public SerializedObject SerializedObject => m_SerializedObject;
 
     public SerializedProperty WallSectionData { get { return m_WallSectionData; } }
     public SerializedProperty WallElement { get { return m_SerializedObject.FindProperty("m_WallElement"); } }
+    public SerializedProperty DoorElement { get { return WallSectionData.FindPropertyRelative("m_ActiveDoorElements"); } }
     public SerializedProperty DoorColumns { get { return WallSectionData.FindPropertyRelative("m_DoorColumns"); } }
     public SerializedProperty DoorRows { get { return WallSectionData.FindPropertyRelative("m_DoorRows"); } }
     public SerializedProperty DoorHeight { get { return WallSectionData.FindPropertyRelative("m_PedimentHeight"); } }
     public SerializedProperty DoorWidth { get { return WallSectionData.FindPropertyRelative("m_SideWidth"); } }
     public SerializedProperty DoorOffset { get { return WallSectionData.FindPropertyRelative("m_SideOffset"); } }
-    public SerializedProperty DoorArchHeight { get { return WallSectionData.FindPropertyRelative("m_DoorArchHeight"); } }
-    public SerializedProperty DoorArchSides { get { return WallSectionData.FindPropertyRelative("m_DoorArchSides"); } }
+    public SerializedProperty DoorArchHeight { get { return WallSectionData.FindPropertyRelative("m_ArchHeight"); } }
+    public SerializedProperty DoorArchSides { get { return WallSectionData.FindPropertyRelative("m_ArchSides"); } }
     public SerializedProperty DoorActive { get { return WallSectionData.FindPropertyRelative("m_IsDoorActive"); } }
     public SerializedProperty DoorData { get { return WallSectionData.FindPropertyRelative("m_DoorData"); } }
     public SerializedProperty DoorScale { get { return DoorData.FindPropertyRelative("m_Scale"); } }
@@ -60,6 +63,7 @@ public class WallSectionSerializedProperties
         m_WallSectionData = m_SerializedObject.FindProperty("m_Data");
 
         m_WindowSerializedProperties = new WindowSerializedProperties(m_SerializedObject, WindowData);
+        m_DoorSerializedProperties = new DoorSerializedProperties(m_SerializedObject, DoorData);
 
     }
 

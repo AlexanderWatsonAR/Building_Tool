@@ -62,7 +62,7 @@ public class RoofEditor : Editor
             }
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Frame Type");
+            EditorGUILayout.PrefixLabel("Frame Type");
 
             if (index == -1)
             {
@@ -125,7 +125,7 @@ public class RoofEditor : Editor
             }
             else
             {
-                roof.BuildFrame();
+                roof.Build();
                 roof.OnAnyRoofChange_Invoke();
             }
         }

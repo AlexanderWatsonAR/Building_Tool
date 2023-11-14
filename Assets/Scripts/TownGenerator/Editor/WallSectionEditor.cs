@@ -16,128 +16,78 @@ public class WallSectionEditor : Editor
     private bool m_IsDoorFrameFoldoutActive = true;
     private bool m_IsWindowFoldoutActive = true;
 
+    WallSection m_Section;
+    WallSectionSerializedProperties m_SerializedProperties;
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
-        WallSection section = (WallSection)target;
+        m_Section = (WallSection)target;
 
-        WallSectionSerializedProperties serialProps = new WallSectionSerializedProperties(section);
+        m_SerializedProperties = new WallSectionSerializedProperties(m_Section);
 
-        WindowData windowData = section.Data.WindowData;
+        WindowData windowData = m_Section.Data.WindowData;
 
-        EditorGUILayout.PropertyField(serialProps.WallElement, new GUIContent("Section"));
+        EditorGUILayout.PropertyField(m_SerializedProperties.WallElement, new GUIContent("Section"));
 
-        switch (section.WallElement)
+        switch (m_Section.WallElement)
         {
             case WallElement.Wall:
                 break;
             case WallElement.Doorway:
-                {
-                    EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
-                    EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(serialProps.DoorColumns, new GUIContent("Columns"));
-                    EditorGUILayout.PropertyField(serialProps.DoorRows, new GUIContent("Rows"));
-                    EditorGUI.indentLevel--;
-                    EditorGUILayout.LabelField("Size");
-                    EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(serialProps.DoorOffset);
-                    EditorGUILayout.PropertyField(serialProps.DoorHeight);
-                    EditorGUILayout.PropertyField(serialProps.DoorWidth);
-                    EditorGUI.indentLevel--;
-
-                    EditorGUILayout.PropertyField(serialProps.DoorActive, new GUIContent("Is Active"));
-
-                    m_IsDoorFoldoutActive = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsDoorFoldoutActive, "Door");
-
-                    if (m_IsDoorFoldoutActive)
-                    {
-                        EditorGUI.BeginDisabledGroup(!serialProps.DoorActive.boolValue);
-
-                        EditorGUILayout.PropertyField(serialProps.DoorScale);
-                        EditorGUILayout.PropertyField(serialProps.DoorDepth);
-                        EditorGUILayout.LabelField("Hinge", EditorStyles.boldLabel);
-                        EditorGUI.indentLevel++;
-                        EditorGUILayout.PropertyField(serialProps.DoorHingePoint, new GUIContent("Position"));
-                        EditorGUILayout.PropertyField(serialProps.DoorHingeOffset, new GUIContent("Offset"));
-                        EditorGUILayout.PropertyField(serialProps.DoorHingeEulerAngle, new GUIContent("Euler Angle"));
-                        EditorGUI.indentLevel--;
-
-                        EditorGUI.EndDisabledGroup();
-                    }
-
-                    EditorGUILayout.EndFoldoutHeaderGroup();
-
-                    m_IsDoorFrameFoldoutActive = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsDoorFoldoutActive, "Frame");
-
-                    if (m_IsDoorFrameFoldoutActive)
-                    {
-                        EditorGUI.BeginDisabledGroup(!serialProps.DoorActive.boolValue);
-
-                        EditorGUILayout.PropertyField(serialProps.DoorFrameDepth, new GUIContent("Depth"));
-                        EditorGUILayout.PropertyField(serialProps.DoorFrameScale, new GUIContent("Scale"));
-
-                        EditorGUI.EndDisabledGroup();
-                    }
-
-                    EditorGUILayout.LabelField("Handle", EditorStyles.boldLabel);
-                    EditorGUILayout.PropertyField(serialProps.DoorHandleScale, new GUIContent("Scale"));
-                    EditorGUILayout.PropertyField(serialProps.DoorHandlePoint, new GUIContent("Position"));
-
-
-                    EditorGUILayout.EndFoldoutHeaderGroup();
-                }
+                DisplayDoorway();
                 break;
             case WallElement.Window:
                 {
                     EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
                     EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(serialProps.WindowColumns, new GUIContent("Columns"));
-                    EditorGUILayout.PropertyField(serialProps.WindowRows, new GUIContent("Rows"));
+                    EditorGUILayout.PropertyField(m_SerializedProperties.WindowColumns, new GUIContent("Columns"));
+                    EditorGUILayout.PropertyField(m_SerializedProperties.WindowRows, new GUIContent("Rows"));
                     EditorGUI.indentLevel--;
                     EditorGUILayout.LabelField("Shape", EditorStyles.boldLabel);
                     EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(serialProps.WindowSides, new GUIContent("Sides"));
-                    EditorGUILayout.PropertyField(serialProps.WindowHeight, new GUIContent("Height"));
-                    EditorGUILayout.PropertyField(serialProps.WindowWidth, new GUIContent("Width"));
-                    EditorGUILayout.PropertyField(serialProps.WindowAngle, new GUIContent("Angle"));
+                    EditorGUILayout.PropertyField(m_SerializedProperties.WindowSides, new GUIContent("Sides"));
+                    EditorGUILayout.PropertyField(m_SerializedProperties.WindowHeight, new GUIContent("Height"));
+                    EditorGUILayout.PropertyField(m_SerializedProperties.WindowWidth, new GUIContent("Width"));
+                    EditorGUILayout.PropertyField(m_SerializedProperties.WindowAngle, new GUIContent("Angle"));
                     EditorGUI.indentLevel--;
 
                     m_IsWindowFoldoutActive = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsWindowFoldoutActive, "Window");
 
                     if (m_IsWindowFoldoutActive)
                     {
-                        EditorGUILayout.PropertyField(serialProps.WindowActiveElements);
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowActiveElements);
 
                         EditorGUI.BeginDisabledGroup(!windowData.IsOuterFrameActive);
                         EditorGUILayout.LabelField("Outer Frame", EditorStyles.boldLabel);
                         EditorGUI.indentLevel++;
-                        EditorGUILayout.PropertyField(serialProps.WindowOuterFrameScale, new GUIContent("Scale"));
-                        EditorGUILayout.PropertyField(serialProps.WindowOuterFrameDepth, new GUIContent("Depth"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowOuterFrameScale, new GUIContent("Scale"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowOuterFrameDepth, new GUIContent("Depth"));
                         EditorGUI.indentLevel--;
                         EditorGUI.EndDisabledGroup();
 
                         EditorGUI.BeginDisabledGroup(!windowData.IsInnerFrameActive);
                         EditorGUILayout.LabelField("Inner Frame", EditorStyles.boldLabel);
                         EditorGUI.indentLevel++;
-                        EditorGUILayout.PropertyField(serialProps.WindowInnerFrameColumns, new GUIContent("Columns"));
-                        EditorGUILayout.PropertyField(serialProps.WindowInnerFrameRows, new GUIContent("Rows"));
-                        EditorGUILayout.PropertyField(serialProps.WindowInnerFrameScale, new GUIContent("Scale"));
-                        EditorGUILayout.PropertyField(serialProps.WindowInnerFrameDepth, new GUIContent("Depth"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowInnerFrameColumns, new GUIContent("Columns"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowInnerFrameRows, new GUIContent("Rows"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowInnerFrameScale, new GUIContent("Scale"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowInnerFrameDepth, new GUIContent("Depth"));
                         EditorGUI.indentLevel--;
                         EditorGUI.EndDisabledGroup();
 
                         EditorGUI.BeginDisabledGroup(!windowData.IsPaneActive);
                         EditorGUILayout.LabelField("Pane", EditorStyles.boldLabel);
                         EditorGUI.indentLevel++;
-                        EditorGUILayout.PropertyField(serialProps.WindowPaneDepth);
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowPaneDepth);
                         EditorGUI.indentLevel--;
                         EditorGUI.EndDisabledGroup();
 
                         EditorGUI.BeginDisabledGroup(!windowData.AreShuttersActive);
                         EditorGUILayout.LabelField("Shutters", EditorStyles.boldLabel);
                         EditorGUI.indentLevel++;
-                        EditorGUILayout.PropertyField(serialProps.WindowShuttersDepth, new GUIContent("Depth"));
-                        EditorGUILayout.PropertyField(serialProps.WindowShuttersAngle, new GUIContent("Angle"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowShuttersDepth, new GUIContent("Depth"));
+                        EditorGUILayout.PropertyField(m_SerializedProperties.WindowShuttersAngle, new GUIContent("Angle"));
                         EditorGUI.indentLevel--;
                         EditorGUI.EndDisabledGroup();
                     }
@@ -146,15 +96,95 @@ public class WallSectionEditor : Editor
                 }
                 break;
             case WallElement.Extension:
-                EditorGUILayout.PropertyField(serialProps.ExtensionWidth);
-                EditorGUILayout.PropertyField(serialProps.ExtensionHeight);
-                EditorGUILayout.PropertyField(serialProps.ExtensionDistance);
+                EditorGUILayout.PropertyField(m_SerializedProperties.ExtensionWidth);
+                EditorGUILayout.PropertyField(m_SerializedProperties.ExtensionHeight);
+                EditorGUILayout.PropertyField(m_SerializedProperties.ExtensionDistance);
+                break;
+            case WallElement.Archway:
+                DisplayDoorway();
                 break;
         }
 
-        if(serialProps.SerializedObject.ApplyModifiedProperties())
+        if(m_SerializedProperties.SerializedObject.ApplyModifiedProperties())
         {
-            section.Build();
+            m_Section.Build();
         }
     }
+
+    private void DisplayDoorway()
+    {
+        EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(m_SerializedProperties.DoorColumns, new GUIContent("Columns"));
+        EditorGUILayout.PropertyField(m_SerializedProperties.DoorRows, new GUIContent("Rows"));
+        EditorGUI.indentLevel--;
+        EditorGUILayout.LabelField("Size");
+        EditorGUI.indentLevel++;
+
+        EditorGUILayout.PropertyField(m_SerializedProperties.DoorOffset);
+        EditorGUILayout.PropertyField(m_SerializedProperties.DoorHeight);
+        EditorGUILayout.PropertyField(m_SerializedProperties.DoorWidth);
+
+        if (m_Section.WallElement == WallElement.Archway)
+        {
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorArchSides, new GUIContent("Sides"));
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorArchHeight, new GUIContent("Height"));
+        }
+
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.PropertyField(m_SerializedProperties.DoorElement, new GUIContent("Active Elements"));
+
+        m_IsDoorFoldoutActive = EditorGUILayout.BeginFoldoutHeaderGroup(m_IsDoorFoldoutActive, "Door");
+
+        if (m_IsDoorFoldoutActive)
+        {
+            DoorElement doorElement = m_SerializedProperties.DoorElement.GetEnumValue<DoorElement>();
+
+            bool isNothing = doorElement.IsDoorElementActive(DoorElement.Nothing);
+            bool isDoor = doorElement.IsDoorElementActive(DoorElement.Door);
+            bool isFrame = doorElement.IsDoorElementActive(DoorElement.Frame);
+            bool isHandle = doorElement.IsDoorElementActive(DoorElement.Handle);
+
+            EditorGUI.BeginDisabledGroup(isNothing);
+            EditorGUI.BeginDisabledGroup(!isDoor);
+
+            EditorGUI.indentLevel++;
+            EditorGUILayout.LabelField("Door", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorScale);
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorDepth);
+
+            EditorGUILayout.LabelField("Hinge", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorHingePoint, new GUIContent("Position"));
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorHingeOffset, new GUIContent("Offset"));
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorHingeEulerAngle, new GUIContent("Euler Angle"));
+            EditorGUI.indentLevel--;
+
+            EditorGUI.BeginDisabledGroup(!isHandle);
+
+            EditorGUILayout.LabelField("Handle", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorHandleScale, new GUIContent("Scale"));
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorHandlePoint, new GUIContent("Position"));
+            EditorGUI.indentLevel--;
+            EditorGUI.indentLevel--;
+
+            EditorGUI.EndDisabledGroup();
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUI.BeginDisabledGroup(!isFrame);
+
+            EditorGUILayout.LabelField("Frame", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorFrameDepth, new GUIContent("Depth"));
+            EditorGUILayout.PropertyField(m_SerializedProperties.DoorFrameScale, new GUIContent("Scale"));
+            EditorGUI.indentLevel--;
+
+            EditorGUI.EndDisabledGroup();
+            EditorGUI.EndDisabledGroup();
+        }
+    }
+
 }

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEngine.Rendering.DebugUI;
 
 [System.Serializable]
-public class DoorData
+public class DoorData : IData
 {
+    [SerializeField] DoorElement m_ActiveElements;
+
     // Door
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3 m_Forward;
@@ -30,6 +31,7 @@ public class DoorData
 
     [SerializeField] private Material m_Material;
 
+    public DoorElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
     public Vector3[] ControlPoints{ get{ return m_ControlPoints;} set{ SetControlPoints(value); }}
     public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
     public Vector3 Right { get { return m_Right; } set { m_Right = value; } }

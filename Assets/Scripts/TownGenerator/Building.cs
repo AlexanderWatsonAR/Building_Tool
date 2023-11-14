@@ -124,7 +124,7 @@ public class Building : MonoBehaviour
             count++;
         }
 
-        m_Roof.SetControlPoints(ControlPoints);
+        m_Roof.Data.ControlPoints = ControlPoints;
 
         //m_ProBuilderMesh.SetPivot(m_PivotPosition); 
         //m_ProBuilderMesh.ToMesh();
@@ -158,8 +158,7 @@ public class Building : MonoBehaviour
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).SetControlPoints(ControlPoints);
-        roofGO.GetComponent<Roof>().BuildFrame();
+        roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).Build();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
         return this;
     }

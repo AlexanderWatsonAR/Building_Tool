@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using Edge = UnityEngine.ProBuilder.Edge;
 
-public class Door : MonoBehaviour
+public class Door : MonoBehaviour, IBuildable
 {
     [SerializeField] private ProBuilderMesh m_DoorMesh;
     [SerializeField] private ProBuilderMesh m_DoorHandleMesh;
@@ -17,21 +17,23 @@ public class Door : MonoBehaviour
 
     public DoorData DoorData => m_Data;
 
-    public Door Initialize(DoorData data)
+    public IBuildable Initialize(IData data)
     {
         m_DoorMesh = GetComponent<ProBuilderMesh>();
         m_DoorHandleMesh = ProBuilderMesh.Create();
         m_DoorHandleMesh.transform.SetParent(transform, false);
         m_DoorHandleMesh.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
         m_DoorHandleMesh.name = "Handle";
-        m_Data = data;
+        m_Data = data as DoorData;
         return this;
     }
 
-    public Door Build()
+    public void Build()
     {
-        m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward);
+        if (!m_Data.ActiveElements.IsDoorElementActive(DoorElement.Door))
+            return;
 
+        m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward);
         ProBuilderMesh inside = Instantiate(m_DoorMesh);
         inside.faces[0].Reverse();
 
@@ -50,6 +52,9 @@ public class Door : MonoBehaviour
         m_DoorMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
         m_DoorMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
         m_DoorMesh.Refresh();
+
+        if (!m_Data.ActiveElements.IsDoorElementActive(DoorElement.Handle))
+            return;
 
         // Handle
         float size = m_Data.HandleSize * m_Data.HandleScale;
@@ -84,8 +89,6 @@ public class Door : MonoBehaviour
         m_DoorHandleMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
         m_DoorHandleMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
         m_DoorHandleMesh.Refresh();
-
-        return this;
     }
 
 }

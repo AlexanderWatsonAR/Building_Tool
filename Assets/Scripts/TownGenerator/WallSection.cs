@@ -8,6 +8,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 using System.Linq;
 using UnityEngine.ProBuilder.Shapes;
 using ProMaths = UnityEngine.ProBuilder.Math;
+using UnityEngine.Rendering;
 
 public class WallSection : MonoBehaviour, IBuildable
 {
@@ -20,7 +21,6 @@ public class WallSection : MonoBehaviour, IBuildable
     public WallElement WallElement => m_WallElement;
     public WallSectionData Data => m_Data;
 
-
     // Temp variables for testing
     List<IList<Vector3>> m_Points;
     List<Vector3> m_Grid;
@@ -31,6 +31,7 @@ public class WallSection : MonoBehaviour, IBuildable
     public IBuildable Initialize(IData wallSectionData)
     {
         m_Data = wallSectionData as WallSectionData;
+        m_FaceNormal = m_Data.DoorData.Forward;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
         return this;
     }
@@ -38,7 +39,6 @@ public class WallSection : MonoBehaviour, IBuildable
     public void Build()
     {
         transform.DeleteChildren();
-        //m_Children = transform.GetAllChildren();
 
         switch(m_WallElement)
         {
@@ -49,61 +49,30 @@ public class WallSection : MonoBehaviour, IBuildable
                 {
                     List<List<Vector3>> doorGridControlPoints;
 
-                    if (m_Data.ArchHeight > 0)
-                    {
-                        ProBuilderMesh archedDoorGridA = MeshMaker.ArchedDoorHoleGrid(m_Data.ControlPoints, m_Data.SideWidth, m_Data.DoorColumns, m_Data.DoorRows, m_Data.PedimentHeight, m_Data.ArchHeight, m_Data.ArchSides, out doorGridControlPoints, Vector3.right * m_Data.SideOffset); // Outside
-                        archedDoorGridA.Extrude(new Face[] { archedDoorGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_Data.WallDepth);
-                        ProBuilderMesh archedDoorGridB = MeshMaker.ArchedDoorHoleGrid(m_Data.ControlPoints, m_Data.SideWidth, m_Data.DoorColumns, m_Data.DoorRows, m_Data.PedimentHeight, m_Data.ArchHeight, m_Data.ArchSides, out doorGridControlPoints, Vector3.right * m_Data.SideOffset, true); // Inside
-                        CombineMeshes.Combine(new ProBuilderMesh[] { archedDoorGridA, archedDoorGridB }, archedDoorGridA);
-                        Rebuild(archedDoorGridA);
-                        DestroyImmediate(archedDoorGridB.gameObject);
-                    }
-                    else
-                    {
-                        Vector3 doorScale = new Vector3(m_Data.SideWidth, m_Data.PedimentHeight);
-                        ProBuilderMesh doorGridA = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, out doorGridControlPoints, Vector3.right * m_Data.SideOffset, new Vector3(0, -0.999f)); // Outside
-                        doorGridA.Extrude(new Face[] { doorGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_Data.WallDepth);
-                        ProBuilderMesh doorGridB = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, out _, Vector3.right * m_Data.SideOffset, new Vector3(0, -0.999f), true); // Inside
-                        CombineMeshes.Combine(new ProBuilderMesh[] { doorGridA, doorGridB }, doorGridA);
-                        Rebuild(doorGridA);
-                        DestroyImmediate(doorGridB.gameObject);
-                    }
+                    Vector3 doorScale = new Vector3(m_Data.SideWidth, m_Data.PedimentHeight);
+                    ProBuilderMesh doorGridA = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, out doorGridControlPoints, Vector3.right * m_Data.SideOffset, new Vector3(0, -0.999f)); // Outside
+                    doorGridA.Extrude(new Face[] { doorGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_Data.WallDepth);
+                    ProBuilderMesh doorGridB = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, out _, Vector3.right * m_Data.SideOffset, new Vector3(0, -0.999f), true); // Inside
+                    CombineMeshes.Combine(new ProBuilderMesh[] { doorGridA, doorGridB }, doorGridA);
+                    Rebuild(doorGridA);
+                    DestroyImmediate(doorGridB.gameObject);
 
-                    if (!m_Data.IsDoorActive)
-                        return;
-
-                    foreach (List<Vector3> controlPoints in doorGridControlPoints)
-                    {
-                        ProBuilderMesh doorPro = ProBuilderMesh.Create();
-                        doorPro.name = "Door";
-                        doorPro.transform.SetParent(transform, false);
-                        Door door = doorPro.AddComponent<Door>();
-                        DoorData data = new DoorData(m_Data.DoorData);
-                        {
-                            data.ControlPoints = controlPoints.ToArray();
-                        }
-
-                        door.Initialize(data).Build();
-
-                        // Frame
-                        Vector3[] scaledControlPoints = controlPoints.ScalePolygon(m_Data.DoorFrameInsideScale);
-                        List<IList<Vector3>> holePoints = new();
-                        holePoints.Add(scaledControlPoints);
-
-                        ProBuilderMesh doorFrameMesh = ProBuilderMesh.Create();
-                        doorFrameMesh.name = "Frame";
-                        doorFrameMesh.transform.SetParent(doorPro.transform, false);
-                        doorFrameMesh.CreateShapeFromPolygon(controlPoints, 0, false, holePoints);
-                        doorFrameMesh.ToMesh();
-                        doorFrameMesh.Refresh();
-                        doorFrameMesh.MatchFaceToNormal(m_FaceNormal);
-                        doorFrameMesh.Extrude(doorFrameMesh.faces, ExtrudeMethod.FaceNormal, m_Data.DoorFrameDepth);
-                        doorFrameMesh.ToMesh();
-                        doorFrameMesh.Refresh();
-                        //doorFrameMesh.GetComponent<Renderer>().sharedMaterial = m_Data.DoorFrameMaterial;
-                    }
+                    CreateDoors(doorGridControlPoints);
                 }
+                break;
+            case WallElement.Archway:
+                {
+                    List<List<Vector3>> doorGridControlPoints;
 
+                    ProBuilderMesh archedDoorGridA = MeshMaker.ArchedDoorHoleGrid(m_Data.ControlPoints, m_Data.SideWidth, m_Data.DoorColumns, m_Data.DoorRows, m_Data.PedimentHeight, m_Data.ArchHeight, m_Data.ArchSides, out doorGridControlPoints, Vector3.right * m_Data.SideOffset); // Outside
+                    archedDoorGridA.Extrude(new Face[] { archedDoorGridA.faces[0] }, ExtrudeMethod.FaceNormal, m_Data.WallDepth);
+                    ProBuilderMesh archedDoorGridB = MeshMaker.ArchedDoorHoleGrid(m_Data.ControlPoints, m_Data.SideWidth, m_Data.DoorColumns, m_Data.DoorRows, m_Data.PedimentHeight, m_Data.ArchHeight, m_Data.ArchSides, out doorGridControlPoints, Vector3.right * m_Data.SideOffset, true); // Inside
+                    CombineMeshes.Combine(new ProBuilderMesh[] { archedDoorGridA, archedDoorGridB }, archedDoorGridA);
+                    Rebuild(archedDoorGridA);
+                    DestroyImmediate(archedDoorGridB.gameObject);
+
+                    CreateDoors(doorGridControlPoints);
+                }
                 break;
             case WallElement.Window:
                 {
@@ -198,17 +167,17 @@ public class WallSection : MonoBehaviour, IBuildable
                     }
                     else
                     {
-                        wallSectionRoof = gameObject.AddComponent<Roof>().Initialize();
+                        gameObject.AddComponent<Roof>().Initialize(new RoofData());
+                        wallSectionRoof = gameObject.GetComponent<Roof>();
                     }
 
-                    wallSectionRoof.SetControlPoints(points);
+                    wallSectionRoof.Data.ControlPoints = points;
 
                     GameObject roofGO = new GameObject("Roof", typeof(Roof));
                     roofGO.transform.SetParent(transform, true);
                     roofGO.transform.localPosition = new Vector3(0, wallHeight, 0);
-                    Roof roofExtension = roofGO.GetComponent<Roof>().Initialize(wallSectionRoof.Data);
-                    roofExtension.SetControlPoints(points);
-                    roofExtension.BuildFrame();
+                    Roof roofExtension = roofGO.GetComponent<Roof>();
+                    roofExtension.Initialize(wallSectionRoof.Data).Build();
                 }
                 break;
             case WallElement.Empty:
@@ -231,6 +200,47 @@ public class WallSection : MonoBehaviour, IBuildable
             }
         }
 
+    }
+
+    private void CreateDoors(List<List<Vector3>> doorGridControlPoints)
+    {
+        foreach (List<Vector3> controlPoints in doorGridControlPoints)
+        {
+            if (m_Data.ActiveDoorElements.IsDoorElementActive(DoorElement.Door))
+            {
+                ProBuilderMesh doorPro = ProBuilderMesh.Create();
+                doorPro.name = "Door";
+                doorPro.transform.SetParent(transform, false);
+                Door door = doorPro.AddComponent<Door>();
+                DoorData data = new DoorData(m_Data.DoorData);
+                {
+                    data.ControlPoints = controlPoints.ToArray();
+                    data.ActiveElements = m_Data.ActiveDoorElements;
+                }
+
+                door.Initialize(data).Build();
+            }
+
+            if (!m_Data.ActiveDoorElements.IsDoorElementActive(DoorElement.Frame))
+                continue;
+
+            // Frame
+            Vector3[] scaledControlPoints = controlPoints.ScalePolygon(m_Data.DoorFrameInsideScale);
+            List<IList<Vector3>> holePoints = new();
+            holePoints.Add(scaledControlPoints);
+
+            ProBuilderMesh doorFrameMesh = ProBuilderMesh.Create();
+            doorFrameMesh.name = "Frame";
+            doorFrameMesh.transform.SetParent(transform, false);
+            doorFrameMesh.CreateShapeFromPolygon(controlPoints, 0, false, holePoints);
+            doorFrameMesh.ToMesh();
+            doorFrameMesh.Refresh();
+            doorFrameMesh.MatchFaceToNormal(m_FaceNormal);
+            doorFrameMesh.Extrude(doorFrameMesh.faces, ExtrudeMethod.FaceNormal, m_Data.DoorFrameDepth);
+            doorFrameMesh.ToMesh();
+            doorFrameMesh.Refresh();
+            //doorFrameMesh.GetComponent<Renderer>().sharedMaterial = m_Data.DoorFrameMaterial;
+        }
     }
 
     private WallSection Rebuild(ProBuilderMesh mesh)

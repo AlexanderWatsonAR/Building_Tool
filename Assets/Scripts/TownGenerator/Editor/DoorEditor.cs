@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Rendering;
+using JetBrains.Annotations;
 
 [CustomEditor(typeof(Door))]
 public class DoorEditor : Editor
@@ -16,6 +17,17 @@ public class DoorEditor : Editor
         Door door = (Door)target;
 
         SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        SerializedProperty activeElements = data.FindPropertyRelative("m_ActiveElements");
+
+        int flag = (int)activeElements.GetEnumValue<DoorElement>();
+
+        if(flag == (int) DoorElement.Frame)
+        {
+            flag = (int)DoorElement.Nothing;
+        }    
+
+        activeElements.SetEnumValue<DoorElement>( (DoorElement) EditorGUILayout.MaskField("Active Elements", flag, new string[] { "Door", "Handle"}));
 
         m_HingePosition = data.FindPropertyRelative("m_HingePosition").vector3Value;
         Vector3 forward = data.FindPropertyRelative("m_Forward").vector3Value;

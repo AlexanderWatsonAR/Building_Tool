@@ -16,7 +16,7 @@ public class WallOverlay : Overlay, ITransientOverlay
         root.Add(new Slider("Rows"));
         return root;
 
-        
+
 
     }
 

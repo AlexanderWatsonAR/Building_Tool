@@ -17,7 +17,7 @@ public enum WindowElement
 [System.Flags]
 public enum DoorElement
 {
-    Nothing = 0, Door = 1, Frame = 2, Handle = 4, Everything = ~0
+    Nothing = 0, Door = 1, Handle = 2, Frame = 4, Everything = ~0
 }
 
 public enum FloorMode
@@ -54,6 +54,7 @@ public enum WallElement
     Wall, Doorway, Archway, Window, Extension, Empty
 }
 
+
 public enum PolyMode
 {
     Draw, Edit, Hide
@@ -62,4 +63,17 @@ public enum PolyMode
 public enum CornerType
 {
     Point, Round, Flat
+}
+
+public static class EnumExtensions
+{
+    public static bool IsWindowElementActive(this WindowElement windowElement, WindowElement comparison)
+    {
+        return windowElement == WindowElement.Nothing ? false : (windowElement & comparison) != 0;
+    }
+
+    public static bool IsDoorElementActive(this DoorElement doorElement, DoorElement comparison)
+    {
+        return doorElement == DoorElement.Nothing ? false : (doorElement & comparison) != 0;
+    }
 }

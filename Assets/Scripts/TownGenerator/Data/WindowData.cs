@@ -16,6 +16,11 @@ public class WindowData : IData
     [SerializeField, Range(0, 0.999f)] private float m_ShuttersDepth;
     [SerializeField, Range(0, 180)] private float m_ShuttersAngle;
 
+    [SerializeField] private bool m_IsOuterFrameActive;
+    [SerializeField] private bool m_IsInnerFrameActive;
+    [SerializeField] private bool m_IsPaneActive;
+    [SerializeField] private bool m_AreShuttersActive;
+
     public Vector3[] ControlPoints => m_ControlPoints;
     public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
     public int InnerFrameColumns => m_InnerFrameColumns;
@@ -33,10 +38,10 @@ public class WindowData : IData
     public Material ShuttersMaterial { get { return m_ShuttersMaterial; } set { m_ShuttersMaterial = value; } }
     public WindowElement ActiveElements => m_ActiveElements;
 
-    public bool IsOuterFrameActive => IsElementActive(WindowElement.OuterFrame);
-    public bool IsInnerFrameActive => IsElementActive(WindowElement.InnerFrame);
-    public bool IsPaneActive => IsElementActive(WindowElement.Pane);
-    public bool AreShuttersActive => IsElementActive(WindowElement.Shutters);
+    public bool IsOuterFrameActive => m_ActiveElements.IsWindowElementActive(WindowElement.OuterFrame);
+    public bool IsInnerFrameActive => m_ActiveElements.IsWindowElementActive(WindowElement.InnerFrame);
+    public bool IsPaneActive => m_ActiveElements.IsWindowElementActive(WindowElement.Pane);
+    public bool AreShuttersActive => m_ActiveElements.IsWindowElementActive(WindowElement.Shutters);
 
     public WindowData() : this (WindowElement.Everything, Vector3.forward, new Vector3[0], 2, 2, 0.95f, 0.95f, 0.4f, 0.2f, 0.1f, 0.2f, 90f, null, null, null, null)
     {
@@ -59,7 +64,8 @@ public class WindowData : IData
         data.OuterFrameMaterial,
         data.InnerFrameMaterial,
         data.PaneMaterial,
-        data.ShuttersMaterial)
+        data.ShuttersMaterial
+    )
     {
 
     }
@@ -95,10 +101,4 @@ public class WindowData : IData
         m_PaneMaterial = pane;
         m_ShuttersMaterial = shutters;
     }
-
-    private bool IsElementActive(WindowElement windowElement)
-    {
-        return m_ActiveElements == WindowElement.Nothing ? false : (m_ActiveElements & windowElement) != 0;
-    }
-
 }

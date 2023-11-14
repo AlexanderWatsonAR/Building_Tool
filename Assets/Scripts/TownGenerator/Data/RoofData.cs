@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 [System.Serializable]
 public class RoofData: IData
 {
+    [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints; // Could possible get rid of this?
     [SerializeField] private bool m_IsActive;
     [SerializeField] private RoofType m_RoofType;
 
@@ -19,7 +20,9 @@ public class RoofData: IData
     [SerializeField] private bool m_IsFlipped; // For M shaped
     [SerializeField] private bool m_IsOpen;
 
-    public RoofTileData RoofTileData => m_RoofTileData;
+    public ControlPoint[] OriginalControlPoints => m_OriginalControlPoints;
+    public ControlPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
+    public RoofTileData TileData { get { return m_RoofTileData; } set { m_RoofTileData = value; } }
     public float MansardScale => m_MansardScale;
     public float MansardHeight => m_MansardHeight;
     public float PyramidHeight => m_PyramidHeight;
@@ -30,16 +33,19 @@ public class RoofData: IData
     public RoofType RoofType => m_RoofType;
     public float GableScale => m_GableScale;
 
-    public RoofData() : this (new RoofTileData(), RoofType.Mansard, 1, 1, 1, 1, 0.75f, false, false, true )
+
+    public RoofData() : this (new ControlPoint[0], new RoofTileData(), RoofType.Mansard, 1, 1, 1, 1, 0.75f, false, false, true )
     {
 
     }
-    public RoofData(RoofData data) : this (data.RoofTileData, data.RoofType, data.MansardHeight, data.MansardScale, data.PyramidHeight, data.GableHeight, data.GableScale, data.IsOpen, data.IsFlipped, data.IsActive )
+    public RoofData(RoofData data) : this (data.ControlPoints, data.TileData, data.RoofType, data.MansardHeight, data.MansardScale, data.PyramidHeight, data.GableHeight, data.GableScale, data.IsOpen, data.IsFlipped, data.IsActive )
     {
 
     }
-    public RoofData(RoofTileData roofTileData, RoofType type, float mansardHeight, float mansardScale, float pyramidHeight, float gableHeight, float gableScale, bool isOpen, bool isFlipped, bool isActive)
+    public RoofData(ControlPoint[] controlPoints, RoofTileData roofTileData, RoofType type, float mansardHeight, float mansardScale, float pyramidHeight, float gableHeight, float gableScale, bool isOpen, bool isFlipped, bool isActive)
     {
+        m_ControlPoints = controlPoints == null ? new ControlPoint[0] : controlPoints;
+        m_OriginalControlPoints = m_ControlPoints;
         m_RoofTileData = roofTileData;
         m_RoofType = type;
         m_MansardHeight = mansardHeight;
@@ -49,10 +55,6 @@ public class RoofData: IData
         m_GableScale = gableScale;
         m_IsFlipped = isFlipped;
         m_IsOpen = isOpen;
-        m_IsActive = isActive;
-    }
-    public void SetActive(bool isActive = true)
-    {
         m_IsActive = isActive;
     }
 
