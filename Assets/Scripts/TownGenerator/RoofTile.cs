@@ -71,7 +71,15 @@ public class RoofTile : MonoBehaviour, IBuildable
                 roofSection.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
 
                 roofSection.transform.SetParent(transform, false);
-                roofSection.AddComponent<RoofSection>().Initialize(controlPoints, distance).SetTopPoints(points).Build();
+
+                RoofSectionData data = new RoofSectionData()
+                {
+                    ControlPoints = controlPoints,
+                    TopPoints = points,
+                    SectionHeight = distance
+                };
+
+                roofSection.AddComponent<RoofSection>().Initialize(data).Build();
             }
         }
     }

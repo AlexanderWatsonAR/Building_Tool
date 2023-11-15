@@ -11,6 +11,227 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static Vector3[] ScaleRoofRidge(this Vector3[] oneLine, IEnumerable<ControlPoint> controlPoints, float scale)
+    {
+        #region Static Patterns
+        switch (oneLine.Length)
+        {
+            case 2:
+                {
+                    Vector3 mid = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    oneLine[0] = Vector3.Lerp(oneLine[0], mid, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], mid, scale);
+                }
+                break;
+            case 3:
+                if(controlPoints.IsLShaped(out _))
+                {
+                    Vector3 lp1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 lp2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], lp1, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], lp2, scale);
+                }
+                break;
+            case 4:
+                if(controlPoints.IsArrowShaped(out _ ))
+                {
+                    Vector3 ap1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                    Vector3 ap2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                    Vector3 ap3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], ap1, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], ap2, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], ap3, scale);
+                }
+                else if(controlPoints.IsSimpleNShaped(out _))
+                {
+                    Vector3 simpleNP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 simpleNP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], simpleNP1, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], simpleNP2, scale);
+                }
+                else if(controlPoints.IsTShaped(out _))
+                {
+                    Vector3 tp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                    Vector3 tp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                    Vector3 tp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], tp1, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], tp2, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], tp3, scale);
+                }
+                else if (controlPoints.IsUShaped(out _))
+                {
+                    Vector3 up1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 up2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], up1, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], up2, scale);
+                }
+                else if (controlPoints.IsYShaped(out _))
+                {
+                    Vector3 yp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                    Vector3 yp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                    Vector3 yp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], yp1, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], yp2, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], yp3, scale);
+                }
+                break;
+            case 5:
+                if (controlPoints.IsFShaped(out _))
+                {
+                    Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                    Vector3 c = Vector3.Lerp(oneLine[4], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], a, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], b, scale);
+                    oneLine[4] = Vector3.Lerp(oneLine[4], c, scale);
+                }
+                else if (controlPoints.IsSimpleMShaped(out _))
+                {
+                    Vector3 simpleMP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 simpleMP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], simpleMP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], simpleMP2, scale);
+                }
+                else if(controlPoints.IsXShaped(out _))
+                {
+                    Vector3 mid = ProMaths.Average(oneLine);
+
+                    for (int i = 0; i < oneLine.Length - 1; i++)
+                    {
+                        Vector3 xP = Vector3.Lerp(oneLine[i], mid, 0.5f);
+                        oneLine[i] = Vector3.Lerp(oneLine[i], xP, scale);
+                    }
+                }
+                break;
+            case 6:
+                if(controlPoints.IsNShaped(out _))
+                {
+                    Vector3 nP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 nP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], nP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], nP2, scale);
+                }
+                else if(controlPoints.IsEShaped(out _))
+                {
+                    Vector3 eP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 eP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+                    Vector3 eP3 = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], eP1, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], eP2, scale);
+                    oneLine[5] = Vector3.Lerp(oneLine[5], eP3, scale);
+                }
+                else if(controlPoints.IsHShaped(out _))
+                {
+                    Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                    Vector3 c = Vector3.Lerp(oneLine[3], oneLine[4], 0.5f);
+                    Vector3 d = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], a, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], b, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], c, scale);
+                    oneLine[5] = Vector3.Lerp(oneLine[5], d, scale);
+                }
+                else if(controlPoints.IsKShaped(out _))
+                {
+                    Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                    Vector3 c = Vector3.Lerp(oneLine[3], oneLine[5], 0.5f);
+                    Vector3 d = Vector3.Lerp(oneLine[4], oneLine[5], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], a, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], b, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], c, scale);
+                    oneLine[4] = Vector3.Lerp(oneLine[4], d, scale);
+                }
+                else if(controlPoints.IsInterlockingYShaped(out _))
+                {
+
+                }
+                break;
+            case 7:
+                if(controlPoints.IsMShaped(out _))
+                {
+                    Vector3 mP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 mP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], mP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], mP2, scale);
+                }
+                break;
+
+        }
+        #endregion
+
+        #region Repeating Patterns
+
+        if(controlPoints.IsZigZagShaped(out _))
+        {
+            Vector3 zigP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+            Vector3 zigP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+            oneLine[0] = Vector3.Lerp(oneLine[0], zigP1, scale);
+            oneLine[^1] = Vector3.Lerp(oneLine[^1], zigP2, scale);
+        }
+        else if(controlPoints.IsCrenelShaped(out _))
+        {
+            Vector3 crenelP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+            Vector3 crenelP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+            oneLine[0] = Vector3.Lerp(oneLine[0], crenelP1, scale);
+            oneLine[^1] = Vector3.Lerp(oneLine[^1], crenelP2, scale);
+
+            for (int i = 2; i < oneLine.Length - 2; i += 2)
+            {
+                Vector3 a = Vector3.Lerp(oneLine[i], oneLine[i + 1], 0.5f);
+                oneLine[i + 1] = Vector3.Lerp(oneLine[i + 1], a, scale);
+            }
+        }
+        else if(controlPoints.IsAsteriskShaped(out _))
+        {
+            for (int i = 0; i < oneLine.Length - 1; i++)
+            {
+                Vector3 a = Vector3.Lerp(oneLine[i], oneLine[^1], 0.5f);
+                oneLine[i] = Vector3.Lerp(oneLine[i], a, scale);
+            }
+        }
+        else if(controlPoints.IsAntennaShaped(out _))
+        {
+            int length = oneLine.Length / 3;
+            int bIndex = 0;
+            int mIndex = 1;
+            int tIndex = 2;
+            for (int i = 0; i < length; i++)
+            {
+                Vector3 a = Vector3.Lerp(oneLine[tIndex], oneLine[mIndex], 0.5f);
+                Vector3 b = Vector3.Lerp(oneLine[bIndex], oneLine[mIndex], 0.5f);
+
+                oneLine[tIndex] = Vector3.Lerp(oneLine[tIndex], a, scale);
+                oneLine[bIndex] = Vector3.Lerp(oneLine[bIndex], b, scale);
+
+                bIndex += 3;
+                mIndex += 3;
+                tIndex += 3;
+            }
+        }
+
+
+        #endregion
+
+
+        return oneLine;
+    }
+
     public static void MinMax(IEnumerable<Vector3> points, out Vector3 min, out Vector3 max)
     {
         Vector3[] vectors = points.ToArray();

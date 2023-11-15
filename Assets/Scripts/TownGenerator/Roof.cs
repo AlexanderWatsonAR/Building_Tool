@@ -11,11 +11,6 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 using UnityEditor;
 using UnityEngine.UI;
 using UnityEngine.ProBuilder.MeshOperations;
-using TMPro;
-using UnityEngine.Rendering;
-using UnityEngine.UIElements;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine.Rendering.Universal;
 
 public class Roof : MonoBehaviour, IBuildable
 {
@@ -108,8 +103,6 @@ public class Roof : MonoBehaviour, IBuildable
         if (!m_Data.IsActive)
             return;
 
-        m_Data.ControlPoints.SetPositions(m_Data.OriginalControlPoints);
-
         if (TryGetComponent(out Building building))
         {
             m_LastStorey = building.GetComponents<Storey>()[^1];
@@ -186,13 +179,7 @@ public class Roof : MonoBehaviour, IBuildable
 
     private void BuildMansard()
     {
-        ControlPoint[] scaledControlPoints = PolygonRecognition.Clone(m_Data.ControlPoints);
-        scaledControlPoints = scaledControlPoints.ScalePolygon(m_Data.MansardScale);
-
-        for (int i = 0; i < m_Data.ControlPoints.Length; i++)
-        {
-            scaledControlPoints[i] += Vector3.up * m_Data.MansardHeight;
-        }
+        ControlPoint[] scaledControlPoints = m_Data.ScaledControlPoints;
 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
@@ -218,17 +205,11 @@ public class Roof : MonoBehaviour, IBuildable
             ProBuilderMesh top = ProBuilderMesh.Create();
             top.name = "Lid";
             top.CreateShapeFromPolygon(scaledControlPoints.GetPositions(), m_Data.TileData.Height, false);
-            top.GetComponent<Renderer>().material = m_Data.TileData.Material;
+            top.GetComponent<Renderer>().sharedMaterial = m_Data.TileData.Material;
             top.transform.SetParent(transform, false);
             return;
         }
 
-        for (int i = 0; i < m_Data.ControlPoints.Length; i++)
-        {
-            scaledControlPoints[i] += Vector3.up * m_Data.TileData.Height;
-        }
-
-        m_Data.ControlPoints.SetPositions(scaledControlPoints);
     }
 
     private void CreateRoofTiles(Vector3[] oneLine, int startIndex, int[][] indices, bool[][] extend)
@@ -252,6 +233,7 @@ public class Roof : MonoBehaviour, IBuildable
             RoofTileData data = new RoofTileData(m_Data.TileData)
             {
                 ControlPoints = new Vector3[] { points[relativeIndices[tileIndices[0]]].Position, oneLine[tileIndices[1]], oneLine[tileIndices[2]], points[relativeIndices[tileIndices[3]]].Position },
+                IsInside = m_Data.IsHip,
                 ExtendHeightBeginning = tileExtend[0],
                 ExtendHeightEnd = tileExtend[1],
                 ExtendWidthBeginning = tileExtend[2],
@@ -281,6 +263,7 @@ public class Roof : MonoBehaviour, IBuildable
         ProBuilderMesh probuilderMesh = ProBuilderMesh.Create();
         probuilderMesh.transform.SetParent(transform, false);
         RoofTile tile = probuilderMesh.AddComponent<RoofTile>();
+        //data.IsInside = m_Data.IsHip;
         tile.Initialize(data).Build();
         m_Tiles.Add(tile);
     }
@@ -297,177 +280,75 @@ public class Roof : MonoBehaviour, IBuildable
 
     private void BuildGable()
     {
-        if (m_Data.ControlPoints.IsDescribableInOneLine(out Vector3[] oneLine))
+        ControlPoint[] pathPoints = m_Data.ScaledControlPoints.FindPathPoints().ToArray();
+
+        if (pathPoints.IsDescribableInOneLine(out Vector3[] oneLine))
         {
-            ControlPoint[] pathPoints = m_Data.ControlPoints.FindPathPoints().ToArray();
+            if (m_Data.IsHip)
+            {
+                for (int i = 0; i < pathPoints.Length; i++)
+                {
+                    pathPoints[i] += Vector3.up * m_Data.TileData.Height;
+                }
+                oneLine = oneLine.ScaleRoofRidge(pathPoints, m_Data.GableScale);
+            }
 
             for (int i = 0; i < oneLine.Length; i++)
             {
                 oneLine[i] += Vector3.up * m_Data.GableHeight;
             }
 
-            //m_TempOneLine = oneLine;
 
+            RoofTileData data = new RoofTileData(m_Data.TileData)
+            {
+                IsInside = m_Data.IsHip
+            };
+
+            #region Static Patterns
             switch (oneLine.Length)
             {
                 case 2:
-                    if (!m_Data.IsOpen)
-                    {
-                        Vector3 mid = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                        oneLine[0] = Vector3.Lerp(oneLine[0], mid, m_Data.GableScale);
-                        oneLine[1] = Vector3.Lerp(oneLine[1], mid, m_Data.GableScale);
-                    }
-
-
-                    CreateRoofTile(new Vector3[] { pathPoints[3].Position, oneLine[1], oneLine[0], pathPoints[0].Position });
-                    CreateRoofTile(new Vector3[] { pathPoints[1].Position, oneLine[0], oneLine[1], pathPoints[2].Position });
-
-                    if (m_Data.IsOpen)
-                    {
-                        CreateWall(new Vector3[] { pathPoints[1].Position, oneLine[0], oneLine[0], pathPoints[0].Position });
-                        CreateWall(new Vector3[] { pathPoints[3].Position, oneLine[1], oneLine[1], pathPoints[2].Position });
-                    }
-                    else
-                    {
-                        CreateRoofTile(new Vector3[] { pathPoints[0].Position, oneLine[0], oneLine[0], pathPoints[1].Position });
-                        CreateRoofTile(new Vector3[] { pathPoints[2].Position, oneLine[1], oneLine[1], pathPoints[3].Position });
-                    }
+                    CreateRoofTiles(oneLine, 0, GableData.squareIndices, GableData.squareExtend);
                     break;
                 case 3:
                     if (pathPoints.IsLShaped(out int index))
                     {
-                        if(!m_Data.IsOpen)
-                        {
-                            Vector3 lp1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 lp2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], lp1, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], lp2, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, index, GableData.lIndices, GableData.lExtend);
                     }
                     break;
                 case 4:
                     if(pathPoints.IsArrowShaped(out int[] arrowPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 ap1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
-                            Vector3 ap2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
-                            Vector3 ap3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], ap1, m_Data.GableScale);
-                            oneLine[1] = Vector3.Lerp(oneLine[1], ap2, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], ap3, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, arrowPointIndices[0], GableData.arrowIndices, GableData.arrowExtend);
                     }
-            
                     else if (pathPoints.IsSimpleNShaped(out int[] simpleNPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 simpleNP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 simpleNP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], simpleNP1, m_Data.GableScale);
-                            oneLine[3] = Vector3.Lerp(oneLine[3], simpleNP2, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, simpleNPointIndices[0], GableData.simpleNIndices, GableData.simpleNExtend);
                     }
                     else if (pathPoints.IsTShaped(out int[] tPointIndices))
                     {
-                        if(!m_Data.IsOpen)
-                        {
-                            Vector3 tp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
-                            Vector3 tp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
-                            Vector3 tp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], tp1, m_Data.GableScale);
-                            oneLine[1] = Vector3.Lerp(oneLine[1], tp2, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], tp3, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, tPointIndices[0], GableData.tIndices, GableData.tExtend);
                     }
                     else if (pathPoints.IsUShaped(out int[] uPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 up1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 up2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], up1, m_Data.GableScale);
-                            oneLine[3] = Vector3.Lerp(oneLine[3], up2, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, uPointIndices[0], GableData.uIndices, GableData.uExtend);
-
                     }
                     else if (pathPoints.IsYShaped(out int[] yPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 yp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
-                            Vector3 yp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
-                            Vector3 yp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], yp1, m_Data.GableScale);
-                            oneLine[1] = Vector3.Lerp(oneLine[1], yp2, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], yp3, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, yPointIndices[0], GableData.yIndices, GableData.yExtend);
                     }
                     break;
                 case 5:
                     if(pathPoints.IsFShaped(out int[] fIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
-                            Vector3 c = Vector3.Lerp(oneLine[4], oneLine[3], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_Data.GableScale);
-                            oneLine[4] = Vector3.Lerp(oneLine[4], c, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, fIndices[0], GableData.fIndices, GableData.fExtend);
                     }
-
                     else if (pathPoints.IsSimpleMShaped(out int[] simpleMPointIndices))
                     {
-
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 simpleMP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 simpleMP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], simpleMP1, m_Data.GableScale);
-                            oneLine[^1] = Vector3.Lerp(oneLine[^1], simpleMP2, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, simpleMPointIndices[0], GableData.simpleMIndices, GableData.simpleMExtend);
                     }
                     else if (pathPoints.IsXShaped(out int[] xPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 mid = ProMaths.Average(oneLine);
-
-                            for (int i = 0; i < oneLine.Length - 1; i++)
-                            {
-                                Vector3 xP = Vector3.Lerp(oneLine[i], mid, 0.5f);
-                                oneLine[i] = Vector3.Lerp(oneLine[i], xP, m_Data.GableScale);
-                            }
-
-                        }
-
                         for (int i = 0; i < xPointIndices.Length; i++)
                         {
                             int current = xPointIndices[i];
@@ -496,102 +377,39 @@ public class Roof : MonoBehaviour, IBuildable
                 case 6:
                     if (pathPoints.IsNShaped(out int[] nPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 nP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 nP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], nP1, m_Data.GableScale);
-                            oneLine[^1] = Vector3.Lerp(oneLine[^1], nP2, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, nPointIndices[0], GableData.nIndices, GableData.nExtend);
                     }
                     else if (pathPoints.IsEShaped(out int[] ePointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 eP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 eP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
-                            Vector3 eP3 = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], eP1, m_Data.GableScale);
-                            oneLine[3] = Vector3.Lerp(oneLine[3], eP2, m_Data.GableScale);
-                            oneLine[5] = Vector3.Lerp(oneLine[5], eP3, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, ePointIndices[0], GableData.eIndices, GableData.eExtend);
 
                     }
                     else if(pathPoints.IsHShaped(out int[] hPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
-                            Vector3 c = Vector3.Lerp(oneLine[3], oneLine[4], 0.5f);
-                            Vector3 d = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_Data.GableScale);
-                            oneLine[3] = Vector3.Lerp(oneLine[3], c, m_Data.GableScale);
-                            oneLine[5] = Vector3.Lerp(oneLine[5], d, m_Data.GableScale);
-                        }
 
                         CreateRoofTiles(oneLine, hPointIndices[0], GableData.hIndices, GableData.hExtend);
                     }
                     else if(pathPoints.IsKShaped(out int[] kPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 a = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 b = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
-                            Vector3 c = Vector3.Lerp(oneLine[3], oneLine[5], 0.5f);
-                            Vector3 d = Vector3.Lerp(oneLine[4], oneLine[5], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], a, m_Data.GableScale);
-                            oneLine[2] = Vector3.Lerp(oneLine[2], b, m_Data.GableScale);
-                            oneLine[3] = Vector3.Lerp(oneLine[3], c, m_Data.GableScale);
-                            oneLine[4] = Vector3.Lerp(oneLine[4], d, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, kPointIndices[0], GableData.kIndices, GableData.kExtend);
                     }
                     else if(pathPoints.IsInterlockingYShaped(out int[] interYIndices))
                     {
                         CreateRoofTiles(oneLine, interYIndices[0], GableData.interYIndices, GableData.interYExtend);
                     }
-
                     break;
                 case 7:
                     if (pathPoints.IsMShaped(out int[] mPointIndices))
                     {
-                        if (!m_Data.IsOpen)
-                        {
-                            Vector3 mP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                            Vector3 mP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
-
-                            oneLine[0] = Vector3.Lerp(oneLine[0], mP1, m_Data.GableScale);
-                            oneLine[^1] = Vector3.Lerp(oneLine[^1], mP2, m_Data.GableScale);
-                        }
-
                         CreateRoofTiles(oneLine, mPointIndices[0], GableData.mIndices, GableData.mExtend);
                     }
                     break;
             }
+            #endregion
 
-            // Repeating patterns
-            if(pathPoints.IsZigZagShaped(out int[] zigZagIndices))
+            #region Repeating Patterns
+            if (pathPoints.IsZigZagShaped(out int[] zigZagIndices))
             {
-                if (!m_Data.IsOpen)
-                {
-                    Vector3 zigP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                    Vector3 zigP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
-
-                    oneLine[0] = Vector3.Lerp(oneLine[0], zigP1, m_Data.GableScale);
-                    oneLine[^1] = Vector3.Lerp(oneLine[^1], zigP2, m_Data.GableScale);
-                }
-
                 int[] indices = pathPoints.RelativeIndices(zigZagIndices[0]);
                 int previous = indices[^1];
                 int start = indices[^3];
@@ -643,21 +461,6 @@ public class Roof : MonoBehaviour, IBuildable
             }
             else if(pathPoints.IsCrenelShaped(out int[] crenelIndices))
             {
-                if (!m_Data.IsOpen)
-                {
-                    Vector3 crenelP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
-                    Vector3 crenelP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
-
-                    oneLine[0] = Vector3.Lerp(oneLine[0], crenelP1, m_Data.GableScale);
-                    oneLine[^1] = Vector3.Lerp(oneLine[^1], crenelP2, m_Data.GableScale);
-
-                    for (int i = 2; i < oneLine.Length -2; i+= 2)
-                    {
-                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[i+1], 0.5f);
-                        oneLine[i+1] = Vector3.Lerp(oneLine[i+1], a, m_Data.GableScale);
-                    }
-                }
-
                 int[] startIndices = pathPoints.RelativeIndices(crenelIndices[0]);
                 int[] endIndices = pathPoints.RelativeIndices(crenelIndices[^1]);
 
@@ -705,15 +508,6 @@ public class Roof : MonoBehaviour, IBuildable
             }
             else if(pathPoints.IsAsteriskShaped(out int[] asteriskPointIndices))
             {
-                if(!m_Data.IsOpen)
-                {
-                    for(int i = 0; i < oneLine.Length-1; i++)
-                    {
-                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[^1], 0.5f);
-                        oneLine[i] = Vector3.Lerp(oneLine[i], a, m_Data.GableScale);
-                    }
-                }
-
                 int count = oneLine.Length-2;
                 for(int i = 0; i < asteriskPointIndices.Length; i++)
                 {
@@ -744,23 +538,6 @@ public class Roof : MonoBehaviour, IBuildable
             }
             else if(pathPoints.IsAntennaShaped(out int[] antPointIndices))
             {
-                int length = oneLine.Length / 3;
-                int bIndex = 0;
-                int mIndex = 1;
-                int tIndex = 2;
-                for(int i = 0; i < length; i++)
-                {
-                    Vector3 a = Vector3.Lerp(oneLine[tIndex], oneLine[mIndex], 0.5f);
-                    Vector3 b = Vector3.Lerp(oneLine[bIndex], oneLine[mIndex], 0.5f);
-
-                    oneLine[tIndex] = Vector3.Lerp(oneLine[tIndex], a, m_Data.GableScale);
-                    oneLine[bIndex] = Vector3.Lerp(oneLine[bIndex], b, m_Data.GableScale);
-
-                    bIndex += 3;
-                    mIndex += 3;
-                    tIndex += 3;
-                }
-
                 // Middle Vertical
                 int current = pathPoints.GetIndex(antPointIndices[0] - 4);
                 for(int i = 3; i < oneLine.Length - 3; i+= 3)
@@ -874,9 +651,10 @@ public class Roof : MonoBehaviour, IBuildable
                     current = pathPoints.GetIndex(current + (pathPoints.Length/2));
                 }
             }
+            #endregion
         }
 
-        if(!m_Data.IsOpen)
+        if (!m_Data.IsOpen)
         {
             foreach (RoofTile tile in m_Tiles)
             {
@@ -1010,4 +788,5 @@ public class Roof : MonoBehaviour, IBuildable
             iterator++;
         }
     }
+
 }

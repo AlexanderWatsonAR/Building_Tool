@@ -6,7 +6,7 @@ using UnityEngine;
 public class RoofData: IData
 {
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
-    [SerializeField, HideInInspector] private ControlPoint[] m_OriginalControlPoints; // Could possible get rid of this?
+    //[SerializeField, HideInInspector] private ControlPoint[] m_ScaledControlPoints; // Could possible get rid of this?
     [SerializeField] private bool m_IsActive;
     [SerializeField] private RoofType m_RoofType;
 
@@ -20,7 +20,7 @@ public class RoofData: IData
     [SerializeField] private bool m_IsFlipped; // For M shaped
     [SerializeField] private bool m_IsOpen;
 
-    public ControlPoint[] OriginalControlPoints => m_OriginalControlPoints;
+    public ControlPoint[] ScaledControlPoints => ScaleControlPoints();
     public ControlPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public RoofTileData TileData { get { return m_RoofTileData; } set { m_RoofTileData = value; } }
     public float MansardScale => m_MansardScale;
@@ -45,7 +45,6 @@ public class RoofData: IData
     public RoofData(ControlPoint[] controlPoints, RoofTileData roofTileData, RoofType type, float mansardHeight, float mansardScale, float pyramidHeight, float gableHeight, float gableScale, bool isOpen, bool isFlipped, bool isActive)
     {
         m_ControlPoints = controlPoints == null ? new ControlPoint[0] : controlPoints;
-        m_OriginalControlPoints = m_ControlPoints;
         m_RoofTileData = roofTileData;
         m_RoofType = type;
         m_MansardHeight = mansardHeight;
@@ -62,8 +61,38 @@ public class RoofData: IData
     {
         get
         {
-            return m_RoofType == RoofType.Gable || m_RoofType == RoofType.Dormer || m_RoofType == RoofType.MShaped;
+            return m_RoofType == RoofType.Gable | m_RoofType == RoofType.Dormer | m_RoofType == RoofType.MShaped;
         }
         
+    }
+
+    public bool IsHip
+    {
+        get
+        {
+            return m_RoofType == RoofType.Dormer | m_RoofType == RoofType.PyramidHip;
+        }
+    }
+
+    /// <summary>
+    /// returns control points modified by the mansard scale & height.
+    /// if the current roof type is not equal to Dormer or Pyramid hip it will returnt the original cps.
+    /// </summary>
+    /// <returns></returns>
+    private ControlPoint[] ScaleControlPoints()
+    {
+        ControlPoint[] scaledControlPoints = PolygonRecognition.Clone(m_ControlPoints);
+
+        if(IsHip | m_RoofType == RoofType.Mansard)
+        {
+            scaledControlPoints = scaledControlPoints.ScalePolygon(m_MansardScale);
+
+            for (int i = 0; i < scaledControlPoints.Length; i++)
+            {
+                scaledControlPoints[i] += Vector3.up * m_MansardHeight;
+            }
+        }
+
+        return scaledControlPoints;
     }
 }

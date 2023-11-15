@@ -9,89 +9,61 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
-public class RoofSection : MonoBehaviour
+public class RoofSection : MonoBehaviour, IBuildable
 {
-    [SerializeField] private RoofElement m_RoofElement;
-    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
-    [SerializeField, HideInInspector] private Vector3[] m_TopPoints;
-    [SerializeField, HideInInspector] private float m_SectionHeight;
-    [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
+    [SerializeField] private RoofSectionData m_Data;
+    public RoofSectionData Data => m_Data;
 
-    // --------- Window Hole Properties -------------
-    [SerializeField, Range(0, 0.999f)] private float m_WindowHeight;
-    [SerializeField, Range(0, 0.999f)] private float m_WindowWidth;
-    [SerializeField, Range(3, 32)] private int m_WindowSides = 3;
-    [SerializeField, Range(1, 10)] private int m_WindowColumns, m_WindowRows;
-    //---------- End of Window Hole Properties -----------
+    [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
 
     // --------- Window Properties--------------------
     [SerializeField] private WindowData m_WindowData;
     //---------- End of Window Properties -----------
+    
 
-
-    public RoofElement RoofElement => m_RoofElement;
-
-    public RoofSection Initialize(IEnumerable<Vector3> controlPoints, float sectionHeight)
+    public IBuildable Initialize(IData data)
     {
-        m_ControlPoints = controlPoints.ToArray();
-        m_SectionHeight = sectionHeight;
+        m_Data = data as RoofSectionData;
+
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_RoofElement = RoofElement.Tile;
-
-        // Window hole
-        m_WindowHeight = 0.5f;
-        m_WindowWidth = 0.5f;
-        m_WindowColumns = 1;
-        m_WindowRows = 1;
-
-        // Window
-        Material def = BuiltinMaterials.defaultMaterial;
-        //m_WindowData = new WindowData(WindowElement.Everything, null, 2, 2, 0.95f, 0.95f, m_SectionHeight, m_SectionHeight * 0.5f, m_SectionHeight  * 0.25f, m_SectionHeight * 0.2f, 90, def, def, def, def );
-        
 
         return this;
     }
 
-    public RoofSection SetTopPoints(IEnumerable<Vector3> topPoints, bool rebuild = false)
-    {
-        m_TopPoints = topPoints.ToArray();
-        return this;
-    }
-
-    public RoofSection Build()
+    public void Build()
     {
         transform.DeleteChildren();
 
-        Vector3[] controlPointsCopy = new Vector3[] { m_ControlPoints[0], m_ControlPoints[1], m_ControlPoints[2], m_ControlPoints[3] };
+        Vector3[] controlPoints = m_Data.ControlPoints.Clone() as Vector3[];
 
-        if (controlPointsCopy[1] == controlPointsCopy[2])
+        if (controlPoints[1] == controlPoints[2])
         {
-            m_ControlPoints = new Vector3[] { m_ControlPoints[0], m_ControlPoints[1], m_ControlPoints[3] };
-            m_TopPoints = new Vector3[] { m_TopPoints[0], m_TopPoints[1], m_TopPoints[3] };
+            m_Data.ControlPoints = new Vector3[] { m_Data.ControlPoints[0], m_Data.ControlPoints[1], m_Data.ControlPoints[3] };
+            m_Data.TopPoints = new Vector3[] { m_Data.TopPoints[0], m_Data.TopPoints[1], m_Data.TopPoints[3] };
         }
-        else if (controlPointsCopy[0] == controlPointsCopy[3])
+        else if (controlPoints[0] == controlPoints[3])
         {
-            m_ControlPoints = new Vector3[] { m_ControlPoints[0], m_ControlPoints[1], m_ControlPoints[2] };
-            m_TopPoints = new Vector3[] { m_TopPoints[0], m_TopPoints[1], m_TopPoints[2] };
+            m_Data.ControlPoints = new Vector3[] { m_Data.ControlPoints[0], m_Data.ControlPoints[1], m_Data.ControlPoints[2] };
+            m_Data.TopPoints = new Vector3[] { m_Data.TopPoints[0], m_Data.TopPoints[1], m_Data.TopPoints[2] };
         }
 
-        switch (m_RoofElement)
+        switch (m_Data.RoofElement)
         {
             case RoofElement.Tile:
-                m_ProBuilderMesh.CreateShapeFromPolygon(m_ControlPoints, m_SectionHeight, false);
+                m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.SectionHeight, false);
                 m_ProBuilderMesh.ToMesh();
                 SetCornerPoints();
                 m_ProBuilderMesh.Refresh();
                 break;
             case RoofElement.Window:
                 List<List<Vector3>> holePoints;
-                Vector3 winScale = new Vector3(m_WindowWidth, m_WindowHeight);
-                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_ControlPoints, winScale, m_WindowColumns, m_WindowRows, m_WindowSides, 0, out holePoints, true);
+                Vector3 winScale = new Vector3(m_Data.WindowWidth, m_Data.WindowHeight);
+                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, winScale, m_Data.WindowColumns, m_Data.WindowRows, m_Data.WindowSides, 0, out holePoints, true);
                 polyHoleGrid.ToMesh();
                 polyHoleGrid.Refresh();
-                Vector3 calculatedNormal = m_ControlPoints.CalculatePolygonFaceNormal();
+                Vector3 calculatedNormal = m_Data.ControlPoints.CalculatePolygonFaceNormal();
                 polyHoleGrid.MatchFaceToNormal(calculatedNormal);
-                polyHoleGrid.Extrude(polyHoleGrid.faces, ExtrudeMethod.FaceNormal, m_SectionHeight);
+                polyHoleGrid.Extrude(polyHoleGrid.faces, ExtrudeMethod.FaceNormal, m_Data.SectionHeight);
                 polyHoleGrid.ToMesh();
                 Rebuild(polyHoleGrid);
                 SetCornerPoints();
@@ -106,37 +78,26 @@ public class RoofSection : MonoBehaviour
                 Window window = win.AddComponent<Window>();
                 window.Initialize(windowData).Build();
                 win.transform.localPosition = Vector3.zero;
-
-
                 break;
             case RoofElement.Empty:
                 m_ProBuilderMesh.Clear();
                 m_ProBuilderMesh.ToMesh();
                 break;
         }
-
-        return this;
     }
 
     private void SetCornerPoints()
     {
         Vertex[] vertices = m_ProBuilderMesh.GetVertices();
-
-        //Vector3 normal = m_ProBuilderMesh.GetVertices(m_ProBuilderMesh.faces[0].distinctIndexes)[0].normal;
         
-        Vector3[] top = new Vector3[m_ControlPoints.Length];
-        Array.Copy(m_ControlPoints, top, m_ControlPoints.Length);
-
-        for (int i = 0; i < top.Length; i++)
+        for (int i = 0; i < m_Data.TopPoints.Length; i++)
         {
-            //top[i] += normal * m_SectionHeight; // This should be approximately where the extruded points are.
-
             // Note: No need to find the points. They are where you left them.
             List<int> shared = m_ProBuilderMesh.GetCoincidentVertices(new int[] { i });
 
             for(int j = 0; j < shared.Count; j++)
             {
-                vertices[shared[j]].position = m_TopPoints[i];
+                vertices[shared[j]].position = m_Data.TopPoints[i];
             }
         }
 

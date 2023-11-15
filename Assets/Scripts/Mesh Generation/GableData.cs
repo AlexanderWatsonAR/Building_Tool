@@ -12,6 +12,14 @@ public static class GableData
     // The middle 2 points reference the one line points.
 
     // Indices
+    public static int[][] squareIndices = new int[][]
+    {
+        new int[] { 3, 1, 0, 0 },
+        new int[] { 1, 0, 1, 2 },
+        new int[] { 0, 0, 0, 1 },
+        new int[] { 2, 1, 1, 3 },
+    };
+
     public static readonly int[][] lIndices = new int[][]
     {
         new int[] { 0, 1, 0, 1 },
@@ -200,6 +208,15 @@ public static class GableData
 
     // Extensions
     // Height Start, Height End, Width Start, Width End
+
+    public static readonly bool[][] squareExtend = new bool[][]
+    {
+        new bool[] { false, true, false, false },
+        new bool[] { false, true, false, false },
+        new bool[] { false, true, false, false },
+        new bool[] { false, true, false, false }
+    };
+
     public static readonly bool[][] lExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
