@@ -22,6 +22,11 @@ public class RoofEditor : Editor
         Roof roof = (Roof)target;
         serializedObject.Update();
 
+        if (roof.gameObject.TryGetComponent(out Building theBuilding) && !theBuilding.HasInitialized)
+        {
+            return;
+        }
+
         SerializedProperty roofData = serializedObject.FindProperty("m_Data");
 
         SerializedProperty roofActive = roofData.FindPropertyRelative("m_IsActive");

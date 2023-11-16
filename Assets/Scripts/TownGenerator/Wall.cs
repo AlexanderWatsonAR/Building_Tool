@@ -7,7 +7,7 @@ using UnityEngine.ProBuilder;
 using System.Linq;
 using UnityEditor;
 
-public class Wall : MonoBehaviour
+public class Wall : MonoBehaviour, IBuildable
 {
     [SerializeField] WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
@@ -27,9 +27,9 @@ public class Wall : MonoBehaviour
 
     public WallData WallData => m_Data;
 
-    public Wall Initialize(WallData data)
+    public IBuildable Initialize(IData data)
     {
-        m_Data = new WallData(data);
+        m_Data = data as WallData;
 
         Vector3 right = m_Data.ControlPoints[0].DirectionToTarget(m_Data.ControlPoints[3]);
         Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
@@ -70,7 +70,7 @@ public class Wall : MonoBehaviour
         return this;
     }
 
-    public Wall Build()
+    public void Build()
     {
         List<Vector3[]> subPoints = SubPoints;
 
@@ -100,8 +100,6 @@ public class Wall : MonoBehaviour
                 wallSection.AddComponent<WallSection>().Initialize(wallSectionData).Build();
             }
         }
-
-        return this;
     }
 
     private void OnDrawGizmosSelected()

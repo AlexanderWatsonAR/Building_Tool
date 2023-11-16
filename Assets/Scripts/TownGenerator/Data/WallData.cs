@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 
 [System.Serializable]
-public class WallData
+public class WallData : IData
 {
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, Range(1, 10)] private int m_Columns, m_Rows;

@@ -5,22 +5,15 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
-public class Pillar : MonoBehaviour 
+public class Pillar : MonoBehaviour, IBuildable
 {
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private PillarData m_Data;
 
-    public Pillar Initialize()
+    public IBuildable Initialize(IData data)
     {
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_Data = new PillarData();
-        return this;
-    }
-
-    public Pillar Initialize(PillarData data)
-    {
-        m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_Data = data;
+        m_Data = data as PillarData;
         return this;
     }
 
@@ -51,10 +44,10 @@ public class Pillar : MonoBehaviour
             controlPoints[i] = v;
         }
 
-        m_Data.SetControlPoints(controlPoints);
+        m_Data.ControlPoints = controlPoints;
     }
 
-    public Pillar Build()
+    public void Build()
     {
         CreateControlPoints();
         m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, 0, false);
@@ -70,7 +63,5 @@ public class Pillar : MonoBehaviour
 
         GetComponent<Renderer>().material = m_Data.Material;
         m_ProBuilderMesh.Refresh();
-
-        return this;
     }
 }

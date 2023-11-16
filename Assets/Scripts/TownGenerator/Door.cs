@@ -30,7 +30,7 @@ public class Door : MonoBehaviour, IBuildable
 
     public void Build()
     {
-        if (!m_Data.ActiveElements.IsDoorElementActive(DoorElement.Door))
+        if (!m_Data.ActiveElements.IsElementActive(DoorElement.Door))
             return;
 
         m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward);
@@ -53,7 +53,7 @@ public class Door : MonoBehaviour, IBuildable
         m_DoorMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
         m_DoorMesh.Refresh();
 
-        if (!m_Data.ActiveElements.IsDoorElementActive(DoorElement.Handle))
+        if (!m_Data.ActiveElements.IsElementActive(DoorElement.Handle))
             return;
 
         // Handle

@@ -272,7 +272,7 @@ public class Roof : MonoBehaviour, IBuildable
     {
         GameObject wall = new GameObject("Wall", typeof(Wall));
         wall.transform.SetParent(transform, false);
-        WallData data = new WallData(m_LastStorey.WallData);
+        WallData data = new WallData(m_LastStorey.Data.WallData);
         data.SetControlPoints(points);
         wall.GetComponent<Wall>().Initialize(data).Build();
         m_Walls.Add(wall.GetComponent<Wall>());

@@ -149,15 +149,15 @@ public class WallSection : MonoBehaviour, IBuildable
                     }
                     else
                     {
-                        wallSectionStorey = gameObject.AddComponent<Storey>().Initialize();
+                        wallSectionStorey = gameObject.AddComponent<Storey>().Initialize(new StoreyData()) as Storey;
                     }
 
-                    wallSectionStorey.SetControlPoints(points);
-                    wallSectionStorey.SetWallHeight(wallHeight);
+                    wallSectionStorey.Data.ControlPoints = points;
+                    wallSectionStorey.Data.WallData.Height = wallHeight;
 
                     GameObject storeyGO = new GameObject("Storey", typeof(Storey));
                     storeyGO.transform.SetParent(transform, true);
-                    storeyGO.GetComponent<Storey>().Initialize(wallSectionStorey).Build();
+                    storeyGO.GetComponent<Storey>().Initialize(wallSectionStorey.Data).Build();
 
                     Roof wallSectionRoof;
 
@@ -206,7 +206,7 @@ public class WallSection : MonoBehaviour, IBuildable
     {
         foreach (List<Vector3> controlPoints in doorGridControlPoints)
         {
-            if (m_Data.ActiveDoorElements.IsDoorElementActive(DoorElement.Door))
+            if (m_Data.ActiveDoorElements.IsElementActive(DoorElement.Door))
             {
                 ProBuilderMesh doorPro = ProBuilderMesh.Create();
                 doorPro.name = "Door";
@@ -221,7 +221,7 @@ public class WallSection : MonoBehaviour, IBuildable
                 door.Initialize(data).Build();
             }
 
-            if (!m_Data.ActiveDoorElements.IsDoorElementActive(DoorElement.Frame))
+            if (!m_Data.ActiveDoorElements.IsElementActive(DoorElement.Frame))
                 continue;
 
             // Frame

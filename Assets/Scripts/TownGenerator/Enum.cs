@@ -67,13 +67,18 @@ public enum CornerType
 
 public static class EnumExtensions
 {
-    public static bool IsWindowElementActive(this WindowElement windowElement, WindowElement comparison)
+    public static bool IsElementActive(this WindowElement windowElement, WindowElement comparison)
     {
         return windowElement == WindowElement.Nothing ? false : (windowElement & comparison) != 0;
     }
 
-    public static bool IsDoorElementActive(this DoorElement doorElement, DoorElement comparison)
+    public static bool IsElementActive(this DoorElement doorElement, DoorElement comparison)
     {
         return doorElement == DoorElement.Nothing ? false : (doorElement & comparison) != 0;
+    }
+
+    public static bool IsElementActive(this StoreyElement storeyElement, StoreyElement comparison)
+    {
+        return storeyElement == StoreyElement.Nothing ? false : (storeyElement & comparison) != 0;
     }
 }

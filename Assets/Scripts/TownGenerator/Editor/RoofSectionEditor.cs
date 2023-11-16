@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Rendering;
 
 [CustomEditor(typeof(RoofSection))]
 public class RoofSectionEditor : Editor
@@ -12,17 +13,19 @@ public class RoofSectionEditor : Editor
         serializedObject.Update();
         RoofSection section = (RoofSection)target;
 
-        SerializedProperty element = serializedObject.FindProperty("m_RoofElement");
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
 
-        SerializedProperty winColumns = serializedObject.FindProperty("m_WindowColumns");
-        SerializedProperty winRows = serializedObject.FindProperty("m_WindowRows");
-        SerializedProperty winHeight = serializedObject.FindProperty("m_WindowHeight");
-        SerializedProperty winWidth = serializedObject.FindProperty("m_WindowWidth");
-        SerializedProperty winSides = serializedObject.FindProperty("m_WindowSides");
+        SerializedProperty element = data.FindPropertyRelative("m_RoofElement");
+
+        SerializedProperty winColumns = data.FindPropertyRelative("m_WindowColumns");
+        SerializedProperty winRows = data.FindPropertyRelative("m_WindowRows");
+        SerializedProperty winHeight = data.FindPropertyRelative("m_WindowHeight");
+        SerializedProperty winWidth = data.FindPropertyRelative("m_WindowWidth");
+        SerializedProperty winSides = data.FindPropertyRelative("m_WindowSides");
 
         EditorGUILayout.PropertyField(element);
 
-        switch (section.RoofElement)
+        switch (element.GetEnumValue<RoofElement>())
         {
             case RoofElement.Tile:
                 break;

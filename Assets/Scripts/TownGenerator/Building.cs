@@ -21,7 +21,7 @@ public class Building : MonoBehaviour
     [SerializeField] private PolyPath m_BuildingPolyPath;
     [SerializeField] private List<Storey> m_Storeys;
     [SerializeField] private Roof m_Roof;
-    [SerializeField] private bool m_HasInitialized;
+    private bool m_HasInitialized;
     [SerializeField] private MaterialPalette m_Palette;
 
     [SerializeField] private bool m_IsPolyPathHandleSelected;
@@ -49,6 +49,8 @@ public class Building : MonoBehaviour
     }
 
     public PolyPath PolyPath => m_BuildingPolyPath ?? new PolyPath();
+
+    public bool HasInitialized => m_HasInitialized;
 
     private void Reset()
     {
@@ -119,9 +121,8 @@ public class Building : MonoBehaviour
         int count = 0;
         foreach(Storey storey in m_Storeys)
         {
-            storey.SetControlPoints(ControlPoints);
-            storey.SetID(count);
-            count++;
+            storey.Initialize(new StoreyData() { ID = count, ControlPoints = this.ControlPoints });
+
         }
 
         m_Roof.Data.ControlPoints = ControlPoints;
@@ -149,10 +150,9 @@ public class Building : MonoBehaviour
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]);
-            storey.SetControlPoints(ControlPoints);
+            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i].Data) as Storey;
             storey.Build();
-            pos += (Vector3.up * storey.WallData.Height);
+            pos += (Vector3.up * storey.Data.WallData.Height);
         }
 
         GameObject roofGO = new GameObject("Roof");

@@ -141,10 +141,10 @@ public class WallSectionEditor : Editor
         {
             DoorElement doorElement = m_SerializedProperties.DoorElement.GetEnumValue<DoorElement>();
 
-            bool isNothing = doorElement.IsDoorElementActive(DoorElement.Nothing);
-            bool isDoor = doorElement.IsDoorElementActive(DoorElement.Door);
-            bool isFrame = doorElement.IsDoorElementActive(DoorElement.Frame);
-            bool isHandle = doorElement.IsDoorElementActive(DoorElement.Handle);
+            bool isNothing = doorElement.IsElementActive(DoorElement.Nothing);
+            bool isDoor = doorElement.IsElementActive(DoorElement.Door);
+            bool isFrame = doorElement.IsElementActive(DoorElement.Frame);
+            bool isHandle = doorElement.IsElementActive(DoorElement.Handle);
 
             EditorGUI.BeginDisabledGroup(isNothing);
             EditorGUI.BeginDisabledGroup(!isDoor);

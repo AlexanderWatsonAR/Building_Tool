@@ -38,10 +38,10 @@ public class WindowData : IData
     public Material ShuttersMaterial { get { return m_ShuttersMaterial; } set { m_ShuttersMaterial = value; } }
     public WindowElement ActiveElements => m_ActiveElements;
 
-    public bool IsOuterFrameActive => m_ActiveElements.IsWindowElementActive(WindowElement.OuterFrame);
-    public bool IsInnerFrameActive => m_ActiveElements.IsWindowElementActive(WindowElement.InnerFrame);
-    public bool IsPaneActive => m_ActiveElements.IsWindowElementActive(WindowElement.Pane);
-    public bool AreShuttersActive => m_ActiveElements.IsWindowElementActive(WindowElement.Shutters);
+    public bool IsOuterFrameActive => m_ActiveElements.IsElementActive(WindowElement.OuterFrame);
+    public bool IsInnerFrameActive => m_ActiveElements.IsElementActive(WindowElement.InnerFrame);
+    public bool IsPaneActive => m_ActiveElements.IsElementActive(WindowElement.Pane);
+    public bool AreShuttersActive => m_ActiveElements.IsElementActive(WindowElement.Shutters);
 
     public WindowData() : this (WindowElement.Everything, Vector3.forward, new Vector3[0], 2, 2, 0.95f, 0.95f, 0.4f, 0.2f, 0.1f, 0.2f, 90f, null, null, null, null)
     {

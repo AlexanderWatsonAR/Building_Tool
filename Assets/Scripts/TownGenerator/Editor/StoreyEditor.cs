@@ -16,38 +16,50 @@ public class StoreyEditor : Editor
         serializedObject.Update();
         Storey storey = (Storey)target;
 
+        if (storey.gameObject.TryGetComponent(out Building theBuilding) && !theBuilding.HasInitialized)
+        {
+            return;
+        }
         // Consider this implementation of storey
         //EditorGUILayout.PropertyField(serializedObject.FindProperty("testList"), new GUIContent("Title"));
 
-        SerializedProperty activeElements = serializedObject.FindProperty("m_ActiveElements");
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
 
-        // Wall
-        SerializedProperty wallData = serializedObject.FindProperty("m_WallData");
+        SerializedProperty activeElements = data.FindPropertyRelative("m_ActiveElements");
+
+        #region Wall
+        SerializedProperty wallData = data.FindPropertyRelative("m_Wall");
         SerializedProperty wallHeight = wallData.FindPropertyRelative("m_Height");
         SerializedProperty wallDepth = wallData.FindPropertyRelative("m_Depth");
         SerializedProperty wallMaterial = wallData.FindPropertyRelative("m_Material");
-        SerializedProperty cornerType = serializedObject.FindProperty("m_CornerType");
-        SerializedProperty curvedCornersSides = serializedObject.FindProperty("m_CurvedCornersSides");
-        // End Wall
+        #endregion
 
-        // Floor
-        SerializedProperty floorHeight = serializedObject.FindProperty("m_FloorHeight");
-        SerializedProperty floorMaterial = serializedObject.FindProperty("m_FloorMaterial");
-        // End Floor
+        #region Corner
+        SerializedProperty cornerData = data.FindPropertyRelative("m_Corner");
+        SerializedProperty cornerType = cornerData.FindPropertyRelative("m_Type");
+        SerializedProperty cornerSides = cornerData.FindPropertyRelative("m_Sides");
+        #endregion
 
-        // Pillar
-        SerializedProperty pillarData = serializedObject.FindProperty("m_PillarData");
+        #region Floor
+        SerializedProperty floorData = data.FindPropertyRelative("m_Floor");
+        SerializedProperty floorHeight = floorData.FindPropertyRelative("m_Height");
+        SerializedProperty floorMaterial = floorData.FindPropertyRelative("m_Material");
+        #endregion
 
+        #region Pillar
+        SerializedProperty pillarData = data.FindPropertyRelative("m_Pillar");
         SerializedProperty pillarWidth = pillarData.FindPropertyRelative("m_Width");
         SerializedProperty pillarDepth = pillarData.FindPropertyRelative("m_Depth");
         SerializedProperty pillarSides = pillarData.FindPropertyRelative("m_Sides");
         SerializedProperty pillarSmooth = pillarData.FindPropertyRelative("m_IsSmooth");
         SerializedProperty pillarMaterial = pillarData.FindPropertyRelative("m_Material");
-        // End Pillar
+        #endregion
 
         EditorGUILayout.PropertyField(activeElements);
 
-        EditorGUI.BeginDisabledGroup(!storey.AreWallsActive);
+        StoreyElement elements = activeElements.GetEnumValue<StoreyElement>();
+
+        EditorGUI.BeginDisabledGroup(!elements.IsElementActive(StoreyElement.Walls));
         m_ShowWall = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowWall, "Wall");
         if (m_ShowWall)
         {
@@ -57,13 +69,13 @@ public class StoreyEditor : Editor
             }
             EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
             EditorGUILayout.PropertyField(cornerType);
-            EditorGUILayout.IntSlider(curvedCornersSides, 3, 15, "Sides");
+            EditorGUILayout.IntSlider(cornerSides, 3, 15, "Sides");
             //EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
 
-        EditorGUI.BeginDisabledGroup(!storey.IsFloorActive);
+        EditorGUI.BeginDisabledGroup(!elements.IsElementActive(StoreyElement.Floor));
         m_ShowFloor = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowFloor, "Floor");
         if (m_ShowFloor)
         {
@@ -73,7 +85,7 @@ public class StoreyEditor : Editor
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
 
-        EditorGUI.BeginDisabledGroup(!storey.ArePillarsActive);
+        EditorGUI.BeginDisabledGroup(!elements.IsElementActive(StoreyElement.Pillars));
         m_ShowPillar = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPillar, "Pillar");
         if (m_ShowPillar)
         {

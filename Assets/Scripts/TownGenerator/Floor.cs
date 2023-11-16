@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
-public class Floor : MonoBehaviour
+public class Floor : MonoBehaviour, IBuildable 
 {
     [SerializeField] private FloorData m_Data;
 
@@ -18,15 +18,15 @@ public class Floor : MonoBehaviour
 
     public Vector3[] Split => m_Split;
 
-    public Floor Initialize(FloorData data)
+    public IBuildable Initialize(IData data)
     {
-        m_Data = data;
+        m_Data = data as FloorData;
         m_Split = new Vector3[0];
         m_Position = Vector3.zero;
         return this;
     }
 
-    public Floor Build()
+    public void Build()
     {
         transform.DeleteChildren();
 
@@ -65,7 +65,6 @@ public class Floor : MonoBehaviour
         // Idea: Floor Sections! Spilt the polygon with mesh maker function.
         // each floor section can have a hole
 
-        return this;
     }
 
     private void OnDrawGizmosSelected()

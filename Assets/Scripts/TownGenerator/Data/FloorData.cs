@@ -1,18 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 [System.Serializable]
-public class FloorData
+public class FloorData : IData
 {
-
     [SerializeField, Range(1, 10)] private int m_Columns, m_Rows; 
     [SerializeField] private ControlPoint[] m_ControlPoints;
     [SerializeField] private float m_Height;
     [SerializeField, HideInInspector] private Material m_Material;
 
-    public Material Material => m_Material;
+    public Material Material { get { return m_Material; } set { m_Material = value; } }
 
     public int Columns { get { return m_Columns; } set { m_Columns = value; } }
     public int Rows { get { return m_Rows; } set { m_Rows = value; } }
