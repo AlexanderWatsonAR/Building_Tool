@@ -16,12 +16,13 @@ public class StoreyEditor : Editor
         serializedObject.Update();
         Storey storey = (Storey)target;
 
-        if (storey.gameObject.TryGetComponent(out Building theBuilding) && !theBuilding.HasInitialized)
+        if (storey.gameObject.TryGetComponent(out Building theBuilding))
         {
-            return;
+            if(!theBuilding.HasInitialized)
+                return;
+
+            //theBuilding.Data.
         }
-        // Consider this implementation of storey
-        //EditorGUILayout.PropertyField(serializedObject.FindProperty("testList"), new GUIContent("Title"));
 
         SerializedProperty data = serializedObject.FindProperty("m_Data");
 

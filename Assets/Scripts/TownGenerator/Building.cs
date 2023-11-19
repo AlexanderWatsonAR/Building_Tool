@@ -8,18 +8,17 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
-using UnityEngine.ProBuilder.Shapes;
-using UnityEngine.Serialization;
-using UnityEditor;
 
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Storey), typeof(Roof))]
-public class Building : MonoBehaviour
+public class Building : MonoBehaviour, IBuildable
 {
+    [SerializeField] private BuildingData m_Data;
+
     [SerializeField, HideInInspector] ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private PolyPath m_BuildingPolyPath;
-    [SerializeField] private List<Storey> m_Storeys;
+    [SerializeField] private Storey m_Storey;
     [SerializeField] private Roof m_Roof;
     private bool m_HasInitialized;
     [SerializeField] private MaterialPalette m_Palette;
@@ -27,6 +26,8 @@ public class Building : MonoBehaviour
     [SerializeField] private bool m_IsPolyPathHandleSelected;
     [SerializeField] private Vector3 m_PivotPosition;
     public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
+
+    public BuildingData Data => m_Data;
 
     public ControlPoint[] ControlPoints => m_BuildingPolyPath.ControlPoints.ToArray();
 
@@ -55,7 +56,7 @@ public class Building : MonoBehaviour
     private void Reset()
     {
         m_BuildingPolyPath = new PolyPath();
-        m_Storeys = GetComponents<Storey>().ToList();
+        m_Storey = GetComponent<Storey>();
         m_Roof = GetComponent<Roof>();
         m_Palette = ScriptableObject.CreateInstance<MaterialPalette>().Initialize();
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
@@ -96,17 +97,19 @@ public class Building : MonoBehaviour
     {
         // Issue: When try to centre the pivot point the building moves position & doesn't align with the control points.
         m_HasInitialized = false;
-        Initialize();
+        //Initialize();
         Build();
     }
 
-    public Building Initialize()
+    public IBuildable Initialize(IData data)
     {
         if (m_HasInitialized)
             return this;
 
-        m_PivotPosition = ProMaths.Average(ControlPoints.GetPositions());
-        m_BuildingPolyPath.CalculateForwards();
+        m_Data = data as BuildingData;
+
+        //m_PivotPosition = ProMaths.Average(ControlPoints.GetPositions());
+        
         //Vector3[] controlPoints = ControlPoints.GetPositions();
 
         //for (int i = 0; i < controlPoints.Length; i++)
@@ -118,14 +121,8 @@ public class Building : MonoBehaviour
 
         //m_BuildingPolyPath.OnControlPointsChanged += Building_OnControlPointsChanged;
 
-        int count = 0;
-        foreach(Storey storey in m_Storeys)
-        {
-            storey.Initialize(new StoreyData() { ID = count, ControlPoints = this.ControlPoints });
 
-        }
-
-        m_Roof.Data.ControlPoints = ControlPoints;
+        //m_Roof.Initialize(m_Data.RoofData);
 
         //m_ProBuilderMesh.SetPivot(m_PivotPosition); 
         //m_ProBuilderMesh.ToMesh();
@@ -136,22 +133,23 @@ public class Building : MonoBehaviour
         return this;
     }
 
-    public Building Build()
+    public void Build()
     {
         transform.DeleteChildren();
 
         if (!m_BuildingPolyPath.IsPathValid || !m_HasInitialized)
-            return this;
+            return;
 
         Vector3 pos = Vector3.zero;
 
-        for (int i = 0; i < m_Storeys.Count; i++)
+        for (int i = 0; i < m_Data.StoreysData.Count; i++)
         {
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i].Data) as Storey;
+            Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
             storey.Build();
+            storey.OnDataChange += (StoreyData data) => { m_Data.StoreysData[data.ID] = data; };
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
 
@@ -160,7 +158,7 @@ public class Building : MonoBehaviour
         roofGO.transform.localPosition = pos;
         roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).Build();
         roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
-        return this;
+        return;
     }
 
     //private void Building_OnControlPointsChanged(List<ControlPoint> controlPoints)

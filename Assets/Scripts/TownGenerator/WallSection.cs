@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -21,12 +22,18 @@ public class WallSection : MonoBehaviour, IBuildable
     public WallElement WallElement => m_WallElement;
     public WallSectionData Data => m_Data;
 
+    public event Action<WallSectionData> OnDataChange;
+
     // Temp variables for testing
     List<IList<Vector3>> m_Points;
     List<Vector3> m_Grid;
     Vector3 m_Centre;
     // end of temp
 
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
 
     public IBuildable Initialize(IData wallSectionData)
     {

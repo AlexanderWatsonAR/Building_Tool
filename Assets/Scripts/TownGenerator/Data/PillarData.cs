@@ -7,6 +7,7 @@ using UnityEngine.ProBuilder;
 [System.Serializable]
 public class PillarData : IData
 {
+    [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, Range(0, 100)] private float m_Height;
     [SerializeField, Range(0, 10)] private float m_Width;
@@ -15,6 +16,7 @@ public class PillarData : IData
     [SerializeField] private bool m_IsSmooth;
     [SerializeField,HideInInspector] private Material m_Material;
 
+    public int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public float Width => m_Width;
     public float Height { get { return m_Height; } set { m_Height = value; } }

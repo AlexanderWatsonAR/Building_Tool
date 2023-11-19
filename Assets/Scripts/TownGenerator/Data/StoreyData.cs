@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
 public class StoreyData : IData
 {
     [SerializeField, HideInInspector] private int m_ID;
-    [SerializeField] private ControlPoint[] m_ControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints; // static?
     [SerializeField] private StoreyElement m_ActiveElements;
 
     [SerializeField] private WallData m_Wall;
@@ -14,10 +15,18 @@ public class StoreyData : IData
     [SerializeField] private CornerData m_Corner;
     [SerializeField] private FloorData m_Floor;
 
+    [SerializeField] private WallData[] m_Walls;
+    [SerializeField] private PillarData[] m_Pillars;
+    [SerializeField] private CornerData[] m_Corners;
+
     public WallData WallData => m_Wall;
     public PillarData PillarData => m_Pillar;
     public CornerData CornerData => m_Corner;
     public FloorData FloorData => m_Floor;
+
+    public WallData[] Walls { get { return m_Walls; } set { m_Walls = value; } }
+    public PillarData[] Pillars { get { return m_Pillars; } set { m_Pillars = value; } }
+    public CornerData[] Corners { get { return m_Corners; } set { m_Corners = value; } }
 
     public ControlPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public StoreyElement ActiveElements => m_ActiveElements;
@@ -59,5 +68,8 @@ public class StoreyData : IData
         m_Pillar.Height = m_Wall.Height;
         m_Corner = cornerData;
         m_Floor = floorData;
+        m_Walls = new WallData[m_ControlPoints.Length];
+        m_Pillars = new PillarData[m_ControlPoints.Length];
+        m_Corners = new CornerData[m_ControlPoints.Length];
     }
 }

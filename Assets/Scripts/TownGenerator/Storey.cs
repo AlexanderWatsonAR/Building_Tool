@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
@@ -11,12 +12,17 @@ using UnityEngine.ProBuilder.MeshOperations;
 public class Storey : MonoBehaviour, IBuildable
 {
     [SerializeField] private StoreyData m_Data;
-    private bool m_HasInitialized;
     
-    List<Vector3[]> m_WallPoints;
+    [SerializeField] List<Vector3[]> m_WallPoints;
+
+    public event Action<StoreyData> OnDataChange;
 
     public StoreyData Data => m_Data;
-    public bool HasInitialized => m_HasInitialized;
+
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
 
     public IBuildable Initialize(IData data)
     {
@@ -39,7 +45,6 @@ public class Storey : MonoBehaviour, IBuildable
         }
 
         m_WallPoints = new();
-        m_HasInitialized = true;
 
         return this;
     }
@@ -65,13 +70,16 @@ public class Storey : MonoBehaviour, IBuildable
 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            ProBuilderMesh pillar = ProBuilderMesh.Create();
-            pillar.name = "Pillar " + i.ToString();
-            pillar.AddComponent<Pillar>().Initialize(m_Data.PillarData).Build();
-            pillar.transform.SetParent(pillars.transform, false);
-            pillar.transform.localPosition = m_Data.ControlPoints[i].Position;
+            ProBuilderMesh pillarMesh = ProBuilderMesh.Create();
+            pillarMesh.name = "Pillar " + i.ToString();
+            pillarMesh.AddComponent<Pillar>().Initialize(m_Data.PillarData).Build();
+            pillarMesh.transform.SetParent(pillars.transform, false);
+            pillarMesh.transform.localPosition = m_Data.ControlPoints[i].Position;
             int index = m_Data.ControlPoints.GetNext(i);
-            pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_Data.ControlPoints[index].Position);
+            pillarMesh.transform.forward = pillarMesh.transform.localPosition.DirectionToTarget(m_Data.ControlPoints[index].Position);
+
+            Pillar pillar = pillarMesh.GetComponent<Pillar>();
+            pillar.OnDataChange += (PillarData data) => { m_Data.Pillars[data.ID] = data; };
         }
     }
 
@@ -82,6 +90,8 @@ public class Storey : MonoBehaviour, IBuildable
 
         if (m_WallPoints.Count != m_Data.ControlPoints.Length)
             return;
+
+        m_Data.Corners = new CornerData[m_Data.ControlPoints.Length];
 
         GameObject corners = new GameObject("Corners");
         corners.transform.SetParent(transform, false);
@@ -97,11 +107,9 @@ public class Storey : MonoBehaviour, IBuildable
             int next = m_Data.ControlPoints.GetNext(i);
 
             Vector3 dirA = m_WallPoints[current][0].DirectionToTarget(m_WallPoints[current][1]);
-            //Vector3 crossA = Vector3.Cross(Vector3.up, dirA) * m_WallData.Depth;
             Vector3 crossA = Vector3.Cross(dirA, Vector3.up) * wallData.Depth;
 
             Vector3 dirB = m_WallPoints[previous][0].DirectionToTarget(m_WallPoints[previous][1]);
-            //Vector3 crossB = Vector3.Cross(Vector3.up, dirB) * m_WallData.Depth;
             Vector3 crossB = Vector3.Cross(dirB, Vector3.up) * wallData.Depth;
 
             Vector3 intersection;
@@ -112,56 +120,33 @@ public class Storey : MonoBehaviour, IBuildable
 
             Vector3[] cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[current][0] + crossB, intersection };
             Vector3[] flatPoints = new Vector3[] { cornerPoints[0], cornerPoints[1], cornerPoints[2] };
-            Vector3[] curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[1], cornerPoints[3], cornerPoints[2], numberOfSamples);
-            Vector3[] points = new Vector3[curveyPoints.Length + 1];
-            points[0] = cornerPoints[0];
 
-            if (isConcave)
+            bool isInside = isConcave && concavePoints.Any(b => b == current);
+
+            if (isInside)
             {
-                if(concavePoints.Any(b => b == current))
-                {
-                    Extensions.DoLinesIntersect(m_WallPoints[current][0], m_WallPoints[current][1], m_WallPoints[previous][0], m_WallPoints[previous][1], out intersection);
-                    cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1], intersection };
-                    curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[2], cornerPoints[3], cornerPoints[0], numberOfSamples);
-                    flatPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1] };
-                    points[0] = cornerPoints[1];
-                }
-
+                Extensions.DoLinesIntersect(m_WallPoints[current][0], m_WallPoints[current][1], m_WallPoints[previous][0], m_WallPoints[previous][1], out intersection);
+                cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1], intersection };
+                flatPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1] };
             }
 
-            for(int j = 0; j < curveyPoints.Length; j++)
+            ProBuilderMesh cornerMesh = ProBuilderMesh.Create();
+            Corner corner = cornerMesh.AddComponent<Corner>();
+            corner.name = "Corner " + current.ToString();
+            corner.transform.SetParent(corners.transform, false);
+            corner.GetComponent<Renderer>().sharedMaterial = wallData.Material;
+
+            CornerData cornerData = new CornerData(m_Data.CornerData)
             {
-                points[j+1] = curveyPoints[j];
-            }
+                CornerPoints = cornerPoints,
+                FlatPoints = flatPoints.SortPointsClockwise().ToArray(),
+                ID = current,
+                IsInside = isInside,
+                Height = m_Data.WallData.Height
+            };
 
-            points = points.SortPointsClockwise().ToArray();
-            cornerPoints = cornerPoints.SortPointsClockwise().ToArray();
-            flatPoints = flatPoints.SortPointsClockwise().ToArray();
-
-            ProBuilderMesh post = ProBuilderMesh.Create();
-            post.name = "Corner";
-
-            switch (m_Data.CornerData.Type)
-            {
-                case CornerType.Point:
-                    post.CreateShapeFromPolygon(cornerPoints, wallData.Height, false);
-                    break;
-                case CornerType.Round:
-                    post.CreateShapeFromPolygon(points, 0, false);
-                    Face[] extrudeFaces = post.Extrude(new Face[] { post.faces[0] }, ExtrudeMethod.FaceNormal, wallData.Height);
-                    //Smoothing.ApplySmoothingGroups(post, extrudeFaces, 360);
-                    break;
-                case CornerType.Flat:
-                    post.CreateShapeFromPolygon(flatPoints, wallData.Height, false);
-                    break;
-            }
-                
-            post.GetComponent<Renderer>().sharedMaterial = wallData.Material;
-            post.ToMesh();
-            post.Refresh();
-
-            post.transform.SetParent(corners.transform, false);
-
+            corner.Initialize(cornerData).Build();
+            corner.OnDataChange += (CornerData data) => { m_Data.Corners[data.ID] = data; };
         }
     }
 
@@ -169,6 +154,11 @@ public class Storey : MonoBehaviour, IBuildable
     {
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
             return;
+
+        //if (m_Data.Walls.Length > 0)
+        //    return;
+
+        m_Data.Walls = new WallData[m_Data.ControlPoints.Length];
 
         WallData wallData = m_Data.WallData;
 
@@ -235,15 +225,22 @@ public class Storey : MonoBehaviour, IBuildable
             Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
             
 
-            ProBuilderMesh wall = ProBuilderMesh.Create();
-            wall.name = "Wall " + i.ToString();
-            wall.AddComponent<Wall>();
-            wall.transform.SetParent(walls.transform, false);
-            WallData data = new WallData(wallData);
-            data.SetControlPoints(points);
-            wall.GetComponent<Wall>().Initialize(data).Build();
+            ProBuilderMesh wallMesh = ProBuilderMesh.Create();
+            wallMesh.name = "Wall " + i.ToString();
+            wallMesh.AddComponent<Wall>();
+            wallMesh.transform.SetParent(walls.transform, false);
 
+            Wall wall = wallMesh.GetComponent<Wall>();
             
+            WallData data = new WallData(wallData)
+            {
+                ID = i,
+                ControlPoints = points
+            };
+            
+            m_Data.Walls[i] = wallData;
+            wall.Initialize(data).Build();
+            wall.OnDataChange += (WallData data) => { m_Data.Walls[data.ID] = data; };
         }
     }
 

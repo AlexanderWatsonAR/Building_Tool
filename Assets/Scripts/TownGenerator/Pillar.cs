@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
@@ -9,6 +10,13 @@ public class Pillar : MonoBehaviour, IBuildable
 {
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private PillarData m_Data;
+
+    public event Action<PillarData> OnDataChange;
+
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
 
     public IBuildable Initialize(IData data)
     {

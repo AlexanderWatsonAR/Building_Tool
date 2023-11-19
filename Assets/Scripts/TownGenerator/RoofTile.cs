@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class RoofTile : MonoBehaviour, IBuildable
 {
     [SerializeField] private RoofTileData m_Data;
     [SerializeField, HideInInspector] private List<Vector3[]> m_SubPoints;
+    
+    public event Action<IData> OnDataChange;
 
     public RoofTileData Data => m_Data;
 

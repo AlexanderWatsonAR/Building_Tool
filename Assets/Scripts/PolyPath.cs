@@ -437,14 +437,14 @@ public class PolyPath
             sum += Vector3.Cross(edge1, edge2).y; // We use .y since we're on the XZ plane
         }
 
-        if(sum > 0)
-        {
-            Debug.Log("Clockwise");
-        }
-        else
-        {
-            Debug.Log("Counter-clockwise");
-        }
+        //if(sum > 0)
+        //{
+        //    Debug.Log("Clockwise");
+        //}
+        //else
+        //{
+        //    Debug.Log("Counter-clockwise");
+        //}
 
         return sum > 0f;
 

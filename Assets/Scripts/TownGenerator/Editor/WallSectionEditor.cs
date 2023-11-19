@@ -108,6 +108,7 @@ public class WallSectionEditor : Editor
         if(m_SerializedProperties.SerializedObject.ApplyModifiedProperties())
         {
             m_Section.Build();
+            m_Section.OnDataChange_Invoke();
         }
     }
 

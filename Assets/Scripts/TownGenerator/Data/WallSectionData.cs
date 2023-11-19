@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class WallSectionData : IData
 {
-
+    [SerializeField, HideInInspector] private Vector2Int m_ID;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private float m_WallDepth;
 
@@ -68,6 +68,7 @@ public class WallSectionData : IData
     #endregion
 
 
+    public Vector2Int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public float WallDepth { get { return m_WallDepth; } set { m_WallDepth = value; } }
 

@@ -29,6 +29,7 @@ public class WallEditor : Editor
         if (serializedObject.ApplyModifiedProperties())
         {
             wall.Build();
+            wall.OnDataChange_Invoke();
         }
     }
 }

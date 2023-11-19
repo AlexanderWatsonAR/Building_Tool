@@ -6,6 +6,7 @@ using HandleUtil = UnityEditor.HandleUtility;
 using UnityEditor.ProBuilder;
 using UnityEngine.Rendering;
 using System.Linq;
+using System.IO;
 
 // Add Poly path stuff
 [CustomEditor(typeof(Building))]
@@ -158,8 +159,12 @@ public class BuildingEditor : Editor
                     {
                         m_PolyMode = PolyMode.Hide;
                         m_PolyPath.PolyMode = PolyMode.Hide;
-                        m_PolyPath.IsValidPath();
-                        m_Building.Initialize().Build();
+                        if(m_PolyPath.IsValidPath())
+                        {
+                            m_PolyPath.CalculateForwards();
+                            m_Building.Initialize(new BuildingData(m_PolyPath)).Build();
+                        }
+                        
                         
                         return;
                     }

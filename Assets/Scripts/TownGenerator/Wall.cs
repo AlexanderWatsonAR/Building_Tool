@@ -6,12 +6,15 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder;
 using System.Linq;
 using UnityEditor;
+using System;
 
 public class Wall : MonoBehaviour, IBuildable
 {
     [SerializeField] WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
     private WallSectionData m_SectionData;
+
+    public event Action<WallData> OnDataChange;
 
     private List<Vector3[]> SubPoints
     {
@@ -26,6 +29,11 @@ public class Wall : MonoBehaviour, IBuildable
     }
 
     public WallData WallData => m_Data;
+
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
 
     public IBuildable Initialize(IData data)
     {
@@ -63,7 +71,6 @@ public class Wall : MonoBehaviour, IBuildable
             DoorData = doorData,
             DoorFrameInsideScale = doorData.Scale,
             DoorFrameDepth = m_Data.Depth * 1.1f
-
         };
 
 
@@ -76,28 +83,37 @@ public class Wall : MonoBehaviour, IBuildable
 
         transform.DeleteChildren();
 
-        for (int i = 0; i < m_Data.Columns; i++)
+        m_Data.Sections = new WallSectionData[m_Data.Columns, m_Data.Rows];
+
+        for (int x = 0; x < m_Data.Columns; x++)
         {
-            for (int j = 0; j < m_Data.Rows; j++)
+            for (int y = 0; y < m_Data.Rows; y++)
             {
-                Vector3 first = subPoints[j][i];
-                Vector3 second = subPoints[j + 1][i];
-                Vector3 third = subPoints[j + 1][i + 1];
-                Vector3 fourth = subPoints[j][i + 1];
+                Vector3 first = subPoints[y][x];
+                Vector3 second = subPoints[y + 1][x];
+                Vector3 third = subPoints[y + 1][x + 1];
+                Vector3 fourth = subPoints[y][x + 1];
 
                 Vector3[] points = new Vector3[] { first, second, third, fourth };
 
-                ProBuilderMesh wallSection = ProBuilderMesh.Create();
-                wallSection.name = "Wall Section " + i.ToString() + " " + j.ToString();
-                wallSection.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
-                wallSection.transform.SetParent(transform, false);
+                ProBuilderMesh wallSectionMesh = ProBuilderMesh.Create();
+                wallSectionMesh.name = "Wall Section " + x.ToString() + " " + y.ToString();
+                wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
+                wallSectionMesh.transform.SetParent(transform, false);
 
                 WallSectionData wallSectionData = new WallSectionData(m_SectionData) // Pass in generic section data.
                 {
-                    ControlPoints = points
+                    ControlPoints = points,
+                    ID = new Vector2Int(x, y)
                 };
 
-                wallSection.AddComponent<WallSection>().Initialize(wallSectionData).Build();
+                m_Data.Sections[x, y] = wallSectionData;
+
+                WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(wallSectionData) as WallSection;
+                wallSection.Build();
+
+                wallSection.OnDataChange += (WallSectionData data) => { m_Data.Sections[data.ID.x, data.ID.y] = data;};
+
             }
         }
     }

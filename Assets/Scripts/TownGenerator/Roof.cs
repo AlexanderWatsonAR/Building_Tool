@@ -31,9 +31,11 @@ public class Roof : MonoBehaviour, IBuildable
     //End Beam
 
     [SerializeField] private List<RoofTile> m_Tiles;
+    [SerializeField] private List<RoofTileData> m_TilesData;
     public RoofData Data => m_Data;
 
     public event Action<RoofData> OnAnyRoofChange; // Building should sub to this.
+    ///public event Action<IData> OnDataChange;
 
     public void OnAnyRoofChange_Invoke()
     {
@@ -264,16 +266,27 @@ public class Roof : MonoBehaviour, IBuildable
         probuilderMesh.transform.SetParent(transform, false);
         RoofTile tile = probuilderMesh.AddComponent<RoofTile>();
         //data.IsInside = m_Data.IsHip;
+        
         tile.Initialize(data).Build();
+        tile.OnDataChange += Tile_OnDataChange;
         m_Tiles.Add(tile);
+        m_TilesData.Add(data);
+    }
+
+    private void Tile_OnDataChange(IData obj)
+    {
+        Debug.Break();
     }
 
     private void CreateWall(Vector3[] points)
     {
         GameObject wall = new GameObject("Wall", typeof(Wall));
         wall.transform.SetParent(transform, false);
-        WallData data = new WallData(m_LastStorey.Data.WallData);
-        data.SetControlPoints(points);
+
+        WallData data = new WallData(m_LastStorey.Data.WallData)
+        {
+            ControlPoints = points
+        };
         wall.GetComponent<Wall>().Initialize(data).Build();
         m_Walls.Add(wall.GetComponent<Wall>());
     }
@@ -682,9 +695,10 @@ public class Roof : MonoBehaviour, IBuildable
                 points[0] += dir * 0.5f;
                 points[3] -= dir * 0.5f;
 
-                WallData data = new WallData(wall.WallData);
-                data.SetControlPoints(points);
-
+                WallData data = new WallData(wall.WallData)
+                {
+                    ControlPoints = points
+                };
                 wall.Initialize(data).Build();
 
             }
