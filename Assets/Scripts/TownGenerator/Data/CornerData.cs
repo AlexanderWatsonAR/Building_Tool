@@ -11,7 +11,7 @@ public class CornerData : IData
     [SerializeField, HideInInspector] float m_Height;
     [SerializeField, HideInInspector] bool m_IsInside;
     [SerializeField] private CornerType m_Type;
-    [SerializeField] private int m_Sides;
+    [SerializeField, HideInInspector] private int m_Sides;
 
     public int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] CornerPoints { get { return m_CornerPoints; } set { m_CornerPoints = value; } }

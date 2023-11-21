@@ -16,14 +16,36 @@ public class StoreyEditor : Editor
         serializedObject.Update();
         Storey storey = (Storey)target;
 
-        if (storey.gameObject.TryGetComponent(out Building theBuilding))
+        if (storey.TryGetComponent(out Building building))
         {
-            if(!theBuilding.HasInitialized)
+            if(!building.HasInitialized)
                 return;
 
-            //theBuilding.Data.
+            BuildingSerializedProperties props = new(building);
+
+            props.SerializedObject.Update();
+
+            EditorGUILayout.PropertyField(props.Storeys);
+
+            if (props.SerializedObject.ApplyModifiedProperties())
+            {
+                for(int i = 0; i < building.Data.StoreysData.Count; i++)
+                {
+                    building.Data.StoreysData[i].ID = i;
+                }
+
+                building.Build();
+            }
+        }
+        else
+        {
+            DisplayStorey(storey);
         }
 
+    }
+
+    private void DisplayStorey(Storey storey)
+    {
         SerializedProperty data = serializedObject.FindProperty("m_Data");
 
         SerializedProperty activeElements = data.FindPropertyRelative("m_ActiveElements");
@@ -64,14 +86,13 @@ public class StoreyEditor : Editor
         m_ShowWall = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowWall, "Wall");
         if (m_ShowWall)
         {
-            if(!storey.TryGetComponent(out WallSection _))
+            if (!storey.TryGetComponent(out WallSection _))
             {
                 EditorGUILayout.Slider(wallHeight, 1, 100, "Height");
             }
             EditorGUILayout.Slider(wallDepth, 0.1f, 1, "Depth");
             EditorGUILayout.PropertyField(cornerType);
             EditorGUILayout.IntSlider(cornerSides, 3, 15, "Sides");
-            //EditorGUILayout.ObjectField(wallMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
@@ -81,7 +102,6 @@ public class StoreyEditor : Editor
         if (m_ShowFloor)
         {
             EditorGUILayout.Slider(floorHeight, 0.00001f, 1, "Height");
-            //EditorGUILayout.ObjectField(floorMaterial, new GUIContent("Material"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUI.EndDisabledGroup();
@@ -90,17 +110,10 @@ public class StoreyEditor : Editor
         m_ShowPillar = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowPillar, "Pillar");
         if (m_ShowPillar)
         {
-            //bool enterChildren = true;    
-            //while(pillarData.Next(enterChildren))
-            //{
-            //    enterChildren = false;
-            //    EditorGUILayout.PropertyField(pillarData);
-            //}
             EditorGUILayout.Slider(pillarWidth, 0, 10, "Width");
             EditorGUILayout.Slider(pillarDepth, 0, 10, "Depth");
             EditorGUILayout.IntSlider(pillarSides, 3, 32, "Sides");
             pillarSmooth.boolValue = EditorGUILayout.Toggle("Is Smooth", pillarSmooth.boolValue);
-            //EditorGUILayout.ObjectField(pillarMaterial, new GUIContent("Material"));
 
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
@@ -112,7 +125,7 @@ public class StoreyEditor : Editor
             {
                 building.Build();
             }
-            else if(storey.TryGetComponent(out WallSection wallSection)) // If the storey is an extension. 
+            else if (storey.TryGetComponent(out WallSection wallSection)) // If the storey is an extension. 
             {
                 wallSection.Build();
             }

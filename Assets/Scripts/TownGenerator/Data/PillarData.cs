@@ -9,12 +9,12 @@ public class PillarData : IData
 {
     [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
-    [SerializeField, Range(0, 100)] private float m_Height;
+    [SerializeField, Range(1, 50)] private float m_Height;
     [SerializeField, Range(0, 10)] private float m_Width;
     [SerializeField, Range(0, 10)] private float m_Depth;
     [SerializeField, Range(3, 32)] private int m_Sides;
     [SerializeField] private bool m_IsSmooth;
-    [SerializeField,HideInInspector] private Material m_Material;
+    [SerializeField, HideInInspector] private Material m_Material;
 
     public int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
@@ -33,7 +33,7 @@ public class PillarData : IData
     }
     public PillarData(IEnumerable<Vector3> controlPoints, float width, float height, float depth, int sides, Material material, bool isSmooth = false)
     {
-        m_ControlPoints = controlPoints == null ? new Vector3[0] : ControlPoints.ToArray();
+        m_ControlPoints = controlPoints == null ? new Vector3[0] : controlPoints.ToArray();
         m_Width = width;
         m_Height = height;
         m_Depth = depth;

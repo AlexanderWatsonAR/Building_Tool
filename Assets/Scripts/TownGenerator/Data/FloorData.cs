@@ -8,7 +8,7 @@ using UnityEngine;
 public class FloorData : IData
 {
     [SerializeField, Range(1, 10)] private int m_Columns, m_Rows; 
-    [SerializeField] private ControlPoint[] m_ControlPoints;
+    [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
     [SerializeField] private float m_Height;
     [SerializeField, HideInInspector] private Material m_Material;
 

@@ -6,13 +6,14 @@ using UnityEngine;
 [System.Serializable]
 public class BuildingData : IData
 {
+    // Should this data just be for saving & loading?
     [SerializeField] private PolyPath m_Path;
     [SerializeField] private List<StoreyData> m_Storeys;
     [SerializeField] private RoofData m_Roof;
 
     public PolyPath Path => m_Path;
     public List<StoreyData> StoreysData => m_Storeys;
-    public RoofData RoofData => m_Roof;
+    public RoofData RoofData { get{ return m_Roof;} set{ m_Roof = value; } }
 
     public BuildingData(PolyPath path) : this(path, new List<StoreyData> { new StoreyData() { ControlPoints = path.ControlPoints.ToArray() } }, new RoofData() { ControlPoints = path.ControlPoints.ToArray() })
     {

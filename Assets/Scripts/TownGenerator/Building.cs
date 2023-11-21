@@ -107,27 +107,6 @@ public class Building : MonoBehaviour, IBuildable
             return this;
 
         m_Data = data as BuildingData;
-
-        //m_PivotPosition = ProMaths.Average(ControlPoints.GetPositions());
-        
-        //Vector3[] controlPoints = ControlPoints.GetPositions();
-
-        //for (int i = 0; i < controlPoints.Length; i++)
-        //{
-        //    controlPoints[i] = controlPoints[i] - centre;
-        //}
-
-        //m_BuildingPolyPath.SetControlPoints(controlPoints);
-
-        //m_BuildingPolyPath.OnControlPointsChanged += Building_OnControlPointsChanged;
-
-
-        //m_Roof.Initialize(m_Data.RoofData);
-
-        //m_ProBuilderMesh.SetPivot(m_PivotPosition); 
-        //m_ProBuilderMesh.ToMesh();
-        //m_ProBuilderMesh.Refresh();
-
         m_HasInitialized = true;
 
         return this;
@@ -157,7 +136,7 @@ public class Building : MonoBehaviour, IBuildable
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
         roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).Build();
-        roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
+        roofGO.GetComponent<Roof>().OnDataChange += (RoofData data) => { m_Data.RoofData = data; };
         return;
     }
 
@@ -168,13 +147,13 @@ public class Building : MonoBehaviour, IBuildable
     //    Build();
     //}
 
-    private void Building_OnAnyRoofChange(RoofData data)
-    {
-        if (m_Roof == null && m_BuildingPolyPath == null)
-            return;
+    //private void Building_OnAnyRoofChange(RoofData data)
+    //{
+    //    if (m_Roof == null && m_BuildingPolyPath == null)
+    //        return;
         
-        m_Roof.Initialize(data);
-    }
+    //    m_Roof.Initialize(data);
+    //}
 
     public void RevertBuilding()
     {

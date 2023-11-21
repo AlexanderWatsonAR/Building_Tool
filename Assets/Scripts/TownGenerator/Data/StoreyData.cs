@@ -15,9 +15,9 @@ public class StoreyData : IData
     [SerializeField] private CornerData m_Corner;
     [SerializeField] private FloorData m_Floor;
 
-    [SerializeField] private WallData[] m_Walls;
-    [SerializeField] private PillarData[] m_Pillars;
-    [SerializeField] private CornerData[] m_Corners;
+    [SerializeField, HideInInspector] private WallData[] m_Walls;
+    [SerializeField, HideInInspector] private PillarData[] m_Pillars;
+    [SerializeField, HideInInspector] private CornerData[] m_Corners;
 
     public WallData WallData => m_Wall;
     public PillarData PillarData => m_Pillar;
@@ -68,8 +68,8 @@ public class StoreyData : IData
         m_Pillar.Height = m_Wall.Height;
         m_Corner = cornerData;
         m_Floor = floorData;
-        m_Walls = new WallData[m_ControlPoints.Length];
-        m_Pillars = new PillarData[m_ControlPoints.Length];
-        m_Corners = new CornerData[m_ControlPoints.Length];
+        m_Walls = null;
+        m_Pillars = null;
+        m_Corners = null;
     }
 }

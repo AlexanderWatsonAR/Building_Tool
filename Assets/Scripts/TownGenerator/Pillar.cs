@@ -20,8 +20,8 @@ public class Pillar : MonoBehaviour, IBuildable
 
     public IBuildable Initialize(IData data)
     {
+        m_Data = new PillarData(data as PillarData);
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_Data = data as PillarData;
         return this;
     }
 

@@ -34,12 +34,12 @@ public class Roof : MonoBehaviour, IBuildable
     [SerializeField] private List<RoofTileData> m_TilesData;
     public RoofData Data => m_Data;
 
-    public event Action<RoofData> OnAnyRoofChange; // Building should sub to this.
+    public event Action<RoofData> OnDataChange; // Building should sub to this.
     ///public event Action<IData> OnDataChange;
 
     public void OnAnyRoofChange_Invoke()
     {
-        OnAnyRoofChange?.Invoke(m_Data);
+        OnDataChange?.Invoke(m_Data);
     }
 
     private void Reset()

@@ -21,6 +21,7 @@ public class Floor : MonoBehaviour, IBuildable
     public IBuildable Initialize(IData data)
     {
         m_Data = data as FloorData;
+        name = "Floor";
         m_Split = new Vector3[0];
         m_Position = Vector3.zero;
         return this;
