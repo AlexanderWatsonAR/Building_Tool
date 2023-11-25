@@ -15,7 +15,11 @@ public class BuildingData : IData
     public List<StoreyData> StoreysData => m_Storeys;
     public RoofData RoofData { get{ return m_Roof;} set{ m_Roof = value; } }
 
-    public BuildingData(PolyPath path) : this(path, new List<StoreyData> { new StoreyData() { ControlPoints = path.ControlPoints.ToArray() } }, new RoofData() { ControlPoints = path.ControlPoints.ToArray() })
+    public BuildingData() : this(new PolyPath(), new List<StoreyData>(), new RoofData())
+    {
+
+    }
+    public BuildingData(PolyPath path) : this(path, new List<StoreyData> { new StoreyData() { ControlPoints = path.ControlPoints.ToArray(), Name = "Ground" } }, new RoofData() { ControlPoints = path.ControlPoints.ToArray() })
     {
         m_Path.CalculateForwards();
     }
@@ -33,5 +37,16 @@ public class BuildingData : IData
     {
         storeyData.ControlPoints = m_Path.ControlPoints.ToArray();
         m_Storeys.Add(storeyData);
+    }
+
+    /// <summary>
+    /// Each storey data as an id equal to its index in the list.
+    /// </summary>
+    public void AssignStoreyID()
+    {
+        for(int i = 0; i < m_Storeys.Count; i++)
+        {
+            m_Storeys[i].ID = i;
+        }
     }
 }

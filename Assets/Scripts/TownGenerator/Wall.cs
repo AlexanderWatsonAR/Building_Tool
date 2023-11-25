@@ -12,7 +12,6 @@ public class Wall : MonoBehaviour, IBuildable
 {
     [SerializeField] WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
-    private WallSectionData m_SectionData;
 
     public event Action<WallData> OnDataChange;
 
@@ -22,7 +21,11 @@ public class Wall : MonoBehaviour, IBuildable
         {
             if (m_Data.Columns <= 0 && m_Data.Rows <= 0) return null;
 
-            m_SubPoints = MeshMaker.CreateGridFromControlPoints(m_Data.ControlPoints, m_Data.Columns, m_Data.Rows);
+            Vector3 start = m_Data.Start;
+            Vector3 end = m_Data.End;
+            Vector3 h = Vector3.up * m_Data.Height;
+
+            m_SubPoints = MeshMaker.CreateGridFromControlPoints(new Vector3[] {start, start + h, end + h, end}, m_Data.Columns, m_Data.Rows);
 
             return m_SubPoints;
         }
@@ -39,7 +42,7 @@ public class Wall : MonoBehaviour, IBuildable
     {
         m_Data = data as WallData;
 
-        Vector3 right = m_Data.ControlPoints[0].DirectionToTarget(m_Data.ControlPoints[3]);
+        Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
         Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
 
         Material defaultMat = BuiltinMaterials.defaultMaterial;
@@ -64,7 +67,7 @@ public class Wall : MonoBehaviour, IBuildable
             Material = defaultMat,
         };
 
-        m_SectionData = new WallSectionData()
+        m_Data.SectionData = new WallSectionData()
         {
             WallDepth = m_Data.Depth,
             WindowData = winData,
@@ -83,7 +86,7 @@ public class Wall : MonoBehaviour, IBuildable
 
         transform.DeleteChildren();
 
-        m_Data.Sections = new WallSectionData[m_Data.Columns, m_Data.Rows];
+        m_Data.Sections ??= new WallSectionData[m_Data.Columns, m_Data.Rows];
 
         for (int x = 0; x < m_Data.Columns; x++)
         {
@@ -101,21 +104,27 @@ public class Wall : MonoBehaviour, IBuildable
                 wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
                 wallSectionMesh.transform.SetParent(transform, false);
 
-                WallSectionData wallSectionData = new WallSectionData(m_SectionData) // Pass in generic section data.
+                m_Data.Sections[x, y] ??= new WallSectionData(m_Data.SectionData)
                 {
-                    ControlPoints = points,
                     ID = new Vector2Int(x, y)
                 };
 
-                m_Data.Sections[x, y] = wallSectionData;
+                m_Data.Sections[x, y].ControlPoints = points;
 
-                WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(wallSectionData) as WallSection;
+                WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[x, y]) as WallSection;
                 wallSection.Build();
 
                 wallSection.OnDataChange += (WallSectionData data) => { m_Data.Sections[data.ID.x, data.ID.y] = data;};
 
             }
         }
+    }
+
+    private WallSectionData CalculateSection()
+    {
+        WallSectionData data = new WallSectionData();
+
+        return data;
     }
 
     private void OnDrawGizmosSelected()

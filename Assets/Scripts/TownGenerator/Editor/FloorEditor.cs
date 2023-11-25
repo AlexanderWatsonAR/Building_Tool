@@ -175,14 +175,15 @@ public class FloorEditor : Editor
             Vector3 wallStart = startEndPoints[i];
             Vector3 wallEnd = startEndPoints[next];
 
-            Vector3[] wallPoints = new Vector3[] { wallStart, wallStart + (Vector3.up * height), wallEnd + (Vector3.up * height), wallEnd };
+            //Vector3[] wallPoints = new Vector3[] { wallStart, wallStart + (Vector3.up * height), wallEnd + (Vector3.up * height), wallEnd };
 
             ProBuilderMesh wall = ProBuilderMesh.Create();
             wall.name = "Wall " + count.ToString();
             wall.AddComponent<Wall>();
             WallData data = new WallData()
             {
-                ControlPoints = wallPoints,
+                Start = wallStart,
+                End = wallEnd,
                 Material = BuiltinMaterials.defaultMaterial,
                 Depth = depth,
                 Height = height

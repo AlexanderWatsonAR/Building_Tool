@@ -8,13 +8,12 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
-using static UnityEngine.UI.GridLayoutGroup;
 
 public class Storey : MonoBehaviour, IBuildable
 {
     [SerializeField] private StoreyData m_Data;
 
-    [SerializeField] List<Vector3[]> m_WallPoints;
+    [SerializeField] private Tuple<Vector3, Vector3>[] m_Tuples;
 
     public event Action<StoreyData> OnDataChange;
 
@@ -29,6 +28,7 @@ public class Storey : MonoBehaviour, IBuildable
     {
         m_Data = data as StoreyData;
 
+        m_Tuples = new Tuple<Vector3, Vector3>[m_Data.ControlPoints.Length];
 
         if (m_Data.WallData.Material == null)
         {
@@ -45,15 +45,12 @@ public class Storey : MonoBehaviour, IBuildable
             m_Data.FloorData.Material = BuiltinMaterials.defaultMaterial;
         }
 
-        m_WallPoints = new();
-
         return this;
     }
 
     public void Build()
     {
         transform.DeleteChildren();
-        m_WallPoints?.Clear();
 
         BuildPillars();
         BuildExternalWalls();
@@ -93,9 +90,6 @@ public class Storey : MonoBehaviour, IBuildable
     private void BuildCorners()
     {
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
-            return;
-
-        if (m_WallPoints.Count != m_Data.ControlPoints.Length)
             return;
 
         GameObject corners = new GameObject("Corners");
@@ -138,7 +132,7 @@ public class Storey : MonoBehaviour, IBuildable
 
             Wall wall = wallMesh.GetComponent<Wall>();
 
-            m_Data.Walls[i] = CalculateWall(i);
+            m_Data.Walls[i] ??= CalculateWall(i);
 
             wall.Initialize(m_Data.Walls[i]).Build();
             wall.OnDataChange += (WallData data) => { m_Data.Walls[data.ID] = data; OnDataChange_Invoke(); };
@@ -171,28 +165,28 @@ public class Storey : MonoBehaviour, IBuildable
         int previous = m_Data.ControlPoints.GetPrevious(current);
         int next = m_Data.ControlPoints.GetNext(current);
 
-        Vector3 dirA = m_WallPoints[current][0].DirectionToTarget(m_WallPoints[current][1]);
+        Vector3 dirA = m_Data.Walls[current].Start.DirectionToTarget(m_Data.Walls[current].End);
         Vector3 crossA = Vector3.Cross(dirA, Vector3.up) * wallData.Depth;
 
-        Vector3 dirB = m_WallPoints[previous][0].DirectionToTarget(m_WallPoints[previous][1]);
+        Vector3 dirB = m_Data.Walls[previous].Start.DirectionToTarget(m_Data.Walls[previous].End);
         Vector3 crossB = Vector3.Cross(dirB, Vector3.up) * wallData.Depth;
 
         Vector3 intersection;
 
-        Extensions.DoLinesIntersect(m_WallPoints[current][0] + crossA, m_WallPoints[current][1] + crossA, m_WallPoints[previous][0] + crossB, m_WallPoints[previous][1] + crossB, out intersection);
+        Extensions.DoLinesIntersect(m_Data.Walls[current].Start + crossA, m_Data.Walls[current].End + crossA, m_Data.Walls[previous].Start + crossB, m_Data.Walls[previous].End + crossB, out intersection);
 
         int numberOfSamples = m_Data.CornerData.Sides + 1;
 
-        Vector3[] cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[current][0] + crossB, intersection };
+        Vector3[] cornerPoints = new Vector3[] { m_Data.Walls[current].Start, m_Data.Walls[current].Start + crossA, m_Data.Walls[current].Start + crossB, intersection };
         Vector3[] flatPoints = new Vector3[] { cornerPoints[0], cornerPoints[1], cornerPoints[2] };
 
         bool isInside = isConcave && concavePoints.Any(b => b == current);
 
         if (isInside)
         {
-            Extensions.DoLinesIntersect(m_WallPoints[current][0], m_WallPoints[current][1], m_WallPoints[previous][0], m_WallPoints[previous][1], out intersection);
-            cornerPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1], intersection };
-            flatPoints = new Vector3[] { m_WallPoints[current][0], m_WallPoints[current][0] + crossA, m_WallPoints[previous][1] };
+            Extensions.DoLinesIntersect(m_Data.Walls[current].Start, m_Data.Walls[current].End, m_Data.Walls[previous].Start, m_Data.Walls[previous].End, out intersection);
+            cornerPoints = new Vector3[] { m_Data.Walls[current].Start, m_Data.Walls[current].Start + crossA, m_Data.Walls[previous].End, intersection };
+            flatPoints = new Vector3[] { m_Data.Walls[current].Start, m_Data.Walls[current].Start + crossA, m_Data.Walls[previous].End };
         }
 
         CornerData cornerData = new CornerData(m_Data.CornerData)
@@ -209,8 +203,9 @@ public class Storey : MonoBehaviour, IBuildable
     private WallData CalculateWall(int wallIndex)
     {
         WallData wallData = m_Data.WallData;
+        wallData.Sections = new WallSectionData[wallData.Columns, wallData.Rows];
 
-        Vector3 h = wallData.Height * Vector3.up;
+        m_Data.WallPoints = new WallPoints[m_Data.ControlPoints.Length];
 
         Vector3[] insidePoints = m_Data.InsidePoints;
 
@@ -231,9 +226,9 @@ public class Storey : MonoBehaviour, IBuildable
         Vector3 previousRight = Vector3.Cross(Vector3.up, previousForward) * wallData.Depth;
 
         Vector3 bottomLeft = insidePoints[current];
-        Vector3 topLeft = bottomLeft + h;
+        //Vector3 topLeft = bottomLeft + h;
         Vector3 bottomRight = oneNextInside;
-        Vector3 topRight = bottomRight + h;
+        //Vector3 topRight = bottomRight + h;
 
         // Post Points
         Vector3 zero = m_Data.ControlPoints[current].Position;
@@ -251,25 +246,26 @@ public class Storey : MonoBehaviour, IBuildable
             if (conditionA)
             {
                 bottomRight = nextControlPoint - nextRight;
-                topRight = bottomRight + h;
+                //topRight = bottomRight + h;
             }
 
             if (conditionB)
             {
                 bottomLeft = m_Data.ControlPoints[current].Position - nextRight;
-                topLeft = bottomLeft + h;
+                //topLeft = bottomLeft + h;
             }
 
         }
 
-        m_WallPoints.Add(new Vector3[] { bottomLeft, bottomRight });
+        m_Data.WallPoints[current] = new WallPoints(bottomLeft, bottomRight);
 
-        Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
+        //Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
 
         WallData data = new WallData(wallData)
         {
             ID = wallIndex,
-            ControlPoints = points
+            Start = bottomLeft,
+            End = bottomRight
         };
 
         return data;

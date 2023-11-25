@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -94,5 +95,37 @@ public class RoofData: IData
         }
 
         return scaledControlPoints;
+    }
+
+    public int[] AvailableRoofFrames()
+    {
+        if (m_ControlPoints == null | m_ControlPoints.Length == 0)
+            return new int[0];
+
+        int Gable = (int)RoofType.Gable;
+        int Mansard = (int)RoofType.Mansard;
+        int Dormer = (int)RoofType.Dormer;
+        int MShaped = (int)RoofType.MShaped;
+        int Pyramid = (int)RoofType.Pyramid;
+        int PyramidHip = (int)RoofType.PyramidHip;
+
+        if (m_ControlPoints.FindPathPoints().Count() == 4)
+            return new int[] { Gable, Mansard, Dormer, MShaped, Pyramid, PyramidHip };
+
+        if (m_ControlPoints.IsDescribableInOneLine(out _))
+        {
+            if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+            {
+                return new int[] { Gable, Mansard, Dormer, Pyramid, PyramidHip };
+            }
+            return new int[] { Gable, Mansard, Dormer };
+        }
+
+        if (m_ControlPoints.IsPointInside(m_ControlPoints.Centre()))
+        {
+            return new int[] { Mansard, Pyramid, PyramidHip };
+        }
+
+        return new int[] { Mansard };
     }
 }

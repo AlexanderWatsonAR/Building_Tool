@@ -8,8 +8,6 @@ using UnityEngine.ProBuilder;
 using Vertex = UnityEngine.ProBuilder.Vertex;
 using Rando = UnityEngine.Random;
 using ProMaths = UnityEngine.ProBuilder.Math;
-using UnityEditor;
-using UnityEngine.UI;
 using UnityEngine.ProBuilder.MeshOperations;
 
 public class Roof : MonoBehaviour, IBuildable
@@ -105,18 +103,18 @@ public class Roof : MonoBehaviour, IBuildable
         if (!m_Data.IsActive)
             return;
 
-        if (TryGetComponent(out Building building))
-        {
-            m_LastStorey = building.GetComponents<Storey>()[^1];
-        }
-        else if(TryGetComponent(out WallSection wallSection))
-        {
-            m_LastStorey = wallSection.GetComponent<Storey>();
-        }
-        else
-        {
-            m_LastStorey = transform.parent.GetComponents<Storey>()[^1];
-        }
+        //if (TryGetComponent(out Building building))
+        //{
+        //    m_LastStorey = building.GetComponents<Storey>()[^1];
+        //}
+        //else if(TryGetComponent(out WallSection wallSection))
+        //{
+        //    m_LastStorey = wallSection.GetComponent<Storey>();
+        //}
+        //else
+        //{
+        //    m_LastStorey = transform.parent.GetComponents<Storey>()[^1];
+        //}
 
         switch (m_Data.RoofType)
         {
@@ -270,7 +268,7 @@ public class Roof : MonoBehaviour, IBuildable
         tile.Initialize(data).Build();
         tile.OnDataChange += Tile_OnDataChange;
         m_Tiles.Add(tile);
-        m_TilesData.Add(data);
+        //m_TilesData.Add(data);
     }
 
     private void Tile_OnDataChange(IData obj)
@@ -283,9 +281,10 @@ public class Roof : MonoBehaviour, IBuildable
         GameObject wall = new GameObject("Wall", typeof(Wall));
         wall.transform.SetParent(transform, false);
 
-        WallData data = new WallData(m_LastStorey.Data.WallData)
+        WallData data = new WallData()
         {
-            ControlPoints = points
+            Start = points[0],
+            End = points[^1]
         };
         wall.GetComponent<Wall>().Initialize(data).Build();
         m_Walls.Add(wall.GetComponent<Wall>());
@@ -688,16 +687,18 @@ public class Roof : MonoBehaviour, IBuildable
 
             foreach(Wall wall in m_Walls)
             {
-                Vector3[] points = wall.WallData.ControlPoints;
+                Vector3 start = wall.WallData.Start;
+                Vector3 end = wall.WallData.End;
 
-                Vector3 dir = points[0].DirectionToTarget(points[3]);
+                Vector3 dir = start.DirectionToTarget(end);
 
-                points[0] += dir * 0.5f;
-                points[3] -= dir * 0.5f;
+                start += dir * 0.5f;
+                end -= dir * 0.5f;
 
                 WallData data = new WallData(wall.WallData)
                 {
-                    ControlPoints = points
+                    Start = start,
+                    End = end
                 };
                 wall.Initialize(data).Build();
 

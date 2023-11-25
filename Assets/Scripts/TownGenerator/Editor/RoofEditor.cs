@@ -22,10 +22,10 @@ public class RoofEditor : Editor
         Roof roof = (Roof)target;
         serializedObject.Update();
 
-        if (roof.gameObject.TryGetComponent(out Building theBuilding) && !theBuilding.HasInitialized)
-        {
-            return;
-        }
+        //if (roof.gameObject.TryGetComponent(out Building theBuilding) && !theBuilding.HasInitialized)
+        //{
+        //    return;
+        //}
 
         SerializedProperty roofData = serializedObject.FindProperty("m_Data");
 
@@ -46,7 +46,7 @@ public class RoofEditor : Editor
         int index = 0;
         int value = (int)frameType.GetEnumValue<RoofType>();
 
-        int[] frames = roof.AvailableRoofFrames();
+        int[] frames = roof.Data.AvailableRoofFrames();
 
         if (frames.Length > 0)
         {

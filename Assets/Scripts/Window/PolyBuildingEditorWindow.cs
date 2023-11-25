@@ -7,6 +7,8 @@ using UnityEditor.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 public class PolyBuildingEditorWindow : EditorWindow
 {
@@ -19,38 +21,59 @@ public class PolyBuildingEditorWindow : EditorWindow
         GetWindow(typeof(PolyBuildingEditorWindow), false, "PolyBuilding");
     }
 
-    private void OnGUI()
+    public void CreateGUI()
     {
-        if(GUILayout.Button("New Poly Building"))
-        {
-            ProBuilderMesh building = ProBuilderMesh.Create();
-            building.name = "Poly Building";
-            building.AddComponent<Building>();
-            Building build = building.GetComponent<Building>();
-            build.PolyPath.PolyMode = PolyMode.Draw;
-            Selection.activeGameObject = building.gameObject;
-        }
+        Button newPolyBuilding_btn = new Button
+        (
+            () =>
+            {
+                ProBuilderMesh building = ProBuilderMesh.Create();
+                building.name = "Poly Building";
+                building.AddComponent<Building>();
+                Building build = building.GetComponent<Building>();
+                build.Data.Path.PolyMode = PolyMode.Draw;
+                Selection.activeGameObject = building.gameObject;
+            }
+        );
 
-        EditorGUI.BeginDisabledGroup(!m_IsActiveGameObjectABuilding);
+       newPolyBuilding_btn.text = "New Poly Building";
 
-        if(GUILayout.Button("Merge"))
-        {
-            MergeWindow.ShowWindow();
-        }
-
-        if (GUILayout.Button("Export"))
-        {
-            ExportEditorWindow.ShowWindow();
-        }
-
-        EditorGUI.EndDisabledGroup();
-
-        if (GUILayout.Button("Material Presets"))
-        {
-            MaterialPresetWindow.ShowWindow();
-
-        }
+       rootVisualElement.Add(newPolyBuilding_btn);
     }
+
+
+    //private void OnGUI()
+    //{
+    //    if(GUILayout.Button("New Poly Building"))
+    //    {
+    //        ProBuilderMesh building = ProBuilderMesh.Create();
+    //        building.name = "Poly Building";
+    //        building.AddComponent<Building>();
+    //        Building build = building.GetComponent<Building>();
+    //        build.Data.Path.PolyMode = PolyMode.Draw;
+    //        Selection.activeGameObject = building.gameObject;
+    //    }
+
+    //    EditorGUI.BeginDisabledGroup(!m_IsActiveGameObjectABuilding);
+
+    //    if(GUILayout.Button("Merge"))
+    //    {
+    //        MergeWindow.ShowWindow();
+    //    }
+
+    //    if (GUILayout.Button("Export"))
+    //    {
+    //        ExportEditorWindow.ShowWindow();
+    //    }
+
+    //    EditorGUI.EndDisabledGroup();
+
+    //    if (GUILayout.Button("Material Presets"))
+    //    {
+    //        MaterialPresetWindow.ShowWindow();
+
+    //    }
+    //}
 
     private void OnSelectionChange()
     {

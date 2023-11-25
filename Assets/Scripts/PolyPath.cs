@@ -24,6 +24,7 @@ public class PolyPath
     public bool IsPathValid => m_IsPathValid;
 
     public event Action<List<ControlPoint>> OnControlPointsChanged;
+    public event Action<PolyMode> OnPolyModeChanged;
 
     public PolyPath(bool isClosedLoop = true)
     {
@@ -34,7 +35,7 @@ public class PolyPath
     public PolyMode PolyMode
     {
         get { return m_PolyMode; }
-        set { m_PolyMode = value; }
+        set { m_PolyMode = value; OnPolyModeChanged?.Invoke(m_PolyMode); }
     }
 
     public Vector3[] Positions
@@ -255,18 +256,14 @@ public class PolyPath
 
         return m_IsPathValid;
     }
-
-
     public void RemoveControlPointAt(int index)
     {
         m_ControlPoints.RemoveAt(index);
     }
-
     public ControlPoint GetControlPointAt(int index)
     {
         return m_ControlPoints[index];
     }
-
     public void SetPositionAt(int index, Vector3 position)
     {
         if (index < 0 || index > m_ControlPoints.Count)
@@ -336,22 +333,18 @@ public class PolyPath
             }
         }
     }
-
     public Vector3 GetPositionAt(int index)
     {
         return m_ControlPoints[index].Position;
     }
-
     public Vector3 GetLastPosition()
     {
         return m_ControlPoints[^1].Position;
     }
-
     public Vector3 GetFirstPosition()
     {
         return m_ControlPoints[0].Position;
     }
-
     public void CalculateForwards()
     {
         if (!m_IsClosedLoop)

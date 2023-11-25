@@ -7,7 +7,9 @@ using UnityEngine;
 public class StoreyData : IData
 {
     [SerializeField, HideInInspector] private int m_ID;
+    [SerializeField, HideInInspector] private string m_Name;
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints; // static?
+    [SerializeField] private WallPoints[] m_WallPoints;
     [SerializeField] private StoreyElement m_ActiveElements;
 
     [SerializeField] private WallData m_Wall;
@@ -29,7 +31,10 @@ public class StoreyData : IData
     public CornerData[] Corners { get { return m_Corners; } set { m_Corners = value; } }
 
     public ControlPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
+    public WallPoints[] WallPoints { get { return m_WallPoints; } set { m_WallPoints = value; } }
     public StoreyElement ActiveElements => m_ActiveElements;
+
+    public string Name { get { return m_Name; } set { m_Name = value; } }
     public int ID { get{ return m_ID; } set { m_ID = value; } }
 
     public Vector3[] InsidePoints
@@ -48,17 +53,17 @@ public class StoreyData : IData
         }
     }
 
-    public StoreyData() : this (0, new ControlPoint[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData())
+    public StoreyData() : this (0, new ControlPoint[0], new WallPoints[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData())
     {
 
     }
 
-    public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.ActiveElements, data.WallData, data.PillarData, data.CornerData, data.FloorData)
+    public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.WallPoints, data.ActiveElements, data.WallData, data.PillarData, data.CornerData, data.FloorData)
     {
 
     }
 
-    public StoreyData(int id, ControlPoint[] controlPoints, StoreyElement activeElements, WallData wallData, PillarData pillarData, CornerData cornerData, FloorData floorData)
+    public StoreyData(int id, ControlPoint[] controlPoints, WallPoints[] wallPoints, StoreyElement activeElements, WallData wallData, PillarData pillarData, CornerData cornerData, FloorData floorData)
     {
         m_ID = id;
         m_ControlPoints = controlPoints == null? new ControlPoint[0] : controlPoints;

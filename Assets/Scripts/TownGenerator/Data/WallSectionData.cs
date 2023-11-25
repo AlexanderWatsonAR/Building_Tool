@@ -9,6 +9,10 @@ public class WallSectionData : IData
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private float m_WallDepth;
 
+    [SerializeField] private WallElement m_WallElement;
+
+    public WallElement WallElement => m_WallElement;
+
     #region Window Properties
     [SerializeField] private WindowData m_WindowData;
     [SerializeField, Range(0, 0.999f)] private float m_WindowHeight;

@@ -48,13 +48,13 @@ public class BuildingToolEditor : EditorTool
     public override void OnActivated()
     {
         Building building = (Building)target;
-        building.PolyPath.PolyMode = PolyMode.Edit;
+        building.Data.Path.PolyMode = PolyMode.Edit;
         m_MouseCursor = MouseCursor.ArrowPlus;
     }
     public override void OnWillBeDeactivated()
     {
         Building building = (Building)target;
-        building.PolyPath.PolyMode = PolyMode.Hide;
+        building.Data.Path.PolyMode = PolyMode.Hide;
         m_MouseCursor = MouseCursor.Arrow;
     }
     private void OnEnable()

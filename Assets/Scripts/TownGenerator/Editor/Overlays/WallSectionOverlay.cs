@@ -31,7 +31,7 @@ public class WallSectionOverlay : Overlay, ITransientOverlay
         wallElementField.RegisterValueChangedCallback((ChangeEvent<System.Enum> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); displayed = false; } displayed = true; }); // Toggling display off & on triggers the panel to redraw. // Bug: this doesn't work if the panel has been collapsed.
         root.Add(wallElementField);
 
-        WallElement wallElement = m_Section.WallElement;
+        WallElement wallElement = m_Section.Data.WallElement;
 
         if (collapsed)
             return root;

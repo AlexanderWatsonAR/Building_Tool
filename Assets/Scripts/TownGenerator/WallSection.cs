@@ -13,22 +13,19 @@ using UnityEngine.Rendering;
 
 public class WallSection : MonoBehaviour, IBuildable
 {
-    [SerializeField] private WallElement m_WallElement;
-
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private Vector3 m_FaceNormal;
     [SerializeField] private WallSectionData m_Data;
 
-    public WallElement WallElement => m_WallElement;
     public WallSectionData Data => m_Data;
 
     public event Action<WallSectionData> OnDataChange;
 
-    // Temp variables for testing
-    List<IList<Vector3>> m_Points;
-    List<Vector3> m_Grid;
-    Vector3 m_Centre;
-    // end of temp
+    //// Temp variables for testing
+    //List<IList<Vector3>> m_Points;
+    //List<Vector3> m_Grid;
+    //Vector3 m_Centre;
+    //// end of temp
 
     public void OnDataChange_Invoke()
     {
@@ -47,7 +44,7 @@ public class WallSection : MonoBehaviour, IBuildable
     {
         transform.DeleteChildren();
 
-        switch(m_WallElement)
+        switch(m_Data.WallElement)
         {
             case WallElement.Wall:
                 Rebuild(MeshMaker.Cube(m_Data.ControlPoints, m_Data.WallDepth));
@@ -194,7 +191,7 @@ public class WallSection : MonoBehaviour, IBuildable
                 break;      
         }
 
-        if(m_WallElement != WallElement.Extension)
+        if(m_Data.WallElement != WallElement.Extension)
         {
             if(TryGetComponent(out Storey storey))
             {
@@ -291,27 +288,27 @@ public class WallSection : MonoBehaviour, IBuildable
         //    Handles.Label(positions[index], index.ToString(), style);
         //}
 
-        if (m_Grid == null)
-            return;
+        //if (m_Grid == null)
+        //    return;
 
-        for(int x = 0; x < m_Grid.Count; x++) // cols
-        {
-            Handles.color = Color.yellow;
-            Handles.DotHandleCap(0, m_Grid[x], Quaternion.identity, 0.02f, EventType.Repaint);
+        //for(int x = 0; x < m_Grid.Count; x++) // cols
+        //{
+        //    Handles.color = Color.yellow;
+        //    Handles.DotHandleCap(0, m_Grid[x], Quaternion.identity, 0.02f, EventType.Repaint);
 
-            //for(int y = 0; y < m_Grid.GetLength(1)-1; y++) // rows
-            //{
-            //    Vector3 bl = m_Grid[x,y];
-            //    Vector3 tl = m_Grid[x, y + 1];
-            //    Vector3 tr = m_Grid[x + 1, y + 1];
-            //    Vector3 br = m_Grid[x + 1, y];
+        //    //for(int y = 0; y < m_Grid.GetLength(1)-1; y++) // rows
+        //    //{
+        //    //    Vector3 bl = m_Grid[x,y];
+        //    //    Vector3 tl = m_Grid[x, y + 1];
+        //    //    Vector3 tr = m_Grid[x + 1, y + 1];
+        //    //    Vector3 br = m_Grid[x + 1, y];
 
-            //    Vector3[] quad = new Vector3[] { bl, tl, tr, br };
+        //    //    Vector3[] quad = new Vector3[] { bl, tl, tr, br };
 
-            //    Handles.DrawAAPolyLine(quad);
-            //    Handles.DrawAAPolyLine(quad[0], quad[3]);
-            //}
-        }
+        //    //    Handles.DrawAAPolyLine(quad);
+        //    //    Handles.DrawAAPolyLine(quad[0], quad[3]);
+        //    //}
+        //}
 
         //Vector3 forward = Vector3.Cross(m_ControlPoints[0].DirectionToTarget(m_ControlPoints[3]), Vector3.up);
         //Quaternion rotation = Quaternion.FromToRotation(Vector3.up, forward);

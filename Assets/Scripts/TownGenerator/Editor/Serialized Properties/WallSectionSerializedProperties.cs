@@ -15,7 +15,7 @@ public class WallSectionSerializedProperties
     public SerializedObject SerializedObject => m_SerializedObject;
 
     public SerializedProperty WallSectionData { get { return m_WallSectionData; } }
-    public SerializedProperty WallElement { get { return m_SerializedObject.FindProperty("m_WallElement"); } }
+    public SerializedProperty WallElement { get { return WallSectionData.FindPropertyRelative("m_WallElement"); } }
     public SerializedProperty DoorElement { get { return WallSectionData.FindPropertyRelative("m_ActiveDoorElements"); } }
     public SerializedProperty DoorColumns { get { return WallSectionData.FindPropertyRelative("m_DoorColumns"); } }
     public SerializedProperty DoorRows { get { return WallSectionData.FindPropertyRelative("m_DoorRows"); } }

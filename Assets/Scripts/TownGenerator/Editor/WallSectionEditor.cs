@@ -30,7 +30,7 @@ public class WallSectionEditor : Editor
 
         EditorGUILayout.PropertyField(m_SerializedProperties.WallElement, new GUIContent("Section"));
 
-        switch (m_Section.WallElement)
+        switch (m_Section.Data.WallElement)
         {
             case WallElement.Wall:
                 break;
@@ -126,7 +126,7 @@ public class WallSectionEditor : Editor
         EditorGUILayout.PropertyField(m_SerializedProperties.DoorHeight);
         EditorGUILayout.PropertyField(m_SerializedProperties.DoorWidth);
 
-        if (m_Section.WallElement == WallElement.Archway)
+        if (m_Section.Data.WallElement == WallElement.Archway)
         {
             EditorGUILayout.PropertyField(m_SerializedProperties.DoorArchSides, new GUIContent("Sides"));
             EditorGUILayout.PropertyField(m_SerializedProperties.DoorArchHeight, new GUIContent("Height"));
