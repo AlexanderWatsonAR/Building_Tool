@@ -9,7 +9,7 @@ public class FloorData : IData
 {
     [SerializeField, Range(1, 10)] private int m_Columns, m_Rows; 
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
-    [SerializeField] private float m_Height;
+    [SerializeField, Range(0.001f, 1)] private float m_Height;
     [SerializeField, HideInInspector] private Material m_Material;
 
     public Material Material { get { return m_Material; } set { m_Material = value; } }

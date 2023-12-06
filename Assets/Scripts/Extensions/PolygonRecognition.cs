@@ -613,19 +613,13 @@ public static class PolygonRecognition
 
         simpleNPointIndices = indices;
 
-        int indices0Next = controlPoints.GetNextControlPoint(indices[0]);
-        int indices0Next1 = controlPoints.GetNextControlPoint(indices0Next);
-        int indices0Next2 = controlPoints.GetNextControlPoint(indices0Next1);
-        int indices0Next3 = controlPoints.GetNextControlPoint(indices0Next2);
+        int indices0Next4 = controlPoints.GetControlPointIndex(indices[0] + 4);
+        int indices1Next4 = controlPoints.GetControlPointIndex(indices[1] + 4);
 
-        int indices1Next = controlPoints.GetNextControlPoint(indices[1]);
-        int indices1Next1 = controlPoints.GetNextControlPoint(indices1Next);
-        int indices1Next2 = controlPoints.GetNextControlPoint(indices1Next1);
-        int indices1Next3 = controlPoints.GetNextControlPoint(indices1Next2);
-
-        if (indices[0] == indices1Next3 &&
-            indices[1] == indices0Next3)
+        if (indices[0] == indices1Next4 &&
+            indices[1] == indices0Next4)
         {
+            Debug.Log("NShape");
             return true;
         }
 
@@ -766,19 +760,19 @@ public static class PolygonRecognition
 
         for(int i = 0; i < indices.Length; i++)
         {
-            int sevenPrevious = controlPoints.GetControlPointIndex(indices[i] - 7);
-            int threeNext = controlPoints.GetControlPointIndex(indices[i] + 3);
-            int fourNext = controlPoints.GetControlPointIndex(indices[i] + 4);
+            int sixPlus = controlPoints.GetControlPointIndex(indices[i] +6); // prev -7
+            int threePrevious = controlPoints.GetControlPointIndex(indices[i] - 3); // prev + 3
+            int fourPrevious = controlPoints.GetControlPointIndex(indices[i] - 4); // pre + 4
 
-            bool conA = indices.Any(x => x == sevenPrevious);
-            bool conB = indices.Any(x => x == threeNext);
-            bool conC = indices.Any(x => x == fourNext);
+            bool conA = indices.Any(x => x == sixPlus);
+            bool conB = indices.Any(x => x == threePrevious);
+            bool conC = indices.Any(x => x == fourPrevious);
 
             if(conA && conB && conC)
             {
                 fIndices[0] = indices[i];
-                fIndices[1] = threeNext;
-                fIndices[2] = fourNext;
+                fIndices[1] = threePrevious;
+                fIndices[2] = fourPrevious;
                 break;
             }
         }
@@ -1292,21 +1286,23 @@ public static class PolygonRecognition
     /// <param name="polyTool"></param>
     /// <param name="oneLine"></param>
     /// <returns></returns>
-    public static bool IsDescribableInOneLine(this PolyPath polyTool, out Vector3[] oneLine)
+    public static bool IsDescribableInOneLine(this PolyPath polyTool, out Vector3[] oneLine, out OneLineShape shape, out int shapeIndex)
     {
-        return IsPolygonDescribableInOneLine(polyTool.Positions, out oneLine);
+        return IsPolygonDescribableInOneLine(polyTool.Positions, out oneLine, out shape, out shapeIndex);
     }
 
-    public static bool IsDescribableInOneLine(this IEnumerable<ControlPoint> controlPoints, out Vector3[] oneLine)
+    public static bool IsDescribableInOneLine(this IEnumerable<ControlPoint> controlPoints, out Vector3[] oneLine, out OneLineShape shape, out int shapeIndex)
     {
-        return IsPolygonDescribableInOneLine(GetPositions(controlPoints), out oneLine);
+        return IsPolygonDescribableInOneLine(GetPositions(controlPoints), out oneLine, out shape, out shapeIndex);
     }
 
-    public static bool IsPolygonDescribableInOneLine(this IEnumerable<Vector3> controlPoints, out Vector3[] oneLine)
+    public static bool IsPolygonDescribableInOneLine(this IEnumerable<Vector3> controlPoints, out Vector3[] oneLine, out OneLineShape shape, out int shapeIndex)
     {
         List<Vector3> points = FindPathPoints(controlPoints).ToList();
 
         oneLine = new Vector3[0];
+        shape = OneLineShape.Unknown;
+        shapeIndex = -1;
 
         switch (points.Count)
         {
@@ -1314,6 +1310,8 @@ public static class PolygonRecognition
                 oneLine = new Vector3[2];
                 oneLine[0] = Vector3.Lerp(points[0], points[1], 0.5f);
                 oneLine[1] = Vector3.Lerp(points[2], points[3], 0.5f);
+                shape = OneLineShape.Square;
+                shapeIndex = 0;
                 return true;
             case 6:
                 oneLine = new Vector3[3];
@@ -1326,6 +1324,8 @@ public static class PolygonRecognition
                     oneLine[0] = Vector3.Lerp(points[lIndices[1]], points[lIndices[2]], 0.5f);
                     oneLine[1] = Vector3.Lerp(points[lIndices[0]], points[lIndices[3]], 0.5f);
                     oneLine[2] = Vector3.Lerp(points[lIndices[5]], points[lIndices[4]], 0.5f);
+                    shape = OneLineShape.L;
+                    shapeIndex = index;
                     return true;
                 }
                 break;
@@ -1343,6 +1343,8 @@ public static class PolygonRecognition
                     second = Vector3.Lerp(points[tIndices[7]], points[tIndices[6]], 0.5f);
                     third = Vector3.Lerp(points[tIndices[4]], points[tIndices[5]], 0.5f);
                     last = Vector3.Lerp(second, third, 0.5f);
+                    shape = OneLineShape.T;
+                    shapeIndex = tIndices[0];
                 }
                 if (points.IsPolygonUShaped(out indices))
                 {
@@ -1352,15 +1354,19 @@ public static class PolygonRecognition
                     second = Vector3.Lerp(points[uIndices[0]], points[uIndices[5]], 0.5f);
                     third = Vector3.Lerp(points[uIndices[1]], points[uIndices[4]], 0.5f);
                     last = Vector3.Lerp(points[uIndices[2]], points[uIndices[3]], 0.5f);
+                    shape = OneLineShape.U;
+                    shapeIndex = uIndices[0];
                 }
                 if (points.IsPolygonSimpleNShaped(out indices))
                 {
                     int[] nIndices = points.RelativeIndices(indices[0]);
 
-                    start = Vector3.Lerp(points[nIndices[7]], points[nIndices[6]], 0.5f);
-                    second = Vector3.Lerp(points[nIndices[0]], points[nIndices[5]], 0.5f);
-                    third = Vector3.Lerp(points[nIndices[4]], points[nIndices[1]], 0.5f);
-                    last = Vector3.Lerp(points[nIndices[2]], points[nIndices[3]], 0.5f);
+                    start = Vector3.Lerp(points[nIndices[1]], points[nIndices[2]], 0.5f);
+                    second = Vector3.Lerp(points[nIndices[0]], points[nIndices[3]], 0.5f);
+                    third = Vector3.Lerp(points[nIndices[4]], points[nIndices[7]], 0.5f);
+                    last = Vector3.Lerp(points[nIndices[5]], points[nIndices[6]], 0.5f);
+                    shape = OneLineShape.SimpleN;
+                    shapeIndex = nIndices[0];
                 }
 
                 oneLine[0] = start;
@@ -1379,6 +1385,8 @@ public static class PolygonRecognition
                     oneLine[1] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[2]], 0.5f);
                     oneLine[2] = Vector3.Lerp(points[relativeIndices[4]], points[relativeIndices[5]], 0.5f);
                     Extensions.DoLinesIntersect(oneLine[0], points[relativeIndices[3]], oneLine[1], Vector3.Lerp(points[relativeIndices[0]], points[relativeIndices[3]], 0.5f), out oneLine[3]);
+                    shape = OneLineShape.Arrow;
+                    shapeIndex = arrowPointIndices[0];
                     return true;
 
                 }
@@ -1391,9 +1399,9 @@ public static class PolygonRecognition
                     oneLine[0] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[2]], 0.5f);
                     oneLine[1] = Vector3.Lerp(points[relativeIndices[4]], points[relativeIndices[5]], 0.5f);
                     oneLine[2] = Vector3.Lerp(points[relativeIndices[7]], points[relativeIndices[8]], 0.5f);
-
-
                     oneLine[3] = ProMaths.Average(new Vector3[] { points[yPointIndices[0]], points[yPointIndices[1]], points[yPointIndices[2]] });
+                    shape = OneLineShape.Y;
+                    shapeIndex = yPointIndices[0];
                     return true;
                 }
                 return false;
@@ -1403,12 +1411,14 @@ public static class PolygonRecognition
                     oneLine = new Vector3[6];
                     int[] nIndices = points.RelativeIndices(nPointIndices[0]);
 
-                    oneLine[0] = Vector3.Lerp(points[nIndices[9]], points[nIndices[8]], 0.5f);
-                    oneLine[1] = Vector3.Lerp(points[nIndices[0]], points[nIndices[7]], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[nIndices[0]], points[nIndices[6]], 0.5f);
-                    oneLine[3] = Vector3.Lerp(points[nIndices[5]], points[nIndices[1]], 0.5f);
-                    oneLine[4] = Vector3.Lerp(points[nIndices[5]], points[nIndices[2]], 0.5f);
-                    oneLine[5] = Vector3.Lerp(points[nIndices[3]], points[nIndices[4]], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[nIndices[1]], points[nIndices[2]], 0.5f);
+                    oneLine[1] = Vector3.Lerp(points[nIndices[0]], points[nIndices[3]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[nIndices[0]], points[nIndices[4]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[nIndices[5]], points[nIndices[9]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[nIndices[5]], points[nIndices[8]], 0.5f);
+                    oneLine[5] = Vector3.Lerp(points[nIndices[6]], points[nIndices[7]], 0.5f);
+                    shape = OneLineShape.N;
+                    shapeIndex = nPointIndices[0];
                     return true;
                 }
                 else if(points.IsPolygonSimpleMShaped(out int[] simpleMPointIndices))
@@ -1421,6 +1431,8 @@ public static class PolygonRecognition
                     oneLine[2] = Vector3.Lerp(points[mIndices[1]], points[mIndices[6]], 0.5f);
                     oneLine[3] = Vector3.Lerp(points[mIndices[2]], points[mIndices[5]], 0.5f);
                     oneLine[4] = Vector3.Lerp(points[mIndices[3]], points[mIndices[4]], 0.5f);
+                    shape = OneLineShape.SimpleM;
+                    shapeIndex = simpleMPointIndices[0];
                     return true;
                 }
                 else if(points.IsPolygonFShaped(out int[] fIndices))
@@ -1428,13 +1440,13 @@ public static class PolygonRecognition
                     oneLine = new Vector3[5];
                     int[] relIndices = points.RelativeIndices(fIndices[0]);
 
-                    oneLine[0] = Vector3.Lerp(points[relIndices[9]], points[relIndices[8]], 0.5f);
-                    oneLine[2] = Vector3.Lerp(points[relIndices[1]], points[relIndices[2]], 0.5f);
-                    oneLine[3] = Vector3.Lerp(points[relIndices[7]], points[relIndices[4]], 0.5f);
-                    oneLine[4] = Vector3.Lerp(points[relIndices[5]], points[relIndices[6]], 0.5f);
+                    oneLine[0] = Vector3.Lerp(points[relIndices[1]], points[relIndices[2]], 0.5f);
+                    oneLine[2] = Vector3.Lerp(points[relIndices[8]], points[relIndices[9]], 0.5f);
+                    oneLine[3] = Vector3.Lerp(points[relIndices[3]], points[relIndices[6]], 0.5f);
+                    oneLine[4] = Vector3.Lerp(points[relIndices[4]], points[relIndices[5]], 0.5f);
 
-                    Vector3 line2Start = Vector3.Lerp(points[relIndices[0]], points[relIndices[3]], 0.5f);
-                    Vector3 dir = points[relIndices[0]].DirectionToTarget(points[relIndices[3]]);
+                    Vector3 line2Start = Vector3.Lerp(points[relIndices[0]], points[relIndices[7]], 0.5f);
+                    Vector3 dir = points[relIndices[0]].DirectionToTarget(points[relIndices[7]]);
                     Vector3 targetDirection = Vector3.Cross(dir, Vector3.up);
                     Vector3 line2End = line2Start + targetDirection * points.PolygonLength();
 
@@ -1442,7 +1454,8 @@ public static class PolygonRecognition
                     {
                         oneLine[1] = intersection;
                     }
-
+                    shape = OneLineShape.F;
+                    shapeIndex = fIndices[0];
                     return true;
                 }
                 return false;
@@ -1469,7 +1482,8 @@ public static class PolygonRecognition
                         oneLine[4] = intersection;
                     }
                     oneLine[5] = Vector3.Lerp(points[eIndices[2]], points[eIndices[3]], 0.5f);
-
+                    shape = OneLineShape.E;
+                    shapeIndex = ePointIndices[0];
                     return true;
                 }
                 else if (points.IsPolygonHShaped(out int[] hIndices))
@@ -1507,7 +1521,8 @@ public static class PolygonRecognition
                     {
                         oneLine[4] = intersection;
                     }
-
+                    shape = OneLineShape.H;
+                    shapeIndex = hIndices[0];
                     return true;
                 }
                 else if (points.IsPolygonMShaped(out int[] mPointIndices))
@@ -1523,6 +1538,8 @@ public static class PolygonRecognition
                     oneLine[4] = Vector3.Lerp(points[mIndices[2]], points[mIndices[6]], 0.5f);
                     oneLine[5] = Vector3.Lerp(points[mIndices[2]], points[mIndices[5]], 0.5f);
                     oneLine[6] = Vector3.Lerp(points[mIndices[3]], points[mIndices[4]], 0.5f);
+                    shape = OneLineShape.M;
+                    shapeIndex = mPointIndices[0];
                     return true;
                 }
                 else if(points.IsPolygonKShaped(out int[] kPointIndices))
@@ -1543,7 +1560,8 @@ public static class PolygonRecognition
                     Vector3 line1End = Vector3.Lerp(points[kIndices[1]], points[kIndices[4]], 0.5f);
 
                     Extensions.DoLinesIntersect(oneLine[4], line1End, oneLine[3], line2End, out oneLine[5]);
-
+                    shape = OneLineShape.K;
+                    shapeIndex = kPointIndices[0];
                     return true;
                 }
                 else if (points.IsPolygonXShaped(out int[] xPointIndices))
@@ -1563,6 +1581,8 @@ public static class PolygonRecognition
                         points[xPointIndices[3]] };
 
                     oneLine[4] = ProMaths.Average(xPoints);
+                    shape = OneLineShape.X;
+                    shapeIndex = xPointIndices[0];
                     return true;
                 }
                 else if (points.IsPolygonInterlockingYShaped(out int[] interlockingYIndices))
@@ -1577,10 +1597,10 @@ public static class PolygonRecognition
                     oneLine[3] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[4]], 0.5f);
                     oneLine[4] = Vector3.Lerp(points[relativeIndices[2]], points[relativeIndices[3]], 0.5f);
                     oneLine[5] = Vector3.Lerp(points[relativeIndices[10]], points[relativeIndices[11]], 0.5f);
+                    shape = OneLineShape.InterlockY;
+                    shapeIndex = interlockingYIndices[0];
                     return true;
                 }
-
-
 
                 return false;
         }
@@ -1604,7 +1624,8 @@ public static class PolygonRecognition
                 previous --;
                 itr++;
             }
-
+            shape = OneLineShape.ZigZag;
+            shapeIndex = zigZagPointIndices[0];
             return true;
         }
         else if(points.IsPolygonCrenelShaped(out int[] crenelPointIndices))
@@ -1647,6 +1668,8 @@ public static class PolygonRecognition
                 end += 4;
             }
 
+            shape = OneLineShape.Crenel;
+            shapeIndex = crenelPointIndices[0];
             return true;
         }
         else if(points.IsPolygonAsteriskShaped(out int[] asteriskPointIndices))
@@ -1667,7 +1690,7 @@ public static class PolygonRecognition
             }
 
             oneLine[^1] = ProMaths.Average(asteriskPoints);
-
+            shapeIndex = asteriskPointIndices[0];
             return true;
         }
         else if(points.IsPolygonAntennaShaped(out int[] antPointIndices)) // This implementation is quite hacky.
@@ -1766,6 +1789,8 @@ public static class PolygonRecognition
             oneLine[^2] = unsortedPoints[mid];
             oneLine[^3] = unsortedPoints[mid+1];
 
+            shape = OneLineShape.Antenna;
+            shapeIndex = antPointIndices[0];
             return true;
         }
 

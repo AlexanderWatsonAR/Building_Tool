@@ -7,16 +7,21 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEngine.Rendering;
 
 public class RoofTile : MonoBehaviour, IBuildable
 {
     [SerializeField] private RoofTileData m_Data;
     [SerializeField, HideInInspector] private List<Vector3[]> m_SubPoints;
     
-    public event Action<IData> OnDataChange;
+    public event Action<RoofTileData> OnDataChange;
 
     public RoofTileData Data => m_Data;
 
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
     private List<Vector3[]> SubPoints
     {
         get
@@ -28,61 +33,65 @@ public class RoofTile : MonoBehaviour, IBuildable
             return m_SubPoints;
         }
     }
-
     public IBuildable Initialize(IData data)
     {
         m_Data = data as RoofTileData;
         name = "Roof Tile";
         return this;
     }
-
     public void Build()
     {
         List<Vector3[]> bottomPoints = SubPoints;
 
+        transform.DeleteChildren();
+
+        m_Data.Sections ??= new RoofSectionData[m_Data.Columns, m_Data.Rows];
+
         Vector3[] extendedPoints = m_Data.ExtendedPoints;
 
-        Vector3[] projectedVerts = MeshMaker.ProjectedCubeVertices(extendedPoints, m_Data.Height);
+        Vector3[] projectedVerts = MeshMaker.ProjectedCubeVertices(extendedPoints, m_Data.Thickness);
         Vector3 midPointA = Vector3.Lerp(extendedPoints[0], extendedPoints[1], 0.5f);
         Vector3 midPointB = Vector3.Lerp(projectedVerts[0], projectedVerts[1], 0.5f);
         float distance = Vector3.Distance(midPointA, midPointB);
 
         List<Vector3[]> topPoints = MeshMaker.CreateGridFromControlPoints(projectedVerts, m_Data.Columns, m_Data.Rows);
 
-        transform.DeleteChildren();
-
-        for (int i = 0; i < m_Data.Columns; i++)
+        for (int x = 0; x < m_Data.Columns; x++)
         {
-            for (int j = 0; j < m_Data.Rows; j++)
+            for (int y = 0; y < m_Data.Rows; y++)
             {
-                Vector3 bl = bottomPoints[j][i];
-                Vector3 tl = bottomPoints[j + 1][i];
-                Vector3 tr = bottomPoints[j + 1][i + 1];
-                Vector3 br = bottomPoints[j][i + 1];
+                Vector3 bl = bottomPoints[y][x];
+                Vector3 tl = bottomPoints[y + 1][x];
+                Vector3 tr = bottomPoints[y + 1][x + 1];
+                Vector3 br = bottomPoints[y][x + 1];
 
                 Vector3[] controlPoints = new Vector3[] { bl, tl, tr, br };
 
-                Vector3 topBL = topPoints[j][i];
-                Vector3 topTL = topPoints[j + 1][i];
-                Vector3 topTR = topPoints[j + 1][i + 1];
-                Vector3 topBR = topPoints[j][i + 1];
+                Vector3 topBL = topPoints[y][x];
+                Vector3 topTL = topPoints[y + 1][x];
+                Vector3 topTR = topPoints[y + 1][x + 1];
+                Vector3 topBR = topPoints[y][x + 1];
 
-                Vector3[] points = new Vector3[] { topBL, topTL, topTR, topBR };
+                Vector3[] top = new Vector3[] { topBL, topTL, topTR, topBR };
 
-                ProBuilderMesh roofSection = ProBuilderMesh.Create();
-                roofSection.name = "Roof Section " + j.ToString() + " " + i.ToString();
-                roofSection.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
+                ProBuilderMesh roofSectionMesh = ProBuilderMesh.Create();
+                roofSectionMesh.name = "Roof Section " + y.ToString() + " " + x.ToString();
+                roofSectionMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
 
-                roofSection.transform.SetParent(transform, false);
+                roofSectionMesh.transform.SetParent(transform, false);
 
-                RoofSectionData data = new RoofSectionData()
+                m_Data.Sections[x, y] ??= new RoofSectionData(m_Data.SectionData)
                 {
-                    ControlPoints = controlPoints,
-                    TopPoints = points,
-                    SectionHeight = distance
+                    ID = new Vector2Int(x, y)
                 };
 
-                roofSection.AddComponent<RoofSection>().Initialize(data).Build();
+                m_Data.Sections[x, y].ControlPoints = controlPoints;
+                m_Data.Sections[x, y].TopPoints = top;
+                m_Data.Sections[x, y].SectionHeight = distance;
+
+                RoofSection roofSection = roofSectionMesh.AddComponent<RoofSection>().Initialize(m_Data.Sections[x,y]) as RoofSection;
+                roofSection.Build();
+                roofSection.OnDataChange += (RoofSectionData data) => { m_Data.Sections[data.ID.x, data.ID.y] = data; };
             }
         }
     }
@@ -109,7 +118,7 @@ public class RoofTile : MonoBehaviour, IBuildable
                     Vector3 br = subPoints[j + 1][i + 0];
 
                     Vector3 dir = bl.DirectionToTarget(br);
-                    Vector3 cross = Vector3.Cross(bl.DirectionToTarget(tl), dir) * m_Data.Height;
+                    Vector3 cross = Vector3.Cross(bl.DirectionToTarget(tl), dir) * m_Data.Thickness;
 
                     bl += cross;
                     tl += cross;

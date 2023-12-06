@@ -13,8 +13,6 @@ public class Storey : MonoBehaviour, IBuildable
 {
     [SerializeField] private StoreyData m_Data;
 
-    [SerializeField] private Tuple<Vector3, Vector3>[] m_Tuples;
-
     public event Action<StoreyData> OnDataChange;
 
     public StoreyData Data => m_Data;
@@ -27,8 +25,6 @@ public class Storey : MonoBehaviour, IBuildable
     public IBuildable Initialize(IData data)
     {
         m_Data = data as StoreyData;
-
-        m_Tuples = new Tuple<Vector3, Vector3>[m_Data.ControlPoints.Length];
 
         if (m_Data.WallData.Material == null)
         {
@@ -165,28 +161,29 @@ public class Storey : MonoBehaviour, IBuildable
         int previous = m_Data.ControlPoints.GetPrevious(current);
         int next = m_Data.ControlPoints.GetNext(current);
 
-        Vector3 dirA = m_Data.Walls[current].Start.DirectionToTarget(m_Data.Walls[current].End);
+
+        Vector3 dirA = m_Data.Walls[current].StartPosition.DirectionToTarget(m_Data.Walls[current].EndPosition);
         Vector3 crossA = Vector3.Cross(dirA, Vector3.up) * wallData.Depth;
 
-        Vector3 dirB = m_Data.Walls[previous].Start.DirectionToTarget(m_Data.Walls[previous].End);
+        Vector3 dirB = m_Data.Walls[previous].StartPosition.DirectionToTarget(m_Data.Walls[previous].EndPosition);
         Vector3 crossB = Vector3.Cross(dirB, Vector3.up) * wallData.Depth;
 
         Vector3 intersection;
 
-        Extensions.DoLinesIntersect(m_Data.Walls[current].Start + crossA, m_Data.Walls[current].End + crossA, m_Data.Walls[previous].Start + crossB, m_Data.Walls[previous].End + crossB, out intersection);
+        Extensions.DoLinesIntersect(m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[current].EndPosition + crossA, m_Data.Walls[previous].StartPosition + crossB, m_Data.Walls[previous].EndPosition + crossB, out intersection);
 
         int numberOfSamples = m_Data.CornerData.Sides + 1;
 
-        Vector3[] cornerPoints = new Vector3[] { m_Data.Walls[current].Start, m_Data.Walls[current].Start + crossA, m_Data.Walls[current].Start + crossB, intersection };
+        Vector3[] cornerPoints = new Vector3[] { m_Data.Walls[current].StartPosition, m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[current].StartPosition + crossB, intersection };
         Vector3[] flatPoints = new Vector3[] { cornerPoints[0], cornerPoints[1], cornerPoints[2] };
 
         bool isInside = isConcave && concavePoints.Any(b => b == current);
 
         if (isInside)
         {
-            Extensions.DoLinesIntersect(m_Data.Walls[current].Start, m_Data.Walls[current].End, m_Data.Walls[previous].Start, m_Data.Walls[previous].End, out intersection);
-            cornerPoints = new Vector3[] { m_Data.Walls[current].Start, m_Data.Walls[current].Start + crossA, m_Data.Walls[previous].End, intersection };
-            flatPoints = new Vector3[] { m_Data.Walls[current].Start, m_Data.Walls[current].Start + crossA, m_Data.Walls[previous].End };
+            Extensions.DoLinesIntersect(m_Data.Walls[current].StartPosition, m_Data.Walls[current].EndPosition, m_Data.Walls[previous].StartPosition, m_Data.Walls[previous].EndPosition, out intersection);
+            cornerPoints = new Vector3[] { m_Data.Walls[current].StartPosition, m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[previous].EndPosition, intersection };
+            flatPoints = new Vector3[] { m_Data.Walls[current].StartPosition, m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[previous].EndPosition };
         }
 
         CornerData cornerData = new CornerData(m_Data.CornerData)
@@ -207,34 +204,39 @@ public class Storey : MonoBehaviour, IBuildable
 
         m_Data.WallPoints = new WallPoints[m_Data.ControlPoints.Length];
 
-        Vector3[] insidePoints = m_Data.InsidePoints;
+        //Vector3[] insidePoints = m_Data.InsidePoints;
 
         int current = wallIndex;
         int next = m_Data.ControlPoints.GetNext(current);
-        int previous = m_Data.ControlPoints.GetPrevious(current);
+        //int previous = m_Data.ControlPoints.GetPrevious(current);
 
-        Vector3 nextControlPoint = m_Data.ControlPoints[next].Position;
-        Vector3 oneNextInside = insidePoints[next];
-        Vector3 onePreviousInside = insidePoints[previous];
+        //Vector3 previousInsidePoint = insidePoints[previous];
 
-        Vector3 nextForward = insidePoints[current].DirectionToTarget(oneNextInside);
-        //Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallData.Depth;
-        Vector3 nextRight = Vector3.Cross(nextForward, Vector3.up) * wallData.Depth;
+        Vector3 nextDir = m_Data.ControlPoints[current].DirectionToTarget(m_Data.ControlPoints[next]);
+        Vector3 wallForward = Vector3.Cross(nextDir, Vector3.up) * wallData.Depth;
 
-        Vector3 previousForward = insidePoints[current].DirectionToTarget(onePreviousInside);
-        //Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_WallData.Depth;
-        Vector3 previousRight = Vector3.Cross(Vector3.up, previousForward) * wallData.Depth;
+        ControlPoint start = new ControlPoint(m_Data.ControlPoints[current]);
+        ControlPoint end = new ControlPoint(m_Data.ControlPoints[next]);
 
-        Vector3 bottomLeft = insidePoints[current];
-        //Vector3 topLeft = bottomLeft + h;
-        Vector3 bottomRight = oneNextInside;
-        //Vector3 topRight = bottomRight + h;
+        {
+            //Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallData.Depth;
 
-        // Post Points
-        Vector3 zero = m_Data.ControlPoints[current].Position;
-        Vector3 one = insidePoints[current] + nextRight;
-        Vector3 two = insidePoints[current];
-        Vector3 three = insidePoints[current] + previousRight;
+
+            //Vector3 previousForward = insidePoints[current].DirectionToTarget(onePreviousInside);
+            //Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_WallData.Depth;
+            //Vector3 previousRight = Vector3.Cross(Vector3.up, previousForward) * wallData.Depth;
+
+
+            //Vector3 topLeft = bottomLeft + h;
+
+            //Vector3 topRight = bottomRight + h;
+
+            // Post Points
+            //Vector3 zero = m_Data.ControlPoints[current].Position;
+            //Vector3 one = insidePoints[current] + nextRight;
+            //Vector3 two = insidePoints[current];
+            //Vector3 three = insidePoints[current] + previousRight;
+        }
 
         bool isConcave = m_Data.ControlPoints.IsConcave(out int[] concavePoints);
 
@@ -245,27 +247,26 @@ public class Storey : MonoBehaviour, IBuildable
 
             if (conditionA)
             {
-                bottomRight = nextControlPoint - nextRight;
-                //topRight = bottomRight + h;
+                //end.SetPosition(m_Data.ControlPoints[next].Position);
+                end.SetForward(-wallForward);
+
+                //end = nextControlPoint - wallForward;
             }
 
             if (conditionB)
             {
-                bottomLeft = m_Data.ControlPoints[current].Position - nextRight;
-                //topLeft = bottomLeft + h;
+                //start.SetPosition(m_Data.ControlPoints[current].Position);
+                start.SetForward(-wallForward);
             }
 
         }
 
-        m_Data.WallPoints[current] = new WallPoints(bottomLeft, bottomRight);
-
-        //Vector3[] points = new Vector3[] { bottomLeft, topLeft, topRight, bottomRight };
-
         WallData data = new WallData(wallData)
         {
             ID = wallIndex,
-            Start = bottomLeft,
-            End = bottomRight
+            Start = start,
+            End = end,
+            Normal = wallForward.normalized
         };
 
         return data;

@@ -19,7 +19,14 @@ public class RoofSection : MonoBehaviour, IBuildable
     // --------- Window Properties--------------------
     [SerializeField] private WindowData m_WindowData;
     //---------- End of Window Properties -----------
+
+    public event Action<RoofSectionData> OnDataChange;
     
+
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
 
     public IBuildable Initialize(IData data)
     {

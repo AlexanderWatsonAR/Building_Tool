@@ -48,21 +48,22 @@ public enum RoofElement
 {
     Tile, Window, Empty
 }
-
 public enum WallElement
 {
     Wall, Doorway, Archway, Window, Extension, Empty
 }
-
-
 public enum PolyMode
 {
     Draw, Edit, Hide
 }
-
 public enum CornerType
 {
     Point, Round, Flat
+}
+
+public enum OneLineShape
+{
+    Unknown, Antenna, Arrow, Asterisk, Square, Crenel, E, F, H, InterlockY, K, L, M, N, SimpleM, SimpleN, T, U, Y, X, ZigZag 
 }
 
 public static class EnumExtensions

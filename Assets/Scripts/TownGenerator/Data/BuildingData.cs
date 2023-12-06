@@ -33,12 +33,6 @@ public class BuildingData : IData
         m_Storeys = storeysData;
         m_Roof = roofData;
     }
-    public void AddStorey(StoreyData storeyData)
-    {
-        storeyData.ControlPoints = m_Path.ControlPoints.ToArray();
-        m_Storeys.Add(storeyData);
-    }
-
     /// <summary>
     /// Each storey data as an id equal to its index in the list.
     /// </summary>

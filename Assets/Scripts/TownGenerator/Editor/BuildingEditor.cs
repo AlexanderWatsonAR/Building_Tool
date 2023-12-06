@@ -23,6 +23,8 @@ public class BuildingEditor : Editor
     MouseCursor m_MouseCursor;
     private Vector3[] m_GlobalControlPointPositions;
 
+    [SerializeField] private VisualElement m_Root;
+
     [SerializeField] private bool m_IsValidPolygon;
     [SerializeField] private bool m_IsAHandleSelected;
     [SerializeField] private int m_SelectedHandle = -1;
@@ -103,13 +105,13 @@ public class BuildingEditor : Editor
 
     public override VisualElement CreateInspectorGUI()
     {
-        VisualElement container = new VisualElement();
+        m_Root = new VisualElement();
 
         VisualElement polymodeContainer = new VisualElement();
 
-        DisplayMessages(polymodeContainer);
+        DisplayMessages(m_Path.PolyMode);
 
-        m_Path.OnPolyModeChanged += (pathMode) => DisplayMessages(polymodeContainer);
+        m_Path.OnPolyModeChanged += DisplayMessages;
 
         VisualElement horizontalWrapper = new VisualElement()
         {
@@ -132,20 +134,20 @@ public class BuildingEditor : Editor
         horizontalWrapper.Add(build_btn);
         horizontalWrapper.Add(reset_btn);
 
-        container.Add(polymodeContainer);
-        container.Add(horizontalWrapper);
+        m_Root.Add(polymodeContainer);
+        m_Root.Add(horizontalWrapper);
 
-        return container;
+        return m_Root;
     }
 
-    private void DisplayMessages(VisualElement element)
+    private void DisplayMessages(PolyMode polyMode)
     {
-        element.Clear();
+        m_Root.Clear();
 
-        switch (m_Path.PolyMode)
+        switch (polyMode)
         {
             case PolyMode.Draw:
-                element.Add(new HelpBox("Click to draw points", HelpBoxMessageType.Info));
+                m_Root.Add(new HelpBox("Click to draw points", HelpBoxMessageType.Info));
                 break;
             case PolyMode.Edit:
                 {
@@ -166,9 +168,9 @@ public class BuildingEditor : Editor
                     remove_btn.text = "Remove Point";
                     remove_btn.SetEnabled(m_SelectedHandle == -1);
 
-                    element.Add(quit_btn);
-                    element.Add(remove_btn);
-                    element.Add(new HelpBox("Move points to update the poly building's shape", HelpBoxMessageType.Info));
+                    m_Root.Add(quit_btn);
+                    m_Root.Add(remove_btn);
+                    m_Root.Add(new HelpBox("Move points to update the poly building's shape", HelpBoxMessageType.Info));
                 }
                 break;
             case PolyMode.Hide:
@@ -180,14 +182,22 @@ public class BuildingEditor : Editor
                     });
                     edit_btn.text = "Edit Building Path";
 
-                    element.Add(edit_btn);
-                    element.Add(new HelpBox("Editing the shape of the building will erase changes made to the building", HelpBoxMessageType.Warning));
+                    m_Root.Add(edit_btn);
+                    m_Root.Add(new HelpBox("Editing the path will erase changes made to the building", HelpBoxMessageType.Warning));
 
                     SerializedProperty storeys = m_Data.FindPropertyRelative("m_Storeys");
                     PropertyField storeysField = new PropertyField(storeys);
                     storeysField.BindProperty(storeys);
 
-                    element.Add(storeysField);
+                    SerializedProperty roof = m_Data.FindPropertyRelative("m_Roof");
+                    PropertyField roofField = new PropertyField(roof);
+                    roofField.BindProperty(roof);
+
+                    Foldout roofFoldout = new Foldout() { text = "Roof" };
+                    roofFoldout.Add(roofField);
+
+                    m_Root.Add(storeysField);
+                    m_Root.Add(roofFoldout);
                 }
                 break;
         }
@@ -436,7 +446,20 @@ public class BuildingEditor : Editor
     }
     private void QuitEdit()
     {
+        m_Path.OnPolyModeChanged -= DisplayMessages;
         m_Path.PolyMode = PolyMode.Hide;
         m_SelectedHandle = -1;
+    }
+    private void OnDestroy()
+    {
+        if (m_Root == null)
+            return;
+
+        IEnumerable<VisualElement> children = m_Root.Children();
+
+        foreach(VisualElement child in children)
+        {
+            child.Unbind();
+        }
     }
 }

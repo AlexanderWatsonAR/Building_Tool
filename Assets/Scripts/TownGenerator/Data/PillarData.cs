@@ -18,11 +18,11 @@ public class PillarData : IData
 
     public int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
-    public float Width => m_Width;
+    public float Width { get { return m_Width; } set { m_Width = value; } }
     public float Height { get { return m_Height; } set { m_Height = value; } }
-    public float Depth => m_Depth;
-    public int Sides => m_Sides;
-    public bool IsSmooth => m_IsSmooth;
+    public float Depth { get { return m_Depth; } set { m_Depth = value; } }
+    public int Sides { get { return m_Sides; } set { m_Sides = value; } }
+    public bool IsSmooth { get { return m_IsSmooth; } set { m_IsSmooth = value; } }
     public Material Material { get { return m_Material; } set { m_Material = value; } }
 
     public PillarData() : this(null, 0.5f, 0.5f, 0.5f, 4, null)

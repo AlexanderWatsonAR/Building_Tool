@@ -182,8 +182,8 @@ public class FloorEditor : Editor
             wall.AddComponent<Wall>();
             WallData data = new WallData()
             {
-                Start = wallStart,
-                End = wallEnd,
+                Start = new ControlPoint(wallStart),
+                End = new ControlPoint(wallEnd),
                 Material = BuiltinMaterials.defaultMaterial,
                 Depth = depth,
                 Height = height

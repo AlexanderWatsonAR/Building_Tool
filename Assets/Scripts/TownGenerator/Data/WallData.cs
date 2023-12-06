@@ -8,10 +8,12 @@ using UnityEngine;
 public class WallData : IData
 {
     [SerializeField, HideInInspector] private int m_ID;
-    [SerializeField, HideInInspector] private Vector3 m_Start, m_End;
+    [SerializeField, HideInInspector] private ControlPoint m_Start, m_End;
+    [SerializeField, HideInInspector] private Vector3 m_Normal;
     [SerializeField, HideInInspector, Range(1, 5)] private int m_Columns, m_Rows;
     [SerializeField, Range(1, 50)] private float m_Height;
     [SerializeField, Range(0, 1)] private float m_Depth;
+    [SerializeField, HideInInspector] private bool m_IsTriangle;
     [SerializeField, HideInInspector] Material m_Material;
 
     // This field is viewable in the inspector.
@@ -23,34 +25,56 @@ public class WallData : IData
     public WallSectionData SectionData { get{ return m_SectionData; } set { m_SectionData = value; } }
 
     public int ID { get { return m_ID; } set { m_ID = value; } }
-    public Vector3 Start { get { return m_Start; } set { m_Start = value; } }
-    public Vector3 End { get { return m_End; } set { m_End = value; } }
+    public Vector3 StartPosition
+    {
+        get 
+        {
+            float d = Mathf.Lerp(-1, 1, m_Depth);
+            Vector3 start = m_Start.Position + m_Start.Forward + (m_Start.Forward * d);
+            return start;
+        }
+    }
+    public Vector3 EndPosition
+    {
+        get
+        {
+            float d = Mathf.Lerp(-1, 1, m_Depth);
+            Vector3 end = m_End.Position + m_End.Forward + (m_End.Forward * d);
+            return end;
+        }
+    }
+    public ControlPoint Start { get { return m_Start; } set { m_Start = value; } }
+    public ControlPoint End { get { return m_End; } set { m_End = value; } }
+    public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
     public Material Material { get { return m_Material; } set { m_Material = value; } }
     public float Height { get { return m_Height; } set { m_Height = value; } }
     public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public int Columns => m_Columns;
     public int Rows => m_Rows;
+    public bool IsTriangle { get { return m_IsTriangle; } set { m_IsTriangle = value; } }
 
     public WallSectionData[,] Sections { get { return m_Sections; } set { m_Sections = value; } }
 
-    public WallData(): this(Vector3.zero, Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1,1], null)
+    public WallData(): this(null, null, Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1,1], null)
     {
 
     }
-    public WallData(WallData data) : this (data.Start, data.End, data.Columns, data.Rows, data.Height, data.Depth, data.Sections, data.Material)
+    public WallData(WallData data) : this (data.Start, data.End, data.Normal, data.Columns, data.Rows, data.Height, data.Depth, data.Sections, data.Material)
     {
 
     }
-    public WallData(Vector3 wallStart, Vector3 wallEnd, int columns, int rows, float height, float depth, WallSectionData[,] sections, Material material)
+    public WallData(ControlPoint wallStart, ControlPoint wallEnd, Vector3 normal, int columns, int rows, float height, float depth, WallSectionData[,] sections, Material material)
     {
         m_Start = wallStart;
         m_End = wallEnd;
+        m_Normal = normal;
         m_Columns = columns;
         m_Rows = rows;
         m_Height = height;
         m_Depth = depth;
         m_Material = material;
         m_Sections = sections;
+        m_IsTriangle = false;
     }
 
     public Vector3[] BottomPoints()

@@ -67,7 +67,6 @@ public class WindowData : IData
         data.ShuttersMaterial
     )
     {
-
     }
     public WindowData(WindowElement activeElements, Vector3 forward, IEnumerable<Vector3> controlPoints, int columns, int rows, float outerFrameScale, float innerFrameScale, float outerFrameDepth, float innerFrameDepth, float paneDepth, float shuttersDepth, float shuttersAngle, Material outerFrameMat, Material innerFrameMat, Material paneMat, Material shuttersMat)
     {

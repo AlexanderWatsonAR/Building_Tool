@@ -21,11 +21,14 @@ public class Wall : MonoBehaviour, IBuildable
         {
             if (m_Data.Columns <= 0 && m_Data.Rows <= 0) return null;
 
-            Vector3 start = m_Data.Start;
-            Vector3 end = m_Data.End;
+            Vector3 bottomLeft = m_Data.StartPosition;
+            Vector3 bottomRight = m_Data.EndPosition;
             Vector3 h = Vector3.up * m_Data.Height;
 
-            m_SubPoints = MeshMaker.CreateGridFromControlPoints(new Vector3[] {start, start + h, end + h, end}, m_Data.Columns, m_Data.Rows);
+            Vector3 topLeft = m_Data.IsTriangle ? Vector3.Lerp(bottomLeft + h, bottomRight + h, 0.5f): bottomLeft + h;
+            Vector3 topRight = m_Data.IsTriangle ? Vector3.Lerp(bottomLeft + h, bottomRight + h, 0.5f) : bottomRight + h;
+
+            m_SubPoints = MeshMaker.CreateGridFromControlPoints(new Vector3[] {bottomLeft, topLeft, topRight, bottomRight}, m_Data.Columns, m_Data.Rows);
 
             return m_SubPoints;
         }
@@ -110,6 +113,7 @@ public class Wall : MonoBehaviour, IBuildable
                 };
 
                 m_Data.Sections[x, y].ControlPoints = points;
+                m_Data.Sections[x, y].WallDepth = m_Data.Depth;
 
                 WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[x, y]) as WallSection;
                 wallSection.Build();

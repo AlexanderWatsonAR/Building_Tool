@@ -2,6 +2,7 @@ using AutoLayout3D;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -10,12 +11,10 @@ using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
 [ExecuteInEditMode]
-//[RequireComponent(typeof(Roof))]
 [DisallowMultipleComponent]
 public class Building : MonoBehaviour, IBuildable
 {
     [SerializeField] private BuildingData m_Data;
-    [SerializeField] private Roof m_Roof;
     [SerializeField] private MaterialPalette m_Palette;
 
     [SerializeField] private bool m_IsPolyPathHandleSelected;
@@ -26,7 +25,6 @@ public class Building : MonoBehaviour, IBuildable
     private void Reset()
     {
         m_Data = new BuildingData();
-        m_Roof = GetComponent<Roof>();
     }
 
     private void OnEnable()
@@ -88,17 +86,20 @@ public class Building : MonoBehaviour, IBuildable
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
 
-        //GameObject roofGO = new GameObject("Roof");
-        //roofGO.transform.SetParent(transform, false);
-        //roofGO.transform.localPosition = pos;
-        //roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
-        //roofGO.GetComponent<Roof>().OnDataChange += (RoofData data) => { m_Data.RoofData = data; };
-        //return;
+        GameObject roofGO = new GameObject("Roof");
+        roofGO.transform.SetParent(transform, false);
+        roofGO.transform.localPosition = pos;
+        roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
+        roofGO.GetComponent<Roof>().OnDataChange += (RoofData data) => { m_Data.RoofData = data; Debug.Log("RoofData change"); };
     }
 
     public void RevertBuilding()
     {
         transform.DeleteChildren();
+    }
+
+    private void OnValidate()
+    {
     }
 
 }

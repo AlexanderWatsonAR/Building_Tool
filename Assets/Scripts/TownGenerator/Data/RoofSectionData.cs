@@ -6,6 +6,9 @@ using UnityEngine;
 public class RoofSectionData : IData
 {
     [SerializeField] private RoofElement m_RoofElement;
+
+    [SerializeField, HideInInspector] Vector2Int m_ID;
+
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3[] m_TopPoints;
     [SerializeField, HideInInspector] private float m_SectionHeight;
@@ -30,6 +33,7 @@ public class RoofSectionData : IData
     public int WindowSides => m_WindowSides;
     public int WindowColumns => m_WindowColumns;
     public int WindowRows => m_WindowRows;
+    public Vector2Int ID { get { return m_ID; } set { m_ID = value; } }
 
 
     public RoofSectionData() : this(new WindowData(), RoofElement.Tile, new Vector3[0], new Vector3[0], 0.25f, 0.5f, 0.5f, 4, 1, 1)

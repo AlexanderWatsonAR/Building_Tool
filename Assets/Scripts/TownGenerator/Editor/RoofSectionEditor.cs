@@ -45,6 +45,7 @@ public class RoofSectionEditor : Editor
         if (serializedObject.ApplyModifiedProperties())
         {
             section.Build();
+            section.OnDataChange_Invoke();
         }
     }
 }
