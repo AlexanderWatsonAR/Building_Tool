@@ -63,28 +63,28 @@ public class RoofSection : MonoBehaviour, IBuildable
                 m_ProBuilderMesh.Refresh();
                 break;
             case RoofElement.Window:
-                List<List<Vector3>> holePoints;
-                Vector3 winScale = new Vector3(m_Data.WindowWidth, m_Data.WindowHeight);
-                ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, winScale, m_Data.WindowColumns, m_Data.WindowRows, m_Data.WindowSides, 0, out holePoints, true);
-                polyHoleGrid.ToMesh();
-                polyHoleGrid.Refresh();
-                Vector3 calculatedNormal = m_Data.ControlPoints.CalculatePolygonFaceNormal();
-                polyHoleGrid.MatchFaceToNormal(calculatedNormal);
-                polyHoleGrid.Extrude(polyHoleGrid.faces, ExtrudeMethod.FaceNormal, m_Data.SectionHeight);
-                polyHoleGrid.ToMesh();
-                Rebuild(polyHoleGrid);
-                SetCornerPoints();
-                m_ProBuilderMesh.Refresh();
+                //List<List<Vector3>> holePoints;
+                //Vector3 winScale = new Vector3(m_Data.WindowWidth, m_Data.WindowHeight);
+                //ProBuilderMesh polyHoleGrid = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, winScale, m_Data.WindowColumns, m_Data.WindowRows, m_Data.WindowSides, 0, out holePoints, true);
+                //polyHoleGrid.ToMesh();
+                //polyHoleGrid.Refresh();
+                //Vector3 calculatedNormal = m_Data.ControlPoints.CalculatePolygonFaceNormal();
+                //polyHoleGrid.MatchFaceToNormal(calculatedNormal);
+                //polyHoleGrid.Extrude(polyHoleGrid.faces, ExtrudeMethod.FaceNormal, m_Data.SectionHeight);
+                //polyHoleGrid.ToMesh();
+                //Rebuild(polyHoleGrid);
+                //SetCornerPoints();
+                //m_ProBuilderMesh.Refresh();
 
-                WindowData windowData = new WindowData(m_WindowData);
-                windowData.SetControlPoints(holePoints[0]);
+                //WindowData windowData = new WindowData(m_WindowData);
+                //windowData.SetControlPoints(holePoints[0]);
 
-                ProBuilderMesh win = ProBuilderMesh.Create();
-                win.name = "Window";
-                win.transform.SetParent(transform, true);
-                Window window = win.AddComponent<Window>();
-                window.Initialize(windowData).Build();
-                win.transform.localPosition = Vector3.zero;
+                //ProBuilderMesh win = ProBuilderMesh.Create();
+                //win.name = "Window";
+                //win.transform.SetParent(transform, true);
+                //Window window = win.AddComponent<Window>();
+                //window.Initialize(windowData).Build();
+                //win.transform.localPosition = Vector3.zero;
                 break;
             case RoofElement.Empty:
                 m_ProBuilderMesh.Clear();

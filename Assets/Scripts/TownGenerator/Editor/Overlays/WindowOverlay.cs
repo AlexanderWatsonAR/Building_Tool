@@ -17,9 +17,18 @@ public class WindowOverlay : Overlay, ITransientOverlay
     {
         var root = new VisualElement() { name = "Window Root" };
 
-        WindowSerializedProperties props = new WindowSerializedProperties(m_Window);
+        SerializedObject serializedObject = new SerializedObject(m_Window);
 
-        Display(root, props, m_Window, this);
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        PropertyField dataField = new PropertyField(data);
+        dataField.BindProperty(data);
+
+        root.Add(dataField);
+
+        //WindowSerializedProperties props = new WindowSerializedProperties(m_Window);
+
+        //Display(root, props, m_Window, this);
 
         return root;
     }

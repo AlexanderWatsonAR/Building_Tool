@@ -7,7 +7,8 @@ using UnityEngine.UIElements;
 [System.Serializable]
 public class DoorData : IData
 {
-    [SerializeField] DoorElement m_ActiveElements;
+    [SerializeField] private int m_ID;
+    [SerializeField] private DoorElement m_ActiveElements;
 
     // Door
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
@@ -31,6 +32,7 @@ public class DoorData : IData
 
     [SerializeField] private Material m_Material;
 
+    public int ID { get { return m_ID; } set { m_ID = value; } }
     public DoorElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
     public Vector3[] ControlPoints{ get{ return m_ControlPoints;} set{ SetControlPoints(value); }}
     public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }

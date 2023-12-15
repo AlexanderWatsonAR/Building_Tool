@@ -25,7 +25,7 @@ public class Window : MonoBehaviour, IBuildable
     public float Width => m_Width;
 
 
-    public WindowData WindowData => m_Data;
+    public WindowData Data => m_Data;
 
     private Vector3[] ScaledControlPoints
     {
@@ -94,7 +94,6 @@ public class Window : MonoBehaviour, IBuildable
     {
         transform.DeleteChildren();
 
-
         if (m_Data.ActiveElements == WindowElement.Nothing)
             return;
 
@@ -131,7 +130,6 @@ public class Window : MonoBehaviour, IBuildable
             m_InnerFrame.transform.SetParent(transform, false);
             m_InnerFrame.name = "Inner Frame";
             m_InnerFrame.GetComponent<Renderer>().sharedMaterial = m_Data.InnerFrameMaterial;
-
         }
 
         if (m_Data.IsPaneActive)

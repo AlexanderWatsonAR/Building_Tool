@@ -12,7 +12,7 @@ public class BuildingData : IData
     [SerializeField] private RoofData m_Roof;
 
     public PolyPath Path => m_Path;
-    public List<StoreyData> StoreysData => m_Storeys;
+    public List<StoreyData> StoreysData { get { return m_Storeys; } set { m_Storeys = value; } }
     public RoofData RoofData { get{ return m_Roof;} set{ m_Roof = value; } }
 
     public BuildingData() : this(new PolyPath(), new List<StoreyData>(), new RoofData())

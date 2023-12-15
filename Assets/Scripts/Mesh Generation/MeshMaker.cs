@@ -468,23 +468,21 @@ public static class MeshMaker
         return new Vector3[0];
     }
 
-    public static ProBuilderMesh ArchedDoorHoleGrid(IEnumerable<Vector3> controlPoints, float width, int columns, int rows, float height, float archHeight, int archSides, out List<List<Vector3>> holeVertices, Vector3? positionOffset = null, bool flipFace = false)
+    public static IList<IList<Vector3>> ArchedDoorHoleGrid(IEnumerable<Vector3> controlPoints, float width, int columns, int rows, float height, float archHeight, int archSides, Vector3? positionOffset = null)
     {
         Vector3[] points = controlPoints.ToArray();
 
-        holeVertices = new List<List<Vector3>>();
+        IList<IList<Vector3>>  holePoints = new List<IList<Vector3>>();
 
         if (points.Length != 4)
             return null;
 
         if (width == 0 || height == 0 || columns == 0 || rows == 0)
         {
-            return Quad(controlPoints, flipFace);
+            return holePoints;
         }
 
         List<Vector3[]> controlPointsGrid = CreateGridFromControlPoints(points, columns, rows);
-
-        IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
         for (int i = 0; i < columns; i++)
         {
@@ -556,55 +554,27 @@ public static class MeshMaker
             }
         }
 
-        ProBuilderMesh mesh = ProBuilderMesh.Create();
-
-        Vector3 normal = Vector3.Cross(points[0].DirectionToTarget(points[3]), points[0].DirectionToTarget(points[1]));
-
-        if (flipFace)
-            normal = -normal;
-
-        mesh.CreateShapeFromPolygon(controlPoints.ToList(), 0, flipFace, holePoints);
-        mesh.ToMesh();
-        mesh.Refresh();
-
-        Vector3[] normals = mesh.GetNormals();
-
-        // The promesh normals should be the same (or roughly the same) as the calculated normal.
-        if (!Vector3Extensions.Approximately(normals[0], normal, 0.1f))
-        {
-            mesh.faces[0].Reverse();
-        }
-
-        //Smoothing.ApplySmoothingGroups(mesh, faces, 360 / sides);
-        mesh.ToMesh();
-        mesh.Refresh();
-
-        foreach (IList<Vector3> hole in holePoints)
-        {
-            holeVertices.Add(hole.ToList());
-        }
-
-        return mesh;
+        return holePoints;
     }
 
-    public static ProBuilderMesh NPolyHoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, int sides, float angle, out List<List<Vector3>> holeVertices, bool flipFace = false)
+    public static IList<IList<Vector3>> NPolyHoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, int sides, float angle)
     {
-        return NPolyHoleGrid(controlPoints, scale, columns, rows, sides, angle, out holeVertices, null, null, flipFace);
+        return NPolyHoleGrid(controlPoints, scale, columns, rows, sides, angle, null, null);
     }
 
-    public static ProBuilderMesh NPolyHoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, int sides, float angle, out List<List<Vector3>> holeVertices, Vector3? positionOffset = null, Vector3? scalePointOffset = null, bool flipFace = false)
+    public static IList<IList<Vector3>> NPolyHoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, int sides, float angle, Vector3? positionOffset = null, Vector3? scalePointOffset = null)
     {
         Vector3[] points = controlPoints.ToArray();
 
         //Vector3[] points = RectanglePoints(controlPoints);
-        holeVertices = new List<List<Vector3>>();
+        IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
         if (points.Length != 4)
-            return null;
+            return holePoints;
 
         if (scale == Vector3.zero || columns == 0 || rows == 0)
         {
-            return Quad(controlPoints, flipFace);
+            return holePoints;
         }
 
         List<Vector3[]> controlPointsGrid = new();
@@ -661,8 +631,6 @@ public static class MeshMaker
             controlPointsGrid = CreateGridFromControlPoints(points, columns, rows);
         }
         
-
-        IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
         for (int i = 0; i < columns; i++)
         {
@@ -743,36 +711,7 @@ public static class MeshMaker
             }
         }
 
-        ProBuilderMesh mesh = ProBuilderMesh.Create();
-
-        //Vector3 normal = points.CalculateTriangleNormal();
-
-        Vector3 normal = Vector3.Cross(points[0].DirectionToTarget(points[1]), points[3].DirectionToTarget(points[0]));
-
-        if (flipFace)
-            normal = -normal;
-
-        mesh.CreateShapeFromPolygon(points, 0, flipFace, holePoints);
-        mesh.ToMesh();
-        mesh.Refresh();
-
-        Vector3 aveNormal = ProMaths.Average(mesh.GetNormals());
-
-        // The promesh normals should be the same (or roughly the same) as the calculated normal.
-        if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
-        {
-            mesh.faces[0].Reverse();
-        }
-
-        mesh.ToMesh();
-        mesh.Refresh();
-
-        foreach(IList<Vector3> hole in holePoints)
-        {
-            holeVertices.Add(hole.ToList());
-        }
-
-        return mesh;
+        return holePoints;
     }
     /// <summary>
     /// Creates an 'n' polygon on the XY plane.
@@ -829,32 +768,6 @@ public static class MeshMaker
             return polygons;
         }
 
-        if(polygon.GetConcaveIndexPoints().Length > 0)
-        {
-            ProBuilderMesh mesh = ProBuilderMesh.Create();
-            mesh.CreateShapeFromPolygon(polygon.ToArray(), 0, false);
-            Face[] triangles = mesh.ToTriangles(mesh.faces);
-
-            foreach(Face triangle in triangles)
-            {
-                Vector3[] verts = mesh.FaceToVertices(triangle);
-
-                polygons.AddRange(SpiltPolygon(verts, polygonWidth, polygonHeight, columns, rows, polygonPosition, polygonNormal));
-            }
-
-            if (Application.isEditor)
-            {
-                UnityEngine.Object.DestroyImmediate(mesh.gameObject);
-            }
-            else
-            {
-                UnityEngine.Object.Destroy(mesh.gameObject);
-            }
-
-            return polygons;
-        }
-
-
         Vector3[] points = polygon.ToArray();
         Vector3 normal = polygonNormal.HasValue ? polygonNormal.Value : polygon.CalculatePolygonFaceNormal();
 
@@ -907,7 +820,6 @@ public static class MeshMaker
 
         float actualPolygonSize = width;
         actualPolygonSize = height > width ? height : width;
-
 
         for (int x = 0; x < columns; x++)
         {

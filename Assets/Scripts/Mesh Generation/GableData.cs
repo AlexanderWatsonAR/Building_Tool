@@ -225,11 +225,10 @@ public static class GablePersistentData
 
     #region Extend
     // Height Start, Height End, Width Start, Width End
-
     public static readonly bool[][] squareExtend = new bool[][]
     {
-        new bool[] { false, true, false, false },
-        new bool[] { false, true, false, false },
+        new bool[] { false, true, true, true },
+        new bool[] { false, true, true, true },
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
@@ -887,6 +886,7 @@ public static class GablePersistentData
     }
 }
 
+[System.Serializable]
 public struct GableData
 {
     public ushort[][] indices;

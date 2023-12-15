@@ -124,9 +124,6 @@ public class Roof : MonoBehaviour, IBuildable
     }
     private RoofTileData CalculateGableTile(int index)
     {
-        if (!m_Data.AvailableFrames.Contains((int)RoofType.Gable))
-            return null;
-
         ushort[] roofTileIndices = m_Data.GableData.indices[index];
         bool[] roofTileExtend = m_Data.GableData.extend[index];
 
@@ -143,13 +140,13 @@ public class Roof : MonoBehaviour, IBuildable
         float gableScale = m_Data.IsOpen ? 1 : m_Data.GableScale;
 
         LerpPoint bottomLeft = new LerpPoint(m_Data.PathPoints[relIndices[roofTileIndices[0]]].Position);
-
         LerpPoint topLeft = new LerpPoint(scaledOneLine[roofTileIndices[1]], oneLine[roofTileIndices[1]], gableScale);
         LerpPoint topRight = new LerpPoint(scaledOneLine[roofTileIndices[2]], oneLine[roofTileIndices[2]], gableScale);
-
         LerpPoint bottomRight = new LerpPoint(m_Data.PathPoints[relIndices[roofTileIndices[3]]].Position);
 
         bool extendHeightEnd = m_Data.RoofType == RoofType.Dormer ? false : roofTileExtend[1];
+
+        // Question: Is extending the width at the beginning & end always false when is open == false?
         bool extendWidthBeginning = m_Data.IsOpen && roofTileExtend[2];
         bool extendWidthEnd = m_Data.IsOpen && roofTileExtend[3];
 
@@ -176,7 +173,11 @@ public class Roof : MonoBehaviour, IBuildable
         ControlPoint start = new ControlPoint(m_Data.PathPoints[wallIndices[0]]);
         start.SetForward(Vector3.zero);
         ControlPoint end = new ControlPoint(m_Data.PathPoints[wallIndices[^1]]);
-        start.SetForward(Vector3.zero);
+        end.SetForward(Vector3.zero);
+
+        //Vector3 dir = start.DirectionToTarget(end);
+        //start += dir * 0.5f;
+        //end -= dir * 0.5f;
 
         WallData data = new WallData()
         {
@@ -235,7 +236,10 @@ public class Roof : MonoBehaviour, IBuildable
     }
     private void BuildGable()
     {
-        if(m_Data.GableTiles == null || m_Data.GableTiles.Length == 0)
+        if (!m_Data.AvailableFrames.Contains((int)RoofType.Gable))
+            return;
+
+        if (m_Data.GableTiles == null || m_Data.GableTiles.Length == 0)
             m_Data.GableTiles = new RoofTileData[m_Data.PathPoints.Length];
 
         for(int i = 0; i < m_Data.GableTiles.Length; i++)

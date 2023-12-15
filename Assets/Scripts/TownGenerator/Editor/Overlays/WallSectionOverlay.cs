@@ -15,98 +15,108 @@ using UnityEngine.UIElements;
 public class WallSectionOverlay : Overlay, ITransientOverlay
 {
     [SerializeField] private WallSection m_Section;
-    [SerializeField] private WallSectionSerializedProperties m_SerialProps;
+    //[SerializeField] private WallSectionSerializedProperties m_SerialProps;
 
     public override VisualElement CreatePanelContent()
     {
         if (m_Section == null)
             return new VisualElement();
 
-        m_SerialProps = new WallSectionSerializedProperties(m_Section);
+        //m_SerialProps = new WallSectionSerializedProperties(m_Section);
 
-        var root = new VisualElement() { name = "Wall Section Root" };
+        VisualElement container = new VisualElement() { name = "Wall Section Container" };
 
-        EnumField wallElementField = new EnumField() { tooltip = "Section" };
-        wallElementField.BindProperty(m_SerialProps.WallElement);
-        wallElementField.RegisterValueChangedCallback((ChangeEvent<System.Enum> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); displayed = false; } displayed = true; }); // Toggling display off & on triggers the panel to redraw. // Bug: this doesn't work if the panel has been collapsed.
-        root.Add(wallElementField);
+        SerializedObject serializedObject = new SerializedObject(m_Section);
 
-        WallElement wallElement = m_Section.Data.WallElement;
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
 
-        if (collapsed)
-            return root;
+        PropertyField dataField = new PropertyField(data);
+        dataField.BindProperty(data);
 
-        switch (wallElement)
-        {
-            case WallElement.Doorway:
-                {
-                    Foldout shapeFold = new Foldout() { text = "Shape" };
-                    root.Add(shapeFold);
+        container.Add(dataField);
 
-                    Slider sideOffset = new Slider() { label = "Offset", lowValue = -0.999f, highValue = 0.999f, value = m_Section.Data.SideOffset };
-                    sideOffset.BindProperty(m_SerialProps.DoorOffset);
-                    sideOffset.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
-                    shapeFold.Add(sideOffset);
 
-                    Slider height = new Slider() { label = "Height", lowValue = 0, highValue = 0.999f, value = m_Section.Data.PedimentHeight };
-                    height.BindProperty(m_SerialProps.DoorHeight);
-                    height.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
-                    shapeFold.Add(height);
+        //EnumField wallElementField = new EnumField() { tooltip = "Section" };
+        //wallElementField.BindProperty(m_SerialProps.WallElement);
+        //wallElementField.RegisterValueChangedCallback((ChangeEvent<System.Enum> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); displayed = false; } displayed = true; }); // Toggling display off & on triggers the panel to redraw. // Bug: this doesn't work if the panel has been collapsed.
+        //root.Add(wallElementField);
 
-                    Slider width = new Slider() { label = "Width", lowValue = 0, highValue = 0.999f, value = m_Section.Data.SideWidth };
-                    width.BindProperty(m_SerialProps.DoorWidth);
-                    width.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
-                    shapeFold.Add(width);
+        //WallElement wallElement = m_Section.Data.WallElement;
 
-                    Toggle isDoorActive = new Toggle() { text = "Is Active", value = m_SerialProps.DoorActive.boolValue };
-                    isDoorActive.BindProperty(m_SerialProps.DoorActive);
-                    isDoorActive.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); displayed = false; } displayed = true; });
-                    root.Add(isDoorActive);
+        //if (collapsed)
+        //    return root;
 
-                    Foldout doorFoldout = new Foldout() { text = "Door" };
-                    doorFoldout.SetEnabled(m_SerialProps.DoorActive.boolValue);
-                    root.Add(doorFoldout);
+        //switch (wallElement)
+        //{
+        //    case WallElement.Doorway:
+        //        {
+        //            Foldout shapeFold = new Foldout() { text = "Shape" };
+        //            root.Add(shapeFold);
 
-                    DoorOverlay.Display(doorFoldout, m_SerialProps.DoorSerializedProperties, m_Section);
-                }
-                break;
+        //            Slider sideOffset = new Slider() { label = "Offset", lowValue = -0.999f, highValue = 0.999f, value = m_Section.Data.SideOffset };
+        //            sideOffset.BindProperty(m_SerialProps.DoorOffset);
+        //            sideOffset.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //            shapeFold.Add(sideOffset);
 
-            case WallElement.Window:
-                {
-                    WindowData winData = m_Section.Data.WindowData;
+        //            Slider height = new Slider() { label = "Height", lowValue = 0, highValue = 0.999f, value = m_Section.Data.PedimentHeight };
+        //            height.BindProperty(m_SerialProps.DoorHeight);
+        //            height.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //            shapeFold.Add(height);
 
-                    Foldout shapeFold = new Foldout() { text = "Shape" };
-                    root.Add(shapeFold);
+        //            Slider width = new Slider() { label = "Width", lowValue = 0, highValue = 0.999f, value = m_Section.Data.SideWidth };
+        //            width.BindProperty(m_SerialProps.DoorWidth);
+        //            width.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //            shapeFold.Add(width);
 
-                    SliderInt sides = new SliderInt() { tooltip = "Sides", lowValue = 3, highValue = 16, value = m_Section.Data.WindowSides };
-                    sides.BindProperty(m_SerialProps.WindowSides);
-                    sides.RegisterValueChangedCallback((ChangeEvent<int> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
-                    shapeFold.Add(sides);
+        //            Toggle isDoorActive = new Toggle() { text = "Is Active", value = m_SerialProps.DoorActive.boolValue };
+        //            isDoorActive.BindProperty(m_SerialProps.DoorActive);
+        //            isDoorActive.RegisterValueChangedCallback(evt => { if (evt.newValue != evt.previousValue) { m_Section.Build(); displayed = false; } displayed = true; });
+        //            root.Add(isDoorActive);
 
-                    Slider height = new Slider() { tooltip = "Height", lowValue = 0, highValue = 0.999f, value = m_Section.Data.WindowHeight };
-                    height.BindProperty(m_SerialProps.WindowHeight);
-                    height.RegisterValueChangedCallback((ChangeEvent<float> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
-                    shapeFold.Add(height);
+        //            Foldout doorFoldout = new Foldout() { text = "Door" };
+        //            doorFoldout.SetEnabled(m_SerialProps.DoorActive.boolValue);
+        //            root.Add(doorFoldout);
 
-                    Slider width = new Slider() { tooltip = "Width", lowValue = 0, highValue = 0.999f, value = m_Section.Data.WindowWidth };
-                    width.BindProperty(m_SerialProps.WindowWidth);
-                    width.RegisterValueChangedCallback((ChangeEvent<float> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
-                    shapeFold.Add(width);
+        //            DoorOverlay.Display(doorFoldout, m_SerialProps.DoorSerializedProperties, m_Section);
+        //        }
+        //        break;
 
-                    Slider angle = new Slider() { tooltip = "Angle", lowValue = -180, highValue = 180, value = m_Section.Data.WindowAngle };
-                    angle.BindProperty(m_SerialProps.WindowAngle);
-                    angle.RegisterValueChangedCallback((ChangeEvent<float> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //    case WallElement.Window:
+        //        {
+        //            WindowData winData = m_Section.Data.WindowData;
 
-                    shapeFold.Add(angle);
+        //            Foldout shapeFold = new Foldout() { text = "Shape" };
+        //            root.Add(shapeFold);
 
-                    WindowOverlay.Display(root, m_SerialProps.WindowSerializedProperties, m_Section, this);
-                }
-                break;
+        //            SliderInt sides = new SliderInt() { tooltip = "Sides", lowValue = 3, highValue = 16, value = m_Section.Data.WindowSides };
+        //            sides.BindProperty(m_SerialProps.WindowSides);
+        //            sides.RegisterValueChangedCallback((ChangeEvent<int> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //            shapeFold.Add(sides);
 
-        }
+        //            Slider height = new Slider() { tooltip = "Height", lowValue = 0, highValue = 0.999f, value = m_Section.Data.WindowHeight };
+        //            height.BindProperty(m_SerialProps.WindowHeight);
+        //            height.RegisterValueChangedCallback((ChangeEvent<float> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //            shapeFold.Add(height);
 
-        
-        return root;
+        //            Slider width = new Slider() { tooltip = "Width", lowValue = 0, highValue = 0.999f, value = m_Section.Data.WindowWidth };
+        //            width.BindProperty(m_SerialProps.WindowWidth);
+        //            width.RegisterValueChangedCallback((ChangeEvent<float> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+        //            shapeFold.Add(width);
+
+        //            Slider angle = new Slider() { tooltip = "Angle", lowValue = -180, highValue = 180, value = m_Section.Data.WindowAngle };
+        //            angle.BindProperty(m_SerialProps.WindowAngle);
+        //            angle.RegisterValueChangedCallback((ChangeEvent<float> evt) => { if (evt.newValue != evt.previousValue) { m_Section.Build(); } });
+
+        //            shapeFold.Add(angle);
+
+        //            WindowOverlay.Display(root, m_SerialProps.WindowSerializedProperties, m_Section, this);
+        //        }
+        //        break;
+
+        //}
+
+
+        return container;
 
     }
 

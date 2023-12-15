@@ -151,7 +151,7 @@ public class BuildingEditor : Editor
                 break;
             case PolyMode.Edit:
                 {
-                    Button quit_btn = new Button(() => { QuitEdit(); SceneView.RepaintAll(); });
+                    Button quit_btn = new Button(() => { QuitEdit(); SceneView.RepaintAll(); DisplayMessages(m_Building.Data.Path.PolyMode); });
                     quit_btn.text = "Quit Edit";
 
                     Button remove_btn = new Button(() => 
@@ -170,7 +170,7 @@ public class BuildingEditor : Editor
 
                     m_Root.Add(quit_btn);
                     m_Root.Add(remove_btn);
-                    m_Root.Add(new HelpBox("Move points to update the poly building's shape", HelpBoxMessageType.Info));
+                    m_Root.Add(new HelpBox("Move points to update the building's shape", HelpBoxMessageType.Info));
                 }
                 break;
             case PolyMode.Hide:
@@ -312,7 +312,6 @@ public class BuildingEditor : Editor
             return;
 
         Handles.color = m_Building.Data.Path.IsPathValid ? Color.white : m_CP_Invalid;
-        
 
         DrawHandles();
         ConnectTheDots();

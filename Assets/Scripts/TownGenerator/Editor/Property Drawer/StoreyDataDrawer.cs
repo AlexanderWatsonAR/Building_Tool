@@ -113,7 +113,7 @@ public class StoreyDataDrawer : PropertyDrawer
         floorFoldout.Add(floorHeightField);
         #endregion
 
-        #region Register Value Changed Callback
+        #region Register Value Change Callback
 
         activeStoreyElementsField.RegisterValueChangedCallback(evt =>
         {

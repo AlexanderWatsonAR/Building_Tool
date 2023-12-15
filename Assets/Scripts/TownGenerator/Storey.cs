@@ -204,39 +204,14 @@ public class Storey : MonoBehaviour, IBuildable
 
         m_Data.WallPoints = new WallPoints[m_Data.ControlPoints.Length];
 
-        //Vector3[] insidePoints = m_Data.InsidePoints;
-
         int current = wallIndex;
         int next = m_Data.ControlPoints.GetNext(current);
-        //int previous = m_Data.ControlPoints.GetPrevious(current);
-
-        //Vector3 previousInsidePoint = insidePoints[previous];
 
         Vector3 nextDir = m_Data.ControlPoints[current].DirectionToTarget(m_Data.ControlPoints[next]);
         Vector3 wallForward = Vector3.Cross(nextDir, Vector3.up) * wallData.Depth;
 
         ControlPoint start = new ControlPoint(m_Data.ControlPoints[current]);
         ControlPoint end = new ControlPoint(m_Data.ControlPoints[next]);
-
-        {
-            //Vector3 nextRight = Vector3.Cross(Vector3.up, nextForward) * m_WallData.Depth;
-
-
-            //Vector3 previousForward = insidePoints[current].DirectionToTarget(onePreviousInside);
-            //Vector3 previousRight = Vector3.Cross(previousForward, Vector3.up) * m_WallData.Depth;
-            //Vector3 previousRight = Vector3.Cross(Vector3.up, previousForward) * wallData.Depth;
-
-
-            //Vector3 topLeft = bottomLeft + h;
-
-            //Vector3 topRight = bottomRight + h;
-
-            // Post Points
-            //Vector3 zero = m_Data.ControlPoints[current].Position;
-            //Vector3 one = insidePoints[current] + nextRight;
-            //Vector3 two = insidePoints[current];
-            //Vector3 three = insidePoints[current] + previousRight;
-        }
 
         bool isConcave = m_Data.ControlPoints.IsConcave(out int[] concavePoints);
 
@@ -247,18 +222,12 @@ public class Storey : MonoBehaviour, IBuildable
 
             if (conditionA)
             {
-                //end.SetPosition(m_Data.ControlPoints[next].Position);
                 end.SetForward(-wallForward);
-
-                //end = nextControlPoint - wallForward;
             }
-
             if (conditionB)
             {
-                //start.SetPosition(m_Data.ControlPoints[current].Position);
                 start.SetForward(-wallForward);
             }
-
         }
 
         WallData data = new WallData(wallData)

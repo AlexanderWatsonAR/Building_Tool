@@ -6,6 +6,7 @@ using UnityEngine;
 [System.Serializable]
 public class WindowData : IData
 {
+    [SerializeField] private int m_ID;
     [SerializeField] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private Vector3 m_Forward;
     [SerializeField] private WindowElement m_ActiveElements;
@@ -21,22 +22,23 @@ public class WindowData : IData
     [SerializeField] private bool m_IsPaneActive;
     [SerializeField] private bool m_AreShuttersActive;
 
-    public Vector3[] ControlPoints => m_ControlPoints;
+    public int ID { get { return m_ID; } set { m_ID = value; } }
+    public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
-    public int InnerFrameColumns => m_InnerFrameColumns;
-    public int InnerFrameRows => m_InnerFrameRows;
-    public float OuterFrameScale => m_OuterFrameScale;
-    public float InnerFrameScale => m_InnerFrameScale;
+    public int InnerFrameColumns { get { return m_InnerFrameColumns; } set { m_InnerFrameColumns = value; } }
+    public int InnerFrameRows { get { return m_InnerFrameRows; } set { m_InnerFrameRows = value; } }
+    public float OuterFrameScale { get { return m_OuterFrameScale; } set { m_OuterFrameScale = value; } }
+    public float InnerFrameScale { get { return m_InnerFrameScale; } set { m_InnerFrameScale = value; } }
     public float OuterFrameDepth { get { return m_OuterFrameDepth; } set { m_OuterFrameDepth = value; } }
     public float InnerFrameDepth { get { return m_InnerFrameDepth; } set { m_InnerFrameDepth = value; } }
     public float PaneDepth { get { return m_PaneDepth; } set { m_PaneDepth = value; } }
     public float ShuttersDepth { get { return m_ShuttersDepth; } set { m_ShuttersDepth = value; } }
-    public float ShuttersAngle => m_ShuttersAngle;
+    public float ShuttersAngle { get { return m_ShuttersAngle; } set { m_ShuttersAngle = value; } }
     public Material OuterFrameMaterial { get { return m_OuterFrameMaterial; } set { m_OuterFrameMaterial = value; } }
     public Material InnerFrameMaterial { get { return m_InnerFrameMaterial; } set { m_InnerFrameMaterial = value; } }
     public Material PaneMaterial { get { return m_PaneMaterial; } set { m_PaneMaterial = value; } }
     public Material ShuttersMaterial { get { return m_ShuttersMaterial; } set { m_ShuttersMaterial = value; } }
-    public WindowElement ActiveElements => m_ActiveElements;
+    public WindowElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
 
     public bool IsOuterFrameActive => m_ActiveElements.IsElementActive(WindowElement.OuterFrame);
     public bool IsInnerFrameActive => m_ActiveElements.IsElementActive(WindowElement.InnerFrame);

@@ -7,9 +7,7 @@ using UnityEditor;
 using Unity.VisualScripting;
 using UnityEditor.Rendering;
 using System.Linq;
-using UnityEditor.Build.Reporting;
-using Codice.Client.Common;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System;
 
 [CustomPropertyDrawer(typeof(RoofData))]
 public class RoofDataDrawer : PropertyDrawer
@@ -170,21 +168,32 @@ public class RoofDataDrawer : PropertyDrawer
 
             buildable.Build();
         });
-        PropertyField isOpen = new PropertyField(isGableOpen) { label = "Is Open" };
+        Toggle isOpen = new Toggle() { label = "Is Open", value = isGableOpen.boolValue};
         isOpen.BindProperty(isGableOpen);
-        isOpen.RegisterValueChangeCallback(evt =>
+        isOpen.RegisterValueChangedCallback(evt =>
         {
+            if (evt == null)
+                return;
+
+            if (evt.newValue == evt.previousValue)
+                return;
+
             if (roofData.GableTiles == null)
                 return;
 
-            if(evt.changedProperty.boolValue)
+            if(evt.newValue)
             {
                 scale.SetEnabled(false);
 
-                for(int i = 0; i < roofData.GableTiles.Length; i++)
+                for (int i = 0; i < roofData.GableTiles.Length; i++)
                 {
                     roofData.GableTiles[i].ControlPoints[1].T = 1;
                     roofData.GableTiles[i].ControlPoints[2].T = 1;
+
+                    bool[] roofTileExtend = roofData.GableData.extend[roofData.GableTiles[i].ID];
+
+                    roofData.GableTiles[i].ExtendWidthBeginning = roofTileExtend[2];
+                    roofData.GableTiles[i].ExtendWidthEnd = roofTileExtend[3];
                 }
             }
             else
@@ -194,6 +203,14 @@ public class RoofDataDrawer : PropertyDrawer
                 {
                     roofData.GableTiles[i].ControlPoints[1].T = roofData.GableScale;
                     roofData.GableTiles[i].ControlPoints[2].T = roofData.GableScale;
+
+                    bool[] roofTileExtend = roofData.GableData.extend[roofData.GableTiles[i].ID];
+
+                    bool extendWidthBeginning = roofData.IsOpen && roofTileExtend[2];
+                    bool extendWidthEnd = roofData.IsOpen && roofTileExtend[3];
+
+                    roofData.GableTiles[i].ExtendWidthBeginning = extendWidthBeginning;
+                    roofData.GableTiles[i].ExtendWidthEnd = extendWidthEnd;
                 }
             }
 

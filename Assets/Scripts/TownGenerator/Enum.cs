@@ -15,9 +15,15 @@ public enum WindowElement
 }
 
 [System.Flags]
-public enum DoorElement
+public enum DoorwayElement
 {
     Nothing = 0, Door = 1, Handle = 2, Frame = 4, Everything = ~0
+}
+
+[System.Flags]
+public enum DoorElement
+{
+    Nothing = 0, Door = 1, Handle = 2, Everything = ~0
 }
 
 public enum FloorMode
@@ -73,13 +79,35 @@ public static class EnumExtensions
         return windowElement == WindowElement.Nothing ? false : (windowElement & comparison) != 0;
     }
 
-    public static bool IsElementActive(this DoorElement doorElement, DoorElement comparison)
+    public static bool IsElementActive(this DoorwayElement doorwayElement, DoorwayElement comparison)
     {
-        return doorElement == DoorElement.Nothing ? false : (doorElement & comparison) != 0;
+        return doorwayElement == DoorwayElement.Nothing ? false : (doorwayElement & comparison) != 0;
     }
 
     public static bool IsElementActive(this StoreyElement storeyElement, StoreyElement comparison)
     {
         return storeyElement == StoreyElement.Nothing ? false : (storeyElement & comparison) != 0;
+    }
+
+    public static bool IsElementActive(this DoorElement doorElement, DoorElement comparison)
+    {
+        return doorElement == DoorElement.Nothing ? false : (doorElement & comparison) != 0;
+    }
+
+    public static DoorElement ToDoorElement(this DoorwayElement doorway)
+    {
+        if (doorway == DoorwayElement.Nothing)
+            return DoorElement.Nothing;
+
+        if (doorway == DoorwayElement.Everything)
+            return DoorElement.Everything;
+
+        if (doorway.IsElementActive(DoorwayElement.Door))
+            return DoorElement.Door;
+
+        if (doorway.IsElementActive(DoorwayElement.Handle))
+            return DoorElement.Door;
+
+        return DoorElement.Nothing;
     }
 }

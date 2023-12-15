@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [System.Serializable]
 public class WallSectionData : IData
@@ -8,6 +9,7 @@ public class WallSectionData : IData
     [SerializeField, HideInInspector] private Vector2Int m_ID;
     [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
     [SerializeField, HideInInspector] private float m_WallDepth;
+    [SerializeField, HideInInspector] private Vector3 m_FaceNormal;
 
     [SerializeField] private WallElement m_WallElement;
 
@@ -34,14 +36,13 @@ public class WallSectionData : IData
 
     #region Door Properties
     // Doorway
-    [SerializeField, Range(0, 0.999f)] private float m_PedimentHeight;
-    [SerializeField, Range(0, 0.999f)] private float m_SideWidth;
-    [SerializeField, Range(-0.999f, 0.999f)] private float m_SideOffset;
+    [SerializeField, Range(0, 0.999f)] private float m_DoorPedimentHeight;
+    [SerializeField, Range(0, 0.999f)] private float m_DoorSideWidth;
+    [SerializeField, Range(-0.999f, 0.999f)] private float m_DoorSideOffset;
     [SerializeField, Range(1, 10)] private int m_DoorColumns, m_DoorRows;
-    [SerializeField] private float m_ArchHeight;
-    [SerializeField] private int m_ArchSides;
+
     // Door
-    [SerializeField] private DoorElement m_ActiveDoorElements;
+    [SerializeField] private DoorwayElement m_ActiveDoorwayElements;
     [SerializeField] private DoorData m_DoorData;
 
     // Door Frame
@@ -49,16 +50,44 @@ public class WallSectionData : IData
     [SerializeField, Range(0, 0.999f)] private float m_DoorFrameInsideScale;
 
     public DoorData DoorData { get { return m_DoorData; } set { m_DoorData = value; } }
-    public DoorElement ActiveDoorElements => m_ActiveDoorElements;
-    public float PedimentHeight => m_PedimentHeight;
-    public float SideWidth => m_SideWidth;
-    public float SideOffset => m_SideOffset;
+    public DoorwayElement ActiveDoorElements => m_ActiveDoorwayElements;
+    public float DoorPedimentHeight => m_DoorPedimentHeight;
+    public float DoorSideWidth => m_DoorSideWidth;
+    public float DoorSideOffset => m_DoorSideOffset;
     public int DoorColumns => m_DoorColumns;
     public int DoorRows => m_DoorRows;
-    public float ArchHeight => m_ArchHeight;
-    public int ArchSides => m_ArchSides;
     public float DoorFrameInsideScale { get { return m_DoorFrameInsideScale; } set { m_DoorFrameInsideScale = value; } }
     public float DoorFrameDepth { get { return m_DoorFrameDepth; } set { m_DoorFrameDepth = value; } }
+    #endregion
+
+    #region Arch Properties
+    // Archway
+    [SerializeField, Range(0, 0.999f)] private float m_ArchPedimentHeight;
+    [SerializeField, Range(0, 0.999f)] private float m_ArchSideWidth;
+    [SerializeField, Range(-0.999f, 0.999f)] private float m_ArchSideOffset;
+    [SerializeField, Range(1, 10)] private int m_ArchColumns, m_ArchRows;
+    [SerializeField] private float m_ArchHeight;
+    [SerializeField] private int m_ArchSides;
+
+    // Arch Door
+    [SerializeField] private DoorwayElement m_ActiveArchDoorElements;
+    [SerializeField] private DoorData m_ArchDoorData;
+
+    // Arch Door Frame
+    [SerializeField, Range(0, 0.999f)] private float m_ArchDoorFrameDepth;
+    [SerializeField, Range(0, 0.999f)] private float m_ArchDoorFrameInsideScale;
+
+    public float ArchHeight => m_ArchHeight;
+    public int ArchSides => m_ArchSides;
+    public DoorData ArchDoorData { get { return m_ArchDoorData; } set { m_ArchDoorData = value; } }
+    public DoorwayElement ActiveArchDoorElements => m_ActiveArchDoorElements;
+    public float ArchPedimentHeight => m_ArchPedimentHeight;
+    public float ArchSideWidth => m_ArchSideWidth;
+    public float ArchSideOffset => m_ArchSideOffset;
+    public int ArchColumns => m_ArchColumns;
+    public int ArchRows => m_ArchRows;
+    public float ArchDoorFrameInsideScale { get { return m_ArchDoorFrameInsideScale; } set { m_ArchDoorFrameInsideScale = value; } }
+    public float ArchDoorFrameDepth { get { return m_ArchDoorFrameDepth; } set { m_ArchDoorFrameDepth = value; } }
     #endregion
 
     #region Extension Properties
@@ -71,41 +100,36 @@ public class WallSectionData : IData
     public float ExtendWidth => m_ExtendWidth;
     #endregion
 
+    [SerializeField] private WindowData[] m_Windows;
+    [SerializeField] private DoorData[] m_Doors;
+    [SerializeField] private DoorData[] m_ArchDoors;
 
+    public WindowData[] Windows { get { return m_Windows; } set { m_Windows = value; } }
+    public DoorData[] Doors { get { return m_Doors; } set { m_Doors = value; } }
+    public DoorData[] ArchDoors { get { return m_ArchDoors; } set { m_ArchDoors = value; } }
     public Vector2Int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public float WallDepth { get { return m_WallDepth; } set { m_WallDepth = value; } }
+    public Vector3 FaceNormal => m_FaceNormal;
 
-    public WallSectionData()
+    public WallSectionData() : this
+    (
+        new Vector3[0], 0.5f, new WindowData(), 0.5f, 0.5f,
+        4, 1, 1, 0,false, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 1, 1,
+        1, 4, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 1, 1, 1, 1, 0.5f, Vector3.zero, new WindowData[1], new DoorData[1]
+    )
     {
-        m_ControlPoints = new Vector3[0];
-        m_WallDepth = 0.5f;
-
-        m_WindowData = new WindowData();
-        m_WindowHeight = 0.5f;
-        m_WindowWidth = 0.5f;
-        m_WindowColumns = 1;
-        m_WindowRows = 1;
-        m_WindowAngle = 0;
-
-        m_ExtendDistance = 2.5f;
-        m_ExtendHeight = 0.75f;
-        m_ExtendWidth = 0.75f;
-
-        m_DoorData = new DoorData();
-        m_ActiveDoorElements = DoorElement.Everything;
-        m_PedimentHeight = 0.75f;
-        m_SideWidth = 0.5f;
-        m_DoorColumns = 1;
-        m_DoorRows = 1;
-        m_ArchSides = 3;
-        m_ArchHeight = 1;
     }
 
-    public WallSectionData(Vector3[] controlPoints, float wallDepth, WindowData windowData, float windowHeight, float windowWidth, int windowSides, int windowColumns, int windowRows, float windowAngle, bool windowSmooth, float pedimentHeight, float sideWidth, float sideOffset, int doorColumns, int doorRows, float archHeight, int archSides, DoorElement activeElements, DoorData doorData, float doorFrameDepth, float doorFrameInsideScale, float extendDistance, float extendHeight, float extendWidth)
+    public WallSectionData(Vector3[] controlPoints, float wallDepth, WindowData windowData, float windowHeight, float windowWidth, int windowSides, int windowColumns, int windowRows, float windowAngle, bool windowSmooth,
+        float doorPedimentHeight, float doorSideWidth, float doorSideOffset, int doorColumns, int doorRows, DoorwayElement activeDoorElements, DoorData doorData, float doorFrameDepth, float doorFrameInsideScale,
+        float archHeight, int archSides, float archPedimentHeight, float archSideWidth, float archSideOffset, int archColumns, int archRows, DoorwayElement activeArchDoorElements, DoorData archDoorData, float archDoorFrameDepth, float archDoorFrameInsideScale,
+        float extendDistance, float extendHeight, float extendWidth, Vector3 normal, WindowData[] windows, DoorData[] doors)
     {
         m_ControlPoints = controlPoints;
         m_WallDepth = wallDepth;
+
+        #region Window
         m_WindowData = windowData;
         m_WindowHeight = windowHeight;
         m_WindowWidth = windowWidth;
@@ -114,20 +138,43 @@ public class WallSectionData : IData
         m_WindowRows = windowRows;
         m_WindowAngle = windowAngle;
         m_WindowSmooth = windowSmooth;
-        m_PedimentHeight = pedimentHeight;
-        m_SideWidth = sideWidth;
-        m_SideOffset = sideOffset;
+        #endregion
+
+        #region Door
+        m_DoorPedimentHeight = doorPedimentHeight;
+        m_DoorSideWidth = doorSideWidth;
+        m_DoorSideOffset = doorSideOffset;
         m_DoorColumns = doorColumns;
         m_DoorRows = doorRows;
-        m_ArchHeight = archHeight;
-        m_ArchSides = archSides;
-        m_ActiveDoorElements = activeElements;
+        m_ActiveDoorwayElements = activeDoorElements;
         m_DoorData = doorData;
         m_DoorFrameDepth = doorFrameDepth;
         m_DoorFrameInsideScale = doorFrameInsideScale;
+        #endregion
+        m_ArchHeight = archHeight;
+        m_ArchSides = archSides;
+
+        #region Arch
+        m_ArchPedimentHeight = archPedimentHeight;
+        m_ArchSideWidth = archSideWidth;
+        m_ArchSideOffset = archSideOffset;
+        m_ArchColumns = archColumns;
+        m_ArchRows = archRows;
+        m_ActiveArchDoorElements = activeArchDoorElements;
+        m_ArchDoorData = archDoorData;
+        m_ArchDoorFrameDepth = archDoorFrameDepth;
+        m_ArchDoorFrameInsideScale = archDoorFrameInsideScale;
+        #endregion
+
+        #region Extension
         m_ExtendDistance = extendDistance;
         m_ExtendHeight = extendHeight;
         m_ExtendWidth = extendWidth;
+        #endregion
+
+        m_FaceNormal = normal;
+        m_Windows = windows;
+        m_Doors = doors;
     }
 
     public WallSectionData(WallSectionData data) : this
@@ -142,20 +189,32 @@ public class WallSectionData : IData
         data.WindowRows,
         data.WindowAngle,
         data.WindowSmooth,
-        data.PedimentHeight,
-        data.SideWidth,
-        data.SideOffset,
+        data.DoorPedimentHeight,
+        data.DoorSideWidth,
+        data.DoorSideOffset,
         data.DoorColumns,
         data.DoorRows,
-        data.ArchHeight,
-        data.ArchSides,
         data.ActiveDoorElements,
         data.DoorData,
         data.DoorFrameDepth,
         data.DoorFrameInsideScale,
+        data.ArchHeight,
+        data.ArchSides,
+        data.ArchPedimentHeight,
+        data.ArchSideWidth,
+        data.ArchSideOffset,
+        data.ArchColumns,
+        data.ArchRows,
+        data.ActiveArchDoorElements,
+        data.ArchDoorData,
+        data.ArchDoorFrameDepth,
+        data.ArchDoorFrameInsideScale,
         data.ExtendDistance,
         data.ExtendHeight,
-        data.ExtendWidth
+        data.ExtendWidth,
+        data.FaceNormal,
+        data.Windows,
+        data.Doors
     )
     {
         
