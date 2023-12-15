@@ -19,9 +19,19 @@ public class DoorOverlay : Overlay, ITransientOverlay
 
         var root = new VisualElement() { name = "Door Root" };
 
-        DoorSerializedProperties props = new DoorSerializedProperties(m_Door);
+        SerializedObject serializedObject = new SerializedObject(m_Door);
 
-        Display(root, props, m_Door);
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        PropertyField dataField = new PropertyField(data);
+        dataField.BindProperty(data);
+
+        root.Add(dataField);
+        
+
+        //DoorSerializedProperties props = new DoorSerializedProperties(m_Door);
+
+        //Display(root, props, m_Door);
 
         return root;
     }

@@ -38,6 +38,12 @@ public class WallSection : MonoBehaviour, IBuildable
         return this;
     }
 
+    public IList<IList<Vector3>> CalculateDoorway()
+    {
+        Vector3 doorScale = new Vector3(m_Data.DoorSideWidth, m_Data.DoorPedimentHeight);
+        return MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, Vector3.right * m_Data.DoorSideOffset, new Vector3(0, -0.999f));
+    }
+
     public void Build()
     {
         transform.DeleteChildren();
@@ -60,8 +66,7 @@ public class WallSection : MonoBehaviour, IBuildable
 
                     if (m_Data.Doors[0] == null || m_Data.Doors[0].ControlPoints == null || m_Data.Doors[0].ControlPoints.Length == 0)
                     {
-                        Vector3 doorScale = new Vector3(m_Data.DoorSideWidth, m_Data.DoorPedimentHeight);
-                        holePoints = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, Vector3.right * m_Data.DoorSideOffset, new Vector3(0, -0.999f));
+                        holePoints = CalculateDoorway();
 
                         for (int i = 0; i < size; i++)
                         {
@@ -93,7 +98,7 @@ public class WallSection : MonoBehaviour, IBuildable
                             if (!m_Data.ActiveDoorElements.IsElementActive(DoorwayElement.Frame))
                                 continue;
 
-                            BuildFrame(data.ControlPoints, m_Data.ArchDoorFrameInsideScale, m_Data.ArchDoorFrameDepth);
+                            BuildFrame(data.ControlPoints, m_Data.DoorFrameInsideScale, m_Data.DoorFrameDepth);
                         }
                     }
 
@@ -337,14 +342,13 @@ public class WallSection : MonoBehaviour, IBuildable
     }
     private void BuildDoor(DoorData data)
     {
-        //if(m_Data.Ac)
-
         ProBuilderMesh doorMesh = ProBuilderMesh.Create();
-        doorMesh.name = "Door " + Data.ID.ToString();
+        doorMesh.name = "Door " + data.ID.ToString();
         doorMesh.transform.SetParent(transform, false);
         Door door = doorMesh.AddComponent<Door>();
         door.Initialize(data).Build();
     }
+
     private void BuildFrame(IList<Vector3> controlPoints, float insideScale, float depth)
     {
         Vector3[] scaledControlPoints = controlPoints.ScalePolygon(insideScale);
@@ -354,10 +358,7 @@ public class WallSection : MonoBehaviour, IBuildable
         ProBuilderMesh doorFrameMesh = ProBuilderMesh.Create();
         doorFrameMesh.name = "Frame";
         doorFrameMesh.transform.SetParent(transform, false);
-        doorFrameMesh.CreateShapeFromPolygon(controlPoints, 0, false, holePoints);
-        doorFrameMesh.ToMesh();
-        doorFrameMesh.Refresh();
-        doorFrameMesh.MatchFaceToNormal(m_Data.FaceNormal);
+        doorFrameMesh.CreateShapeFromPolygon(controlPoints, m_Data.FaceNormal, holePoints);
         doorFrameMesh.Extrude(doorFrameMesh.faces, ExtrudeMethod.FaceNormal, depth);
         doorFrameMesh.ToMesh();
         doorFrameMesh.Refresh();

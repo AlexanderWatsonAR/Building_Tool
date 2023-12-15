@@ -6,6 +6,7 @@ using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using UnityEditor.Rendering;
 using Unity.VisualScripting;
+using System.Linq;
 
 [CustomPropertyDrawer(typeof(WallSectionData))]
 public class WallSectionDataDrawer : PropertyDrawer
@@ -16,7 +17,7 @@ public class WallSectionDataDrawer : PropertyDrawer
 
         WallSectionSerializedProperties props = new WallSectionSerializedProperties(data);
 
-        PropertyField wallElementField = new PropertyField(props.WallElement);
+        EnumField wallElementField = new EnumField(props.WallElement.GetEnumValue<WallElement>()) { label = "Wall Element"};
         wallElementField.BindProperty(props.WallElement);
         container.Add(wallElementField);
         
@@ -24,14 +25,20 @@ public class WallSectionDataDrawer : PropertyDrawer
 
         VisualElement wallElementContainer = new VisualElement();
 
-        wallElementField.RegisterValueChangeCallback(evt =>
+        wallElementField.RegisterValueChangedCallback(evt =>
         {
             if (evt == null)
                 return;
 
+            if (evt.previousValue == null && evt.newValue == null)
+                return;
+
+            if (evt.newValue == evt.previousValue)
+                return;
+
             wallElementContainer.Clear();
 
-            WallElement wallElement = evt.changedProperty.GetEnumValue<WallElement>();
+            WallElement wallElement = evt.newValue == null ? (WallElement)evt.previousValue : (WallElement)evt.newValue;
 
             switch (wallElement)
             {
@@ -86,12 +93,50 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                         PropertyField offsetField = new PropertyField(props.DoorOffset) { label = "Offset"};
                         offsetField.BindProperty(props.DoorOffset);
+                        offsetField.RegisterValueChangeCallback(evt =>
+                        {
+                            WallSection section = buildable as WallSection;
+                            IList<IList<Vector3>> holePoints = section.CalculateDoorway();
+                            
+                            foreach(DoorData doorData in section.Data.Doors)
+                            {
+                                doorData.ControlPoints = holePoints[doorData.ID].ToArray();
+                            }
+
+                            section.Build();
+                        });
 
                         PropertyField heightField = new PropertyField(props.DoorHeight) { label = "Height"};
                         heightField.BindProperty(props.DoorHeight);
+                        heightField.RegisterValueChangeCallback(evt =>
+                        {
+                            WallSection section = buildable as WallSection;
+                            IList<IList<Vector3>> holePoints = section.CalculateDoorway();
+
+                            foreach (DoorData doorData in section.Data.Doors)
+                            {
+                                doorData.ControlPoints = holePoints[doorData.ID].ToArray();
+                            }
+
+                            section.Build();
+
+                        });
 
                         PropertyField widthField = new PropertyField(props.DoorWidth) { label = "Width"};
                         widthField.BindProperty(props.DoorWidth);
+                        widthField.RegisterValueChangeCallback(evt =>
+                        {
+                            WallSection section = buildable as WallSection;
+                            IList<IList<Vector3>> holePoints = section.CalculateDoorway();
+
+                            foreach (DoorData doorData in section.Data.Doors)
+                            {
+                                doorData.ControlPoints = holePoints[doorData.ID].ToArray();
+                            }
+
+                            section.Build();
+
+                        });
 
                         sizePosFold.Add(offsetField);
                         sizePosFold.Add(heightField);
@@ -110,9 +155,11 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                         PropertyField doorFrameDepthField = new PropertyField(props.DoorFrameDepth) { label = "Depth" };
                         doorFrameDepthField.BindProperty(props.DoorFrameDepth);
+                        doorFrameDepthField.RegisterValueChangeCallback(evt => buildable.Build());
 
                         PropertyField doorFrameScaleField = new PropertyField(props.DoorFrameScale) { label = "Scale" };
                         doorFrameScaleField.BindProperty(props.DoorFrameScale);
+                        doorFrameScaleField.RegisterValueChangeCallback(evt => buildable.Build());
 
                         doorFoldout.Add(activeDoorwayElements);
                         doorFoldout.Add(doorDataField);

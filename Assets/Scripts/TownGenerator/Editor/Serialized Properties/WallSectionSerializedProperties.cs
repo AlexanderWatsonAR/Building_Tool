@@ -14,6 +14,9 @@ public class WallSectionSerializedProperties
     public DoorSerializedProperties DoorSerializedProperties => m_DoorSerializedProperties;
     public SerializedObject SerializedObject => m_SerializedObject;
 
+    public SerializedProperty WallSectionData { get { return m_WallSectionData; } }
+    public SerializedProperty WallElement { get { return WallSectionData.FindPropertyRelative("m_WallElement"); } }
+
     #region Window
     public SerializedProperty Windows { get { return WallSectionData.FindPropertyRelative("m_Windows"); } }
     public SerializedProperty WindowColumns { get { return WallSectionData.FindPropertyRelative("m_WindowColumns"); } }
@@ -36,8 +39,7 @@ public class WallSectionSerializedProperties
     #endregion
 
     #region Door
-    public SerializedProperty WallSectionData { get { return m_WallSectionData; } }
-    public SerializedProperty WallElement { get { return WallSectionData.FindPropertyRelative("m_WallElement"); } }
+    public SerializedProperty Doors { get { return WallSectionData.FindPropertyRelative("m_Doors"); } }
     public SerializedProperty DoorwayElement { get { return WallSectionData.FindPropertyRelative("m_ActiveDoorwayElements"); } }
     public SerializedProperty DoorColumns { get { return WallSectionData.FindPropertyRelative("m_DoorColumns"); } }
     public SerializedProperty DoorRows { get { return WallSectionData.FindPropertyRelative("m_DoorRows"); } }
@@ -54,11 +56,12 @@ public class WallSectionSerializedProperties
     public SerializedProperty DoorHingeEulerAngle { get { return DoorData.FindPropertyRelative("m_HingeEulerAngles"); } }
     public SerializedProperty DoorHandleScale { get { return DoorData.FindPropertyRelative("m_HandleScale"); } }
     public SerializedProperty DoorHandlePoint { get { return DoorData.FindPropertyRelative("m_HandlePoint"); } }
-    public SerializedProperty Doors { get { return DoorData.FindPropertyRelative("m_Doors"); } }
+
 
     #endregion
 
     #region Arch
+    public SerializedProperty ArchDoors { get { return WallSectionData.FindPropertyRelative("m_ArchDoors"); } }
     public SerializedProperty ArchHeight { get { return WallSectionData.FindPropertyRelative("m_ArchHeight"); } }
     public SerializedProperty ArchSides { get { return WallSectionData.FindPropertyRelative("m_ArchSides"); } }
     public SerializedProperty ArchDoorElement { get { return WallSectionData.FindPropertyRelative("m_ActiveArchDoorElements"); } }
@@ -77,7 +80,6 @@ public class WallSectionSerializedProperties
     public SerializedProperty ArchDoorHingeEulerAngle { get { return ArchDoorData.FindPropertyRelative("m_HingeEulerAngles"); } }
     public SerializedProperty ArchDoorHandleScale { get { return ArchDoorData.FindPropertyRelative("m_HandleScale"); } }
     public SerializedProperty ArchDoorHandlePoint { get { return ArchDoorData.FindPropertyRelative("m_HandlePoint"); } }
-    public SerializedProperty ArchDoors { get { return DoorData.FindPropertyRelative("m_ArchDoors"); } }
 
     #endregion
 

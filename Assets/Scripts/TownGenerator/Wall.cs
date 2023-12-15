@@ -73,6 +73,7 @@ public class Wall : MonoBehaviour, IBuildable
         m_Data.SectionData = new WallSectionData()
         {
             WallDepth = m_Data.Depth,
+            FaceNormal = faceNormal,
             WindowData = winData,
             DoorData = doorData,
             DoorFrameInsideScale = doorData.Scale,

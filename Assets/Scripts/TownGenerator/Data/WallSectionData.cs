@@ -110,13 +110,13 @@ public class WallSectionData : IData
     public Vector2Int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public float WallDepth { get { return m_WallDepth; } set { m_WallDepth = value; } }
-    public Vector3 FaceNormal => m_FaceNormal;
+    public Vector3 FaceNormal { get { return m_FaceNormal; } set { m_FaceNormal = value; } }
 
     public WallSectionData() : this
     (
         new Vector3[0], 0.5f, new WindowData(), 0.5f, 0.5f,
-        4, 1, 1, 0,false, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 1, 1,
-        1, 4, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 1, 1, 1, 1, 0.5f, Vector3.zero, new WindowData[1], new DoorData[1]
+        4, 1, 1, 0,false, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 0.999f, 0.9f,
+        1, 4, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 0.999f, 0.9f, 1, 1, 0.5f, Vector3.zero, new WindowData[1], new DoorData[1]
     )
     {
     }

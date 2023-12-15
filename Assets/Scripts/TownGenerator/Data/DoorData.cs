@@ -60,32 +60,13 @@ public class DoorData : IData
             m_HingePoint = value;
 
             m_HingePosition = TransformPointToPosition(m_HingePoint);
-
-            //switch (m_HingePoint)
-            //{
-            //    case TransformPoint.Middle:
-            //        m_HingePosition = m_CentrePosition;
-            //        break;
-            //    case TransformPoint.Top:
-            //        m_HingePosition = m_CentrePosition + (Vector3.up * m_Height * 0.5f);
-            //        break;
-            //    case TransformPoint.Bottom:
-            //        m_HingePosition = m_CentrePosition - (Vector3.up * m_Height * 0.5f);
-            //        break;
-            //    case TransformPoint.Left:
-            //        m_HingePosition = m_CentrePosition - (m_Right * m_Width * 0.5f);
-            //        break;
-            //    case TransformPoint.Right:
-            //        m_HingePosition = m_CentrePosition + (m_Right * m_Width * 0.5f);
-            //        break;
-            //}
         }
     }
 
     
 
     public Vector3 HingePosition => m_HingePosition;
-    public Vector3 HingeOffset => m_HingeOffset;
+    public Vector3 HingeOffset { get { return m_HingeOffset; } set { m_HingeOffset = value; } }
     public Vector3 HingeEulerAngles { get { return m_HingeEulerAngles; } set { m_HingeEulerAngles = value; } }
 
     public float HandleSize { get { return m_HandleSize; } set{ m_HandleSize = value; } }
