@@ -68,6 +68,11 @@ public class Corner : MonoBehaviour, IBuildable
         Rebuild(corner);
     }
 
+    public void Demolish()
+    {
+
+    }
+
     private void Rebuild(ProBuilderMesh mesh)
     {
         m_ProBuilderMesh.RebuildWithPositionsAndFaces(mesh.positions, mesh.faces);

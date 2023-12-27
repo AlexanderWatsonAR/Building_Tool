@@ -1,10 +1,8 @@
 
-using System;
-
 public interface IBuildable
 {
     IBuildable Initialize(IData data);
     void Build();
+    void Demolish();
 
-    //event Action<IData> OnDataChange;
 }

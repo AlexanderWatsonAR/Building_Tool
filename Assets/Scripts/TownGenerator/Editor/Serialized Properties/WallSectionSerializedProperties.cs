@@ -64,7 +64,7 @@ public class WallSectionSerializedProperties
     public SerializedProperty ArchDoors { get { return WallSectionData.FindPropertyRelative("m_ArchDoors"); } }
     public SerializedProperty ArchHeight { get { return WallSectionData.FindPropertyRelative("m_ArchHeight"); } }
     public SerializedProperty ArchSides { get { return WallSectionData.FindPropertyRelative("m_ArchSides"); } }
-    public SerializedProperty ArchDoorElement { get { return WallSectionData.FindPropertyRelative("m_ActiveArchDoorElements"); } }
+    public SerializedProperty ArchwayElement { get { return WallSectionData.FindPropertyRelative("m_ActiveArchDoorElements"); } }
     public SerializedProperty ArchColumns { get { return WallSectionData.FindPropertyRelative("m_ArchColumns"); } }
     public SerializedProperty ArchRows { get { return WallSectionData.FindPropertyRelative("m_ArchRows"); } }
     public SerializedProperty ArchDoorHeight { get { return WallSectionData.FindPropertyRelative("m_ArchPedimentHeight"); } }
@@ -84,9 +84,11 @@ public class WallSectionSerializedProperties
     #endregion
 
     #region Extension
-    public SerializedProperty ExtensionHeight { get { return WallSectionData.FindPropertyRelative("m_ExtendHeight"); } }
-    public SerializedProperty ExtensionWidth { get { return WallSectionData.FindPropertyRelative("m_ExtendWidth"); } }
-    public SerializedProperty ExtensionDistance { get { return WallSectionData.FindPropertyRelative("m_ExtendDistance"); } }
+    public SerializedProperty ExtensionHeight { get { return WallSectionData.FindPropertyRelative("m_ExtensionHeight"); } }
+    public SerializedProperty ExtensionWidth { get { return WallSectionData.FindPropertyRelative("m_ExtensionWidth"); } }
+    public SerializedProperty ExtensionDistance { get { return WallSectionData.FindPropertyRelative("m_ExtensionDistance"); } }
+    public SerializedProperty ExtensionStorey { get { return WallSectionData.FindPropertyRelative("m_ExtensionStoreyData"); } }
+    public SerializedProperty ExtensionRoof { get { return WallSectionData.FindPropertyRelative("m_ExtensionRoofData"); } }
     #endregion
 
     public WallSectionSerializedProperties(WallSection wallSection)

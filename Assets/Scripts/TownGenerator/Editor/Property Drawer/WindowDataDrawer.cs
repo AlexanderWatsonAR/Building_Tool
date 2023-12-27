@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Rendering;
+using System.Net.Http.Headers;
 
 [CustomPropertyDrawer(typeof(WindowData))]
 public class WindowDataDrawer : PropertyDrawer
@@ -103,172 +104,276 @@ public class WindowDataDrawer : PropertyDrawer
             if (evt.newValue == null)
                 return;
 
-            WindowElement win = (WindowElement) evt.newValue;
+            WindowElement currentlyActive = (WindowElement) evt.newValue;
 
-            outerFrameFoldout.SetEnabled(win.IsElementActive(WindowElement.OuterFrame));
-            innerFrameFoldout.SetEnabled(win.IsElementActive(WindowElement.InnerFrame));
-            paneFoldout.SetEnabled(win.IsElementActive(WindowElement.Pane));
-            shuttersFoldout.SetEnabled(win.IsElementActive(WindowElement.Shutters));
+            bool isOuterFrameActive = currentlyActive.IsElementActive(WindowElement.OuterFrame);
+            bool isInnerFrameActive = currentlyActive.IsElementActive(WindowElement.InnerFrame);
+            bool isPaneActive = currentlyActive.IsElementActive(WindowElement.Pane);
+            bool areShuttersActive = currentlyActive.IsElementActive(WindowElement.Shutters);
+
+            outerFrameFoldout.SetEnabled(isOuterFrameActive);
+            innerFrameFoldout.SetEnabled(isInnerFrameActive);
+            paneFoldout.SetEnabled(isPaneActive);
+            shuttersFoldout.SetEnabled(areShuttersActive);
 
             if (evt.newValue == evt.previousValue)
                 return;
 
-            if (buildable is WallSection)
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = buildable as WallSection;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.ActiveElements = win;
-                }
+                bool wasOuterFrameActive = win.IsOuterFrameActive;
+                bool wasInnerFrameActive = win.IsInnerFrameActive;
+                bool wasPaneActive = win.IsPaneActive;
+                bool wereShuttersActive = win.AreShuttersActive;
+
+                if (isOuterFrameActive == true && wasOuterFrameActive == false)
+                    win.DoesOuterFrameNeedRebuild = true;
+                if (isInnerFrameActive == true && wasInnerFrameActive == false)
+                    win.DoesInnerFrameNeedRebuild = true;
+                if (isPaneActive == true && wasPaneActive == false)
+                    win.DoesPaneNeedRebuild = true;
+                if (areShuttersActive == true && wereShuttersActive == false)
+                    win.DoShuttersNeedRebuild = true;
+
+                if(buildable is not Window)
+                    win.ActiveElements = currentlyActive;
             }
 
-
-
-            buildable.Build();
+            if(isOuterFrameActive || isInnerFrameActive || isPaneActive || areShuttersActive)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         outerScaleField.RegisterValueChangeCallback(evt => 
         {
             if (evt == null)
                 return;
 
-            if(buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = buildable as WallSection;
-                foreach(WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.OuterFrameScale = evt.changedProperty.floatValue;
-                }
+                if (win.OuterFrameScale == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.OuterFrameScale = evt.changedProperty.floatValue;
+                win.DoesOuterFrameNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         outerFrameDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.OuterFrameDepth = evt.changedProperty.floatValue;
-                }
+                if (win.OuterFrameDepth == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.OuterFrameDepth = evt.changedProperty.floatValue;
+                win.DoesOuterFrameNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         colsField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable); 
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.InnerFrameColumns = evt.changedProperty.intValue;
-                }
+                if (win.InnerFrameColumns == evt.changedProperty.intValue && buildable is not Window)
+                    continue;
+
+                win.InnerFrameColumns = evt.changedProperty.intValue;
+                win.InnerFrameHolePoints = Window.CalculateInnerFrame(win);
+                win.DoesInnerFrameNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if(rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
+                
         });
         rowsField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.InnerFrameRows = evt.changedProperty.intValue;
-                }
+                if (win.InnerFrameRows == evt.changedProperty.intValue && buildable is not Window)
+                    continue;
+
+                win.InnerFrameRows = evt.changedProperty.intValue;
+                win.InnerFrameHolePoints = Window.CalculateInnerFrame(win);
+                win.DoesInnerFrameNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         innerFrameScaleField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.InnerFrameScale = evt.changedProperty.floatValue;
-                }
+                if (win.InnerFrameScale == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.InnerFrameScale = evt.changedProperty.floatValue;
+                win.DoesInnerFrameNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         innerFrameDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.InnerFrameDepth = evt.changedProperty.floatValue;
-                }
+                if (win.InnerFrameDepth == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.InnerFrameDepth = evt.changedProperty.floatValue;
+                win.DoesInnerFrameNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         paneDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.PaneDepth = evt.changedProperty.floatValue;
-                }
+                if (win.PaneDepth == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.PaneDepth = evt.changedProperty.floatValue;
+                win.DoesPaneNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         shuttersDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.ShuttersDepth = evt.changedProperty.floatValue;
-                }
+                if (win.ShuttersDepth == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.ShuttersDepth = evt.changedProperty.floatValue;
+                win.DoShuttersNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         shuttersAngleField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
 
-            if (buildable is WallSection)
+            bool rebuild = false;
+
+            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            foreach (WindowData win in windows)
             {
-                WallSection wallSection = (WallSection)buildable;
-                foreach (WindowData winData in wallSection.Data.Windows)
-                {
-                    winData.ShuttersAngle = evt.changedProperty.floatValue;
-                }
+                if (win.ShuttersAngle == evt.changedProperty.floatValue && buildable is not Window)
+                    continue;
+
+                win.ShuttersAngle = evt.changedProperty.floatValue;
+                win.DoShuttersNeedRebuild = true;
+                rebuild = true;
             }
 
-            buildable.Build();
+            if (rebuild)
+            {
+                buildable.Demolish();
+                buildable.Build();
+            }
         });
         #endregion
 
@@ -281,5 +386,36 @@ public class WindowDataDrawer : PropertyDrawer
         #endregion
 
         return container;
+    }
+
+    private WindowData[] GetWindowDataFromBuildable(IBuildable buildable)
+    {
+        WindowData[] dataset = new WindowData[0];
+
+        switch (buildable)
+        {
+            case Wall:
+                {
+                    Wall wall = buildable as Wall;
+                    dataset = new WindowData[1];
+                    dataset[0] = wall.Data.Sections[0, 0].WindowData; // TODO: Replace 0,0 with the actively selected section
+                }
+                break;
+            case WallSection:
+                {
+                    WallSection wallSection = buildable as WallSection;
+                    dataset = wallSection.Data.Windows;
+                }
+                break;
+            case Window:
+                {
+                    Window window = buildable as Window;
+                    dataset = new WindowData[1];
+                    dataset[0] = window.Data;
+                }
+                break;
+        }
+
+        return dataset;
     }
 }

@@ -17,13 +17,6 @@ public class DoorDataDrawer : PropertyDrawer
 
         DoorSerializedProperties props = new DoorSerializedProperties(data.serializedObject, data);
 
-        if (buildable is Door)
-        {
-            PropertyField activeElementsField = new PropertyField(props.ActiveElements);
-            activeElementsField.BindProperty(props.ActiveElements);
-            content.Add(activeElementsField);
-        }
-
         PropertyField scaleField = new PropertyField(props.Scale);
         scaleField.BindProperty(props.Scale);
         scaleField.RegisterValueChangeCallback(evt => 
@@ -137,6 +130,79 @@ public class DoorDataDrawer : PropertyDrawer
 
             buildable.Build();
         });
+
+        if (buildable is Door)
+        {
+            PropertyField activeElementsField = new PropertyField(props.ActiveElements);
+            activeElementsField.BindProperty(props.ActiveElements);
+            activeElementsField.RegisterValueChangeCallback(evt =>
+            {
+                bool isDoorActive = evt.changedProperty.GetEnumValue<DoorElement>().IsElementActive(DoorElement.Door);
+
+                scaleField.SetEnabled(isDoorActive);
+                hingeFoldout.SetEnabled(isDoorActive);
+
+                if (evt == null)
+                    return;
+
+                buildable.Build();
+            });
+
+            content.Add(activeElementsField);
+        }
+
+
+        //else if (buildable is WallSection)
+        //{
+        //    SerializedProperty sectionData = data.serializedObject.FindProperty("m_Data");
+        //    SerializedProperty activeElementsDoorway = sectionData.FindPropertyRelative("m_ActiveDoorwayElements");
+        //    SerializedProperty activeElementsArchway = sectionData.FindPropertyRelative("m_ActiveArchDoorElements");
+
+        //    WallSection section = buildable as WallSection;
+
+        //    switch (section.Data.WallElement)
+        //    {
+        //        case WallElement.Doorway:
+        //            {
+        //                PropertyField activeElementsDoorwayField = new PropertyField(activeElementsDoorway) { label = "Active Elements" };
+        //                activeElementsDoorwayField.BindProperty(activeElementsDoorway);
+        //                activeElementsDoorwayField.RegisterValueChangeCallback(evt =>
+        //                {
+        //                    bool isDoorActive = evt.changedProperty.GetEnumValue<DoorElement>().IsElementActive(DoorElement.Door);
+
+        //                    scaleField.SetEnabled(isDoorActive);
+        //                    hingePointField.SetEnabled(isDoorActive);
+        //                    hingeOffsetField.SetEnabled(isDoorActive);
+        //                    hingeEulerAnglesField.SetEnabled(isDoorActive);
+
+        //                    buildable.Build();
+        //                });
+
+        //                content.Add(activeElementsDoorwayField);
+        //            }
+        //            break;
+        //        case WallElement.Archway:
+        //            {
+        //                PropertyField activeElementsArchwayField = new PropertyField(activeElementsArchway) { label = "Active Elements" };
+        //                activeElementsArchwayField.BindProperty(activeElementsArchway);
+        //                activeElementsArchwayField.RegisterValueChangeCallback(evt =>
+        //                {
+        //                    bool isDoorActive = evt.changedProperty.GetEnumValue<DoorElement>().IsElementActive(DoorElement.Door);
+
+        //                    scaleField.SetEnabled(isDoorActive);
+        //                    hingePointField.SetEnabled(isDoorActive);
+        //                    hingeOffsetField.SetEnabled(isDoorActive);
+        //                    hingeEulerAnglesField.SetEnabled(isDoorActive);
+
+        //                    buildable.Build();
+        //                });
+
+        //                content.Add(activeElementsArchwayField);
+        //            }
+        //            break;
+        //    }
+
+        //}
 
         content.Add(scaleField);
         content.Add(hingeFoldout);

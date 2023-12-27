@@ -41,7 +41,7 @@ public class Floor : MonoBehaviour, IBuildable
 
         m_Position = Vector3.Lerp(min, max, 0.5f);
 
-        List<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), m_Size, m_Size, m_Data.Columns, m_Data.Rows, m_Position, Vector3.up);
+        IList<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), m_Size, m_Size, m_Data.Columns, m_Data.Rows, m_Position, Vector3.up);
 
         List<Vector3> list = new();
 
@@ -65,6 +65,11 @@ public class Floor : MonoBehaviour, IBuildable
 
         // Idea: Floor Sections! Spilt the polygon with mesh maker function.
         // each floor section can have a hole
+
+    }
+
+    public void Demolish()
+    {
 
     }
 

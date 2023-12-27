@@ -9,16 +9,15 @@ using UnityEngine.ProBuilder.MeshOperations;
 using System.Linq;
 using UnityEngine.ProBuilder.Shapes;
 using ProMaths = UnityEngine.ProBuilder.Math;
-using System.Threading.Tasks;
 
-public class WallSection : MonoBehaviour, IBuildable
+public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private WallSectionData m_Data;
 
     public WallSectionData Data => m_Data;
 
-    public event Action<WallSectionData> OnDataChange;
+    public event Action<IData> OnDataChange;
 
     //// Temp variables for testing
     //List<IList<Vector3>> m_Points;
@@ -38,15 +37,9 @@ public class WallSection : MonoBehaviour, IBuildable
         return this;
     }
 
-    public IList<IList<Vector3>> CalculateDoorway()
-    {
-        Vector3 doorScale = new Vector3(m_Data.DoorSideWidth, m_Data.DoorPedimentHeight);
-        return MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, doorScale, m_Data.DoorColumns, m_Data.DoorRows, 4, 0, Vector3.right * m_Data.DoorSideOffset, new Vector3(0, -0.999f));
-    }
-
     public void Build()
     {
-        transform.DeleteChildren();
+        Debug.Log("Wall Section build", this);
 
         switch(m_Data.WallElement)
         {
@@ -66,7 +59,7 @@ public class WallSection : MonoBehaviour, IBuildable
 
                     if (m_Data.Doors[0] == null || m_Data.Doors[0].ControlPoints == null || m_Data.Doors[0].ControlPoints.Length == 0)
                     {
-                        holePoints = CalculateDoorway();
+                        holePoints = CalculateDoorway(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
@@ -118,7 +111,7 @@ public class WallSection : MonoBehaviour, IBuildable
 
                     if (m_Data.ArchDoors[0] == null || m_Data.ArchDoors[0].ControlPoints == null || m_Data.ArchDoors[0].ControlPoints.Length == 0)
                     {
-                        holePoints = MeshMaker.ArchedDoorHoleGrid(m_Data.ControlPoints, m_Data.ArchSideWidth, m_Data.ArchColumns, m_Data.ArchRows, m_Data.ArchPedimentHeight, m_Data.ArchHeight, m_Data.ArchSides, Vector3.right * m_Data.ArchSideOffset);
+                        holePoints = CalculateArchway(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
@@ -170,8 +163,7 @@ public class WallSection : MonoBehaviour, IBuildable
 
                     if (m_Data.Windows[0] == null || m_Data.Windows[0].ControlPoints == null || m_Data.Windows[0].ControlPoints.Length == 0)
                     {
-                        Vector3 winScale = new Vector3(m_Data.WindowWidth, m_Data.WindowHeight);
-                        holePoints = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, winScale, m_Data.WindowColumns, m_Data.WindowRows, m_Data.WindowSides, m_Data.WindowAngle);
+                        holePoints = CalculateWindow(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
@@ -186,6 +178,7 @@ public class WallSection : MonoBehaviour, IBuildable
                     {
                         holePoints = new List<IList<Vector3>>();
 
+                        // Bug: Probuilder meshes can only be created from the main thread.
                         //Parallel.ForEach(m_Data.Windows, data =>
                         //{
                         //    holePoints.Add(data.ControlPoints.ToList());
@@ -193,7 +186,7 @@ public class WallSection : MonoBehaviour, IBuildable
                         //    BuildWindow(data);
                         //});
 
-                        foreach(WindowData data in m_Data.Windows)
+                        foreach (WindowData data in m_Data.Windows)
                         {
                             holePoints.Add(data.ControlPoints.ToList());
 
@@ -206,72 +199,45 @@ public class WallSection : MonoBehaviour, IBuildable
                 break;
             case WallElement.Extension:
                 {
-                    //List<List<Vector3>> wallHole;
-                    //Vector3 scale = new Vector3(m_Data.ExtendWidth, m_Data.ExtendHeight);
-                    //ProBuilderMesh extensionA = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, scale, 1, 1, 4, 0, out wallHole, null, new Vector3(0, -0.999f)); // Outside
-                    //Vector3 normal = extensionA.GetVertices(extensionA.faces[0].distinctIndexes)[0].normal;
-                    //extensionA.Extrude(new Face[] { extensionA.faces[0] }, ExtrudeMethod.FaceNormal, m_Data.WallDepth);
-                    //ProBuilderMesh extensionB = MeshMaker.NPolyHoleGrid(m_Data.ControlPoints, scale, 1, 1, 4, 0, out _, null, new Vector3(0, -0.999f), true); // Inside
-                    //CombineMeshes.Combine(new ProBuilderMesh[] { extensionA, extensionB }, extensionA);
-                    //Rebuild(extensionA);
-                    //DestroyImmediate(extensionB.gameObject);
+                    IList<IList<Vector3>> extensionHole = CalculateExtension(m_Data);
 
-                    //ControlPoint[] points = new ControlPoint[4];
-                    //points[0] = new ControlPoint(wallHole[0][0]);
-                    //points[1] = new ControlPoint(wallHole[0][0] + normal * m_Data.ExtendDistance);
-                    //points[2] = new ControlPoint(wallHole[0][3] + normal * m_Data.ExtendDistance);
-                    //points[3] = new ControlPoint(wallHole[0][3]);
+                    BuildSection(extensionHole);
 
-                    //for (int i = 0; i < points.Length; i++)
-                    //{
-                    //    int next = points.GetNext(i);
-                    //    int previous = points.GetPrevious(i);
+                    ControlPoint[] points = new ControlPoint[4];
+                    points[0] = new ControlPoint(extensionHole[0][0]);
+                    points[1] = new ControlPoint(extensionHole[0][0] + m_Data.FaceNormal * m_Data.ExtensionDistance);
+                    points[2] = new ControlPoint(extensionHole[0][3] + m_Data.FaceNormal * m_Data.ExtensionDistance);
+                    points[3] = new ControlPoint(extensionHole[0][3]);
 
-                    //    Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[next].Position);
-                    //    Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[previous].Position);
+                    for (int i = 0; i < points.Length; i++)
+                    {
+                        int next = points.GetNext(i);
+                        int previous = points.GetPrevious(i);
 
-                    //    points[i].SetForward(Vector3.Lerp(nextForward, previousForward, 0.5f));
-                    //}
+                        Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[next].Position);
+                        Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[previous].Position);
 
-                    //float wallHeight = Vector3.Distance(wallHole[0][0], wallHole[0][1]);
+                        points[i].SetForward(Vector3.Lerp(nextForward, previousForward, 0.5f));
+                    }
 
-                    //Storey wallSectionStorey;
+                    float wallHeight = Vector3.Distance(extensionHole[0][0], extensionHole[0][1]);
 
-                    //if (TryGetComponent(out Storey storey))
-                    //{
-                    //    wallSectionStorey = storey;
-                    //}
-                    //else
-                    //{
-                    //    wallSectionStorey = gameObject.AddComponent<Storey>().Initialize(new StoreyData()) as Storey;
-                    //}
+                    m_Data.ExtensionStoreyData ??= new StoreyData();
+                    m_Data.ExtensionRoofData ??= new RoofData();
 
-                    //wallSectionStorey.Data.ControlPoints = points;
-                    //wallSectionStorey.Data.WallData.Height = wallHeight;
+                    m_Data.ExtensionStoreyData.ControlPoints = points;
+                    m_Data.ExtensionStoreyData.WallData.Height = wallHeight;
+                    m_Data.ExtensionRoofData.ControlPoints = points;
 
-                    //GameObject storeyGO = new GameObject("Storey", typeof(Storey));
-                    //storeyGO.transform.SetParent(transform, true);
-                    //storeyGO.GetComponent<Storey>().Initialize(wallSectionStorey.Data).Build();
+                    GameObject storeyGO = new GameObject("Storey", typeof(Storey));
+                    storeyGO.transform.SetParent(transform, true);
+                    storeyGO.GetComponent<Storey>().Initialize(m_Data.ExtensionStoreyData).Build();
 
-                    //Roof wallSectionRoof;
-
-                    //if (TryGetComponent(out Roof roof))
-                    //{
-                    //    wallSectionRoof = roof;
-                    //}
-                    //else
-                    //{
-                    //    gameObject.AddComponent<Roof>().Initialize(new RoofData());
-                    //    wallSectionRoof = gameObject.GetComponent<Roof>();
-                    //}
-
-                    //wallSectionRoof.Data.ControlPoints = points;
-
-                    //GameObject roofGO = new GameObject("Roof", typeof(Roof));
-                    //roofGO.transform.SetParent(transform, true);
-                    //roofGO.transform.localPosition = new Vector3(0, wallHeight, 0);
-                    //Roof roofExtension = roofGO.GetComponent<Roof>();
-                    //roofExtension.Initialize(wallSectionRoof.Data).Build();
+                    GameObject roofGO = new GameObject("Roof", typeof(Roof));
+                    roofGO.transform.SetParent(transform, true);
+                    roofGO.transform.localPosition = new Vector3(0, wallHeight, 0);
+                    Roof roofExtension = roofGO.GetComponent<Roof>();
+                    roofExtension.Initialize(m_Data.ExtensionRoofData).Build();
                 }
                 break;
             case WallElement.Empty:
@@ -318,6 +284,29 @@ public class WallSection : MonoBehaviour, IBuildable
 
         return data;
     }
+    public static IList<IList<Vector3>> CalculateDoorway(WallSectionData data)
+    {
+        Vector3 doorScale = new Vector3(data.DoorSideWidth, data.DoorPedimentHeight);
+        return MeshMaker.NPolyHoleGrid(data.ControlPoints, doorScale, data.DoorColumns, data.DoorRows, 4, 0, Vector3.right * data.DoorSideOffset, new Vector3(0, -0.999f));
+    }
+    /// <summary>
+    /// Calculates the points for the window hole(s)
+    /// </summary>
+    /// <returns></returns>
+    public static IList<IList<Vector3>> CalculateWindow(WallSectionData data)
+    {
+        Vector3 winScale = new Vector3(data.WindowWidth, data.WindowHeight);
+        return MeshMaker.NPolyHoleGrid(data.ControlPoints, winScale, data.WindowColumns, data.WindowRows, data.WindowSides, data.WindowAngle);
+    }
+    public static IList<IList<Vector3>> CalculateArchway(WallSectionData data)
+    {
+        return MeshMaker.ArchedDoorHoleGrid(data.ControlPoints, data.ArchSideWidth, data.ArchColumns, data.ArchRows, data.ArchPedimentHeight, data.ArchHeight, data.ArchSides, Vector3.right * data.ArchSideOffset);
+    }
+    public static IList<IList<Vector3>> CalculateExtension(WallSectionData data)
+    {
+        Vector3 scale = new Vector3(data.ExtensionWidth, data.ExtensionHeight);
+        return MeshMaker.NPolyHoleGrid(data.ControlPoints, scale, 1, 1, 4, 0, null, new Vector3(0, -0.999f)); // Outside
+    }
     #endregion
 
     #region Build
@@ -348,7 +337,6 @@ public class WallSection : MonoBehaviour, IBuildable
         Door door = doorMesh.AddComponent<Door>();
         door.Initialize(data).Build();
     }
-
     private void BuildFrame(IList<Vector3> controlPoints, float insideScale, float depth)
     {
         Vector3[] scaledControlPoints = controlPoints.ScalePolygon(insideScale);
@@ -364,6 +352,11 @@ public class WallSection : MonoBehaviour, IBuildable
         doorFrameMesh.Refresh();
     }
     #endregion
+
+    public void Demolish()
+    {
+        transform.DeleteChildren();
+    }
 
     private WallSection Rebuild(ProBuilderMesh mesh)
     {

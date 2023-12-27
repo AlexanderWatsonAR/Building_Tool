@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:GroupBox style="align-items: flex-start; justify-content: flex-end; opacity: 1; display: flex; flex-wrap: nowrap; flex-direction: row-reverse; height: 252px;">
+        <ui:VisualElement name="sldr_Container" style="width: auto; height: auto; flex-direction: column;">
+            <ui:Slider picking-mode="Ignore" label="Slider" value="42" high-value="100" name="sldr_Columns" />
+            <ui:Slider picking-mode="Ignore" label="Slider" value="42" high-value="100" name="sldr_Rows" />
+        </ui:VisualElement>
+        <ui:VisualElement name="sections_Container" style="width: 200px; height: 200px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(255, 255, 255, 255); border-right-color: rgba(255, 255, 255, 255); border-top-color: rgba(255, 255, 255, 255); border-bottom-color: rgba(255, 255, 255, 255);" />
+    </ui:GroupBox>
+</ui:UXML>

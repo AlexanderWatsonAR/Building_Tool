@@ -8,6 +8,7 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using Edge = UnityEngine.ProBuilder.Edge;
+using System.Diagnostics;
 
 public static class ProBuilderExtensions
 {
@@ -26,6 +27,22 @@ public static class ProBuilderExtensions
         {
             proBuilderMesh.faces[0].Reverse();
         }
+    }
+
+    /// <summary>
+    /// Gives a polygon depth
+    /// </summary>
+    /// <param name="polygon"></param>
+    /// <param name="extrude"></param>
+    public static void Solidify(this ProBuilderMesh polygon, float extrude)
+    {
+        ProBuilderMesh lid = UnityEngine.Object.Instantiate(polygon);
+        lid.faces[0].Reverse();
+        polygon.Extrude(polygon.faces, ExtrudeMethod.FaceNormal, extrude);
+        CombineMeshes.Combine(new ProBuilderMesh[] { polygon, lid }, polygon);
+        UnityEngine.Object.DestroyImmediate(lid.gameObject);
+        polygon.ToMesh();
+        polygon.Refresh();
     }
 
     public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IEnumerable<ControlPoint> controlPoints, float extrude, bool flipNormals)

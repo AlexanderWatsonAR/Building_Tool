@@ -12,13 +12,13 @@ using UnityEngine.ProBuilder.MeshOperations;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine.Assertions.Must;
 
-public class Roof : MonoBehaviour, IBuildable
+public class Roof : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private RoofData m_Data;
 
     public RoofData Data => m_Data;
 
-    public event Action<RoofData> OnDataChange; // Building should sub to this.
+    public event Action<IData> OnDataChange; // Building should sub to this.
 
     public void OnDataChange_Invoke()
     {
@@ -205,7 +205,12 @@ public class Roof : MonoBehaviour, IBuildable
                 m_Data.PyramidTiles[i] ??= CalculatePyramid(i);
 
             RoofTile pyramidTile = CreateRoofTile(m_Data.PyramidTiles[i]);
-            pyramidTile.OnDataChange += data => { m_Data.PyramidTiles[data.ID] = data; OnDataChange_Invoke(); };
+            pyramidTile.OnDataChange += data =>
+            {
+                RoofTileData tileData = data as RoofTileData;
+                m_Data.PyramidTiles[tileData.ID] = tileData;
+                OnDataChange_Invoke();
+            };
         }
     }
     private void BuildMansard()
@@ -217,7 +222,12 @@ public class Roof : MonoBehaviour, IBuildable
             m_Data.MansardTiles[i] ??= CalculateMansard(i);
 
             RoofTile mansardTile = CreateRoofTile(m_Data.MansardTiles[i]);
-            mansardTile.OnDataChange += data => { m_Data.MansardTiles[data.ID] = data; OnDataChange_Invoke(); };
+            mansardTile.OnDataChange += data =>
+            {
+                RoofTileData tileData = data as RoofTileData;
+                m_Data.MansardTiles[tileData.ID] = tileData;
+                OnDataChange_Invoke();
+            };
         }
 
         if (m_Data.RoofType == RoofType.Mansard)
@@ -266,13 +276,22 @@ public class Roof : MonoBehaviour, IBuildable
                 wallGO.transform.SetParent(transform, false);
                 Wall wall = wallGO.GetComponent<Wall>();
                 wall.Initialize(m_Data.GetWallByID(i)).Build();
-                wall.OnDataChange += data => { m_Data.Walls[data.ID] = data; OnDataChange_Invoke(); };
+                wall.OnDataChange += data => 
+                {
+                    WallData wallData = data as WallData;
+                    m_Data.Walls[wallData.ID] = wallData;
+                    OnDataChange_Invoke();
+                };
                 continue;
             }
 
             RoofTile gableTile = CreateRoofTile(m_Data.GableTiles[i]);
-
-            gableTile.OnDataChange += data => { m_Data.GableTiles[data.ID] = data; OnDataChange_Invoke(); };
+            gableTile.OnDataChange += data => 
+            {
+                RoofTileData roofData = data as RoofTileData;
+                m_Data.GableTiles[roofData.ID] = roofData;
+                OnDataChange_Invoke();
+            };
         }
 
     }
@@ -381,7 +400,10 @@ public class Roof : MonoBehaviour, IBuildable
         return tile;
     }
 
+    public void Demolish()
+    {
 
-    
+    }
+
 
 }

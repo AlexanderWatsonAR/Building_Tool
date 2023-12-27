@@ -12,13 +12,13 @@ using UnityEditor.UIElements;
 [CustomEditor(typeof(WallSection))]
 public class WallSectionEditor : Editor
 {
-    private bool m_IsArchFoldoutActive = true;
-    private bool m_IsDoorFoldoutActive = true;
-    private bool m_IsDoorFrameFoldoutActive = true;
-    private bool m_IsWindowFoldoutActive = true;
+    //private bool m_IsArchFoldoutActive = true;
+    //private bool m_IsDoorFoldoutActive = true;
+    //private bool m_IsDoorFrameFoldoutActive = true;
+    //private bool m_IsWindowFoldoutActive = true;
 
-    WallSection m_Section;
-    WallSectionSerializedProperties m_SerializedProperties;
+    //WallSection m_Section;
+    //WallSectionSerializedProperties m_SerializedProperties;
 
     public override VisualElement CreateInspectorGUI()
     {

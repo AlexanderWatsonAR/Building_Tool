@@ -9,7 +9,7 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
-public class RoofSection : MonoBehaviour, IBuildable
+public class RoofSection : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private RoofSectionData m_Data;
     public RoofSectionData Data => m_Data;
@@ -20,7 +20,7 @@ public class RoofSection : MonoBehaviour, IBuildable
     [SerializeField] private WindowData m_WindowData;
     //---------- End of Window Properties -----------
 
-    public event Action<RoofSectionData> OnDataChange;
+    public event Action<IData> OnDataChange;
     
 
     public void OnDataChange_Invoke()
@@ -119,5 +119,10 @@ public class RoofSection : MonoBehaviour, IBuildable
         m_ProBuilderMesh.Refresh();
         DestroyImmediate(mesh.gameObject);
         return this;
+    }
+
+    public void Demolish()
+    {
+
     }
 }

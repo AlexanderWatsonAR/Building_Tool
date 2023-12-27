@@ -6,12 +6,12 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
-public class Pillar : MonoBehaviour, IBuildable
+public class Pillar : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private PillarData m_Data;
 
-    public event Action<PillarData> OnDataChange;
+    public event Action<IData> OnDataChange;
 
     public void OnDataChange_Invoke()
     {
@@ -71,5 +71,10 @@ public class Pillar : MonoBehaviour, IBuildable
 
         GetComponent<Renderer>().material = m_Data.Material;
         m_ProBuilderMesh.Refresh();
+    }
+
+    public void Demolish()
+    {
+
     }
 }

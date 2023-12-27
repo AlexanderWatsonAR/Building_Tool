@@ -9,12 +9,12 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine.Rendering;
 
-public class RoofTile : MonoBehaviour, IBuildable
+public class RoofTile : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private RoofTileData m_Data;
     [SerializeField, HideInInspector] private List<Vector3[]> m_SubPoints;
     
-    public event Action<RoofTileData> OnDataChange;
+    public event Action<IData> OnDataChange;
 
     public RoofTileData Data => m_Data;
 
@@ -91,9 +91,19 @@ public class RoofTile : MonoBehaviour, IBuildable
 
                 RoofSection roofSection = roofSectionMesh.AddComponent<RoofSection>().Initialize(m_Data.Sections[x,y]) as RoofSection;
                 roofSection.Build();
-                roofSection.OnDataChange += (RoofSectionData data) => { m_Data.Sections[data.ID.x, data.ID.y] = data; };
+                roofSection.OnDataChange += data => 
+                {
+                    RoofSectionData sectionData = data as RoofSectionData;
+                    m_Data.Sections[sectionData.ID.x, sectionData.ID.y] = sectionData;
+                };
             }
         }
+    
+    }
+
+    public void Demolish()
+    {
+
     }
 
     private void OnDrawGizmosSelected()

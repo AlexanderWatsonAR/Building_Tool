@@ -106,7 +106,7 @@ public static class EnumExtensions
             return DoorElement.Door;
 
         if (doorway.IsElementActive(DoorwayElement.Handle))
-            return DoorElement.Door;
+            return DoorElement.Handle;
 
         return DoorElement.Nothing;
     }

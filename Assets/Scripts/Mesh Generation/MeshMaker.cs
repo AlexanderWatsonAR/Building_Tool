@@ -758,9 +758,9 @@ public static class MeshMaker
         return polygon;
     }
 
-    public static List<IList<Vector3>> SpiltPolygon(IEnumerable<Vector3> polygon, float polygonWidth, float polygonHeight, int columns, int rows, Vector3? polygonPosition = null, Vector3? polygonNormal = null)
+    public static IList<IList<Vector3>> SpiltPolygon(IEnumerable<Vector3> polygon, float polygonWidth, float polygonHeight, int columns, int rows, Vector3? polygonPosition = null, Vector3? polygonNormal = null)
     {
-        List<IList<Vector3>> polygons = new();
+        IList<IList<Vector3>> polygons = new List<IList<Vector3>>();
 
         if (columns  == 1 && rows == 1)
         {
@@ -907,7 +907,7 @@ public static class MeshMaker
         Vector3 framePosition = position.HasValue ? position.Value : ProMaths.Average(points);
         Vector3 frameNormal = normal.HasValue ? normal.Value : points.CalculatePolygonFaceNormal();
 
-        List<IList<Vector3>> holePoints = SpiltPolygon(polyPoints, polyWidth, polyHeight, columns, rows, framePosition, frameNormal);
+        IList<IList<Vector3>> holePoints = SpiltPolygon(polyPoints, polyWidth, polyHeight, columns, rows, framePosition, frameNormal);
 
         foreach(IList<Vector3> hole in holePoints)
         {

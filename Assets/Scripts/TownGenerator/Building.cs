@@ -99,7 +99,11 @@ public class Building : MonoBehaviour, IBuildable
             next.transform.localPosition = pos;
             Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
             storey.Build();
-            storey.OnDataChange += (StoreyData data) => { m_Data.StoreysData[data.ID] = data; };
+            storey.OnDataChange += (IData data) =>
+            {
+                StoreyData storeyData = data as StoreyData;
+                m_Data.StoreysData[storeyData.ID] = storeyData;
+            };
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
 
@@ -107,7 +111,16 @@ public class Building : MonoBehaviour, IBuildable
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
         roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
-        roofGO.GetComponent<Roof>().OnDataChange += (RoofData data) => { m_Data.RoofData = data; Debug.Log("RoofData change"); };
+        roofGO.GetComponent<Roof>().OnDataChange += data =>
+        {
+            m_Data.RoofData = data as RoofData;
+            Debug.Log("RoofData change");
+        };
+    }
+
+    public void Demolish()
+    {
+
     }
 
     public void RevertBuilding()

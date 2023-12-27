@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager.UI;
@@ -8,7 +10,7 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UIElements;
 
-public class Window : MonoBehaviour, IBuildable
+public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private WindowData m_Data;
 
@@ -17,42 +19,27 @@ public class Window : MonoBehaviour, IBuildable
     [SerializeField] private ProBuilderMesh m_Pane;
     [SerializeField] private ProBuilderMesh m_LeftShutter, m_RightShutter;
 
-    private float m_Height, m_Width;
-    private Vector3 m_Min, m_Max;
-    private Vector3 m_Position;
-
-    public float Height => m_Height;
-    public float Width => m_Width;
-
-
     public WindowData Data => m_Data;
 
-    private Vector3[] ScaledControlPoints
-    {
-        get
-        {
-            Vector3[] scaledPoints = new Vector3[m_Data.ControlPoints.Length];
+    public event Action<IData> OnDataChange;
 
-            for(int i = 0; i < scaledPoints.Length; i++)
-            {
-                Vector3 point = m_Data.ControlPoints[i] - m_Position;
-                Vector3 v = Vector3.Scale(point, Vector3.one * m_Data.OuterFrameScale) + m_Position;
-                scaledPoints[i] = v;
-            }
-
-            return scaledPoints;
-        }
-    }
     public IBuildable Initialize(IData data)
     {
         m_Data = data as WindowData;
+        
 
-        Extensions.MinMax(m_Data.ControlPoints, out m_Min, out m_Max);
-        m_Height = m_Max.y - m_Min.y;
-        m_Width = m_Max.x - m_Min.x + (m_Max.z - m_Min.z);
-        m_Position = Vector3.Lerp(m_Min, m_Max, 0.5f);
+        // Height variable may need calculating based on the forward vector
+        Extensions.MinMax(m_Data.ControlPoints, out Vector3 min, out Vector3 max);
+        m_Data.Height = max.y - min.y;
+        m_Data.Width = max.x - min.x + (max.z - min.z);
+        m_Data.Position = Vector3.Lerp(min, max, 0.5f);
 
         return this;
+    }
+
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
     }
 
     public void SetPosition(Vector3 position)
@@ -90,119 +77,225 @@ public class Window : MonoBehaviour, IBuildable
         }
     }
 
+    #region Calculate
+    public static IList<IList<Vector3>> CalculateOuterFrame(WindowData data)
+    {
+        IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
+        holePoints.Add(data.ControlPoints.ScalePolygon(data.OuterFrameScale, data.Position));
+        return holePoints;
+    }
+    public static IList<IList<Vector3>> CalculateInnerFrame(WindowData data)
+    {
+        Vector3[] points = data.IsOuterFrameActive ? data.ControlPoints.ScalePolygon(data.OuterFrameScale, data.Position) : data.ControlPoints;
+
+        return MeshMaker.SpiltPolygon(points, data.Width, data.Height, data.InnerFrameColumns, data.InnerFrameRows, data.Position, data.Forward);
+    }
+    private DoorData CalculateRightShutterData(IEnumerable<Vector3> controlPoints)
+    {
+        Vector3 right = Vector3.Cross(m_Data.Forward, Vector3.up);
+
+        DoorData rightShutterData = new DoorData()
+        {
+            ControlPoints = controlPoints.ToArray(),
+            Forward = m_Data.Forward,
+            Right = right,
+            Depth = m_Data.ShuttersDepth,
+            Scale = 1,
+            HingePoint = TransformPoint.Right,
+            HingeEulerAngles = -Vector3.up * m_Data.ShuttersAngle,
+            ActiveElements = DoorElement.Everything,
+            Material = m_Data.ShuttersMaterial
+        };
+
+        return rightShutterData;
+    }
+    private DoorData CalculateLeftShutterData(IEnumerable<Vector3> controlPoints)
+    {
+        Vector3 right = Vector3.Cross(m_Data.Forward, Vector3.up);
+
+        DoorData leftShutterData = new DoorData()
+        {
+            ControlPoints = controlPoints.ToArray(),
+            Forward = m_Data.Forward,
+            Right = right,
+            Depth = m_Data.ShuttersDepth,
+            Scale = 1,
+            HingePoint = TransformPoint.Left,
+            HingeEulerAngles = Vector3.up * m_Data.ShuttersAngle,
+            ActiveElements = DoorElement.Everything,
+            Material = m_Data.ShuttersMaterial
+        };
+
+        return leftShutterData;
+    }
+    #endregion
+
+    #region Build
+    private ProBuilderMesh BuildOuterFrame()
+    {
+        ProBuilderMesh outerFrame = ProBuilderMesh.Create();
+        outerFrame.name = "Outer Frame";
+        outerFrame.transform.SetParent(transform, false);
+        outerFrame.GetComponent<Renderer>().sharedMaterial = m_Data.OuterFrameMaterial;
+        return outerFrame;
+    }
+    private ProBuilderMesh BuildInnerFrame()
+    {
+        ProBuilderMesh innerFrame = ProBuilderMesh.Create();
+        innerFrame.name = "Inner Frame";
+        innerFrame.transform.SetParent(transform, false);
+        innerFrame.GetComponent<Renderer>().sharedMaterial = m_Data.InnerFrameMaterial;
+        return innerFrame;
+    }
+    private ProBuilderMesh BuildPane()
+    {
+        ProBuilderMesh pane = ProBuilderMesh.Create();
+        pane.transform.SetParent(transform, false);
+        pane.name = "Pane";
+        pane.GetComponent<Renderer>().sharedMaterial = m_Data.PaneMaterial;
+        return pane;
+    }
+    private ProBuilderMesh BuildLeftShutter()
+    {
+        ProBuilderMesh leftShutter = ProBuilderMesh.Create();
+        leftShutter.name = "Left Shutter";
+        leftShutter.transform.SetParent(transform, false);
+        return leftShutter;
+    }
+    private ProBuilderMesh BuildRightShutter()
+    {
+        ProBuilderMesh rightShutter = ProBuilderMesh.Create();
+        rightShutter.name = "Right Shutter";
+        rightShutter.transform.SetParent(transform, false);
+        return rightShutter;
+    }
+    #endregion
+
     public void Build()
     {
-        transform.DeleteChildren();
-
         if (m_Data.ActiveElements == WindowElement.Nothing)
             return;
 
-        Vector3[] points = m_Data.IsOuterFrameActive ? ScaledControlPoints : m_Data.ControlPoints;
+        Vector3[] points = m_Data.IsOuterFrameActive ? CalculateOuterFrame(m_Data)[0].ToArray() : m_Data.ControlPoints;
 
-        if (m_Data.IsOuterFrameActive)
+        if (m_Data.IsOuterFrameActive && m_Data.DoesOuterFrameNeedRebuild)
         {
-            m_OuterFrame = ProBuilderMesh.Create();
-            m_OuterFrame.name = "Outer Frame";
-            m_OuterFrame.transform.SetParent(transform, false);
-            m_OuterFrame.GetComponent<Renderer>().sharedMaterial = m_Data.OuterFrameMaterial;
+            m_OuterFrame ??= BuildOuterFrame();
 
-            List<IList<Vector3>> holePoints = new();
-            holePoints.Add(ScaledControlPoints);
+            IList<IList<Vector3>> holePoints = CalculateOuterFrame(m_Data);
             m_OuterFrame.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward, holePoints);
-            ProBuilderMesh backFrame = Instantiate(m_OuterFrame);
-            backFrame.faces[0].Reverse();
-            m_OuterFrame.Extrude(m_OuterFrame.faces, ExtrudeMethod.FaceNormal, m_Data.OuterFrameDepth);
-            CombineMeshes.Combine(new ProBuilderMesh[] { m_OuterFrame, backFrame }, m_OuterFrame);
-            DestroyImmediate(backFrame.gameObject);
+            m_OuterFrame.Solidify(m_Data.OuterFrameDepth);
+            m_Data.DoesOuterFrameNeedRebuild = false;
+        }
+
+        if (m_Data.IsInnerFrameActive && m_Data.DoesInnerFrameNeedRebuild)
+        {
+            // Inner Frame
+            m_InnerFrame ??= BuildInnerFrame();
+            m_Data.InnerFrameHolePoints ??= CalculateInnerFrame(m_Data);
+
+            IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
+
+            foreach(IList<Vector3> holePoint in m_Data.InnerFrameHolePoints)
+            {
+                holePoints.Add(holePoint.ScalePolygon(m_Data.InnerFrameScale));
+            }
+
+            m_InnerFrame.CreateShapeFromPolygon(points, m_Data.Forward, holePoints);
+            m_InnerFrame.Solidify(m_Data.OuterFrameDepth);
+            m_Data.DoesInnerFrameNeedRebuild = false;
+        }
+
+        if (m_Data.IsPaneActive && m_Data.DoesPaneNeedRebuild)
+        {
+            m_Pane ??= BuildPane();
+            m_Pane.CreateShapeFromPolygon(points, m_Data.Forward);
+            m_Pane.Solidify(m_Data.PaneDepth);
+            m_Data.DoesPaneNeedRebuild = false;
+        }
+
+        if(m_Data.AreShuttersActive && m_Data.DoShuttersNeedRebuild)
+        {
+            IList<IList<Vector3>> shutterVertices;
+
+            if (m_LeftShutter == null || m_RightShutter == null)
+            {
+                shutterVertices = MeshMaker.SpiltPolygon(points, m_Data.Width, m_Data.Height, 2, 1, m_Data.Position, m_Data.Forward);
+
+                //for (int i = 0; i < shutterVertices.Count; i++)
+                //{
+                //    IList<Vector3> shutter = shutterVertices[i];
+
+                //    for (int j = 0; j < shutter.Count; j++)
+                //    {
+                //        shutter[j] += m_Data.Forward * m_Data.OuterFrameDepth;
+                //    }
+
+                //    shutterVertices[i] = shutter;
+                //}
+            }
+            else
+            {
+                shutterVertices = new List<IList<Vector3>>();
+
+                shutterVertices.Add(m_RightShutter.GetComponent<Door>().DoorData.ControlPoints);
+                shutterVertices.Add(m_LeftShutter.GetComponent<Door>().DoorData.ControlPoints);
+            }
+
+            m_RightShutter ??= BuildRightShutter();
+            m_LeftShutter ??= BuildLeftShutter();
+
+            Door rightShutter = m_RightShutter.GetOrAddComponent<Door>();
+            Door leftShutter = m_LeftShutter.GetOrAddComponent<Door>();
+
+            if (rightShutter.DoorData == null)
+            {
+                rightShutter.Initialize(CalculateRightShutterData(shutterVertices[0]));
+            }
+            
+            if(leftShutter.DoorData == null)
+            {
+                leftShutter.Initialize(CalculateLeftShutterData(shutterVertices[1]));
+            }
+
+            rightShutter.Build();
+            leftShutter.Build();
+
+            m_Data.DoShuttersNeedRebuild = false;
+        }
+    }
+
+    public void Demolish()
+    {
+        if (!m_Data.IsOuterFrameActive && m_OuterFrame != null)
+        {
+            m_OuterFrame.Clear();
             m_OuterFrame.ToMesh();
             m_OuterFrame.Refresh();
         }
-
-        if(m_Data.IsInnerFrameActive)
+        if (!m_Data.IsInnerFrameActive && m_InnerFrame != null)
         {
-            // Inner Frame
-            m_InnerFrame = MeshMaker.PolyFrameGrid(points, m_Height, m_Width, m_Data.InnerFrameScale, m_Data.InnerFrameColumns, m_Data.InnerFrameRows, m_Position, m_Data.Forward);
-            ProBuilderMesh gridCover = Instantiate(m_InnerFrame);
-            gridCover.faces[0].Reverse();
-            m_InnerFrame.Extrude(m_InnerFrame.faces, ExtrudeMethod.FaceNormal, m_Data.InnerFrameDepth);
-            CombineMeshes.Combine(new ProBuilderMesh[] { m_InnerFrame, gridCover }, m_InnerFrame);
-            DestroyImmediate(gridCover.gameObject);
-            m_InnerFrame.transform.SetParent(transform, false);
-            m_InnerFrame.name = "Inner Frame";
-            m_InnerFrame.GetComponent<Renderer>().sharedMaterial = m_Data.InnerFrameMaterial;
+            m_InnerFrame.Clear();
+            m_InnerFrame.ToMesh();
+            m_InnerFrame.Refresh();
         }
-
-        if (m_Data.IsPaneActive)
+        if (!m_Data.IsPaneActive && m_Pane != null)
         {
-            // Pane
-            m_Pane = ProBuilderMesh.Create();
-            m_Pane.transform.SetParent(transform, false);
-            m_Pane.name = "Pane";
-            m_Pane.GetComponent<Renderer>().sharedMaterial = m_Data.PaneMaterial;
-            m_Pane.CreateShapeFromPolygon(points, m_Data.Forward);
-            ProBuilderMesh backPane = Instantiate(m_Pane);
-            backPane.faces[0].Reverse();
-            m_Pane.Extrude(m_Pane.faces, ExtrudeMethod.FaceNormal, m_Data.PaneDepth);
-            CombineMeshes.Combine(new ProBuilderMesh[] { m_Pane, backPane }, m_Pane);
-            DestroyImmediate(backPane.gameObject);
+            m_Pane.Clear();
             m_Pane.ToMesh();
             m_Pane.Refresh();
         }
-
-        if(m_Data.AreShuttersActive)
+        if (!m_Data.AreShuttersActive && m_LeftShutter != null)
         {
-            // Shutters
-            List<IList<Vector3>> shutterVertices = MeshMaker.SpiltPolygon(points, m_Width, m_Height, 2, 1, m_Position, m_Data.Forward);
-
-            for (int i = 0; i < shutterVertices.Count; i++)
-            {
-                IList<Vector3> shutter = shutterVertices[i];
-
-                for (int j = 0; j < shutter.Count; j++)
-                {
-                    shutter[j] += m_Data.Forward * m_Data.OuterFrameDepth;
-                }
-
-                shutterVertices[i] = shutter;
-            }
-
-            Vector3 right = Vector3.Cross(m_Data.Forward, Vector3.up);
-
-            DoorData rightShutterData = new DoorData()
-            {
-                ControlPoints = shutterVertices[0].ToArray(),
-                Forward = m_Data.Forward,
-                Right = right,
-                Depth = m_Data.ShuttersDepth,
-                Scale = 1,
-                HingePoint = TransformPoint.Right,
-                HingeEulerAngles = -Vector3.up * m_Data.ShuttersAngle,
-                Material = m_Data.ShuttersMaterial
-            };
-
-            DoorData leftShutterData = new DoorData()
-            {
-                ControlPoints = shutterVertices[1].ToArray(),
-                Forward = m_Data.Forward,
-                Right = right,
-                Depth = m_Data.ShuttersDepth,
-                Scale = 1,
-                HingePoint = TransformPoint.Left,
-                HingeEulerAngles = Vector3.up * m_Data.ShuttersAngle,
-                Material = m_Data.ShuttersMaterial
-            };
-
-            m_RightShutter = ProBuilderMesh.Create();
-            m_RightShutter.name = "Right shutter";
-            m_RightShutter.transform.SetParent(transform, false);
-            Door rightShutter = m_RightShutter.AddComponent<Door>();
-            rightShutter.Initialize(rightShutterData).Build();
-
-            m_LeftShutter = ProBuilderMesh.Create();
-            m_LeftShutter.name = "Left shutter";
-            m_LeftShutter.transform.SetParent(transform, false);
-            Door leftShutter = m_LeftShutter.AddComponent<Door>();
-            leftShutter.Initialize(leftShutterData).Build();
+            m_LeftShutter.Clear();
+            m_LeftShutter.ToMesh();
+            m_LeftShutter.Refresh();
+        }
+        if (!m_Data.AreShuttersActive && m_RightShutter != null)
+        {
+            m_RightShutter.Clear();
+            m_RightShutter.ToMesh();
+            m_RightShutter.Refresh();
         }
     }
 }

@@ -8,14 +8,21 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using Edge = UnityEngine.ProBuilder.Edge;
+using System;
 
-public class Door : MonoBehaviour, IBuildable
+public class Door : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private ProBuilderMesh m_DoorMesh;
     [SerializeField] private ProBuilderMesh m_DoorHandleMesh;
     [SerializeField] private DoorData m_Data;
 
+    public event Action<IData> OnDataChange;
     public DoorData DoorData => m_Data;
+
+    public void OnDataChange_Invoke()
+    {
+        OnDataChange?.Invoke(m_Data);
+    }
 
     public IBuildable Initialize(IData data)
     {
@@ -89,6 +96,11 @@ public class Door : MonoBehaviour, IBuildable
         m_DoorHandleMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
         m_DoorHandleMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
         m_DoorHandleMesh.Refresh();
+    }
+
+    public void Demolish()
+    {
+
     }
 
 }

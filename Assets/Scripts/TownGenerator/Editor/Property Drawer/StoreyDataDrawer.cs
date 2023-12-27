@@ -52,15 +52,16 @@ public class StoreyDataDrawer : PropertyDrawer
         SerializedProperty cornerType = cornerData.FindPropertyRelative("m_Type");
         SerializedProperty cornerSides = cornerData.FindPropertyRelative("m_Sides");
 
+        Foldout cornerFoldout = new Foldout() { text = "Corner" };
         EnumField cornerTypeField = new EnumField(cornerType.GetEnumValue<CornerType>());
-        PropertyField cornerSidesField = new PropertyField(cornerSides);
-
         cornerTypeField.BindProperty(cornerType);
+
+        PropertyField cornerSidesField = new PropertyField(cornerSides);
         cornerSidesField.BindProperty(cornerSides);
 
-        wallFoldout.Add(new Label("Corner"));
-        wallFoldout.Add(cornerTypeField);
-        wallFoldout.Add(cornerSidesField);
+        wallFoldout.Add(cornerFoldout);
+        cornerFoldout.Add(cornerTypeField);
+        cornerFoldout.Add(cornerSidesField);
 
         if (cornerSides.GetEnumValue<CornerType>() != CornerType.Round)
         {

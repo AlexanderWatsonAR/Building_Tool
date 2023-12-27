@@ -9,11 +9,11 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
-public class Storey : MonoBehaviour, IBuildable
+public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private StoreyData m_Data;
 
-    public event Action<StoreyData> OnDataChange;
+    public event Action<IData> OnDataChange;
 
     public StoreyData Data => m_Data;
 
@@ -61,7 +61,11 @@ public class Storey : MonoBehaviour, IBuildable
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Pillars))
             return;
 
-        m_Data.Pillars ??= new PillarData[m_Data.ControlPoints.Length];
+        if(m_Data.Pillars == null || m_Data.Pillars.Length != m_Data.ControlPoints.Length)
+        {
+            m_Data.Pillars = new PillarData[m_Data.ControlPoints.Length];
+        }
+
 
         GameObject pillars = new GameObject("Pillars");
         pillars.transform.SetParent(transform, false);
@@ -77,10 +81,15 @@ public class Storey : MonoBehaviour, IBuildable
             pillarMesh.transform.forward = pillarMesh.transform.localPosition.DirectionToTarget(m_Data.ControlPoints[index].Position);
 
             Pillar pillar = pillarMesh.GetComponent<Pillar>();
-            m_Data.Pillars[i] = CalculatePillar(i);
+            m_Data.Pillars[i] ??= CalculatePillar(i);
 
             pillar.Initialize(m_Data.Pillars[i]).Build();
-            pillar.OnDataChange += (PillarData data) => { m_Data.Pillars[data.ID] = data; OnDataChange_Invoke(); };
+            pillar.OnDataChange += data =>
+            { 
+                PillarData pillarData = data as PillarData;
+                m_Data.Pillars[pillarData.ID] = pillarData;
+                OnDataChange_Invoke();
+            };
         }
     }
     private void BuildCorners()
@@ -91,7 +100,10 @@ public class Storey : MonoBehaviour, IBuildable
         GameObject corners = new GameObject("Corners");
         corners.transform.SetParent(transform, false);
 
-        m_Data.Corners ??= new CornerData[m_Data.ControlPoints.Length];
+        if(m_Data.Corners == null || m_Data.Corners.Length != m_Data.ControlPoints.Length)
+        {
+            m_Data.Corners = new CornerData[m_Data.ControlPoints.Length];
+        }
 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
@@ -111,7 +123,10 @@ public class Storey : MonoBehaviour, IBuildable
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
             return;
 
-        m_Data.Walls ??= new WallData[m_Data.ControlPoints.Length];
+        if(m_Data.Walls == null || m_Data.Walls.Length != m_Data.ControlPoints.Length)
+        {
+            m_Data.Walls = new WallData[m_Data.ControlPoints.Length];
+        }
 
         GameObject walls = new GameObject("Walls");
         walls.transform.SetParent(transform, false);
@@ -131,7 +146,12 @@ public class Storey : MonoBehaviour, IBuildable
             m_Data.Walls[i] ??= CalculateWall(i);
 
             wall.Initialize(m_Data.Walls[i]).Build();
-            wall.OnDataChange += (WallData data) => { m_Data.Walls[data.ID] = data; OnDataChange_Invoke(); };
+            wall.OnDataChange += (IData data) =>
+            {
+                WallData wallData = data as WallData;
+                m_Data.Walls[wallData.ID] = wallData;
+                OnDataChange_Invoke();
+            };
         }
     }
     private void BuildFloor()
@@ -249,6 +269,10 @@ public class Storey : MonoBehaviour, IBuildable
 
         return data;
     }
-
     #endregion
+
+    public void Demolish()
+    {
+
+    }
 }

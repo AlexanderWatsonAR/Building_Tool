@@ -8,12 +8,12 @@ using System.Linq;
 using UnityEditor;
 using System;
 
-public class Wall : MonoBehaviour, IBuildable
+public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
-    public event Action<WallData> OnDataChange;
+    public event Action<IData> OnDataChange;
 
     private List<Vector3[]> SubPoints
     {
@@ -34,7 +34,7 @@ public class Wall : MonoBehaviour, IBuildable
         }
     }
 
-    public WallData WallData => m_Data;
+    public WallData Data => m_Data;
 
     public void OnDataChange_Invoke()
     {
@@ -119,17 +119,19 @@ public class Wall : MonoBehaviour, IBuildable
                 WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[x, y]) as WallSection;
                 wallSection.Build();
 
-                wallSection.OnDataChange += (WallSectionData data) => { m_Data.Sections[data.ID.x, data.ID.y] = data;};
+                wallSection.OnDataChange += data =>
+                {
+                    WallSectionData sectionData = data as WallSectionData;
+                    m_Data.Sections[sectionData.ID.x, sectionData.ID.y] = sectionData;
+                };
 
             }
         }
     }
 
-    private WallSectionData CalculateSection()
+    public void Demolish()
     {
-        WallSectionData data = new WallSectionData();
 
-        return data;
     }
 
     private void OnDrawGizmosSelected()
