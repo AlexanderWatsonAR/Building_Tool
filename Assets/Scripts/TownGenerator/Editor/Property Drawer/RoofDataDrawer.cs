@@ -12,30 +12,32 @@ using System;
 [CustomPropertyDrawer(typeof(RoofData))]
 public class RoofDataDrawer : PropertyDrawer
 {
+    [SerializeField] private RoofDataSerializedProperties m_Props;
+
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
         VisualElement container = new VisualElement();
 
-        SerializedProperty roofActive = data.FindPropertyRelative("m_IsActive");
+        m_Props = new RoofDataSerializedProperties(data);
 
-        container.Add(FrameOptions(data));
-        container.Add(Tile(data));
+        container.Add(FrameOptions());
+        container.Add(Tile());
 
         return container;
     }
 
-    private VisualElement FrameOptions(SerializedProperty data)
+    private VisualElement FrameOptions()
     {
         VisualElement optionsContainer = new VisualElement();
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable;
-        RoofData roofData = data.GetUnderlyingValue() as RoofData;
+        IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
+        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
 
         int[] frames = roofData.AvailableFrames;
 
         if (frames.Length <= 0)
             return optionsContainer;
 
-        SerializedProperty frameType = data.FindPropertyRelative("m_RoofType");
+        SerializedProperty frameType = m_Props.Type;
 
         int index = 0;
         int value = (int)frameType.GetEnumValue<RoofType>();
@@ -59,7 +61,7 @@ public class RoofDataDrawer : PropertyDrawer
         //frameTypeField.BindProperty(frameType); // Issue: Once we bind the field to the property, we no longer have a custom choice selection. 
 
         optionsContainer.Add(frameTypeField);
-        optionsContainer.Add(DisplayRoof(data, (RoofType) index));
+        optionsContainer.Add(DisplayRoof((RoofType) index));
 
         frameTypeField.RegisterValueChangedCallback(evt =>
         {
@@ -78,55 +80,51 @@ public class RoofDataDrawer : PropertyDrawer
             }
 
             frameType.SetEnumValue((RoofType)enumValueIndex);
-            data.serializedObject.ApplyModifiedProperties();
+            m_Props.SerializedObject.ApplyModifiedProperties();
 
-            optionsContainer.Add(DisplayRoof(data, (RoofType)enumValueIndex));
+            optionsContainer.Add(DisplayRoof((RoofType)enumValueIndex));
 
             buildable.Build();
         });
 
         return optionsContainer;
     }
-    private VisualElement DisplayRoof(SerializedProperty data, RoofType roofType)
+    private VisualElement DisplayRoof(RoofType roofType)
     {
         VisualElement container = new VisualElement();
         switch (roofType)
         {
             case RoofType.Gable:
-                DisplayGable(data, container);
+                DisplayGable(container);
                 break;
             case RoofType.Mansard:
-                DisplayMansard(data, container);
+                DisplayMansard(container);
                 break;
             case RoofType.Dormer:
-                DisplayMansard(data, container);
-                DisplayGable(data, container);
+                DisplayMansard(container);
+                DisplayGable(container);
                 break;
             case RoofType.MShaped:
-                DisplayMShaped(data, container);
+                DisplayMShaped(container);
                 break;
             case RoofType.Pyramid:
-                DisplayPyramid(data, container);
+                DisplayPyramid(container);
                 break;
             case RoofType.PyramidHip:
-                DisplayMansard(data, container);
-                DisplayPyramid(data, container);
+                DisplayMansard(container);
+                DisplayPyramid(container);
                 break;
         }
         return container; 
     }
-    private void DisplayGable(SerializedProperty data, VisualElement container)
+    private void DisplayGable(VisualElement container)
     {
-        RoofData roofData = data.GetUnderlyingValue() as RoofData;
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable;
-
-        SerializedProperty gableHeight = data.FindPropertyRelative("m_GableHeight");
-        SerializedProperty gableScale = data.FindPropertyRelative("m_GableScale");
-        SerializedProperty isGableOpen = data.FindPropertyRelative("m_IsOpen");
+        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Gable"};
-        PropertyField height = new PropertyField(gableHeight) { label = "Height"};
-        height.BindProperty(gableHeight);
+        PropertyField height = new PropertyField(m_Props.GableHeight) { label = "Height"};
+        height.BindProperty(m_Props.GableHeight);
         height.RegisterValueChangeCallback(evt =>
         {
             if (roofData.GableTiles == null)
@@ -153,23 +151,34 @@ public class RoofDataDrawer : PropertyDrawer
             if (rebuild)
                 buildable.Build();
         });
-        PropertyField scale = new PropertyField(gableScale) { label = "Scale"};
-        scale.BindProperty(gableScale);
+        PropertyField scale = new PropertyField(m_Props.GableScale) { label = "Scale"};
+        scale.BindProperty(m_Props.GableScale);
         scale.RegisterValueChangeCallback(evt =>
         {
             if (roofData.GableTiles == null)
                 return;
 
+            bool rebuild = false;
+
             for (int i = 0; i < roofData.GableTiles.Length; i++)
             {
+                if(roofData.GableTiles[i].ControlPoints[1].T != evt.changedProperty.floatValue ||
+                   roofData.GableTiles[i].ControlPoints[2].T != evt.changedProperty.floatValue)
+                {
+                    rebuild = true;
+                }
+
                 roofData.GableTiles[i].ControlPoints[1].T = evt.changedProperty.floatValue;
                 roofData.GableTiles[i].ControlPoints[2].T = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            // Thought: We only want to rebuild the roof here. Instead we are rebuilding the building.
+            if(rebuild)
+                buildable.Build();
+
         });
-        Toggle isOpen = new Toggle() { label = "Is Open", value = isGableOpen.boolValue};
-        isOpen.BindProperty(isGableOpen);
+        Toggle isOpen = new Toggle() { label = "Is Open", value = m_Props.IsOpen.boolValue};
+        isOpen.BindProperty(m_Props.IsOpen);
         isOpen.RegisterValueChangedCallback(evt =>
         {
             if (evt == null)
@@ -223,39 +232,35 @@ public class RoofDataDrawer : PropertyDrawer
         container.Add(foldout);
 
     }
-    private void DisplayMShaped(SerializedProperty data, VisualElement container)
+    private void DisplayMShaped(VisualElement container)
     {
-        IBuildable builadable = data.GetUnderlyingValue() as IBuildable;
-        SerializedProperty gableHeight = data.FindPropertyRelative("m_GableHeight");
-        SerializedProperty isMFlipped = data.FindPropertyRelative("m_IsFlipped");
+        IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "M Shaped" };
 
-        PropertyField height = new PropertyField(gableHeight) { label = "Height" };
-        height.BindProperty(gableHeight);
+        PropertyField height = new PropertyField(m_Props.GableHeight) { label = "Height" };
+        height.BindProperty(m_Props.GableHeight);
         height.RegisterValueChangeCallback(evt =>
         {
             if (evt.changedProperty != null)
-                builadable.Build();
+                buildable.Build();
         });
 
-        PropertyField isFlipped = new PropertyField(isMFlipped) { label = "Is Flipped" };
-        isFlipped.BindProperty(isMFlipped);
+        PropertyField isFlipped = new PropertyField(m_Props.IsFlipped) { label = "Is Flipped" };
+        isFlipped.BindProperty(m_Props.IsFlipped);
 
         foldout.Add(height);
         foldout.Add(isFlipped);
         container.Add(foldout);
     }
-    private void DisplayPyramid(SerializedProperty data, VisualElement container)
+    private void DisplayPyramid(VisualElement container)
     {
-        RoofData roofData = data.GetUnderlyingValue() as RoofData;
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable;
-
-        SerializedProperty pyramidHeight = data.FindPropertyRelative("m_PyramidHeight");
+        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Pyramid" };
-        PropertyField height = new PropertyField(pyramidHeight) { label = "Height" };
-        height.BindProperty(pyramidHeight);
+        PropertyField height = new PropertyField(m_Props.PyramidHeight) { label = "Height" };
+        height.BindProperty(m_Props.PyramidHeight);
         height.RegisterValueChangeCallback(evt =>
         {
             if (roofData.PyramidTiles == null)
@@ -272,17 +277,14 @@ public class RoofDataDrawer : PropertyDrawer
         foldout.Add(height);
         container.Add(foldout);
     }
-    private void DisplayMansard(SerializedProperty data, VisualElement container)
+    private void DisplayMansard(VisualElement container)
     {
-        RoofData roofData = data.GetUnderlyingValue() as RoofData;
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable;
-
-        SerializedProperty mansardHeight = data.FindPropertyRelative("m_MansardHeight");
-        SerializedProperty mansardScale = data.FindPropertyRelative("m_MansardScale");
+        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Mansard" };
-        PropertyField height = new PropertyField(mansardHeight) { label = "Height" };
-        height.BindProperty(mansardHeight);
+        PropertyField height = new PropertyField(m_Props.MansardHeight) { label = "Height" };
+        height.BindProperty(m_Props.MansardHeight);
         height.RegisterValueChangeCallback(evt =>
         {
             if (roofData.MansardTiles == null)
@@ -296,8 +298,8 @@ public class RoofDataDrawer : PropertyDrawer
             buildable.Build();
         });
 
-        PropertyField scale = new PropertyField(mansardScale) { label = "Scale" };
-        scale.BindProperty(mansardScale);
+        PropertyField scale = new PropertyField(m_Props.MansardScale) { label = "Scale" };
+        scale.BindProperty(m_Props.MansardScale);
         scale.RegisterValueChangeCallback(evt =>
         {
             if (roofData.MansardTiles == null)
@@ -316,47 +318,53 @@ public class RoofDataDrawer : PropertyDrawer
         foldout.Add(scale);
         container.Add(foldout);
     }
-    private VisualElement Tile(SerializedProperty data)
+    private VisualElement Tile()
     {
-        SerializedProperty roofTileData = data.FindPropertyRelative("m_RoofTileData");
-        SerializedProperty thickness = roofTileData.FindPropertyRelative("m_Thickness");
-        SerializedProperty extend = roofTileData.FindPropertyRelative("m_Extend");
-
-        RoofData roofData = data.GetUnderlyingValue() as RoofData;
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable;
+        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Tile" };
 
-        PropertyField thicknessField = new PropertyField(thickness);
-        thicknessField.BindProperty(thickness);
+        PropertyField thicknessField = new PropertyField(m_Props.RoofTile.Thickness);
+        thicknessField.BindProperty(m_Props.RoofTile.Thickness);
         thicknessField.RegisterValueChangeCallback(evt => 
         {
             bool rebuildMansard = false;
             bool rebuildGable = false;
             bool rebuildPyramid = false;
 
-            for (int i = 0; i < roofData.MansardTiles.Length; i++)
+            if (roofData.MansardTiles != null)
             {
-                if (roofData.MansardTiles[i].Thickness != evt.changedProperty.floatValue)
-                    rebuildMansard = true;
+                for (int i = 0; i < roofData.MansardTiles.Length; i++)
+                {
+                    if (roofData.MansardTiles[i].Thickness != evt.changedProperty.floatValue)
+                        rebuildMansard = true;
 
-                roofData.MansardTiles[i].Thickness = evt.changedProperty.floatValue;
+                    roofData.MansardTiles[i].Thickness = evt.changedProperty.floatValue;
+                }
             }
 
-            for (int i = 0; i < roofData.GableTiles.Length; i++)
-            {
-                if (roofData.GableTiles[i].Thickness != evt.changedProperty.floatValue)
-                    rebuildGable = true;
 
-                roofData.GableTiles[i].Thickness = evt.changedProperty.floatValue;
+            if (roofData.GableTiles != null)
+            {
+                for (int i = 0; i < roofData.GableTiles.Length; i++)
+                {
+                    if (roofData.GableTiles[i].Thickness != evt.changedProperty.floatValue)
+                        rebuildGable = true;
+
+                    roofData.GableTiles[i].Thickness = evt.changedProperty.floatValue;
+                }
             }
 
-            for (int i = 0; i < roofData.PyramidTiles.Length; i++)
+            if (roofData.PyramidTiles != null)
             {
-                if (roofData.PyramidTiles[i].Thickness != evt.changedProperty.floatValue)
-                    rebuildPyramid = true;
+                for (int i = 0; i < roofData.PyramidTiles.Length; i++)
+                {
+                    if (roofData.PyramidTiles[i].Thickness != evt.changedProperty.floatValue)
+                        rebuildPyramid = true;
 
-                roofData.PyramidTiles[i].Thickness = evt.changedProperty.floatValue;
+                    roofData.PyramidTiles[i].Thickness = evt.changedProperty.floatValue;
+                }
             }
 
             switch (roofData.RoofType)
@@ -389,36 +397,45 @@ public class RoofDataDrawer : PropertyDrawer
 
         });
 
-        PropertyField extendField = new PropertyField(extend);
-        extendField.BindProperty(extend);
+        PropertyField extendField = new PropertyField(m_Props.RoofTile.Extend);
+        extendField.BindProperty(m_Props.RoofTile.Extend);
         extendField.RegisterValueChangeCallback(evt =>
         {
             bool rebuildMansard = false;
             bool rebuildGable = false;
             bool rebuildPyramid = false;
 
-            for (int i = 0; i < roofData.MansardTiles.Length; i++)
+            if (roofData.MansardTiles != null)
             {
-                if (roofData.MansardTiles[i].Extend != evt.changedProperty.floatValue)
-                    rebuildMansard = true;
+                for (int i = 0; i < roofData.MansardTiles.Length; i++)
+                {
+                    if (roofData.MansardTiles[i].Extend != evt.changedProperty.floatValue)
+                        rebuildMansard = true;
 
-                roofData.MansardTiles[i].Extend = evt.changedProperty.floatValue;
+                    roofData.MansardTiles[i].Extend = evt.changedProperty.floatValue;
+                }
             }
 
-            for (int i = 0; i < roofData.GableTiles.Length; i++)
+            if (roofData.GableTiles != null)
             {
-                if (roofData.GableTiles[i].Extend != evt.changedProperty.floatValue)
-                    rebuildGable = true;
+                for (int i = 0; i < roofData.GableTiles.Length; i++)
+                {
+                    if (roofData.GableTiles[i].Extend != evt.changedProperty.floatValue)
+                        rebuildGable = true;
 
-                roofData.GableTiles[i].Extend = evt.changedProperty.floatValue;
+                    roofData.GableTiles[i].Extend = evt.changedProperty.floatValue;
+                }
             }
 
-            for (int i = 0; i < roofData.PyramidTiles.Length; i++)
+            if (roofData.PyramidTiles != null)
             {
-                if (roofData.PyramidTiles[i].Extend != evt.changedProperty.floatValue)
-                    rebuildPyramid = true;
+                for (int i = 0; i < roofData.PyramidTiles.Length; i++)
+                {
+                    if (roofData.PyramidTiles[i].Extend != evt.changedProperty.floatValue)
+                        rebuildPyramid = true;
 
-                roofData.PyramidTiles[i].Extend = evt.changedProperty.floatValue;
+                    roofData.PyramidTiles[i].Extend = evt.changedProperty.floatValue;
+                }
             }
 
             switch (roofData.RoofType)

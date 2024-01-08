@@ -859,7 +859,7 @@ public static class Extensions
     /// <param name="transform"></param>
     /// <param name="positions"></param>
     /// <returns></returns>
-    public static IEnumerable<Vector3> TransformPoints(this Transform transform, IEnumerable<Vector3> positions)
+    public static IEnumerable<Vector3> TransformPoints(this Transform transform, IEnumerable<Vector3> positions, int temp)
     {
         List<Vector3> globalPoints = new List<Vector3>();
 

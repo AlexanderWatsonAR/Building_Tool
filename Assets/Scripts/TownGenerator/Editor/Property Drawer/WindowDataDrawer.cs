@@ -5,7 +5,6 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Rendering;
-using System.Net.Http.Headers;
 
 [CustomPropertyDrawer(typeof(WindowData))]
 public class WindowDataDrawer : PropertyDrawer

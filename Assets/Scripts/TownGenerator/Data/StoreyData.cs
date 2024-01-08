@@ -9,9 +9,10 @@ public class StoreyData : IData
     [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private string m_Name;
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints; // static?
-    [SerializeField] private WallPoints[] m_WallPoints;
+    [SerializeField, HideInInspector] private WallPoints[] m_WallPoints;
     [SerializeField] private StoreyElement m_ActiveElements;
 
+    // These serializable data variables are viewable in the inspector & are for providing data overrides for their array counterparts.
     [SerializeField] private WallData m_Wall;
     [SerializeField] private PillarData m_Pillar;
     [SerializeField] private CornerData m_Corner;

@@ -203,41 +203,41 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
 
                     BuildSection(extensionHole);
 
-                    ControlPoint[] points = new ControlPoint[4];
-                    points[0] = new ControlPoint(extensionHole[0][0]);
-                    points[1] = new ControlPoint(extensionHole[0][0] + m_Data.FaceNormal * m_Data.ExtensionDistance);
-                    points[2] = new ControlPoint(extensionHole[0][3] + m_Data.FaceNormal * m_Data.ExtensionDistance);
-                    points[3] = new ControlPoint(extensionHole[0][3]);
+                    //ControlPoint[] points = new ControlPoint[4];
+                    //points[0] = new ControlPoint(extensionHole[0][0]);
+                    //points[1] = new ControlPoint(extensionHole[0][0] + m_Data.FaceNormal * m_Data.ExtensionDistance);
+                    //points[2] = new ControlPoint(extensionHole[0][3] + m_Data.FaceNormal * m_Data.ExtensionDistance);
+                    //points[3] = new ControlPoint(extensionHole[0][3]);
 
-                    for (int i = 0; i < points.Length; i++)
-                    {
-                        int next = points.GetNext(i);
-                        int previous = points.GetPrevious(i);
+                    //for (int i = 0; i < points.Length; i++)
+                    //{
+                    //    int next = points.GetNext(i);
+                    //    int previous = points.GetPrevious(i);
 
-                        Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[next].Position);
-                        Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[previous].Position);
+                    //    Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[next].Position);
+                    //    Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i].Position, points[previous].Position);
 
-                        points[i].SetForward(Vector3.Lerp(nextForward, previousForward, 0.5f));
-                    }
+                    //    points[i].SetForward(Vector3.Lerp(nextForward, previousForward, 0.5f));
+                    //}
 
-                    float wallHeight = Vector3.Distance(extensionHole[0][0], extensionHole[0][1]);
+                    //float wallHeight = Vector3.Distance(extensionHole[0][0], extensionHole[0][1]);
 
-                    m_Data.ExtensionStoreyData ??= new StoreyData();
-                    m_Data.ExtensionRoofData ??= new RoofData();
+                    //m_Data.ExtensionStoreyData ??= new StoreyData();
+                    //m_Data.ExtensionRoofData ??= new RoofData();
 
-                    m_Data.ExtensionStoreyData.ControlPoints = points;
-                    m_Data.ExtensionStoreyData.WallData.Height = wallHeight;
-                    m_Data.ExtensionRoofData.ControlPoints = points;
+                    //m_Data.ExtensionStoreyData.ControlPoints = points;
+                    //m_Data.ExtensionStoreyData.WallData.Height = wallHeight;
+                    //m_Data.ExtensionRoofData.ControlPoints = points;
 
-                    GameObject storeyGO = new GameObject("Storey", typeof(Storey));
-                    storeyGO.transform.SetParent(transform, true);
-                    storeyGO.GetComponent<Storey>().Initialize(m_Data.ExtensionStoreyData).Build();
+                    //GameObject storeyGO = new GameObject("Storey", typeof(Storey));
+                    //storeyGO.transform.SetParent(transform, true);
+                    //storeyGO.GetComponent<Storey>().Initialize(m_Data.ExtensionStoreyData).Build();
 
-                    GameObject roofGO = new GameObject("Roof", typeof(Roof));
-                    roofGO.transform.SetParent(transform, true);
-                    roofGO.transform.localPosition = new Vector3(0, wallHeight, 0);
-                    Roof roofExtension = roofGO.GetComponent<Roof>();
-                    roofExtension.Initialize(m_Data.ExtensionRoofData).Build();
+                    //GameObject roofGO = new GameObject("Roof", typeof(Roof));
+                    //roofGO.transform.SetParent(transform, true);
+                    //roofGO.transform.localPosition = new Vector3(0, wallHeight, 0);
+                    //Roof roofExtension = roofGO.GetComponent<Roof>();
+                    //roofExtension.Initialize(m_Data.ExtensionRoofData).Build();
                 }
                 break;
             case WallElement.Empty:
@@ -312,14 +312,8 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
     #region Build
     private void BuildSection(IList<IList<Vector3>> holePoints)
     {
-        ProBuilderMesh body = ProBuilderMesh.Create();
-        body.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.FaceNormal, holePoints);
-        ProBuilderMesh head = Instantiate(body);
-        head.faces[0].Reverse();
-        body.Extrude(body.faces, ExtrudeMethod.FaceNormal, m_Data.WallDepth);
-        CombineMeshes.Combine(new ProBuilderMesh[] { body, head }, body);
-        Rebuild(body);
-        DestroyImmediate(head.gameObject);
+        m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.FaceNormal, holePoints);
+        m_ProBuilderMesh.Solidify(m_Data.WallDepth);
     }
     private void BuildWindow(WindowData data)
     {
@@ -355,7 +349,16 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
 
     public void Demolish()
     {
-        transform.DeleteChildren();
+        // TODO: make the demolish function more sophisticated. 
+        //transform.DeleteChildren();
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            if (transform.GetChild(i).TryGetComponent(out IBuildable buildable))
+            {
+                buildable.Demolish();
+            }
+        }
     }
 
     private WallSection Rebuild(ProBuilderMesh mesh)

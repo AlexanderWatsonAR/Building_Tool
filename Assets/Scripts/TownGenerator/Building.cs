@@ -86,7 +86,7 @@ public class Building : MonoBehaviour, IBuildable
     public void Build()
     {
         transform.DeleteChildren();
-        Debug.Log("Rebuild from Building");
+        Debug.Log("Building: Build() ",this);
         if (!m_Data.Path.IsPathValid/* || !m_HasInitialized*/)
             return;
 
@@ -126,10 +126,6 @@ public class Building : MonoBehaviour, IBuildable
     public void RevertBuilding()
     {
         transform.DeleteChildren();
-    }
-
-    private void OnValidate()
-    {
     }
 
 }

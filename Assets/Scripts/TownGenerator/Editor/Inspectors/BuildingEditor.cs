@@ -29,80 +29,6 @@ public class BuildingEditor : Editor
     [SerializeField] private bool m_IsAHandleSelected;
     [SerializeField] private int m_SelectedHandle = -1;
 
-    //public override void OnInspectorGUI()
-    //{
-    //    serializedObject.Update();
-
-    //    m_PolyMode = m_PolyPath.PolyMode;
-
-    //    switch (m_PolyMode)
-    //    {
-    //        case PolyMode.Draw:
-    //            EditorGUILayout.HelpBox("Click to draw points", MessageType.Info);
-    //            break;
-    //        case PolyMode.Edit:
-    //            if (GUILayout.Button("Quit Edit"))
-    //            {
-    //                QuitEdit();
-    //                SceneView.RepaintAll();
-    //            }
-
-    //            EditorGUI.BeginDisabledGroup(m_SelectedHandle == -1);
-
-    //            if (GUILayout.Button("Remove Point"))
-    //            {
-    //                m_Building.Data.Path.RemoveControlPointAt(m_SelectedHandle-1);
-    //                if(m_Building.Data.Path.IsValidPath())
-    //                {
-    //                    m_Building.Build();
-    //                }
-    //                SceneView.RepaintAll();
-    //            }
-
-    //            EditorGUI.EndDisabledGroup();
-
-    //            EditorGUILayout.HelpBox("Move points to update the poly building's shape", MessageType.Info);
-    //            break;
-    //        case PolyMode.Hide:
-    //            if (GUILayout.Button("Edit Poly Building"))
-    //            {
-    //                m_PolyPath.PolyMode = PolyMode.Edit;
-    //                SceneView.RepaintAll();
-    //            }
-    //            EditorGUILayout.HelpBox("Editing the shape of the building will erase changes made to the building.", MessageType.Warning);
-
-    //            //SerializedProperty storeys = m_Data.FindPropertyRelative("m_Storeys");
-
-    //            //EditorGUILayout.PropertyField(storeys);
-
-    //            break;
-    //    }
-
-    //    EditorGUI.BeginDisabledGroup(!m_Building.isActiveAndEnabled);
-
-    //    EditorGUILayout.BeginHorizontal();
-
-    //    if (GUILayout.Button("Build"))
-    //    {
-    //        m_Building.Build();
-    //    }
-
-    //    if (GUILayout.Button("Reset"))
-    //    {
-    //        m_Building.RevertBuilding();
-    //    }
-
-    //    EditorGUILayout.EndHorizontal();
-
-    //    EditorGUI.EndDisabledGroup();
-
-    //    if(serializedObject.ApplyModifiedProperties())
-    //    {
-    //        m_Building.Data.AssignStoreyID();
-    //        m_Building.Build();
-    //    }
-    //}
-
     public override VisualElement CreateInspectorGUI()
     {
         m_Root = new VisualElement();
@@ -326,7 +252,7 @@ public class BuildingEditor : Editor
     private void DrawHandles()
     {
         Vector3[] controlPoints = m_Building.Data.Path.ControlPoints.GetPositions();
-        m_GlobalControlPointPositions = m_Building.transform.TransformPoints(controlPoints).ToArray();
+        m_GlobalControlPointPositions = m_Building.transform.TransformPoints(controlPoints, 0).ToArray();
 
         Vector3 centre = UnityEngine.ProBuilder.Math.Average(m_GlobalControlPointPositions);
 
@@ -337,7 +263,8 @@ public class BuildingEditor : Editor
             Color handleColour = Handles.color;
 
             Handles.color = m_SelectedHandle == i+1 ? Color.yellow : handleColour;
-            Vector3 globalPoint = Handles.FreeMoveHandle(i+1, m_GlobalControlPointPositions[i], Quaternion.identity, size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
+            
+            Vector3 globalPoint = Handles.FreeMoveHandle(i+1, m_GlobalControlPointPositions[i], size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
 
             Handles.color = handleColour;
             Vector3 localPoint = m_Building.transform.InverseTransformPoint(globalPoint);

@@ -406,7 +406,7 @@ public class FloorEditor : Editor
             //Quaternion handleRot = Quaternion.LookRotation(polygon[i].DirectionToTarget(sceneCamPos));
             //BuildingHandles.TestSolidCircleHandleCap(controlID, polygon[i], handleRot, size, Event.current.type);
 
-            Vector3 handle = Handles.FreeMoveHandle(controlID, point, Quaternion.identity, size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
+            var fmh_409_71_638399062391782764 = Quaternion.identity; Vector3 handle = Handles.FreeMoveHandle(controlID, point, size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
 
             Handles.color = handleColour;
             controlID++;

@@ -18,7 +18,7 @@ public class FloorData : IData
     public int Rows { get { return m_Rows; } set { m_Rows = value; } }
 
     public ControlPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; }}
-    public float Height => m_Height;
+    public float Height { get { return m_Height; } set { m_Height = value; } }
 
     public FloorData() : this (new ControlPoint[0], 1, 1, 0.1f, null)
     {

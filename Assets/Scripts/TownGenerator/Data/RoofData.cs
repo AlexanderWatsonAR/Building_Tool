@@ -6,16 +6,17 @@ using UnityEngine;
 [System.Serializable]
 public class RoofData : IData
 {
+    #region Member Variable
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;
-    [SerializeField] private bool m_IsActive;
+    [SerializeField] private bool m_IsActive; // delete?
     [SerializeField] private RoofType m_RoofType;
 
     [SerializeField] private RoofTileData m_RoofTileData;
 
-    [SerializeField] private RoofTileData[] m_PyramidRoofTiles;
-    [SerializeField] private RoofTileData[] m_GableRoofTiles;
-    [SerializeField] private RoofTileData[] m_MansardRoofTiles;
-    [SerializeField] private WallData[] m_Walls;
+    [SerializeField, HideInInspector] private RoofTileData[] m_PyramidRoofTiles;
+    [SerializeField, HideInInspector] private RoofTileData[] m_GableRoofTiles;
+    [SerializeField, HideInInspector] private RoofTileData[] m_MansardRoofTiles;
+    [SerializeField, HideInInspector] private WallData[] m_Walls;
 
     [SerializeField, Range(-10, 10)] private float m_MansardHeight;
     [SerializeField, Range(0, 1)] private float m_MansardScale;
@@ -25,13 +26,15 @@ public class RoofData : IData
     [SerializeField] private bool m_IsFlipped; // For M shaped
     [SerializeField] private bool m_IsOpen;
 
-    [SerializeField] private OneLineShape m_OneLineShape;
-    [SerializeField] private int m_ShapeIndex; // Relative start index used for the gable data indices.
-    [SerializeField] private Vector3[] m_OneLine;
-    [SerializeField] private ControlPoint[] m_PathPoints;
-    [SerializeField] private GableData m_GableData;
-    [SerializeField] private int[] m_AvailableFrames;
+    [SerializeField, HideInInspector] private OneLineShape m_OneLineShape;
+    [SerializeField, HideInInspector] private int m_ShapeIndex; // Relative start index used for the gable data indices.
+    [SerializeField, HideInInspector] private Vector3[] m_OneLine;
+    [SerializeField, HideInInspector] private ControlPoint[] m_PathPoints;
+    [SerializeField, HideInInspector] private GableData m_GableData;
+    [SerializeField, HideInInspector] private int[] m_AvailableFrames;
+    #endregion
 
+    #region Accessors
     public OneLineShape OneLineShape { get { return m_OneLineShape; } set { m_OneLineShape = value; } }
     public int ShapeIndex => m_ShapeIndex;
     public Vector3[] OneLine => m_OneLine;
@@ -68,7 +71,6 @@ public class RoofData : IData
             return m_RoofType == RoofType.Dormer | m_RoofType == RoofType.PyramidHip;
         }
     }
-
     public int[] AvailableFrames
     {
         get
@@ -79,6 +81,7 @@ public class RoofData : IData
             return m_AvailableFrames;
         }
     }
+    #endregion 
 
     public RoofData() : this (new ControlPoint[0], new RoofTileData(), null, null, null, RoofType.Mansard, 1, 0.2f, 1, 1, 0.75f, false, false, true )
     {

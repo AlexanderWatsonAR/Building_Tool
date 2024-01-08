@@ -15,7 +15,7 @@ public class WallSectionDataDrawer : PropertyDrawer
     {
         VisualElement container = new VisualElement();
 
-        WallSectionSerializedProperties props = new WallSectionSerializedProperties(data);
+        WallSectionDataSerializedProperties props = new WallSectionDataSerializedProperties(data);
 
         EnumField wallElementField = new EnumField(props.WallElement.GetEnumValue<WallElement>()) { label = "Wall Element" };
         wallElementField.BindProperty(props.WallElement);
@@ -30,13 +30,11 @@ public class WallSectionDataDrawer : PropertyDrawer
             if (evt == null)
                 return;
 
-            if (evt.previousValue == null || evt.newValue == null)
-                return;
-
             if (evt.newValue == evt.previousValue)
                 return;
 
-            buildable.Demolish();
+            if(evt.newValue != null)
+                buildable.Demolish();
 
             wallElementContainer.Clear();
 
@@ -408,7 +406,16 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                             if (size != props.Windows.arraySize)
                             {
-                                buildable.Demolish();
+                                if(buildable is WallSection)
+                                {
+                                    WallSection section = buildable as WallSection;
+                                    section.transform.DeleteChildren();
+                                }
+                                else
+                                {
+                                    buildable.Demolish();
+                                }
+                                
                                 props.Windows.SetUnderlyingValue(new WindowData[size]);
                                 buildable.Build();
                             }
@@ -428,7 +435,16 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                             if (size != props.Windows.arraySize)
                             {
-                                buildable.Demolish();
+                                if (buildable is WallSection)
+                                {
+                                    WallSection section = buildable as WallSection;
+                                    section.transform.DeleteChildren();
+                                }
+                                else
+                                {
+                                    buildable.Demolish();
+                                }
+
                                 props.Windows.SetUnderlyingValue(new WindowData[size]);
                                 buildable.Build();
                             }
@@ -436,10 +452,8 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                         gridFoldout.Add(cols);
                         gridFoldout.Add(rows);
-                        wallElementContainer.Add(gridFoldout);
-
+                        
                         Foldout shapeFold = new Foldout() { text = "Shape" };
-                        wallElementContainer.Add(shapeFold);
 
                         PropertyField sides = new PropertyField() { label = "Sides" };
                         sides.BindProperty(props.WindowSides);
@@ -448,7 +462,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                             if (evt == null)
                                 return;
 
-                            buildable.Demolish();
+                            props.WindowSides.SetUnderlyingValue(evt.changedProperty.intValue);
 
                             WallSectionData sectionData = data.GetUnderlyingValue() as WallSectionData;
 
@@ -457,11 +471,28 @@ public class WallSectionDataDrawer : PropertyDrawer
                             foreach (WindowData winData in sectionData.Windows)
                             {
                                 winData.ControlPoints = holePoints[winData.ID].ToArray();
+                                winData.ClearInnerFrameHolePoints();
+                                winData.DoesOuterFrameNeedRebuild = winData.IsOuterFrameActive;
+                                winData.DoesInnerFrameNeedRebuild = winData.IsInnerFrameActive;
+                                winData.DoesPaneNeedRebuild = winData.IsPaneActive;
+                                winData.DoShuttersNeedRebuild = winData.AreShuttersActive;
                             }
 
-                            buildable.Build();
+                            if(buildable is WallSection)
+                            {
+                                WallSection section = buildable as WallSection;
+
+                                for(int i = 0; i < section.transform.childCount; i++)
+                                {
+                                    if(section.transform.GetChild(i).TryGetComponent(out Window window))
+                                    {
+                                        window.Initialize(sectionData.Windows[window.Data.ID]);
+                                        window.Build();
+                                    }
+                                }
+                            }
                         });
-                        shapeFold.Add(sides);
+     
 
                         PropertyField height = new PropertyField() { label = "Height" };
                         height.BindProperty(props.WindowHeight);
@@ -470,7 +501,11 @@ public class WallSectionDataDrawer : PropertyDrawer
                             if (evt == null)
                                 return;
 
-                            buildable.Demolish();
+                            if (buildable is WallSection)
+                            {
+                                WallSection section = buildable as WallSection;
+                                section.transform.DeleteChildren();
+                            }
 
                             WallSectionData sectionData = data.GetUnderlyingValue() as WallSectionData;
 
@@ -483,8 +518,6 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                             buildable.Build();
                         });
-
-                        shapeFold.Add(height);
 
                         PropertyField width = new PropertyField() { label = "Width" };
                         width.BindProperty(props.WindowWidth);
@@ -506,7 +539,7 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                             buildable.Build();
                         });
-                        shapeFold.Add(width);
+
 
                         PropertyField angle = new PropertyField() { label = "Angle" };
                         angle.BindProperty(props.WindowAngle);
@@ -529,13 +562,20 @@ public class WallSectionDataDrawer : PropertyDrawer
                             buildable.Build();
                         });
 
-                        shapeFold.Add(angle);
-
                         Foldout windowFoldout = new Foldout() { text = "Window" };
-                        wallElementContainer.Add(windowFoldout);
 
                         PropertyField windowDataField = new PropertyField(props.WindowData);
                         windowDataField.BindProperty(props.WindowData);
+
+                        wallElementContainer.Add(gridFoldout);
+                        wallElementContainer.Add(shapeFold);
+                        wallElementContainer.Add(windowFoldout);
+
+                        shapeFold.Add(sides);
+                        shapeFold.Add(height);
+                        shapeFold.Add(width);
+                        shapeFold.Add(angle);
+
                         windowFoldout.Add(windowDataField);
                     }
                     break;
@@ -577,7 +617,8 @@ public class WallSectionDataDrawer : PropertyDrawer
                     break;
             }
 
-            buildable.Build();
+            if(evt.newValue != null)
+                buildable.Build();
         });
 
         container.Add(wallElementContainer);

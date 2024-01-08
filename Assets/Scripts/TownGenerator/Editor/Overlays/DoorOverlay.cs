@@ -36,7 +36,7 @@ public class DoorOverlay : Overlay, ITransientOverlay
         return root;
     }
 
-    public static void Display(VisualElement root, DoorSerializedProperties props, IBuildable buildable)
+    public static void Display(VisualElement root, DoorDataSerializedProperties props, IBuildable buildable)
     {
         Slider scale = new Slider("Scale") { tooltip = "Scale", lowValue = 0, highValue = 0.999f, value = props.Scale.floatValue };
         scale.BindProperty(props.Scale);

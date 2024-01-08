@@ -6,6 +6,7 @@ using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using static Codice.Client.BaseCommands.BranchExplorer.Layout.BrExLayout;
 using System;
+using static UnityEngine.Rendering.CoreUtils;
 
 [CustomEditor(typeof(Wall))]
 public class WallEditor : Editor
@@ -117,7 +118,7 @@ public class WallEditor : Editor
         gridContainer.style.flexDirection = FlexDirection.Column;
         gridContainer.style.flexWrap = Wrap.Wrap;
 
-        SerializedProperty mdata = serializedObject.FindProperty("m_Data");
+        
 
         // Create and add selectable boxes to the grid
         for (int x = 0; x < columns; x++)
@@ -151,13 +152,15 @@ public class WallEditor : Editor
                 // Add a click event handler (for example)
                 box.AddManipulator(new Clickable(() =>
                 {
-                    SerializedProperty columnArrayElement = mdata.GetArrayElementAtIndex(x);
+                    SerializedProperty mdata = serializedObject.FindProperty("m_Data");
+                    SerializedProperty sections = mdata.FindPropertyRelative("m_Sections");
+                    SerializedProperty columnArrayElement = sections.GetArrayElementAtIndex(x);
                     SerializedProperty sectionElement = columnArrayElement.GetArrayElementAtIndex(y);
 
                     PropertyField sectionField = new PropertyField(sectionElement);
                     sectionField.BindProperty(sectionElement);
                     
-                    //root.Add(sectionField);
+                    root.Add(sectionField);
                 }));
 
                 //if (wall != null && wall.Data != null && wall.Data.Sections != null)

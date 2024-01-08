@@ -43,6 +43,7 @@ public class WindowData : IData
     public Material InnerFrameMaterial { get { return m_InnerFrameMaterial; } set { m_InnerFrameMaterial = value; } }
     public bool IsInnerFrameActive => m_ActiveElements.IsElementActive(WindowElement.InnerFrame);
     public IList<IList<Vector3>> InnerFrameHolePoints { get{ return m_InnerFrameHolePoints; } set { m_InnerFrameHolePoints = value.Select(list => list.ToArray()).ToArray(); } }
+    
     public bool DoesInnerFrameNeedRebuild { get { return m_DoesInnerFrameNeedRebuild; } set { m_DoesInnerFrameNeedRebuild = value; } }
     #endregion
 
@@ -132,5 +133,10 @@ public class WindowData : IData
         m_DoesOuterFrameNeedRebuild = true;
         m_DoesPaneNeedRebuild = true;
         m_DoShuttersNeedRebuild = true;
+    }
+
+    public void ClearInnerFrameHolePoints()
+    {
+        m_InnerFrameHolePoints = new Vector3[0][];
     }
 }

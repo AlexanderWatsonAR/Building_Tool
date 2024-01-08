@@ -178,7 +178,7 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
 
         Vector3[] points = m_Data.IsOuterFrameActive ? CalculateOuterFrame(m_Data)[0].ToArray() : m_Data.ControlPoints;
 
-        if (m_Data.IsOuterFrameActive && m_Data.DoesOuterFrameNeedRebuild)
+        if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_OuterFrame.positions.Count == 0 || m_Data.DoesOuterFrameNeedRebuild))
         {
             m_OuterFrame ??= BuildOuterFrame();
 
@@ -188,11 +188,13 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
             m_Data.DoesOuterFrameNeedRebuild = false;
         }
 
-        if (m_Data.IsInnerFrameActive && m_Data.DoesInnerFrameNeedRebuild)
+        if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_InnerFrame.positions.Count == 0 || m_Data.DoesInnerFrameNeedRebuild))
         {
             // Inner Frame
             m_InnerFrame ??= BuildInnerFrame();
-            m_Data.InnerFrameHolePoints ??= CalculateInnerFrame(m_Data);
+
+            if (m_Data.InnerFrameHolePoints == null || m_Data.InnerFrameHolePoints.Count == 0)
+                m_Data.InnerFrameHolePoints = CalculateInnerFrame(m_Data);
 
             IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
@@ -206,7 +208,7 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
             m_Data.DoesInnerFrameNeedRebuild = false;
         }
 
-        if (m_Data.IsPaneActive && m_Data.DoesPaneNeedRebuild)
+        if (m_Data.IsPaneActive && (m_Pane == null || m_Pane.positions.Count == 0 || m_Data.DoesPaneNeedRebuild))
         {
             m_Pane ??= BuildPane();
             m_Pane.CreateShapeFromPolygon(points, m_Data.Forward);
@@ -214,7 +216,9 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
             m_Data.DoesPaneNeedRebuild = false;
         }
 
-        if(m_Data.AreShuttersActive && m_Data.DoShuttersNeedRebuild)
+        if(m_Data.AreShuttersActive && (m_LeftShutter == null || m_LeftShutter.positions.Count == 0 ||
+                                        m_RightShutter == null || m_RightShutter.positions.Count == 0 ||
+                                        m_Data.DoShuttersNeedRebuild))
         {
             IList<IList<Vector3>> shutterVertices;
 
@@ -265,6 +269,9 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
         }
     }
 
+    /// <summary>
+    /// This method removes only the window components that are inactive
+    /// </summary>
     public void Demolish()
     {
         if (!m_Data.IsOuterFrameActive && m_OuterFrame != null)

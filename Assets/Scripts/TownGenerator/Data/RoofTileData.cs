@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class RoofTileData : IData
 {
+    #region Member Variables
     [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private LerpPoint[] m_ControlPoints;
     [SerializeField, HideInInspector] bool m_IsInside;
@@ -16,7 +17,9 @@ public class RoofTileData : IData
     [SerializeField, Range(1, 5)] private int m_Columns, m_Rows;
     [SerializeField] private RoofSectionData m_SectionData;
     [SerializeField] private RoofSectionData[,] m_Sections;
+    #endregion
 
+    #region Accessors
     public int ID { get { return m_ID; } set { m_ID = value; } }
     public LerpPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public Vector3[] ExtendedPoints => ExtendPoints(); 
@@ -35,6 +38,7 @@ public class RoofTileData : IData
     public RoofSectionData[,] Sections { get { return m_Sections; } set { m_Sections = value; } }
     public Vector3 TopLeft => Vector3.Lerp(m_ControlPoints[1].Start, m_ControlPoints[1].End, m_ControlPoints[1].T) + (Vector3.up * m_Height);
     public Vector3 TopRight => Vector3.Lerp(m_ControlPoints[2].Start, m_ControlPoints[2].End, m_ControlPoints[2].T) + (Vector3.up * m_Height);
+    #endregion
 
     public RoofTileData() : this (new LerpPoint[0], new RoofSectionData(), true, 1f, 0.25f, 1, 1, 0.25f, null)
     {

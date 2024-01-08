@@ -15,7 +15,7 @@ public class DoorDataDrawer : PropertyDrawer
 
         IBuildable buildable = data.serializedObject.targetObject as IBuildable;
 
-        DoorSerializedProperties props = new DoorSerializedProperties(data.serializedObject, data);
+        DoorDataSerializedProperties props = new DoorDataSerializedProperties(data);
 
         PropertyField scaleField = new PropertyField(props.Scale);
         scaleField.BindProperty(props.Scale);

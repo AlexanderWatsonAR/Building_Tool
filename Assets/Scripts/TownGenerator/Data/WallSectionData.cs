@@ -102,15 +102,15 @@ public class WallSectionData : IData
 
     #region Extension Properties
 
-    [SerializeField] private StoreyData m_ExtensionStoreyData;
-    [SerializeField] private RoofData m_ExtensionRoofData;
+    //[SerializeField] private StoreyData m_ExtensionStoreyData;
+    //[SerializeField] private RoofData m_ExtensionRoofData;
 
     [SerializeField, Range(1, 10)] private float m_ExtensionDistance;
     [SerializeField, Range(0, 1)] private float m_ExtensionHeight;
     [SerializeField, Range(0, 1)] private float m_ExtensionWidth;
 
-    public StoreyData ExtensionStoreyData { get { return m_ExtensionStoreyData; } set { m_ExtensionStoreyData = value; } }
-    public RoofData ExtensionRoofData { get { return m_ExtensionRoofData; } set { m_ExtensionRoofData = value; } }
+    //public StoreyData ExtensionStoreyData { get { return m_ExtensionStoreyData; } set { m_ExtensionStoreyData = value; } }
+    //public RoofData ExtensionRoofData { get { return m_ExtensionRoofData; } set { m_ExtensionRoofData = value; } }
     public float ExtensionDistance { get { return m_ExtensionDistance; } set { m_ExtensionDistance = value; } }
     public float ExtensionHeight { get { return m_ExtensionHeight; } set { m_ExtensionHeight = value; } }
     public float ExtensionWidth { get { return m_ExtensionWidth; } set { m_ExtensionWidth = value; } }
@@ -126,7 +126,7 @@ public class WallSectionData : IData
         new Vector3[0], 0.5f, new WindowData(), 0.5f, 0.5f,
         4, 1, 1, 0, false, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 0.999f, 0.9f,
         1, 4, 0.75f, 0.5f, 0, 1, 1, DoorwayElement.Everything, new DoorData(), 0.999f, 0.9f, 1, 1, 0.5f, Vector3.zero,
-        null, null, null, null
+        null, null /*null, null*/
     )
     {
     }
@@ -134,7 +134,7 @@ public class WallSectionData : IData
     public WallSectionData(Vector3[] controlPoints, float wallDepth, WindowData windowData, float windowHeight, float windowWidth, int windowSides, int windowColumns, int windowRows, float windowAngle, bool windowSmooth,
         float doorPedimentHeight, float doorSideWidth, float doorSideOffset, int doorColumns, int doorRows, DoorwayElement activeDoorElements, DoorData doorData, float doorFrameDepth, float doorFrameInsideScale,
         float archHeight, int archSides, float archPedimentHeight, float archSideWidth, float archSideOffset, int archColumns, int archRows, DoorwayElement activeArchDoorElements, DoorData archDoorData, float archDoorFrameDepth, float archDoorFrameInsideScale,
-        float extendDistance, float extendHeight, float extendWidth, Vector3 normal, WindowData[] windows, DoorData[] doors, StoreyData storeyExtension, RoofData roofExtension)
+        float extendDistance, float extendHeight, float extendWidth, Vector3 normal, WindowData[] windows, DoorData[] doors/* StoreyData storeyExtension, RoofData roofExtension*/)
     {
         m_ControlPoints = controlPoints;
         m_WallDepth = wallDepth;
@@ -161,6 +161,7 @@ public class WallSectionData : IData
         m_DoorFrameDepth = doorFrameDepth;
         m_DoorFrameInsideScale = doorFrameInsideScale;
         #endregion
+
         m_ArchHeight = archHeight;
         m_ArchSides = archSides;
 
@@ -224,9 +225,9 @@ public class WallSectionData : IData
         data.ExtensionWidth,
         data.FaceNormal,
         data.Windows,
-        data.Doors,
-        data.ExtensionStoreyData,
-        data.ExtensionRoofData
+        data.Doors
+        //data.ExtensionStoreyData,
+        //data.ExtensionRoofData
     )
     {
         

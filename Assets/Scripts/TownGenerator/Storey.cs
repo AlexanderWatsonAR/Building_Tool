@@ -131,28 +131,31 @@ public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
         GameObject walls = new GameObject("Walls");
         walls.transform.SetParent(transform, false);
 
-        Vector3[] insidePoints = m_Data.InsidePoints;
+        //Vector3[] insidePoints = m_Data.InsidePoints;
 
         // Construct the walls 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            ProBuilderMesh wallMesh = ProBuilderMesh.Create();
-            wallMesh.name = "Wall " + i.ToString();
-            wallMesh.AddComponent<Wall>();
-            wallMesh.transform.SetParent(walls.transform, false);
-
-            Wall wall = wallMesh.GetComponent<Wall>();
-
             m_Data.Walls[i] ??= CalculateWall(i);
 
-            wall.Initialize(m_Data.Walls[i]).Build();
-            wall.OnDataChange += (IData data) =>
-            {
-                WallData wallData = data as WallData;
-                m_Data.Walls[wallData.ID] = wallData;
-                OnDataChange_Invoke();
-            };
+            Wall wall = BuildWall(m_Data.Walls[i]);
+            wall.transform.SetParent(walls.transform, true);
         }
+    }
+
+    private Wall BuildWall(WallData data)
+    {
+        ProBuilderMesh wallMesh = ProBuilderMesh.Create();
+        wallMesh.name = "Wall " + data.ID.ToString();
+        Wall wall = wallMesh.AddComponent<Wall>(); 
+        wall.Initialize(data).Build();
+        wall.OnDataChange += (IData data) =>
+        {
+            WallData wallData = data as WallData;
+            m_Data.Walls[wallData.ID] = wallData;
+            OnDataChange_Invoke();
+        };
+        return wall;
     }
     private void BuildFloor()
     {

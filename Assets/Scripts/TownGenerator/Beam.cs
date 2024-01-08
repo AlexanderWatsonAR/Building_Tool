@@ -130,14 +130,14 @@ public class Beam : Extrudable
 
         OnConnectorBeginReshape?.Invoke(this, EventArgs.Empty);
 
-        Vector3[] localExtrusionPositions = transform.parent.InverseTransformPoints(ExtrusionPositions).ToArray();
+        //Vector3[] localExtrusionPositions = transform.parent.InverseTransformPoints(ExtrusionPositions).ToArray();
 
-        for (int i = 0; i < m_Connectors.Count; i++)
-        {
-            m_Connectors[i].Rebuild(localExtrusionPositions[i]);
-        }
+        //for (int i = 0; i < m_Connectors.Count; i++)
+        //{
+        //    m_Connectors[i].Rebuild(localExtrusionPositions[i]);
+        //}
 
-        OnConnectorEndReshape?.Invoke(this, EventArgs.Empty);
+        //OnConnectorEndReshape?.Invoke(this, EventArgs.Empty);
     }
 
     public void AddConnector(Connector connector)

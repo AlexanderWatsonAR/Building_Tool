@@ -33,7 +33,7 @@ public class WindowOverlay : Overlay, ITransientOverlay
         return root;
     }
 
-    public static void Display(VisualElement root, WindowSerializedProperties props, IBuildable buildable, Overlay overlay)
+    public static void Display(VisualElement root, WindowDataSerializedProperties props, IBuildable buildable, Overlay overlay)
     {
         WindowData winData = (WindowData)props.Data.GetUnderlyingValue();
 

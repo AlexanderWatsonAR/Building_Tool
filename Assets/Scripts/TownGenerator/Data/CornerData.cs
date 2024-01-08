@@ -19,7 +19,7 @@ public class CornerData : IData
     public float Height { get { return m_Height; } set { m_Height = value; } }
     public bool IsInside { get { return m_IsInside; } set { m_IsInside = value; } }
     public CornerType Type => m_Type;
-    public int Sides => m_Sides;
+    public int Sides { get { return m_Sides; } set { m_Sides = value; } }
 
     public CornerData() : this (new Vector3[0], new Vector3[0], CornerType.Point, 4)
     {

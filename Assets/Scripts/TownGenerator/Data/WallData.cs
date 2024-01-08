@@ -10,7 +10,7 @@ public class WallData : IData
     [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private ControlPoint m_Start, m_End;
     [SerializeField, HideInInspector] private Vector3 m_Normal;
-    [SerializeField, HideInInspector, Range(1, 5)] private int m_Columns, m_Rows;
+    [SerializeField, Range(1, 5)] private int m_Columns, m_Rows;
     [SerializeField, Range(1, 50)] private float m_Height;
     [SerializeField, Range(0, 1)] private float m_Depth;
     [SerializeField, HideInInspector] private bool m_IsTriangle;
