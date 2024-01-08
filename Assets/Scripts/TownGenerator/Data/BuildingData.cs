@@ -1,30 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class BuildingData
+public class BuildingData : IData
 {
-    [SerializeField] private ControlPoint[] m_ControlPoints;
-    [SerializeField] private StoreyData[] m_StoreysData;
-    [SerializeField] private RoofData m_RoofData;
+    // Should this data just be for saving & loading?
+    [SerializeField] private PolyPath m_Path;
+    [SerializeField] private List<StoreyData> m_Storeys;
+    [SerializeField] private RoofData m_Roof;
 
-    public ControlPoint[] ControlPoints => m_ControlPoints;
-    public StoreyData[] StoreysData => m_StoreysData;
-    public RoofData RoofData => m_RoofData;
+    public PolyPath Path => m_Path;
+    public List<StoreyData> StoreysData { get { return m_Storeys; } set { m_Storeys = value; } }
+    public RoofData RoofData { get{ return m_Roof;} set{ m_Roof = value; } }
 
-    public BuildingData(ControlPoint[] controlPoints) : this (controlPoints, new StoreyData[] {new StoreyData()}, new RoofData())
+    public BuildingData() : this(new PolyPath(), new List<StoreyData>(), new RoofData())
     {
 
     }
-    public BuildingData(BuildingData data) : this (data.ControlPoints, data.StoreysData, data.RoofData)
+    public BuildingData(PolyPath path) : this(path, new List<StoreyData> { new StoreyData() { ControlPoints = path.ControlPoints.ToArray(), Name = "Ground" } }, new RoofData() { ControlPoints = path.ControlPoints.ToArray() })
+    {
+        m_Path.CalculateForwards();
+    }
+    public BuildingData(BuildingData data) : this (data.Path, data.StoreysData, data.RoofData)
     {
 
     }
-    public BuildingData(ControlPoint[] controlPoints, StoreyData[] storeysData, RoofData roofData)
+    public BuildingData(PolyPath path, List<StoreyData> storeysData, RoofData roofData)
     {
-        m_ControlPoints = controlPoints;
-        m_StoreysData = storeysData;
-        m_RoofData = roofData;
+        m_Path = path;
+        m_Storeys = storeysData;
+        m_Roof = roofData;
+    }
+    /// <summary>
+    /// Each storey data as an id equal to its index in the list.
+    /// </summary>
+    public void AssignStoreyID()
+    {
+        for(int i = 0; i < m_Storeys.Count; i++)
+        {
+            m_Storeys[i].ID = i;
+        }
     }
 }

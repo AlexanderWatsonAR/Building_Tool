@@ -5,23 +5,25 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 
 [System.Serializable]
-public class PillarData
+public class PillarData : IData
 {
-    [SerializeField] private Vector3[] m_ControlPoints;
-    [SerializeField] private float m_Height;
-    [SerializeField] private float m_Width;
-    [SerializeField] private float m_Depth;
+    [SerializeField, HideInInspector] private int m_ID;
+    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
+    [SerializeField, Range(1, 50)] private float m_Height;
+    [SerializeField, Range(0, 10)] private float m_Width;
+    [SerializeField, Range(0, 10)] private float m_Depth;
     [SerializeField, Range(3, 32)] private int m_Sides;
     [SerializeField] private bool m_IsSmooth;
-    [SerializeField] private Material m_Material;
+    [SerializeField, HideInInspector] private Material m_Material;
 
-    public Vector3[] ControlPoints => m_ControlPoints;
-    public float Width => m_Width;
-    public float Height => m_Height;
-    public float Depth => m_Depth;
-    public int Sides => m_Sides;
-    public bool IsSmooth => m_IsSmooth;
-    public Material Material => m_Material;
+    public int ID { get { return m_ID; } set { m_ID = value; } }
+    public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
+    public float Width { get { return m_Width; } set { m_Width = value; } }
+    public float Height { get { return m_Height; } set { m_Height = value; } }
+    public float Depth { get { return m_Depth; } set { m_Depth = value; } }
+    public int Sides { get { return m_Sides; } set { m_Sides = value; } }
+    public bool IsSmooth { get { return m_IsSmooth; } set { m_IsSmooth = value; } }
+    public Material Material { get { return m_Material; } set { m_Material = value; } }
 
     public PillarData() : this(null, 0.5f, 0.5f, 0.5f, 4, null)
     {
@@ -31,26 +33,12 @@ public class PillarData
     }
     public PillarData(IEnumerable<Vector3> controlPoints, float width, float height, float depth, int sides, Material material, bool isSmooth = false)
     {
-        m_ControlPoints = controlPoints == null ? new Vector3[4] : ControlPoints.ToArray();
+        m_ControlPoints = controlPoints == null ? new Vector3[0] : controlPoints.ToArray();
         m_Width = width;
         m_Height = height;
         m_Depth = depth;
         m_Sides = sides;
         m_IsSmooth = isSmooth;
-        m_Material = material;
-    }
-
-    public void SetHeight(float height)
-    {
-        m_Height = height;
-    }
-
-    public void SetControlPoints(IEnumerable<Vector3> controlPoints)
-    {
-        m_ControlPoints = controlPoints.ToArray();
-    }
-    public void SetMaterial(Material material)
-    {
         m_Material = material;
     }
 }

@@ -1,86 +1,206 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [System.Serializable]
-public class DoorData
+public class DoorData : IData
 {
-    // Doorway
-    [SerializeField, Range(0, 0.999f)] private float m_PedimentHeight;
-    [SerializeField, Range(0, 0.999f)] private float m_SideWidth;
-    [SerializeField, Range(-0.999f, 0.999f)] private float m_SideOffset;
-    [SerializeField, Range(1, 10)] private int m_Columns, m_Rows;
-    [SerializeField] private float m_ArchHeight;
-    [SerializeField] private int m_ArchSides;
+    [SerializeField] private int m_ID;
+    [SerializeField] private DoorElement m_ActiveElements;
+
     // Door
-    [SerializeField] private bool m_IsActive;
-    [SerializeField] private Vector3 m_Scale;
+    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
+    [SerializeField, HideInInspector] private Vector3 m_Forward;
+    [SerializeField, HideInInspector] private Vector3 m_Right;
+    [SerializeField, Range(0, 0.999f)] private float m_Depth;
+    [SerializeField, Range(0, 0.999f)] private float m_Scale;
+    [SerializeField, HideInInspector] private Vector3 m_CentrePosition;
     [SerializeField] private TransformPoint m_HingePoint;
+    [SerializeField] private Vector3 m_HingePosition;
     [SerializeField] private Vector3 m_HingeOffset;
     [SerializeField] private Vector3 m_HingeEulerAngles;
+    [SerializeField, HideInInspector] private float m_Height;
+    [SerializeField, HideInInspector] private float m_Width;
+
+    // Handle
+    [SerializeField] private float m_HandleSize;
+    [SerializeField, Range(0, 1)] private float m_HandleScale;
+    [SerializeField] private Vector3 m_HandlePosition;
+    [SerializeField] private TransformPoint m_HandlePoint;
+
     [SerializeField] private Material m_Material;
-    // Door Frame
-    [SerializeField] private float m_FrameDepth;
-    [SerializeField] private float m_FrameInsideScale;
 
-    public float PedimentHeight => m_PedimentHeight;
-    public float SideWidth => m_SideWidth;
-    public float SideOffset => m_SideOffset;
-    public int Columns => m_Columns;
-    public int Rows => m_Rows;
-    public float ArchHeight => m_ArchHeight;
-    public int ArchSides => m_ArchSides;
-    public bool IsActive => m_IsActive;
-    public Vector3 Scale => m_Scale;
-    public TransformPoint HingePoint => m_HingePoint;
-    public Vector3 HingeOffset => m_HingeOffset;
-    public Vector3 HingeEulerAngles => m_HingeEulerAngles;
-    public Material Material => m_Material;
-    public float FrameDepth => m_FrameDepth;
-    public float FrameInsideScale => m_FrameInsideScale;
+    public int ID { get { return m_ID; } set { m_ID = value; } }
+    public DoorElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
+    public Vector3[] ControlPoints{ get{ return m_ControlPoints;} set{ SetControlPoints(value); }}
+    public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
+    public Vector3 Right { get { return m_Right; } set { m_Right = value; } }
+    public float Depth { get { return m_Depth; } set { m_Depth = value; } }
+    public float Scale { get { return m_Scale; } set { m_Scale = value; } }
+    public float Height => m_Height;
+    public float Width => m_Width;
+    public Vector3 Centre => m_CentrePosition;
 
-    public DoorData() : this(0.75f, 0.5f, 0, 1, 1, 1, 3, true, Vector3.one * 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, null, 1,1)
+    public TransformPoint HingePoint
+    {
+        get
+        {
+            return m_HingePoint;
+        }
+
+        set
+        {
+            if (m_HingePoint != value)
+            {
+                m_HingeOffset = Vector3.zero;
+            }
+
+            m_HingePoint = value;
+
+            m_HingePosition = TransformPointToPosition(m_HingePoint);
+        }
+    }
+
+    
+
+    public Vector3 HingePosition => m_HingePosition;
+    public Vector3 HingeOffset { get { return m_HingeOffset; } set { m_HingeOffset = value; } }
+    public Vector3 HingeEulerAngles { get { return m_HingeEulerAngles; } set { m_HingeEulerAngles = value; } }
+
+    public float HandleSize { get { return m_HandleSize; } set{ m_HandleSize = value; } }
+    public float HandleScale { get { return m_HandleScale; } set{ m_HandleScale = value; } }
+    public TransformPoint HandlePoint
+    {
+        get
+        {
+            return m_HandlePoint;
+        }
+        set
+        {
+            m_HandlePoint = value;
+            m_HandlePosition = TransformPointToPosition(m_HandlePoint);
+
+            m_HandlePosition -= m_CentrePosition;
+            m_HandlePosition = Vector3.Scale(m_HandlePosition, Vector3.one * m_Scale) + m_CentrePosition;
+            m_HandlePosition += m_Forward * m_Depth;
+
+            float size = m_HandleSize * m_HandleScale;
+
+            switch(m_HandlePoint)
+            {
+                case TransformPoint.Middle:
+                    break;
+                case TransformPoint.Top:
+                    m_HandlePosition +=  Vector3.up * -size;
+                    break;
+                case TransformPoint.Bottom:
+                    m_HandlePosition += Vector3.up * size;
+                    break;
+                case TransformPoint.Left:
+                    m_HandlePosition += m_Right * size;
+                    break;
+                case TransformPoint.Right:
+                    m_HandlePosition += m_Right * -size;
+                    break;
+            }
+        }
+    }
+    public Vector3 HandlePosition => m_HandlePosition;
+    public Material Material { get { return m_Material; } set { m_Material = value; } }
+
+    public DoorData() : this(new Vector3[0], Vector3.zero, Vector3.zero, 0.2f, 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, 0.2f, 1, TransformPoint.Right, null)
     {
 
     }
 
     public DoorData(DoorData data) : this
     (
-        data.PedimentHeight,
-        data.SideWidth,
-        data.SideOffset,
-        data.Columns,
-        data.Rows,
-        data.ArchHeight,
-        data.ArchSides,
-        data.IsActive,
+        data.ControlPoints,
+        data.Forward,
+        data.Right,
+        data.Depth,
         data.Scale,
         data.HingePoint,
         data.HingeOffset,
         data.HingeEulerAngles,
-        data.Material,
-        data.FrameDepth,
-        data.FrameInsideScale
+        data.HandleSize,
+        data.HandleScale,
+        data.HandlePoint,
+        data.Material
     )
     {
     }
 
-    public DoorData(float pedimentHeight, float sideWidth, float sideOffset, int columns, int rows, float archHeight, int archSides, bool isActive, Vector3 scale, TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles, Material material, float frameDepth, float frameInsideScale)
+    public DoorData(IEnumerable<Vector3> controlPoints, Vector3 forward, Vector3 right, float depth, float scale, TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles, float handleSize, float handleScale, TransformPoint handlePoint, Material material)
     {
-        m_PedimentHeight = pedimentHeight;
-        m_SideWidth = sideWidth;
-        m_SideOffset = sideOffset;
-        m_Columns = columns;
-        m_Rows = rows;
-        m_ArchHeight = archHeight;
-        m_ArchSides = archSides;
-        m_IsActive = isActive;
+        SetControlPoints(controlPoints);
+        m_Forward = forward;
+        m_Right = right;
+        m_Depth = depth;
         m_Scale = scale;
-        m_HingePoint = hingePoint;
+
+        HingePoint = hingePoint;
         m_HingeOffset = hingeOffset;
         m_HingeEulerAngles = hingeEulerAngles;
+
+        m_HandleSize = handleSize;
+        m_HandleScale = handleScale;
+        m_HandlePoint = handlePoint;
+
         m_Material = material;
-        m_FrameDepth = frameDepth;
-        m_FrameInsideScale = frameInsideScale;
+    }
+
+    private void SetControlPoints(IEnumerable<Vector3> controlPoints)
+    {
+        if (controlPoints == null)
+            return;
+
+        if (controlPoints.Count() == 0)
+            return;
+
+        m_ControlPoints = controlPoints.ToArray();
+
+        Vector3 min, max;
+        Extensions.MinMax(m_ControlPoints, out min, out max);
+        m_Height = max.y - min.y;
+        m_Width = max.x - min.x + (max.z - min.z);
+
+        m_CentrePosition = Vector3.Lerp(min, max, 0.5f);
+        m_HandleSize = Height * m_Scale * 0.05f;
+        SetHandlePosition();
+        
+    }
+
+    private void SetHandlePosition()
+    {
+        HandlePoint = m_HandlePoint;
+    }
+
+    private Vector3 TransformPointToPosition(TransformPoint transformPoint)
+    {
+        Vector3 position = m_CentrePosition;
+
+        switch (transformPoint)
+        {
+            case TransformPoint.Middle:
+                position = m_CentrePosition;
+                break;
+            case TransformPoint.Top:
+                position = m_CentrePosition + (Vector3.up * m_Height * 0.5f);
+                break;
+            case TransformPoint.Bottom:
+                position = m_CentrePosition - (Vector3.up * m_Height * 0.5f);
+                break;
+            case TransformPoint.Left:
+                position = m_CentrePosition - (m_Right * m_Width * 0.5f);
+                break;
+            case TransformPoint.Right:
+                position = m_CentrePosition + (m_Right * m_Width * 0.5f);
+                break;
+        }
+
+        return position;
     }
 }

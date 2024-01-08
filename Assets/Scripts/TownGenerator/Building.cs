@@ -2,115 +2,130 @@ using AutoLayout3D;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
-using UnityEngine.ProBuilder.Shapes;
-using UnityEngine.Serialization;
+using ProMaths = UnityEngine.ProBuilder.Math;
 
+[ExecuteInEditMode]
 [DisallowMultipleComponent]
-[RequireComponent(typeof(Storey), typeof(Roof))]
-public class Building : MonoBehaviour
+public class Building : MonoBehaviour, IBuildable
 {
-    [SerializeField, HideInInspector] private bool m_HasConstructed;
+    [SerializeField] private BuildingData m_Data;
+    [SerializeField] private MaterialPalette m_Palette;
 
-    [SerializeField] private PolyPath m_BuildingPolyPath;
-    [SerializeField] private List<Storey> m_Storeys;
-    [SerializeField] private Roof m_Roof;
-    [SerializeField] private bool m_HasInitialized;
+    [SerializeField] private bool m_IsPolyPathHandleSelected;
+    public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
 
-    public bool HasConstructed => m_HasConstructed;
-    public ControlPoint[] ControlPoints => m_BuildingPolyPath.ControlPoints.ToArray();
-    public PolyPath PolyPath => m_BuildingPolyPath ?? new PolyPath();
+    public BuildingData Data => m_Data;
 
     private void Reset()
     {
-        m_BuildingPolyPath = new PolyPath();
-        m_Storeys = GetComponents<Storey>().ToList();
-        m_Roof = GetComponent<Roof>();
+        m_Data = new BuildingData();
     }
 
-    public Building Initialize()
+    private void OnEnable()
     {
-        if (m_HasInitialized)
-            return this;
+        UnityEditor.EditorApplication.update = Update;
+    }
 
-        m_BuildingPolyPath.CalculateForwards();
-        m_BuildingPolyPath.OnControlPointsChanged += Building_OnControlPointsChanged;
+    private void OnDisable()
+    {
+        UnityEditor.EditorApplication.update = null;
 
-        if(m_Storeys == null)
+    }
+
+    private void Update()
+    {
+        if (m_Data == null)
+            return;
+
+        if (m_Data.Path == null)
+            return;
+
+        if (m_Data.Path.ControlPointCount == 0)
+            return;
+
+        if (m_Data.Path.PolyMode == PolyMode.Hide)
+            return;
+
+        if (GUIUtility.hotControl == 0 && m_IsPolyPathHandleSelected)
         {
-            m_Storeys.Add(gameObject.AddComponent<Storey>());
+            Rebuild();
         }
 
-        if(m_Roof == null)
-        {
-            m_Roof = gameObject.AddComponent<Roof>();
-        }
+        m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_Data.Path.ControlPointCount + 1 ? true : false;
+    }
 
-        int count = 0;
-        foreach(Storey storey in m_Storeys)
-        {
-            storey.SetControlPoints(ControlPoints);
-            storey.SetID(count);
-            count++;
-        }
-
-        m_Roof.SetControlPoints(ControlPoints).SetRoofActive(true);
-
-        m_HasInitialized = true;
-
+    public IBuildable Initialize(IData data)
+    {
+        m_Data = data as BuildingData;
         return this;
     }
 
+    private void Rebuild()
+    {
+        m_Data.RoofData = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
 
+        int count = m_Data.StoreysData.Count;
 
-    public Building Build()
+        m_Data.StoreysData = new List<StoreyData>(count);
+
+        for(int i = 0; i < count; i++)
+        {
+            StoreyData storey = new StoreyData() { ControlPoints = m_Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
+            m_Data.StoreysData.Add(storey);
+        }
+
+        Build();
+    }
+
+    public void Build()
     {
         transform.DeleteChildren();
+        Debug.Log("Building: Build() ",this);
+        if (!m_Data.Path.IsPathValid/* || !m_HasInitialized*/)
+            return;
 
         Vector3 pos = Vector3.zero;
 
-        for (int i = 0; i < m_Storeys.Count; i++)
+        for (int i = 0; i < m_Data.StoreysData.Count; i++)
         {
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Storeys[i]).Build();
-            pos += (Vector3.up * storey.WallData.Height);
+            Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
+            storey.Build();
+            storey.OnDataChange += (IData data) =>
+            {
+                StoreyData storeyData = data as StoreyData;
+                m_Data.StoreysData[storeyData.ID] = storeyData;
+            };
+            pos += (Vector3.up * storey.Data.WallData.Height);
         }
 
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(m_Roof.Data).SetControlPoints(ControlPoints);
-        roofGO.GetComponent<Roof>().BuildFrame();
-        roofGO.GetComponent<Roof>().OnAnyRoofChange += Building_OnAnyRoofChange;
-        m_HasConstructed = true;
-        return this;
+        roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
+        roofGO.GetComponent<Roof>().OnDataChange += data =>
+        {
+            m_Data.RoofData = data as RoofData;
+            Debug.Log("RoofData change");
+        };
     }
 
-    private void Building_OnControlPointsChanged(List<ControlPoint> controlPoints)
+    public void Demolish()
     {
-        m_HasInitialized = false;
-        m_BuildingPolyPath.OnControlPointsChanged -= Building_OnControlPointsChanged;
-        Initialize().Build();
-    }
 
-    private void Building_OnAnyRoofChange(RoofData data)
-    {
-        if (m_Roof == null && m_BuildingPolyPath == null)
-            return;
-        
-        m_Roof.Initialize(data);
     }
 
     public void RevertBuilding()
     {
         transform.DeleteChildren();
-        m_HasConstructed = false;
     }
 
 }

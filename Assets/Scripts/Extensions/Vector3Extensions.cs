@@ -7,7 +7,8 @@ using UnityEngine.ProBuilder;
 
 public static class Vector3Extensions
 {
-    public static bool Approximately(Vector3 vector1, Vector3 vector2, float tolerance)
+
+    public static bool Approximately(Vector3 vector1, Vector3 vector2, float tolerance = 0.001f)
     {
         float sqrMagnitudeDifference = (vector1 - vector2).sqrMagnitude;
         float sqrTolerance = tolerance * tolerance;
@@ -97,5 +98,27 @@ public static class Vector3Extensions
         }
 
         return temp;
+    }
+
+    public static IEnumerable<Vector3> Distinct(this IEnumerable<Vector3> points, float tolerance = 0.001f)
+    {
+        List<Vector3> distinctList = new List<Vector3>();
+        foreach (Vector3 vector in points)
+        {
+            bool isDuplicate = false;
+            foreach (Vector3 distinctVector in distinctList)
+            {
+                if (Vector3.Distance(vector, distinctVector) < tolerance)
+                {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            if (!isDuplicate)
+            {
+                distinctList.Add(vector);
+            }
+        }
+        return distinctList;
     }
 }

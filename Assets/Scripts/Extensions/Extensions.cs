@@ -2,16 +2,303 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem.HID;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UIElements;
+using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static Vector3[] ScaleOneLine(this Vector3[] oneLine, OneLineShape shape, float scale)
+    {
+        switch (shape)
+        {
+            case OneLineShape.Unknown:
+                break;
+            case OneLineShape.Antenna:
+                {
+                    int length = oneLine.Length / 3;
+                    int bIndex = 0;
+                    int mIndex = 1;
+                    int tIndex = 2;
+                    for (int i = 0; i < length; i++)
+                    {
+                        Vector3 a = Vector3.Lerp(oneLine[tIndex], oneLine[mIndex], 0.5f);
+                        Vector3 b = Vector3.Lerp(oneLine[bIndex], oneLine[mIndex], 0.5f);
+
+                        oneLine[tIndex] = Vector3.Lerp(oneLine[tIndex], a, scale);
+                        oneLine[bIndex] = Vector3.Lerp(oneLine[bIndex], b, scale);
+
+                        bIndex += 3;
+                        mIndex += 3;
+                        tIndex += 3;
+                    }
+                }
+                break;
+            case OneLineShape.Arrow:
+                {
+                    Vector3 ap1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                    Vector3 ap2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                    Vector3 ap3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], ap1, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], ap2, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], ap3, scale);
+                }
+                break;
+            case OneLineShape.Asterisk:
+                {
+                    for (int i = 0; i < oneLine.Length - 1; i++)
+                    {
+                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[^1], 0.5f);
+                        oneLine[i] = Vector3.Lerp(oneLine[i], a, scale);
+                    }
+                }
+                break;
+            case OneLineShape.Square:
+                {
+                    Vector3 mid = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    oneLine[0] = Vector3.Lerp(oneLine[0], mid, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], mid, scale);
+                }
+                break;
+            case OneLineShape.Crenel:
+                {
+                    Vector3 crenelP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 crenelP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], crenelP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], crenelP2, scale);
+
+                    for (int i = 2; i < oneLine.Length - 2; i += 2)
+                    {
+                        Vector3 a = Vector3.Lerp(oneLine[i], oneLine[i + 1], 0.5f);
+                        oneLine[i + 1] = Vector3.Lerp(oneLine[i + 1], a, scale);
+                    }
+                }
+                break;
+            case OneLineShape.E:
+                {
+                    Vector3 eP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 eP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+                    Vector3 eP3 = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], eP1, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], eP2, scale);
+                    oneLine[5] = Vector3.Lerp(oneLine[5], eP3, scale);
+                }
+                break;
+            case OneLineShape.F:
+                {
+                    Vector3 f1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 f2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                    Vector3 f3 = Vector3.Lerp(oneLine[4], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], f1, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], f2, scale);
+                    oneLine[4] = Vector3.Lerp(oneLine[4], f3, scale);
+                }
+                break;
+            case OneLineShape.H:
+                {
+                    Vector3 h1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 h2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                    Vector3 h3 = Vector3.Lerp(oneLine[3], oneLine[4], 0.5f);
+                    Vector3 h4 = Vector3.Lerp(oneLine[5], oneLine[4], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], h1, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], h2, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], h3, scale);
+                    oneLine[5] = Vector3.Lerp(oneLine[5], h4, scale);
+                }
+                break;
+            case OneLineShape.InterlockY:
+                break;
+            case OneLineShape.K:
+                {
+                    Vector3 k1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 k2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+                    Vector3 k3 = Vector3.Lerp(oneLine[3], oneLine[5], 0.5f);
+                    Vector3 k4 = Vector3.Lerp(oneLine[4], oneLine[5], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], k1, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], k2, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], k3, scale);
+                    oneLine[4] = Vector3.Lerp(oneLine[4], k4, scale);
+                }
+                break;
+            case OneLineShape.L:
+                {
+                    Vector3 lp1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 lp2 = Vector3.Lerp(oneLine[2], oneLine[1], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], lp1, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], lp2, scale);
+                }
+                break;
+            case OneLineShape.M:
+                {
+                    Vector3 mP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 mP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], mP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], mP2, scale);
+                }
+                break;
+            case OneLineShape.N:
+                {
+                    Vector3 nP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 nP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], nP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], nP2, scale);
+                }
+                break;
+            case OneLineShape.SimpleM:
+                {
+                    Vector3 simpleMP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 simpleMP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], simpleMP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], simpleMP2, scale);
+                }
+                break;
+            case OneLineShape.SimpleN:
+                {
+                    Vector3 simpleNP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 simpleNP2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], simpleNP1, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], simpleNP2, scale);
+                }
+                break;
+            case OneLineShape.T:
+                {
+                    Vector3 tp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                    Vector3 tp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                    Vector3 tp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], tp1, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], tp2, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], tp3, scale);
+                }
+                break;
+            case OneLineShape.U:
+                {
+                    Vector3 up1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 up2 = Vector3.Lerp(oneLine[3], oneLine[2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], up1, scale);
+                    oneLine[3] = Vector3.Lerp(oneLine[3], up2, scale);
+                }
+                break;
+            case OneLineShape.Y:
+                {
+                    Vector3 yp1 = Vector3.Lerp(oneLine[0], oneLine[3], 0.5f);
+                    Vector3 yp2 = Vector3.Lerp(oneLine[1], oneLine[3], 0.5f);
+                    Vector3 yp3 = Vector3.Lerp(oneLine[2], oneLine[3], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], yp1, scale);
+                    oneLine[1] = Vector3.Lerp(oneLine[1], yp2, scale);
+                    oneLine[2] = Vector3.Lerp(oneLine[2], yp3, scale);
+                }
+                break;
+            case OneLineShape.X:
+                {
+                    Vector3 mid = ProMaths.Average(oneLine);
+
+                    for (int i = 0; i < oneLine.Length - 1; i++)
+                    {
+                        Vector3 xP = Vector3.Lerp(oneLine[i], mid, 0.5f);
+                        oneLine[i] = Vector3.Lerp(oneLine[i], xP, scale);
+                    }
+                }
+                break;
+            case OneLineShape.ZigZag:
+                {
+                    Vector3 zigP1 = Vector3.Lerp(oneLine[0], oneLine[1], 0.5f);
+                    Vector3 zigP2 = Vector3.Lerp(oneLine[^1], oneLine[^2], 0.5f);
+
+                    oneLine[0] = Vector3.Lerp(oneLine[0], zigP1, scale);
+                    oneLine[^1] = Vector3.Lerp(oneLine[^1], zigP2, scale);
+                }
+                break;
+        }
+
+        return oneLine;
+    }
+
+    public static ushort[] ToUShort(this IEnumerable<int> intCollection)
+    {
+        int[] intArray = intCollection.ToArray();
+
+        ushort[] ushortArray = new ushort[intArray.Length];
+
+        for(ushort i = 0; i < intArray.Length; i++)
+        {
+            ushortArray[i] = (ushort)intArray[i];
+        }
+
+        return ushortArray;
+    }
+
+    public static void MinMax(IEnumerable<Vector3> points, out Vector3 min, out Vector3 max)
+    {
+        Vector3[] vectors = points.ToArray();
+
+        min = vectors[0];
+        max = vectors[0];
+
+        for (int i = 1; i < vectors.Length; i++)
+        {
+            if (min.x > vectors[i].x)
+                min.x = vectors[i].x;
+            if (min.y > vectors[i].y)
+                min.y = vectors[i].y;
+            if (min.z > vectors[i].z)
+                min.z = vectors[i].z;
+
+            if (max.x < vectors[i].x)
+                max.x = vectors[i].x;
+            if (max.y < vectors[i].y)
+                max.y = vectors[i].y;
+            if (max.z < vectors[i].z)
+                max.z = vectors[i].z;
+        }
+    }
+
+
+    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> polygon, float scaleFactor, Vector3? scalePoint = null)
+    {
+        return ScalePolygon(polygon, Vector3.one * scaleFactor, scalePoint);
+    }
+
+    public static Vector3[] ScalePolygon(this IEnumerable<Vector3> polygon, Vector3 scaleFactor, Vector3? scalePoint = null)
+    {
+        Vector3[] points = polygon.ToArray();
+
+        if(scalePoint == null)
+        {
+            scalePoint = ProMaths.Average(polygon.ToArray());
+        }
+
+        for( int i = 0; i < points.Length; i++)
+        {
+            // Scale
+            Vector3 point = points[i] - scalePoint.Value;
+            Vector3 v = Vector3.Scale(point, scaleFactor) + scalePoint.Value;
+            points[i] = v;
+        }
+
+        return points;
+    }
+
+    public static bool ApproximatelyEqual(float a, float b, float tolerance = 0.001f)
+    {
+        return Mathf.Abs(a - b) < tolerance;
+    }
 
     public static float PolygonLength(this IEnumerable<Vector3> controlPoints)
     {
@@ -98,6 +385,18 @@ public static class Extensions
         {
             DeleteChildren(transform);
         }
+    }
+
+    public static Transform[] GetAllChildren(this Transform transform)
+    {
+        Transform[] children = new Transform[transform.childCount];
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            children[i] = transform.GetChild(i);
+        }
+
+        return children;
     }
 
     public static Vector3 CheckAxis(this Axis direction)
@@ -441,6 +740,8 @@ public static class Extensions
 
         //Face bevelFace = Bevel.BevelEdges(proBuilderMesh, edgeList, size)[0];
 
+        
+
         Vector3[] positions = proBuilderMesh.positions.ToArray();
 
         Vector3 a = positions[edge.a];
@@ -558,7 +859,7 @@ public static class Extensions
     /// <param name="transform"></param>
     /// <param name="positions"></param>
     /// <returns></returns>
-    public static IEnumerable<Vector3> TransformPoints(this Transform transform, IEnumerable<Vector3> positions)
+    public static IEnumerable<Vector3> TransformPoints(this Transform transform, IEnumerable<Vector3> positions, int temp)
     {
         List<Vector3> globalPoints = new List<Vector3>();
 
@@ -586,7 +887,6 @@ public static class Extensions
 
         return localPoints;
     }
-
     /// <summary>
     /// Assumes polygon is convex. This is for a face with more than 3 points.
     /// </summary>
@@ -595,7 +895,6 @@ public static class Extensions
     public static Vector3 CalculatePolygonFaceNormal(this IEnumerable<Vector3> vertices)
     {
         Vector3[] verts = vertices.ToArray();
-        Vector3 faceNormal = Vector3.zero;
         Vector3 normal = Vector3.zero;
 
         for (int i = 0; i < verts.Length; i++)
@@ -608,8 +907,7 @@ public static class Extensions
             normal.z += (current.x - next.x) * (current.y + next.y);
         }
 
-        faceNormal = normal.normalized;
-        return faceNormal;
+        return normal.normalized;
     }
     /// <summary>
     /// 

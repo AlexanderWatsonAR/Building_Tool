@@ -3,20 +3,22 @@ using UnityEngine;
 
 public class Vector3EqualityComparer : IEqualityComparer<Vector3>
 {
-    private float tolerance;
+    private float m_Tolerance;
 
     public Vector3EqualityComparer(float tolerance = 0.001f)
     {
-        this.tolerance = tolerance;
+        m_Tolerance = tolerance;
     }
-
-    public bool Equals(Vector3 v1, Vector3 v2)
+    public bool Equals(Vector3 a, Vector3 b)
     {
-        return Vector3.Distance(v1, v2) < tolerance;
+        float distance = Vector3.Distance(a, b);
+        bool result = distance < m_Tolerance;
+        Debug.Log(distance);
+        return result;
     }
-
     public int GetHashCode(Vector3 vector)
     {
         return vector.GetHashCode();
     }
+
 }

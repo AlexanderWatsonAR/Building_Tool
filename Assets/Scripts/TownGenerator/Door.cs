@@ -7,170 +7,100 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
+using Edge = UnityEngine.ProBuilder.Edge;
+using System;
 
-public class Door : MonoBehaviour
+public class Door : MonoBehaviour, IBuildable, IDataChangeEvent
 {
-    [SerializeField] private Vector3[] m_ControlPoints;
+    [SerializeField] private ProBuilderMesh m_DoorMesh;
+    [SerializeField] private ProBuilderMesh m_DoorHandleMesh;
+    [SerializeField] private DoorData m_Data;
 
-    [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
-    [SerializeField] private float m_Width, m_Height;
-    [SerializeField] private float m_Depth;
-    [SerializeField] private Vector3 m_Centre;
-    [SerializeField] private Vector3 m_Forward, m_Right;
-    
-    [SerializeField] private Material m_Material;
-    [SerializeField] private Vector3 m_Scale;
-    [SerializeField] private TransformPoint m_HingePoint;
-    [SerializeField] private Vector3 m_HingePosition;
-    [SerializeField] private Vector3 m_HingeOffset;
-    [SerializeField] private Vector3 m_HingeEulerAngles;
+    public event Action<IData> OnDataChange;
+    public DoorData DoorData => m_Data;
 
-    public Vector3 HingeOffset => m_HingeOffset;
-
-    public float Width
+    public void OnDataChange_Invoke()
     {
-        get
-        {
-            m_Width = Vector3.Distance(m_ControlPoints[0], m_ControlPoints[^1]);
-            return m_Width;
-        }
+        OnDataChange?.Invoke(m_Data);
     }
 
-    public float Height
+    public IBuildable Initialize(IData data)
     {
-        get
-        {
-            MeshMaker.MinMax(m_ControlPoints, out _, out Vector3 max);
-            m_Height = max.y;
-            return m_Height;
-        }
-    }
-    
-
-    public TransformPoint HingePoint
-    {
-        get
-        {
-            return m_HingePoint;
-        }
-
-        set
-        {
-            if(m_HingePoint != value)
-            {
-                m_HingeOffset = Vector3.zero;
-            }
-            
-            m_HingePoint = value;
-
-            switch (m_HingePoint)
-            {
-                case TransformPoint.Middle:
-                    m_HingePosition = m_Centre;
-                    break;
-                case TransformPoint.Top:
-                    m_HingePosition = m_Centre + (Vector3.up * Height * 0.5f);
-                    break;
-                case TransformPoint.Bottom:
-                    m_HingePosition = m_Centre - (Vector3.up * Height * 0.5f);
-                    break;
-                case TransformPoint.Left:
-                    m_HingePosition = m_Centre - (m_Right * Width * 0.5f);
-                    break;
-                case TransformPoint.Right:
-                    m_HingePosition = m_Centre + (m_Right * Width * 0.5f);
-                    break;
-            }
-        }
-    }
-
-    public Door SetMaterial(Material material)
-    {
-        m_Material = material;
-        GetComponent<Renderer>().material = m_Material;
+        m_DoorMesh = GetComponent<ProBuilderMesh>();
+        m_DoorHandleMesh = ProBuilderMesh.Create();
+        m_DoorHandleMesh.transform.SetParent(transform, false);
+        m_DoorHandleMesh.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
+        m_DoorHandleMesh.name = "Handle";
+        m_Data = data as DoorData;
         return this;
     }
 
-    public Door SetHingeEulerAngles(Vector3 eulerAngles)
+    public void Build()
     {
-        m_HingeEulerAngles = eulerAngles;
-        return this;
-    }
+        if (!m_Data.ActiveElements.IsElementActive(DoorElement.Door))
+            return;
 
-    public Door SetHingeOffset(Vector3 offset)
-    {
-        m_HingeOffset = offset;
-        return this;
-    }
+        m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward);
+        ProBuilderMesh inside = Instantiate(m_DoorMesh);
+        inside.faces[0].Reverse();
 
-    public Door Initialize(IEnumerable<Vector3> controlPoints, float depth, Vector3 scale)
-    {
-        m_ControlPoints = controlPoints == null ? m_ControlPoints : controlPoints.ToArray();
-        m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_Depth = depth;
+        m_DoorMesh.Extrude(m_DoorMesh.faces, ExtrudeMethod.FaceNormal, m_Data.Depth);
+        m_DoorMesh.ToMesh();
+        m_DoorMesh.Refresh();
 
-        Vector3 a = m_ControlPoints[0];
-        Vector3 b = m_ControlPoints[^1];
-        m_Right = a.DirectionToTarget(b);
-        Vector3 forward = Vector3.Cross(Vector3.up, m_Right);
-        Vector3 c = Vector3.Lerp(m_ControlPoints[0], m_ControlPoints[^1], 0.5f) + Vector3.up * Height * 0.5f;
-        m_Centre = c + (forward * (depth * 0.5f));
-        m_Scale = scale;
-        m_Forward = forward;
-
-        m_HingeEulerAngles = Vector3.zero;
-        HingePoint = TransformPoint.Left;
-        return this;
-    }
-
-    public Door Build()
-    {
-        m_ProBuilderMesh.CreateShapeFromPolygon(m_ControlPoints, 0, false);
-        m_ProBuilderMesh.ToMesh();
-
-        Vector3[] normals = m_ProBuilderMesh.GetNormals();
-
-        if (!Vector3Extensions.Approximately(normals[0], m_Forward, 0.1f))
-        {
-            m_ProBuilderMesh.faces[0].Reverse();
-        }
-
-        m_ProBuilderMesh.Extrude(m_ProBuilderMesh.faces, ExtrudeMethod.FaceNormal, m_Depth);
-        m_ProBuilderMesh.ToMesh();
-
-        ProBuilderMesh inside = ProBuilderMesh.Create();
-        inside.name = "Whatever";
-        inside.CreateShapeFromPolygon(m_ControlPoints, 0, true);
-        inside.ToMesh();
-
-        normals = inside.GetNormals();
-
-        if (!Vector3Extensions.Approximately(normals[0], -m_Forward, 0.1f))
-        {
-            inside.faces[0].Reverse();
-        }
-
-        CombineMeshes.Combine(new ProBuilderMesh[] { m_ProBuilderMesh, inside }, m_ProBuilderMesh);
+        CombineMeshes.Combine(new ProBuilderMesh[] { m_DoorMesh, inside }, m_DoorMesh);
         DestroyImmediate(inside.gameObject);
 
         // Scale
-        m_ProBuilderMesh.transform.localScale = m_Scale;
-        m_ProBuilderMesh.LocaliseVertices();
+        m_DoorMesh.transform.localScale = Vector3.one * m_Data.Scale;
+        m_DoorMesh.LocaliseVertices();
         // Rotate
-        m_ProBuilderMesh.transform.localEulerAngles = m_HingeEulerAngles;
-        m_ProBuilderMesh.LocaliseVertices(m_HingePosition + m_HingeOffset);
+        m_DoorMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
+        m_DoorMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
+        m_DoorMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
+        m_DoorMesh.Refresh();
 
-        m_ProBuilderMesh.Refresh();
-        return this;
+        if (!m_Data.ActiveElements.IsElementActive(DoorElement.Handle))
+            return;
+
+        // Handle
+        float size = m_Data.HandleSize * m_Data.HandleScale;
+        Vector3[] points = MeshMaker.CreateNPolygon(8, size, size);
+        Vector3 position = ProMaths.Average(points);
+
+        // This is aligning the handle points with the door
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, m_Data.Forward);
+
+        for(int i  = 0; i < points.Length; i++)
+        {
+            Vector3 v = Quaternion.Euler(rotation.eulerAngles) * (points[i] - position) + position;
+            points[i] = v;
+        }
+
+        m_DoorHandleMesh.CreateShapeFromPolygon(points, m_Data.Forward);
+        m_DoorHandleMesh.Extrude(m_DoorHandleMesh.faces, ExtrudeMethod.FaceNormal, 0.1f);
+        m_DoorHandleMesh.ToMesh();
+        m_DoorHandleMesh.Refresh();
+
+        IList<Edge> edgeList = m_DoorHandleMesh.faces[0].edges.ToList();
+
+        Bevel.BevelEdges(m_DoorHandleMesh, edgeList, 0.1f);
+
+        m_DoorHandleMesh.ToMesh();
+        m_DoorHandleMesh.Refresh();
+
+        m_DoorHandleMesh.transform.localPosition = m_Data.HandlePosition;
+        //m_DoorHandleMesh.transform.localPosition = m_Data.Centre + (m_Data.Forward * m_Data.Depth);
+        m_DoorHandleMesh.LocaliseVertices();
+        m_DoorHandleMesh.Refresh();
+        m_DoorHandleMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
+        m_DoorHandleMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
+        m_DoorHandleMesh.Refresh();
     }
 
-
-    private void Rebuild(ProBuilderMesh mesh)
+    public void Demolish()
     {
-        m_ProBuilderMesh.RebuildWithPositionsAndFaces(mesh.positions, mesh.faces);
-        m_ProBuilderMesh.ToMesh();
-        m_ProBuilderMesh.Refresh();
-        DestroyImmediate(mesh.gameObject);
+
     }
 
 }

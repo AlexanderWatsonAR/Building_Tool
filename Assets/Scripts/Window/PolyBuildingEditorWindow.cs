@@ -5,83 +5,83 @@ using UnityEditor;
 using UnityEngine.ProBuilder;
 using UnityEditor.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 public class PolyBuildingEditorWindow : EditorWindow
 {
     Building m_ActiveBuilding;
     private bool m_IsActiveGameObjectABuilding;
-    List<ProBuilderMesh> m_MeshesToCombine = new();
 
     [MenuItem("Tools/PolyBuilding Window")]
-
     public static void ShowWindow()
     {
         GetWindow(typeof(PolyBuildingEditorWindow), false, "PolyBuilding");
     }
 
-    private void OnGUI()
+    public void CreateGUI()
     {
-        if(GUILayout.Button("New Poly Building"))
-        {
-            GameObject building = new GameObject("Poly Building", typeof(Building));
-            Building build = building.GetComponent<Building>();
-            build.PolyPath.PolyMode = PolyMode.Draw;
-            Selection.activeGameObject = building;
-        }
+        Button newPolyBuilding_btn = new Button
+        (
+            () =>
+            {
+                ProBuilderMesh building = ProBuilderMesh.Create();
+                building.name = "Poly Building";
+                building.AddComponent<Building>();
+                Building build = building.GetComponent<Building>();
+                build.Data.Path.PolyMode = PolyMode.Draw;
+                Selection.activeGameObject = building.gameObject;
+            }
+        );
 
-        EditorGUI.BeginDisabledGroup(!m_IsActiveGameObjectABuilding);
+       newPolyBuilding_btn.text = "New Poly Building";
 
-        if(GUILayout.Button("Make Game Ready"))
-        {
-            m_MeshesToCombine.Clear();
-            ProBuilderMesh gameReadyBuilding = ProBuilderMesh.Create();
-
-            FindProBuilderMeshesInHierarchy(m_ActiveBuilding.transform);
-
-            CombineMeshes.Combine(m_MeshesToCombine, gameReadyBuilding);
-            gameReadyBuilding.ToMesh();
-            gameReadyBuilding.Refresh();
-            
-        }
-
-        if (GUILayout.Button("Export"))
-        {
-            ExportEditorWindow.ShowWindow();
-        }
-
-        EditorGUI.EndDisabledGroup();
-
-        //GUILayout.Label("Heading", EditorStyles.boldLabel);
-        //GUILayout.Label(text);
-        //toggle = EditorGUILayout.BeginToggleGroup("Settings", toggle);
-
-        //customText = EditorGUILayout.TextField("Text Field", customText);
-        //slider = EditorGUILayout.IntSlider("Custom Slider", slider, -5, 5);
-
-        //EditorGUILayout.EndToggleGroup();
-
-
+       rootVisualElement.Add(newPolyBuilding_btn);
     }
 
-    private void FindProBuilderMeshesInHierarchy(Transform parent)
-    {
-        if (parent.TryGetComponent(out ProBuilderMesh mesh))
-        {
-            m_MeshesToCombine.Add(mesh);
-        }
 
-        for (int i = 0; i < parent.childCount; i++)
-        {
-            Transform child = parent.GetChild(i);
+    //private void OnGUI()
+    //{
+    //    if(GUILayout.Button("New Poly Building"))
+    //    {
+    //        ProBuilderMesh building = ProBuilderMesh.Create();
+    //        building.name = "Poly Building";
+    //        building.AddComponent<Building>();
+    //        Building build = building.GetComponent<Building>();
+    //        build.Data.Path.PolyMode = PolyMode.Draw;
+    //        Selection.activeGameObject = building.gameObject;
+    //    }
 
-            // Recursively traverse the child's hierarchy
-            FindProBuilderMeshesInHierarchy(child);
-        }
-    }
+    //    EditorGUI.BeginDisabledGroup(!m_IsActiveGameObjectABuilding);
+
+    //    if(GUILayout.Button("Merge"))
+    //    {
+    //        MergeWindow.ShowWindow();
+    //    }
+
+    //    if (GUILayout.Button("Export"))
+    //    {
+    //        ExportEditorWindow.ShowWindow();
+    //    }
+
+    //    EditorGUI.EndDisabledGroup();
+
+    //    if (GUILayout.Button("Material Presets"))
+    //    {
+    //        MaterialPresetWindow.ShowWindow();
+
+    //    }
+    //}
 
     private void OnSelectionChange()
     {
-        m_IsActiveGameObjectABuilding = Selection.activeGameObject.TryGetComponent(out Building building);
+        if (Selection.activeGameObject == null)
+            return;
+
+        if(Selection.activeGameObject.TryGetComponent(out Building building))
+            m_IsActiveGameObjectABuilding = true;
 
         if(m_IsActiveGameObjectABuilding)
             m_ActiveBuilding = building;

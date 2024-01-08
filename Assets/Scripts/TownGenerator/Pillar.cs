@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
@@ -5,22 +6,22 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
-public class Pillar : MonoBehaviour 
+public class Pillar : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private PillarData m_Data;
 
-    public Pillar Initialize()
+    public event Action<IData> OnDataChange;
+
+    public void OnDataChange_Invoke()
     {
-        m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_Data = new PillarData();
-        return this;
+        OnDataChange?.Invoke(m_Data);
     }
 
-    public Pillar Initialize(PillarData data)
+    public IBuildable Initialize(IData data)
     {
+        m_Data = new PillarData(data as PillarData);
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        m_Data = data;
         return this;
     }
 
@@ -51,10 +52,10 @@ public class Pillar : MonoBehaviour
             controlPoints[i] = v;
         }
 
-        m_Data.SetControlPoints(controlPoints);
+        m_Data.ControlPoints = controlPoints;
     }
 
-    public Pillar Build()
+    public void Build()
     {
         CreateControlPoints();
         m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, 0, false);
@@ -70,7 +71,10 @@ public class Pillar : MonoBehaviour
 
         GetComponent<Renderer>().material = m_Data.Material;
         m_ProBuilderMesh.Refresh();
+    }
 
-        return this;
+    public void Demolish()
+    {
+
     }
 }

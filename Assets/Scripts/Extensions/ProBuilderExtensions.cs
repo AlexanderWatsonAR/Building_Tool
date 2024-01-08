@@ -5,11 +5,73 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
+using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using Edge = UnityEngine.ProBuilder.Edge;
+using System.Diagnostics;
 
 public static class ProBuilderExtensions
 {
+    /// <summary>
+    /// Sometimes the generated promesh has a normal that points in the opposite direction to what is expected.
+    /// This checks the normal & flips it if it is incorrect.
+    /// Note: This will only work for a polygon.
+    /// </summary>
+    /// <param name="proBuilderMesh"></param>
+    /// <param name="normal"></param>
+    public static void MatchFaceToNormal(this ProBuilderMesh proBuilderMesh, Vector3 normal)
+    {
+        Vector3 aveNormal = ProMaths.Average(proBuilderMesh.GetNormals());
+
+        if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
+        {
+            proBuilderMesh.faces[0].Reverse();
+        }
+    }
+
+    /// <summary>
+    /// Gives a polygon depth
+    /// </summary>
+    /// <param name="polygon"></param>
+    /// <param name="extrude"></param>
+    public static void Solidify(this ProBuilderMesh polygon, float extrude)
+    {
+        ProBuilderMesh lid = UnityEngine.Object.Instantiate(polygon);
+        lid.faces[0].Reverse();
+        polygon.Extrude(polygon.faces, ExtrudeMethod.FaceNormal, extrude);
+        CombineMeshes.Combine(new ProBuilderMesh[] { polygon, lid }, polygon);
+        UnityEngine.Object.DestroyImmediate(lid.gameObject);
+        polygon.ToMesh();
+        polygon.Refresh();
+    }
+
+    public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IEnumerable<ControlPoint> controlPoints, float extrude, bool flipNormals)
+    {
+        return proBuilderMesh.CreateShapeFromPolygon(controlPoints.GetPositions(), extrude, flipNormals);
+    }
+
+    public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IList<Vector3> points, Vector3 normal, IList<IList<Vector3>> holePoints = null)
+    {
+        ActionResult result = ActionResult.NoSelection;
+
+        if (holePoints != null)
+        {
+            result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
+        }
+        else
+        {
+            result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false);
+        }
+
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
+        proBuilderMesh.MatchFaceToNormal(normal);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh();
+
+        return result;
+    }
+
     public static IEnumerable<int> GetCoincidentVerticesFromPosition(this ProBuilderMesh proBuilderMesh, Vector3 position, float marginForError = 0.001f)
     {
         Vertex[] vertices = proBuilderMesh.GetVertices();
@@ -31,6 +93,18 @@ public static class ProBuilderExtensions
         List<int> shared = proBuilderMesh.GetCoincidentVertices(new int[] { firstIndex });
 
         return shared;
+    }
+
+    public static IList<int> GetAllDistinctIndices(this ProBuilderMesh proBuilderMesh)
+    {
+        List<int> distinctIndices = new();
+
+        foreach(Face f in proBuilderMesh.faces)
+        {
+            distinctIndices.AddRange(f.distinctIndexes);
+        }
+
+        return distinctIndices;
     }
 
     public static void SetPosition(this ProBuilderMesh proBuilderMesh, int index, Vector3 position)
@@ -89,7 +163,7 @@ public static class ProBuilderExtensions
         proBuilderMesh.transform.localScale = Vector3.one;
     }
 
-    public static Vector3[] GetDistinctVerts(this ProBuilderMesh proBuilderMesh, Face face)
+    public static Vector3[] FaceToVertices(this ProBuilderMesh proBuilderMesh, Face face)
     {
         Vector3[] positions = proBuilderMesh.positions.ToArray();
         Vector3[] verts = new Vector3[face.distinctIndexes.Count];
