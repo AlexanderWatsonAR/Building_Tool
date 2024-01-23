@@ -9,7 +9,7 @@ using UnityEngine.ProBuilder;
 
 public class Floor : MonoBehaviour, IBuildable 
 {
-    [SerializeField] private FloorData m_Data;
+    [SerializeReference] private FloorData m_Data;
 
     [SerializeField] private Vector3 m_Position;
     [SerializeField] private float m_Size;

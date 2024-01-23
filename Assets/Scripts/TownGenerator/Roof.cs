@@ -14,7 +14,7 @@ using UnityEngine.Assertions.Must;
 
 public class Roof : MonoBehaviour, IBuildable, IDataChangeEvent
 {
-    [SerializeField] private RoofData m_Data;
+    [SerializeReference] private RoofData m_Data;
 
     public RoofData Data => m_Data;
 
@@ -22,7 +22,7 @@ public class Roof : MonoBehaviour, IBuildable, IDataChangeEvent
 
     public void OnDataChange_Invoke()
     {
-        OnDataChange?.Invoke(m_Data);
+        //OnDataChange?.Invoke(m_Data);
     }
     public IBuildable Initialize(IData data)
     {

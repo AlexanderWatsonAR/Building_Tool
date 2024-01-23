@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using UnityEditor.Rendering;
 using Unity.VisualScripting;
 using System.Linq;
+using static PlasticGui.LaunchDiffParameters;
 
 [CustomPropertyDrawer(typeof(WallSectionData))]
 public class WallSectionDataDrawer : PropertyDrawer
@@ -501,22 +502,32 @@ public class WallSectionDataDrawer : PropertyDrawer
                             if (evt == null)
                                 return;
 
-                            if (buildable is WallSection)
-                            {
-                                WallSection section = buildable as WallSection;
-                                section.transform.DeleteChildren();
-                            }
-
                             WallSectionData sectionData = data.GetUnderlyingValue() as WallSectionData;
 
                             IList<IList<Vector3>> holePoints = WallSection.CalculateWindow(sectionData);
 
+                            bool rebuild = false;
+
                             foreach (WindowData winData in sectionData.Windows)
                             {
+                                if (!winData.ControlPoints.SequenceEqual(holePoints[winData.ID]))
+                                {
+                                    rebuild = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+
                                 winData.ControlPoints = holePoints[winData.ID].ToArray();
                             }
 
-                            buildable.Build();
+                            if(rebuild)
+                            {
+                                buildable.Demolish();
+                                buildable.Build();
+                            }
+                            
                         });
 
                         PropertyField width = new PropertyField() { label = "Width" };
@@ -526,7 +537,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                             if (evt == null)
                                 return;
 
-                            buildable.Demolish();
+                            bool rebuild = false;
 
                             WallSectionData sectionData = data.GetUnderlyingValue() as WallSectionData;
 
@@ -534,10 +545,24 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                             foreach (WindowData winData in sectionData.Windows)
                             {
+                                if(!winData.ControlPoints.SequenceEqual(holePoints[winData.ID]))
+                                {
+                                    rebuild = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+
                                 winData.ControlPoints = holePoints[winData.ID].ToArray();
                             }
 
-                            buildable.Build();
+                            if(rebuild)
+                            {
+                                buildable.Demolish();
+                                buildable.Build();
+                            }
+                                
                         });
 
 
@@ -548,7 +573,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                             if (evt == null)
                                 return;
 
-                            buildable.Demolish();
+                            bool rebuild = false;
 
                             WallSectionData sectionData = data.GetUnderlyingValue() as WallSectionData;
 
@@ -556,10 +581,24 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                             foreach (WindowData winData in sectionData.Windows)
                             {
+                                if (!winData.ControlPoints.SequenceEqual(holePoints[winData.ID]))
+                                {
+                                    rebuild = true;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+
                                 winData.ControlPoints = holePoints[winData.ID].ToArray();
                             }
 
-                            buildable.Build();
+                            if(rebuild)
+                            {
+                                buildable.Demolish();
+                                buildable.Build();
+                            }
+                            
                         });
 
                         Foldout windowFoldout = new Foldout() { text = "Window" };

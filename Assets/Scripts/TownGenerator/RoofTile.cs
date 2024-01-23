@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 
 public class RoofTile : MonoBehaviour, IBuildable, IDataChangeEvent
 {
-    [SerializeField] private RoofTileData m_Data;
+    [SerializeReference] private RoofTileData m_Data;
     [SerializeField, HideInInspector] private List<Vector3[]> m_SubPoints;
     
     public event Action<IData> OnDataChange;

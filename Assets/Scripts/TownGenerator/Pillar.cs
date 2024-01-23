@@ -9,7 +9,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 public class Pillar : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
-    [SerializeField] private PillarData m_Data;
+    [SerializeReference] private PillarData m_Data;
 
     public event Action<IData> OnDataChange;
 

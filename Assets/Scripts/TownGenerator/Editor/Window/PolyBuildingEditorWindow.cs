@@ -38,6 +38,14 @@ public class PolyBuildingEditorWindow : EditorWindow
 
        newPolyBuilding_btn.text = "New Poly Building";
 
+        Button save_btn = new Button
+        (
+            () =>
+            {
+                //AssetDatabase.CreateAsset(m_ActiveBuilding.Data, "Assets/w")
+            }
+        );
+
        rootVisualElement.Add(newPolyBuilding_btn);
     }
 

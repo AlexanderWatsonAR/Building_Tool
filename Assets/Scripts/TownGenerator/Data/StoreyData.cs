@@ -6,6 +6,15 @@ using UnityEngine;
 [System.Serializable]
 public class StoreyData : IData
 {
+    // Notes of serialization. I may be repeating myself.
+    // When creating a new building object a StoreyData object is instantiated and a reference is passed to an instance of Storey class.
+    // Upon serialization, that reference is stored as a as copy of the original. So, now inside the storey class is no longer a reference to 
+    // the StoreyData inside Building but a copy of the StoreyData from building. As such, When making changes in the Storey inspector we are altering the copy
+    // and not changing the original StoreyData.
+
+    // Test note: 16-01-2023 - attempted to modify data in the storey & building inspector. data changed but then went back to the default.
+    // 17-01-2023 - Removing the serialized reference to the building data stopped the storey reset from happening.
+    #region Member Variables
     [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private string m_Name;
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints; // static?
@@ -21,7 +30,13 @@ public class StoreyData : IData
     [SerializeField, HideInInspector] private WallData[] m_Walls;
     [SerializeField, HideInInspector] private PillarData[] m_Pillars;
     [SerializeField, HideInInspector] private CornerData[] m_Corners;
+    #endregion
 
+    //[SerializeReference] private BuildingData TheBuilding;
+
+    //public BuildingData Building { get { return TheBuilding; } set { TheBuilding = value; } }
+
+    #region Accessors
     public WallData WallData => m_Wall;
     public PillarData PillarData => m_Pillar;
     public CornerData CornerData => m_Corner;
@@ -37,6 +52,7 @@ public class StoreyData : IData
 
     public string Name { get { return m_Name; } set { m_Name = value; } }
     public int ID { get{ return m_ID; } set { m_ID = value; } }
+    #endregion
 
     public Vector3[] InsidePoints
     {
@@ -54,16 +70,8 @@ public class StoreyData : IData
         }
     }
 
-    public StoreyData() : this (0, new ControlPoint[0], new WallPoints[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData())
-    {
-
-    }
-
-    public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.WallPoints, data.ActiveElements, data.WallData, data.PillarData, data.CornerData, data.FloorData)
-    {
-
-    }
-
+    public StoreyData() : this (0, new ControlPoint[0], new WallPoints[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData()){}
+    public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.WallPoints, data.ActiveElements, data.WallData, data.PillarData, data.CornerData, data.FloorData){}
     public StoreyData(int id, ControlPoint[] controlPoints, WallPoints[] wallPoints, StoreyElement activeElements, WallData wallData, PillarData pillarData, CornerData cornerData, FloorData floorData)
     {
         m_ID = id;

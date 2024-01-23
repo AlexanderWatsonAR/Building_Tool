@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using static Codice.Client.BaseCommands.BranchExplorer.Layout.BrExLayout;
 using System;
 using static UnityEngine.Rendering.CoreUtils;
+using UnityEngine.Serialization;
 
 [CustomEditor(typeof(Wall))]
 public class WallEditor : Editor
@@ -38,6 +39,15 @@ public class WallEditor : Editor
             if (evt == null)
                 return;
 
+            bool rebuild = false;
+
+            if(wall.Data.Sections == null || wall.Data.Sections.GetLength(0) < 1 || wall.Data.Sections[0,0] == null ||
+               wall.Data.Sections.GetLength(0) != wall.Data.Columns)
+                rebuild = true;
+
+            if (!rebuild)
+                return;
+
             wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
             wall.Build();
             wall.OnDataChange_Invoke();
@@ -54,6 +64,15 @@ public class WallEditor : Editor
             if (evt == null)
                 return;
 
+            bool rebuild = false;
+
+            if (wall.Data.Sections == null || wall.Data.Sections.GetLength(0) < 1 || wall.Data.Sections[0, 0] == null ||
+            wall.Data.Sections.GetLength(1) != wall.Data.Rows)
+                rebuild = true;
+
+            if (!rebuild)
+                return;
+
             wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
             wall.Build();
             wall.OnDataChange_Invoke();
@@ -67,6 +86,8 @@ public class WallEditor : Editor
 
         sliderContainer.Add(columnsField);
         sliderContainer.Add(rowsField);
+
+        wall.OnDataChange_Invoke();
 
         AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
 

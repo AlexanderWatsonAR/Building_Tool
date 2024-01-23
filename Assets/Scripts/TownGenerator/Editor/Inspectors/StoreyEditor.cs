@@ -16,7 +16,7 @@ public class StoreyEditor : Editor
         VisualElement myInspector = new VisualElement();
 
         // Add a simple label
-        myInspector.Add(new PropertyField(serializedObject.FindProperty("m_Data")));
+        myInspector.Add(new PropertyField(serializedObject.FindProperty("m_Wrapper").FindPropertyRelative("Data")));
 
         // Return the finished inspector UI
         return myInspector;

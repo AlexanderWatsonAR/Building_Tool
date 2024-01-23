@@ -10,7 +10,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class Corner : MonoBehaviour, IBuildable
 {
-    [SerializeField] private CornerData m_Data;
+    [SerializeReference] private CornerData m_Data;
 
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
 

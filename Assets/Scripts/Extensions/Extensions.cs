@@ -269,7 +269,22 @@ public static class Extensions
         }
     }
 
+    public static Vector3[] RotatePolygon(this IEnumerable<Vector3> polygon, Vector3 currentNormal, Vector3 endNormal, Vector3? rotatePoint = null)
+    {
+        Vector3[] positions = polygon.ToArray();
 
+        rotatePoint ??= ProMaths.Average(positions);
+
+        Vector3 euler = Quaternion.FromToRotation(currentNormal, endNormal).eulerAngles;
+        
+        for(int i = 0; i < positions.Length; i++)
+        {
+            Vector3 v = Quaternion.Euler(euler) * (positions[i] - rotatePoint.Value) + rotatePoint.Value;
+            positions[i] = v;
+        }
+
+        return positions;
+    }
     public static Vector3[] ScalePolygon(this IEnumerable<Vector3> polygon, float scaleFactor, Vector3? scalePoint = null)
     {
         return ScalePolygon(polygon, Vector3.one * scaleFactor, scalePoint);

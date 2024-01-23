@@ -14,7 +14,7 @@ public class Door : MonoBehaviour, IBuildable, IDataChangeEvent
 {
     [SerializeField] private ProBuilderMesh m_DoorMesh;
     [SerializeField] private ProBuilderMesh m_DoorHandleMesh;
-    [SerializeField] private DoorData m_Data;
+    [SerializeReference] private DoorData m_Data;
 
     public event Action<IData> OnDataChange;
     public DoorData DoorData => m_Data;

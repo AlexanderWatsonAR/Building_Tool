@@ -10,7 +10,7 @@ using System;
 
 public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
 {
-    [SerializeField] WallData m_Data;
+    [SerializeField] private WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
     public event Action<IData> OnDataChange;
@@ -39,6 +39,7 @@ public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
     public void OnDataChange_Invoke()
     {
         OnDataChange?.Invoke(m_Data);
+        Debug.Log("Wall Data change invoke");
     }
 
     public IBuildable Initialize(IData data)
@@ -123,6 +124,7 @@ public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
                 {
                     WallSectionData sectionData = data as WallSectionData;
                     m_Data.Sections[sectionData.ID.x, sectionData.ID.y] = sectionData;
+                    OnDataChange_Invoke();
                 };
 
             }

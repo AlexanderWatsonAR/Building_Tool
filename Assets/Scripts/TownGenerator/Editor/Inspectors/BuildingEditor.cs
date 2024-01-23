@@ -8,6 +8,8 @@ using UnityEngine.Rendering;
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using UnityEditor.IMGUI.Controls;
+
 
 // Add Poly path stuff
 [CustomEditor(typeof(Building))]
@@ -59,6 +61,7 @@ public class BuildingEditor : Editor
 
         horizontalWrapper.Add(build_btn);
         horizontalWrapper.Add(reset_btn);
+
 
         m_Root.Add(polymodeContainer);
         m_Root.Add(horizontalWrapper);
@@ -197,7 +200,7 @@ public class BuildingEditor : Editor
                         if(m_Path.IsValidPath())
                         {
                             m_Path.CalculateForwards();
-                            m_Building.Initialize(new BuildingData(m_Path)).Build();
+                            m_Building.Initialize(CreateInstance<BuildingData>()).Build();
                         }
                         
                         
@@ -375,17 +378,5 @@ public class BuildingEditor : Editor
         m_Path.OnPolyModeChanged -= DisplayMessages;
         m_Path.PolyMode = PolyMode.Hide;
         m_SelectedHandle = -1;
-    }
-    private void OnDestroy()
-    {
-        if (m_Root == null)
-            return;
-
-        IEnumerable<VisualElement> children = m_Root.Children();
-
-        foreach(VisualElement child in children)
-        {
-            child.Unbind();
-        }
     }
 }

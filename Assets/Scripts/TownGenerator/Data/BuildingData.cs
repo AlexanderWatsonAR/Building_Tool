@@ -4,9 +4,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class BuildingData : IData
+public class BuildingData : ScriptableObject, IData
 {
-    // Should this data just be for saving & loading?
     [SerializeField] private PolyPath m_Path;
     [SerializeField] private List<StoreyData> m_Storeys;
     [SerializeField] private RoofData m_Roof;

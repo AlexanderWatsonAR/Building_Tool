@@ -1,21 +1,12 @@
-using AutoLayout3D;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.ProBuilder.MeshOperations;
-using ProMaths = UnityEngine.ProBuilder.Math;
+
 
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
 public class Building : MonoBehaviour, IBuildable
 {
     [SerializeField] private BuildingData m_Data;
-    [SerializeField] private MaterialPalette m_Palette;
 
     [SerializeField] private bool m_IsPolyPathHandleSelected;
     public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
@@ -24,20 +15,16 @@ public class Building : MonoBehaviour, IBuildable
 
     private void Reset()
     {
-        m_Data = new BuildingData();
+        m_Data = ScriptableObject.CreateInstance<BuildingData>();
     }
-
     private void OnEnable()
     {
         UnityEditor.EditorApplication.update = Update;
     }
-
     private void OnDisable()
     {
         UnityEditor.EditorApplication.update = null;
-
     }
-
     private void Update()
     {
         if (m_Data == null)
@@ -76,7 +63,7 @@ public class Building : MonoBehaviour, IBuildable
 
         for(int i = 0; i < count; i++)
         {
-            StoreyData storey = new StoreyData() { ControlPoints = m_Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
+            StoreyData storey = new StoreyData() { ControlPoints = m_Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString()};
             m_Data.StoreysData.Add(storey);
         }
 
@@ -97,13 +84,14 @@ public class Building : MonoBehaviour, IBuildable
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
+            //m_Data.StoreysData[i].Building = m_Data;
             Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
             storey.Build();
-            storey.OnDataChange += (IData data) =>
-            {
-                StoreyData storeyData = data as StoreyData;
-                m_Data.StoreysData[storeyData.ID] = storeyData;
-            };
+            //storey.OnDataChange += (IData data) =>
+            //{
+            //    StoreyData storeyData = data as StoreyData;
+            //    m_Data.StoreysData[storeyData.ID] = storeyData;
+            //};
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
 

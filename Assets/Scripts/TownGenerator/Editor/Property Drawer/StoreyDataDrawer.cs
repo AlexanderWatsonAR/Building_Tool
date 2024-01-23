@@ -18,6 +18,9 @@ public class StoreyDataDrawer : PropertyDrawer
 
         VisualElement container = new VisualElement();
 
+        if (storeyData.Corners == null || storeyData.Walls == null || storeyData.Pillars == null)
+            return container;
+
         #region Define Visual Elements
         Foldout nameFoldout = new Foldout() { text = storeyData.Name };
 

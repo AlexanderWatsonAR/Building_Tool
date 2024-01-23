@@ -49,7 +49,7 @@ public class WallData : IData
     public Material Material { get { return m_Material; } set { m_Material = value; } }
     public float Height { get { return m_Height; } set { m_Height = value; } }
     public float Depth { get { return m_Depth; } set { m_Depth = value; } }
-    public int Columns => m_Columns;
+    public int Columns { get { return m_Columns; } set { m_Columns = value; } }
     public int Rows => m_Rows;
     public bool IsTriangle { get { return m_IsTriangle; } set { m_IsTriangle = value; } }
 

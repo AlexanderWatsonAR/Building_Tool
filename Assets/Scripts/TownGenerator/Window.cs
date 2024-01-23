@@ -12,7 +12,7 @@ using UnityEngine.UIElements;
 
 public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
 {
-    [SerializeField] private WindowData m_Data;
+    [SerializeReference] private WindowData m_Data;
 
     [SerializeField] private ProBuilderMesh m_OuterFrame;
     [SerializeField] private ProBuilderMesh m_InnerFrame;

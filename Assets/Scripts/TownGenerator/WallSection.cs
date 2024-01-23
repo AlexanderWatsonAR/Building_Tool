@@ -15,6 +15,8 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private WallSectionData m_Data;
 
+    [SerializeField] WallElement m_PreviousElement;
+
     public WallSectionData Data => m_Data;
 
     public event Action<IData> OnDataChange;
@@ -39,7 +41,10 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
 
     public void Build()
     {
-        Debug.Log("Wall Section build", this);
+        if (m_PreviousElement != m_Data.WallElement)
+            transform.DeleteChildren();
+
+        m_PreviousElement = m_Data.WallElement;
 
         switch(m_Data.WallElement)
         {
@@ -349,9 +354,6 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
 
     public void Demolish()
     {
-        // TODO: make the demolish function more sophisticated. 
-        //transform.DeleteChildren();
-
         for (int i = 0; i < transform.childCount; i++)
         {
             if (transform.GetChild(i).TryGetComponent(out IBuildable buildable))

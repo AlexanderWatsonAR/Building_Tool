@@ -266,12 +266,18 @@ public class RoofDataDrawer : PropertyDrawer
             if (roofData.PyramidTiles == null)
                 return;
 
+            bool rebuild = false;
+
             for (int i = 0; i < roofData.PyramidTiles.Length; i++)
             {
+                if(roofData.PyramidTiles[i].Height != evt.changedProperty.floatValue)
+                    rebuild = true;
+
                 roofData.PyramidTiles[i].Height = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            if(rebuild)
+                buildable.Build();
         });
 
         foldout.Add(height);
@@ -290,12 +296,18 @@ public class RoofDataDrawer : PropertyDrawer
             if (roofData.MansardTiles == null)
                 return;
 
+            bool rebuild = false;
+
             for (int i = 0; i < roofData.MansardTiles.Length; i++)
             {
+                if (roofData.MansardTiles[i].Height != evt.changedProperty.floatValue)
+                    rebuild = true;
+
                 roofData.MansardTiles[i].Height = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            if(rebuild)
+                buildable.Build();
         });
 
         PropertyField scale = new PropertyField(m_Props.MansardScale) { label = "Scale" };
@@ -305,13 +317,23 @@ public class RoofDataDrawer : PropertyDrawer
             if (roofData.MansardTiles == null)
                 return;
 
+            bool rebuild = false;
+
+
             for (int i = 0; i < roofData.MansardTiles.Length; i++)
             {
+                if(roofData.MansardTiles[i].ControlPoints[1].T != evt.changedProperty.floatValue ||
+                roofData.MansardTiles[i].ControlPoints[2].T != evt.changedProperty.floatValue)
+                {
+                    rebuild = true;
+                }
+
                 roofData.MansardTiles[i].ControlPoints[1].T = evt.changedProperty.floatValue;
                 roofData.MansardTiles[i].ControlPoints[2].T = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            if(rebuild)
+                buildable.Build();
         });
 
         foldout.Add(height);

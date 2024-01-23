@@ -6,6 +6,8 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Overlays;
 using UnityEngine.Rendering;
+using System.Linq;
+using System.Buffers.Text;
 
 [Overlay(typeof(SceneView), "Building", true)]
 public class BuildingOverlay : Overlay, ITransientOverlay
@@ -16,6 +18,9 @@ public class BuildingOverlay : Overlay, ITransientOverlay
     {
         if (m_Building == null)
             return new VisualElement();
+
+        minSize = Vector2.one * 200f;
+
 
         var root = new VisualElement() { name = "Building Root"};
 
@@ -29,15 +34,80 @@ public class BuildingOverlay : Overlay, ITransientOverlay
         //    }
         //};
 
-        TexturedElement texturedElement = new() { name = "Textured Element"};
+        //VisualElement textureContainer = new VisualElement()
+        //{
+        //    style =
+        //    {
+        //        minHeight = 200,
+        //        minWidth = 200,
+        //        maxHeight = 400,
+        //        maxWidth = 400,
+        //        height = 200,
+        //        width = 200,
+        //        flexGrow = 0,
+        //        flexShrink = 0,
+        //        flexBasis = 0,
+        //    }
+        //};
+
+        //textureContainer.style.alignItems = Align.Center;
+
+        //VisualElement styleElement = new() { style = { height = 10, width = 10 } };
+
         Image image = new Image();
         Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/tex.png");
         image.sprite = Sprite.Create(texture, new Rect(Vector2.zero, new Vector2(200, 200)), Vector2.zero);
-
         root.Add(image);
+
+        Vector3 min, max;
+        Vector3[] polygon = m_Building.Data.Path.ControlPoints.GetPositions();
+        Extensions.MinMax(polygon, out min, out max);
+        Vector3 centre = Vector3.Lerp(min, max, 0.5f);
+
+        polygon = Extensions.RotatePolygon(polygon, Vector3.up, Vector3.forward, centre);
+
+        Extensions.MinMax(polygon, out min, out max);
+
+        Vector3 offset = new Vector3(50, 50);
+
+        for (int i = 0; i < m_Building.Data.Path.ControlPointCount; i++)
+        {
+            CircleVisualElement controlPoint = new CircleVisualElement()
+            {
+                style =
+                {
+                    position = Position.Absolute,
+                    height = 10,
+                    width = 10
+                }
+            };
+
+            // Control Points need to be translated so that they are on the XY plane, currently that are on the XZ plane.
+            // Control Points also need to be scaled so that they fit within the bound of the panel.
+
+            controlPoint.transform.position = new Vector3(100, 100);
+            controlPoint.MarkDirtyRepaint();
+
+            root.Add(controlPoint);
+        }
+
+        //CircleVisualElement texturedElement = new CircleVisualElement()
+        //{
+        //    style =
+        //    { 
+        //        height = 10,
+        //        width = 10
+        //    }
+        //};
+        //texturedElement.transform.position = new Vector3(50, 50, 0);
+
+        //texturedElement.MarkDirtyRepaint();
+
+        //textureContainer.Add(texturedElement);
+
         //root.Add(new Label("This is a label visual element placed inside the square visual element"));
 
-        
+
         return root;
     }
 
@@ -61,7 +131,41 @@ public class BuildingOverlay : Overlay, ITransientOverlay
     }
 }
 
-class SquareVisualElement : VisualElement
+public class CircleVisualElement: VisualElement
+{
+    private float m_Size;
+    private Color m_Colour;
+
+    public CircleVisualElement()
+    {
+        //m_Size = size;
+        m_Colour = Color.black;
+        
+        generateVisualContent += OnGenerateVisualContent;
+        this.AddManipulator(new Clickable(() =>
+        {
+            m_Colour = Color.yellow;
+            Debug.Log("Click");
+            MarkDirtyRepaint();
+        }));
+    }
+
+    // Make a circle
+    private void OnGenerateVisualContent(MeshGenerationContext mgc)
+    {
+        mgc.painter2D.fillColor = m_Colour;
+
+        Rect r = contentRect;
+
+        mgc.painter2D.BeginPath();
+        mgc.painter2D.Arc(r.center, r.width, 0, 360, ArcDirection.Clockwise);
+        mgc.painter2D.ClosePath();
+        mgc.painter2D.Fill();
+
+    }
+}
+
+public class SquareVisualElement : VisualElement
 {
 
     public SquareVisualElement()
@@ -101,7 +205,7 @@ class SquareVisualElement : VisualElement
     }
 }
 
-class TexturedElement : VisualElement
+public class TexturedElement : VisualElement
 {
     static readonly Vertex[] k_Vertices = new Vertex[4];
     static readonly ushort[] k_Indices = { 0, 1, 2, 2, 3, 0 };
@@ -120,18 +224,19 @@ class TexturedElement : VisualElement
         m_Texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/tex.png");
     }
 
-    Texture2D m_Texture;
+    private Texture2D m_Texture;
+    //private Rect rect;
 
     void OnGenerateVisualContent(MeshGenerationContext mgc)
     {
         Rect r = contentRect;
         if (r.width < 0.01f || r.height < 0.01f)
-            return; // Skip rendering when too small.
+            return;
 
         float left = 0;
-        float right = r.width;
+        float right = r.height;
         float top = 0;
-        float bottom = r.height;
+        float bottom = r.width;
 
         k_Vertices[0].position = new Vector3(left, bottom, Vertex.nearZ);
         k_Vertices[1].position = new Vector3(left, top, Vertex.nearZ);
@@ -150,7 +255,5 @@ class TexturedElement : VisualElement
 
         mwd.SetAllVertices(k_Vertices);
         mwd.SetAllIndices(k_Indices);
-
-        
     }
 }

@@ -11,7 +11,7 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public class RoofSection : MonoBehaviour, IBuildable, IDataChangeEvent
 {
-    [SerializeField] private RoofSectionData m_Data;
+    [SerializeReference] private RoofSectionData m_Data;
     public RoofSectionData Data => m_Data;
 
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
