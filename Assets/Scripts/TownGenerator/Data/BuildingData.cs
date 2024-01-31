@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class BuildingData : ScriptableObject, IData
+public class BuildingData : IData
 {
     [SerializeField] private PolyPath m_Path;
     [SerializeField] private List<StoreyData> m_Storeys;

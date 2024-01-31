@@ -10,19 +10,13 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 using Edge = UnityEngine.ProBuilder.Edge;
 using System;
 
-public class Door : MonoBehaviour, IBuildable, IDataChangeEvent
+public class Door : MonoBehaviour, IBuildable
 {
     [SerializeField] private ProBuilderMesh m_DoorMesh;
     [SerializeField] private ProBuilderMesh m_DoorHandleMesh;
     [SerializeReference] private DoorData m_Data;
 
-    public event Action<IData> OnDataChange;
     public DoorData DoorData => m_Data;
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
-    }
 
     public IBuildable Initialize(IData data)
     {

@@ -14,13 +14,6 @@ public class Corner : MonoBehaviour, IBuildable
 
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
 
-    public event Action<CornerData> OnDataChange;
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
-    }
-
     public IBuildable Initialize(IData data)
     {
         m_Data = data as CornerData;

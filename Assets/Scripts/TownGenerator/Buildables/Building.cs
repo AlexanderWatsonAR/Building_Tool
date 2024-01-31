@@ -15,10 +15,13 @@ public class Building : MonoBehaviour, IBuildable
 
     private void Reset()
     {
-        m_Data = ScriptableObject.CreateInstance<BuildingData>();
+        m_Data = new BuildingData();
     }
     private void OnEnable()
     {
+        // Calling build is a quick way of maintaining the object reference after serialization.
+        if(m_Data != null)
+            Build();
         UnityEditor.EditorApplication.update = Update;
     }
     private void OnDisable()
@@ -73,7 +76,6 @@ public class Building : MonoBehaviour, IBuildable
     public void Build()
     {
         transform.DeleteChildren();
-        Debug.Log("Building: Build() ",this);
         if (!m_Data.Path.IsPathValid/* || !m_HasInitialized*/)
             return;
 
@@ -84,14 +86,8 @@ public class Building : MonoBehaviour, IBuildable
             GameObject next = new GameObject("Storey " + i.ToString());
             next.transform.SetParent(transform, false);
             next.transform.localPosition = pos;
-            //m_Data.StoreysData[i].Building = m_Data;
             Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
             storey.Build();
-            //storey.OnDataChange += (IData data) =>
-            //{
-            //    StoreyData storeyData = data as StoreyData;
-            //    m_Data.StoreysData[storeyData.ID] = storeyData;
-            //};
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
 
@@ -99,11 +95,6 @@ public class Building : MonoBehaviour, IBuildable
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
         roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
-        roofGO.GetComponent<Roof>().OnDataChange += data =>
-        {
-            m_Data.RoofData = data as RoofData;
-            Debug.Log("RoofData change");
-        };
     }
 
     public void Demolish()

@@ -50,7 +50,6 @@ public class WallEditor : Editor
 
             wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
             wall.Build();
-            wall.OnDataChange_Invoke();
 
             selectableBoxContainer.Clear();
             AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
@@ -75,7 +74,6 @@ public class WallEditor : Editor
 
             wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
             wall.Build();
-            wall.OnDataChange_Invoke();
 
             selectableBoxContainer.Clear();
             AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
@@ -86,8 +84,6 @@ public class WallEditor : Editor
 
         sliderContainer.Add(columnsField);
         sliderContainer.Add(rowsField);
-
-        wall.OnDataChange_Invoke();
 
         AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
 

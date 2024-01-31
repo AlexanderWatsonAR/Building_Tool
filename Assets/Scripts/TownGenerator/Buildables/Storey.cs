@@ -9,25 +9,13 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
-public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
+public class Storey : MonoBehaviour, IBuildable
 {
     [SerializeField] StoreyDataWrapper m_Wrapper;
 
     //[SerializeReference] private StoreyData m_Data;
     //
-    public event Action<IData> OnDataChange;
-
     public StoreyData Data => m_Wrapper.Data;
-
-    public void OnDataChange_Invoke()
-    {
-
-        //OnDataChange.GetInvocationList()
-
-
-        //OnDataChange?.Invoke(m_Data);
-        //Debug.Log("Storey data change invoke");
-    }
 
     public IBuildable Initialize(IData data)
     {
@@ -64,8 +52,6 @@ public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
         BuildExternalWalls();
         BuildCorners();
         BuildFloor();
-
-        OnDataChange_Invoke();
     }
     private void BuildPillars()
     {
@@ -76,7 +62,6 @@ public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
         {
             Data.Pillars = new PillarData[Data.ControlPoints.Length];
         }
-
 
         GameObject pillars = new GameObject("Pillars");
         pillars.transform.SetParent(transform, false);
@@ -95,12 +80,6 @@ public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
             Data.Pillars[i] ??= CalculatePillar(i);
 
             pillar.Initialize(Data.Pillars[i]).Build();
-            pillar.OnDataChange += data =>
-            { 
-                PillarData pillarData = data as PillarData;
-                Data.Pillars[pillarData.ID] = pillarData;
-                OnDataChange_Invoke();
-            };
         }
     }
     private void BuildCorners()
@@ -126,7 +105,6 @@ public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
 
             Data.Corners[i] = CalculateCorner(i);
             corner.Initialize(Data.Corners[i]).Build();
-            corner.OnDataChange += (CornerData data) => { Data.Corners[data.ID] = data; OnDataChange_Invoke(); };
         }
     }
     private void BuildExternalWalls()
@@ -159,12 +137,6 @@ public class Storey : MonoBehaviour, IBuildable, IDataChangeEvent
         wallMesh.name = "Wall " + data.ID.ToString();
         Wall wall = wallMesh.AddComponent<Wall>(); 
         wall.Initialize(data).Build();
-        wall.OnDataChange += (IData data) =>
-        {
-            WallData wallData = data as WallData;
-            Data.Walls[wallData.ID] = wallData;
-            OnDataChange_Invoke();
-        };
         return wall;
     }
     private void BuildFloor()

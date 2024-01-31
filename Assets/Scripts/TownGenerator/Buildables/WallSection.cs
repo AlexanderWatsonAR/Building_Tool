@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine.ProBuilder.Shapes;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
-public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
+public class WallSection : MonoBehaviour, IBuildable
 {
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeField] private WallSectionData m_Data;
@@ -18,19 +18,6 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
     [SerializeField] WallElement m_PreviousElement;
 
     public WallSectionData Data => m_Data;
-
-    public event Action<IData> OnDataChange;
-
-    //// Temp variables for testing
-    //List<IList<Vector3>> m_Points;
-    //List<Vector3> m_Grid;
-    //Vector3 m_Centre;
-    //// end of temp
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
-    }
 
     public IBuildable Initialize(IData wallSectionData)
     {
@@ -372,85 +359,5 @@ public class WallSection : MonoBehaviour, IBuildable, IDataChangeEvent
 
         DestroyImmediate(mesh.gameObject);
         return this;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        //if (m_ProBuilderMesh == null)
-        //    return;
-
-        //if (m_Points == null)
-        //    return;
-
-        //for (int i = 0; i < m_Points.Count(); i++)
-        //{
-        //    for (int j = 0; j < m_Points[i].Count(); j++)
-        //    {
-        //        //Handles.DotHandleCap(0, m_Points[i][j], Quaternion.identity, 0.01f, EventType.Repaint);
-        //    }
-
-        //}
-
-        //List<Vector3> positions = m_ProBuilderMesh.positions.ToList();
-
-        //GUIStyle style = new GUIStyle();
-        //style.fontSize = 18;
-        //style.normal.textColor = Color.red;
-
-        //for(int i = 0; i < m_ProBuilderMesh.faces[0].distinctIndexes.Count(); i++)
-        //{
-        //    int index = m_ProBuilderMesh.faces[0].distinctIndexes[i];
-
-        //    Handles.Label(positions[index], index.ToString(), style);
-        //}
-
-        //if (m_Grid == null)
-        //    return;
-
-        //for(int x = 0; x < m_Grid.Count; x++) // cols
-        //{
-        //    Handles.color = Color.yellow;
-        //    Handles.DotHandleCap(0, m_Grid[x], Quaternion.identity, 0.02f, EventType.Repaint);
-
-        //    //for(int y = 0; y < m_Grid.GetLength(1)-1; y++) // rows
-        //    //{
-        //    //    Vector3 bl = m_Grid[x,y];
-        //    //    Vector3 tl = m_Grid[x, y + 1];
-        //    //    Vector3 tr = m_Grid[x + 1, y + 1];
-        //    //    Vector3 br = m_Grid[x + 1, y];
-
-        //    //    Vector3[] quad = new Vector3[] { bl, tl, tr, br };
-
-        //    //    Handles.DrawAAPolyLine(quad);
-        //    //    Handles.DrawAAPolyLine(quad[0], quad[3]);
-        //    //}
-        //}
-
-        //Vector3 forward = Vector3.Cross(m_ControlPoints[0].DirectionToTarget(m_ControlPoints[3]), Vector3.up);
-        //Quaternion rotation = Quaternion.FromToRotation(Vector3.up, forward);
-
-        //for (int i = 0; i < m_WindowFrameColumns; i++)
-        //{
-        //    for(int j = 0; j < m_WindowFrameRows; j++)
-        //    {
-        //        Vector3 bl = m_Grid[j][i];
-        //        Vector3 tl = m_Grid[j + 1][i];
-        //        Vector3 tr = m_Grid[j + 1][i + 1];
-        //        Vector3 br = m_Grid[j][i + 1];
-
-        //        Vector3[] quad = new Vector3[] { bl, tl, tr, br };
-
-
-        //        for (int k = 0; k < quad.Length; k++)
-        //        {
-        //            Vector3 euler = rotation.eulerAngles;
-        //            Vector3 v = Quaternion.Euler(euler) * (quad[k] - m_Centre) + m_Centre;
-        //            quad[k] = v;
-        //        }
-
-        //        Handles.DrawAAPolyLine(quad);
-        //        Handles.DrawAAPolyLine(quad[0], quad[3]);
-        //    }
-        //}
     }
 }

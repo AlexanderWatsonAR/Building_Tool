@@ -154,7 +154,6 @@ public class BuildingEditor : Editor
         Plane plane = new Plane(Vector3.up, Vector3.zero); // XZ plane (upward)
         bool didHit = plane.Raycast(ray, out float enter);
         Vector3 hit = ray.GetPoint(enter);
-        //bool didHit = Physics.Raycast(ray, out RaycastHit hit);
 
         if (didHit)
         {
@@ -200,7 +199,7 @@ public class BuildingEditor : Editor
                         if(m_Path.IsValidPath())
                         {
                             m_Path.CalculateForwards();
-                            m_Building.Initialize(CreateInstance<BuildingData>()).Build();
+                            m_Building.Initialize(new BuildingData(m_Path)).Build();
                         }
                         
                         

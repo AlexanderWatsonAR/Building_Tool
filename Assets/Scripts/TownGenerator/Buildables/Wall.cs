@@ -8,12 +8,10 @@ using System.Linq;
 using UnityEditor;
 using System;
 
-public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
+public class Wall : MonoBehaviour, IBuildable
 {
     [SerializeField] private WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
-
-    public event Action<IData> OnDataChange;
 
     private List<Vector3[]> SubPoints
     {
@@ -35,12 +33,6 @@ public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
     }
 
     public WallData Data => m_Data;
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
-        Debug.Log("Wall Data change invoke");
-    }
 
     public IBuildable Initialize(IData data)
     {
@@ -119,14 +111,6 @@ public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
 
                 WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[x, y]) as WallSection;
                 wallSection.Build();
-
-                wallSection.OnDataChange += data =>
-                {
-                    WallSectionData sectionData = data as WallSectionData;
-                    m_Data.Sections[sectionData.ID.x, sectionData.ID.y] = sectionData;
-                    OnDataChange_Invoke();
-                };
-
             }
         }
     }
@@ -134,44 +118,5 @@ public class Wall : MonoBehaviour, IBuildable, IDataChangeEvent
     public void Demolish()
     {
 
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        //if (m_Points == null)
-        //    return;
-
-        //if (m_Rows != 0 && m_Columns != 0)
-        //{
-        //    List<Vector3[]> subPoints = SubPoints; // cols by rows
-
-        //    for (int i = 0; i < m_Columns; i++)
-        //    {
-        //        for (int j = 0; j < m_Rows; j++)
-        //        {
-        //            Vector3 first = subPoints[i + 0][j + 0];
-        //            Vector3 second = subPoints[i + 0][j + 1];
-        //            Vector3 third = subPoints[i + 1][j + 1];
-        //            Vector3 fourth = subPoints[i + 1][j + 0];
-
-        //            Vector3 dir = first.DirectionToTarget(fourth);
-        //            Vector3 cross = Vector3.Cross(Vector3.up, dir) * m_Depth;
-
-        //            first += cross;
-        //            second += cross;
-        //            third += cross;
-        //            fourth += cross;
-
-        //            first += transform.position;
-        //            second += transform.position;
-        //            third += transform.position;
-        //            fourth += transform.position;
-
-        //            Handles.DrawAAPolyLine(first, second, third, fourth);
-        //            Handles.DrawAAPolyLine(first, fourth);
-
-        //        }
-        //    }
-        //}
     }
 }

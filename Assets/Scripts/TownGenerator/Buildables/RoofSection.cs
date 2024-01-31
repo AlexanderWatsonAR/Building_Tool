@@ -9,7 +9,7 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using ProMaths = UnityEngine.ProBuilder.Math;
 
-public class RoofSection : MonoBehaviour, IBuildable, IDataChangeEvent
+public class RoofSection : MonoBehaviour, IBuildable
 {
     [SerializeReference] private RoofSectionData m_Data;
     public RoofSectionData Data => m_Data;
@@ -19,14 +19,6 @@ public class RoofSection : MonoBehaviour, IBuildable, IDataChangeEvent
     // --------- Window Properties--------------------
     [SerializeField] private WindowData m_WindowData;
     //---------- End of Window Properties -----------
-
-    public event Action<IData> OnDataChange;
-    
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
-    }
 
     public IBuildable Initialize(IData data)
     {

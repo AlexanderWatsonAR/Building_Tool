@@ -6,17 +6,10 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
-public class Pillar : MonoBehaviour, IBuildable, IDataChangeEvent
+public class Pillar : MonoBehaviour, IBuildable
 {
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
     [SerializeReference] private PillarData m_Data;
-
-    public event Action<IData> OnDataChange;
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
-    }
 
     public IBuildable Initialize(IData data)
     {

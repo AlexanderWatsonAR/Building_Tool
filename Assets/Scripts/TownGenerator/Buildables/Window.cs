@@ -10,7 +10,7 @@ using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UIElements;
 
-public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
+public class Window : MonoBehaviour, IBuildable
 {
     [SerializeReference] private WindowData m_Data;
 
@@ -20,8 +20,6 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
     [SerializeField] private ProBuilderMesh m_LeftShutter, m_RightShutter;
 
     public WindowData Data => m_Data;
-
-    public event Action<IData> OnDataChange;
 
     public IBuildable Initialize(IData data)
     {
@@ -35,11 +33,6 @@ public class Window : MonoBehaviour, IBuildable, IDataChangeEvent
         m_Data.Position = Vector3.Lerp(min, max, 0.5f);
 
         return this;
-    }
-
-    public void OnDataChange_Invoke()
-    {
-        OnDataChange?.Invoke(m_Data);
     }
 
     public void SetPosition(Vector3 position)
