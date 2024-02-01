@@ -12,13 +12,10 @@ public class StoreyEditor : Editor
     {
         serializedObject.Update();
 
-        // Create a new VisualElement to be the root of our inspector UI
         VisualElement myInspector = new VisualElement();
 
-        // Add a simple label
-        myInspector.Add(new PropertyField(serializedObject.FindProperty("m_Wrapper").FindPropertyRelative("Data")));
+        myInspector.Add(new PropertyField(serializedObject.FindProperty("m_Data")));
 
-        // Return the finished inspector UI
         return myInspector;
     }
 

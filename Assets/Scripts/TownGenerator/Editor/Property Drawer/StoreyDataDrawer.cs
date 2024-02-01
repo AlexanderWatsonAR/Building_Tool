@@ -9,7 +9,7 @@ using Unity.VisualScripting;
 
 [CustomPropertyDrawer(typeof(StoreyData))]
 public class StoreyDataDrawer : PropertyDrawer
-{
+{//
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
         StoreyDataSerializedProperties props = new StoreyDataSerializedProperties(data);
@@ -32,6 +32,7 @@ public class StoreyDataDrawer : PropertyDrawer
 
         PropertyField wallHeightField = new PropertyField(props.Wall.Height);
         wallHeightField.BindProperty(props.Wall.Height);
+        wallHeightField.SetEnabled(buildable is Building);
 
         PropertyField wallDepthField = new PropertyField(props.Wall.Depth);
         wallDepthField.BindProperty(props.Wall.Depth);

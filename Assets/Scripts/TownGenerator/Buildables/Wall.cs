@@ -10,7 +10,7 @@ using System;
 
 public class Wall : MonoBehaviour, IBuildable
 {
-    [SerializeField] private WallData m_Data;
+    [SerializeReference] private WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
     private List<Vector3[]> SubPoints

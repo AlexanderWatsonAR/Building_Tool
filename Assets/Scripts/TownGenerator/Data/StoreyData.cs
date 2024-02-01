@@ -12,8 +12,7 @@ public class StoreyData : IData
     // the StoreyData inside Building but a copy of the StoreyData from building. As such, When making changes in the Storey inspector we are altering the copy
     // and not changing the original StoreyData.
 
-    // Test note: 16-01-2023 - attempted to modify data in the storey & building inspector. data changed but then went back to the default.
-    // 17-01-2023 - Removing the serialized reference to the building data stopped the storey reset from happening.
+
     #region Member Variables
     [SerializeField, HideInInspector] private int m_ID;
     [SerializeField, HideInInspector] private string m_Name;
@@ -31,10 +30,6 @@ public class StoreyData : IData
     [SerializeField, HideInInspector] private PillarData[] m_Pillars;
     [SerializeField, HideInInspector] private CornerData[] m_Corners;
     #endregion
-
-    //[SerializeReference] private BuildingData TheBuilding;
-
-    //public BuildingData Building { get { return TheBuilding; } set { TheBuilding = value; } }
 
     #region Accessors
     public WallData WallData => m_Wall;

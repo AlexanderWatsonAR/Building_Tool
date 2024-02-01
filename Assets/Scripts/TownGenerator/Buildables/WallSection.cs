@@ -13,7 +13,7 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 public class WallSection : MonoBehaviour, IBuildable
 {
     [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
-    [SerializeField] private WallSectionData m_Data;
+    [SerializeReference] private WallSectionData m_Data;
 
     [SerializeField] WallElement m_PreviousElement;
 
@@ -23,7 +23,7 @@ public class WallSection : MonoBehaviour, IBuildable
     {
         m_Data = wallSectionData as WallSectionData;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        return this;
+        return this;//
     }
 
     public void Build()
