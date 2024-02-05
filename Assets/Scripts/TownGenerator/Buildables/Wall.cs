@@ -83,7 +83,9 @@ public class Wall : MonoBehaviour, IBuildable
 
         transform.DeleteChildren();
 
-        m_Data.Sections ??= new WallSectionData[m_Data.Columns, m_Data.Rows];
+        m_Data.Sections ??= new WallSectionData[m_Data.Columns * m_Data.Rows];
+
+        int count = 0;
 
         for (int x = 0; x < m_Data.Columns; x++)
         {
@@ -94,6 +96,8 @@ public class Wall : MonoBehaviour, IBuildable
                 Vector3 third = subPoints[y + 1][x + 1];
                 Vector3 fourth = subPoints[y][x + 1];
 
+                
+
                 Vector3[] points = new Vector3[] { first, second, third, fourth };
 
                 ProBuilderMesh wallSectionMesh = ProBuilderMesh.Create();
@@ -101,16 +105,25 @@ public class Wall : MonoBehaviour, IBuildable
                 wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
                 wallSectionMesh.transform.SetParent(transform, false);
 
-                m_Data.Sections[x, y] ??= new WallSectionData(m_Data.SectionData)
+                try
                 {
-                    ID = new Vector2Int(x, y)
-                };
+                    m_Data.Sections[count] ??= new WallSectionData(m_Data.SectionData)
+                    {
+                        ID = new Vector2Int(x, y)
+                    };
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Debug.Break();
+                }
+                
 
-                m_Data.Sections[x, y].ControlPoints = points;
-                m_Data.Sections[x, y].WallDepth = m_Data.Depth;
+                m_Data.Sections[count].ControlPoints = points;
+                m_Data.Sections[count].WallDepth = m_Data.Depth;
 
-                WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[x, y]) as WallSection;
+                WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[count]) as WallSection;
                 wallSection.Build();
+                count++;
             }
         }
     }

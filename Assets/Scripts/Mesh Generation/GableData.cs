@@ -232,7 +232,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] lExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
@@ -242,7 +241,6 @@ public static class GablePersistentData
         new bool[] { false, true, true, false },
         new bool[] { false, true, false, true }
     };
-
     public static readonly bool[][] arrowExtend = new bool[][]
     {
         new bool[] { false, true, true, false },
@@ -255,7 +253,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] simpleNExtend = new bool[][]
     {
         new bool[] { false, true, false, false },
@@ -267,7 +264,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] tExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
@@ -279,7 +275,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] uExtend = new bool[][]
     {
         new bool[] { false, true, false, false },
@@ -291,7 +286,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] yExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
@@ -304,7 +298,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] fExtend = new bool[][]
     {
         new bool[] { false, true, true, false },
@@ -423,7 +416,6 @@ public static class GablePersistentData
         new bool[] {  false, true, false, true },
         new bool[] {  false, true, false, true }
     };
-
     public static readonly bool[][] xExtend = new bool[][]
     {
         new bool[] {  false, true, true, false },

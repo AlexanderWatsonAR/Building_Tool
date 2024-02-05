@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[ExecuteInEditMode]
+[ExecuteAlways]
 [DisallowMultipleComponent]
 public class Building : MonoBehaviour, IBuildable
 {
@@ -15,6 +15,7 @@ public class Building : MonoBehaviour, IBuildable
 
     private void Reset()
     {
+        //
         m_Data = new BuildingData();
     }
     private void OnEnable()

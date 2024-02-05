@@ -97,44 +97,44 @@ public class RoofTile : MonoBehaviour, IBuildable
 
     private void OnDrawGizmosSelected()
     {
-        if (m_Data.ControlPoints == null)
-            return;
+        //if (m_Data.ControlPoints == null)
+        //    return;
 
-        if (m_Data.Columns == 0 || m_Data.Rows == 0)
-            return;
+        //if (m_Data.Columns == 0 || m_Data.Rows == 0)
+        //    return;
 
-        List<Vector3[]> subPoints = SubPoints;
+        //List<Vector3[]> subPoints = SubPoints;
 
-        if (m_Data.Rows != 0 && m_Data.Columns != 0)
-        {
-            for (int i = 0; i < m_Data.Columns; i++)
-            {
-                for (int j = 0; j < m_Data.Rows; j++)
-                {
-                    Vector3 bl = subPoints[j + 0][i + 0];
-                    Vector3 tl = subPoints[j + 0][i + 1];
-                    Vector3 tr = subPoints[j + 1][i + 1];
-                    Vector3 br = subPoints[j + 1][i + 0];
+        //if (m_Data.Rows != 0 && m_Data.Columns != 0)
+        //{
+        //    for (int i = 0; i < m_Data.Columns; i++)
+        //    {
+        //        for (int j = 0; j < m_Data.Rows; j++)
+        //        {
+        //            Vector3 bl = subPoints[j + 0][i + 0];
+        //            Vector3 tl = subPoints[j + 0][i + 1];
+        //            Vector3 tr = subPoints[j + 1][i + 1];
+        //            Vector3 br = subPoints[j + 1][i + 0];
 
-                    Vector3 dir = bl.DirectionToTarget(br);
-                    Vector3 cross = Vector3.Cross(bl.DirectionToTarget(tl), dir) * m_Data.Thickness;
+        //            Vector3 dir = bl.DirectionToTarget(br);
+        //            Vector3 cross = Vector3.Cross(bl.DirectionToTarget(tl), dir) * m_Data.Thickness;
 
-                    bl += cross;
-                    tl += cross;
-                    tr += cross;
-                    br += cross;
+        //            bl += cross;
+        //            tl += cross;
+        //            tr += cross;
+        //            br += cross;
 
-                    bl += transform.position;
-                    tl += transform.position;
-                    tr += transform.position;
-                    br += transform.position;
+        //            bl += transform.position;
+        //            tl += transform.position;
+        //            tr += transform.position;
+        //            br += transform.position;
 
-                    Handles.DrawAAPolyLine(bl, tl, tr, br);
-                    Handles.DrawAAPolyLine(bl, br);
+        //            Handles.DrawAAPolyLine(bl, tl, tr, br);
+        //            Handles.DrawAAPolyLine(bl, br);
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
     }
 
 }

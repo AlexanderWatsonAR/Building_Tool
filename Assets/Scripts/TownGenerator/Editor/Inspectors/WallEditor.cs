@@ -41,14 +41,14 @@ public class WallEditor : Editor
 
             bool rebuild = false;
 
-            if(wall.Data.Sections == null || wall.Data.Sections.GetLength(0) < 1 || wall.Data.Sections[0,0] == null ||
-               wall.Data.Sections.GetLength(0) != wall.Data.Columns)
+            if(wall.Data.Sections == null || wall.Data.Sections.Length < 1 || wall.Data.Sections[0] == null || wall.Data.Sections.Length != wall.Data.Columns * wall.Data.Rows)
                 rebuild = true;
 
             if (!rebuild)
                 return;
 
-            wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
+            Debug.Log("Sections have been re-initialized");
+            wall.Data.Sections = new WallSectionData[wall.Data.Columns * wall.Data.Rows];
             wall.Build();
 
             selectableBoxContainer.Clear();
@@ -65,14 +65,14 @@ public class WallEditor : Editor
 
             bool rebuild = false;
 
-            if (wall.Data.Sections == null || wall.Data.Sections.GetLength(0) < 1 || wall.Data.Sections[0, 0] == null ||
-            wall.Data.Sections.GetLength(1) != wall.Data.Rows)
+            if (wall.Data.Sections == null || wall.Data.Sections.Length < 1 || wall.Data.Sections[0] == null || wall.Data.Sections.Length != wall.Data.Columns * wall.Data.Rows)
                 rebuild = true;
 
             if (!rebuild)
                 return;
 
-            wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
+            Debug.Log("Sections have been re-initialized");
+            wall.Data.Sections = new WallSectionData[wall.Data.Columns * wall.Data.Rows];
             wall.Build();
 
             selectableBoxContainer.Clear();

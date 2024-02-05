@@ -42,11 +42,15 @@ public class PolyBuildingEditorWindow : EditorWindow
         (
             () =>
             {
-                //AssetDatabase.CreateAsset(m_ActiveBuilding.Data, "Assets/w")
+                // Error: You can use this to create an asset from a game object.
+                AssetDatabase.CreateAsset(m_ActiveBuilding, "Assets/Export/" + m_ActiveBuilding.name + ".asset");
             }
-        );
+        )
+        { text = "Save Building"};
+       
 
        rootVisualElement.Add(newPolyBuilding_btn);
+       rootVisualElement.Add(save_btn);
     }
 
 

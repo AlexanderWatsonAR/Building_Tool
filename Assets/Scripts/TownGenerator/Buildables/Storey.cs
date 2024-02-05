@@ -200,7 +200,7 @@ public class Storey : MonoBehaviour, IBuildable
     private WallData CalculateWall(int wallIndex)
     {
         WallData wallData = m_Data.WallData;
-        wallData.Sections = new WallSectionData[wallData.Columns, wallData.Rows];
+        wallData.Sections = new WallSectionData[wallData.Columns * wallData.Rows];
 
         m_Data.WallPoints = new WallPoints[m_Data.ControlPoints.Length];
 

@@ -15,9 +15,9 @@ public class WallData : IData
     [SerializeField, Range(1, 50)] private float m_Height;
     [SerializeField, Range(0, 1)] private float m_Depth;
     [SerializeField, HideInInspector] private bool m_IsTriangle;
-    [SerializeField, HideInInspector] Material m_Material;
+    [SerializeField, HideInInspector] private Material m_Material;
     [SerializeField] private WallSectionData m_SectionData;
-    [SerializeField] private WallSectionData[,] m_Sections;
+    [SerializeField] private WallSectionData[] m_Sections; // Sections doesn't seem to be serialized properly (when it was a 2D array)
     #endregion
 
 
@@ -51,10 +51,10 @@ public class WallData : IData
     public int Columns { get { return m_Columns; } set { m_Columns = value; } }
     public int Rows => m_Rows;
     public bool IsTriangle { get { return m_IsTriangle; } set { m_IsTriangle = value; } }
-    public WallSectionData[,] Sections { get { return m_Sections; } set { m_Sections = value; } }
+    public WallSectionData[] Sections { get { return m_Sections; } set { m_Sections = value; } }
     #endregion
 
-    public WallData(): this(null, null, Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1,1], null)
+    public WallData(): this(null, null, Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1], null)
     {
 
     }
@@ -62,7 +62,7 @@ public class WallData : IData
     {
 
     }
-    public WallData(ControlPoint wallStart, ControlPoint wallEnd, Vector3 normal, int columns, int rows, float height, float depth, WallSectionData[,] sections, Material material)
+    public WallData(ControlPoint wallStart, ControlPoint wallEnd, Vector3 normal, int columns, int rows, float height, float depth, WallSectionData[] sections, Material material)
     {
         m_Start = wallStart;
         m_End = wallEnd;

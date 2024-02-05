@@ -397,7 +397,7 @@ public class WindowDataDrawer : PropertyDrawer
                 {
                     Wall wall = buildable as Wall;
                     dataset = new WindowData[1];
-                    dataset[0] = wall.Data.Sections[0, 0].WindowData; // TODO: Replace 0,0 with the actively selected section
+                    dataset[0] = wall.Data.Sections[0].WindowData; // TODO: Replace 0,0 with the actively selected section
                 }
                 break;
             case WallSection:

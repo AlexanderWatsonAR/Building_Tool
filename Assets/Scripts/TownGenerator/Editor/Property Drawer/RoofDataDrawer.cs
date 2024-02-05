@@ -310,8 +310,10 @@ public class RoofDataDrawer : PropertyDrawer
                 buildable.Build();
         });
 
-        PropertyField scale = new PropertyField(m_Props.MansardScale) { label = "Scale" };
-        scale.BindProperty(m_Props.MansardScale);
+        PropertyField scale = new PropertyField(m_Props.MansardScale, "Scale") { label = "Scale" };
+        scale.label = "Scale";
+        //scale.
+        //scale.BindProperty(m_Props.MansardScale);
         scale.RegisterValueChangeCallback(evt =>
         {
             if (roofData.MansardTiles == null)
