@@ -96,8 +96,6 @@ public class Wall : MonoBehaviour, IBuildable
                 Vector3 third = subPoints[y + 1][x + 1];
                 Vector3 fourth = subPoints[y][x + 1];
 
-                
-
                 Vector3[] points = new Vector3[] { first, second, third, fourth };
 
                 ProBuilderMesh wallSectionMesh = ProBuilderMesh.Create();
