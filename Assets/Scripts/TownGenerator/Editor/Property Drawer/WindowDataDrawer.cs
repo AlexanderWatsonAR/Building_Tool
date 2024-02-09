@@ -13,24 +13,21 @@ public class WindowDataDrawer : PropertyDrawer
     {
         VisualElement container = new VisualElement();
 
+        WindowDataSerializedProperties props = new WindowDataSerializedProperties(data);
+
         IBuildable buildable = data.serializedObject.targetObject as IBuildable;
 
-        SerializedProperty activeElements = data.FindPropertyRelative("m_ActiveElements");
-
-        EnumFlagsField activeElementsField = new EnumFlagsField(activeElements.GetEnumValue<WindowElement>());
-        activeElementsField.BindProperty(activeElements);
+        PropertyField activeElementsField = new PropertyField(props.ActiveElements);
+        activeElementsField.BindProperty(props.ActiveElements);
 
         #region Outer Frame
-        SerializedProperty outerScale = data.FindPropertyRelative("m_OuterFrameScale");
-        SerializedProperty outerFrameDepth = data.FindPropertyRelative("m_OuterFrameDepth");
-
         Foldout outerFrameFoldout = new Foldout() { text = "Outer Frame"};
 
-        PropertyField outerScaleField = new PropertyField(outerScale) { label = "Scale"};
-        outerScaleField.BindProperty(outerScale);
+        PropertyField outerScaleField = new PropertyField(props.OuterFrameScale) { label = "Scale"};
+        outerScaleField.BindProperty(props.OuterFrameScale);
 
-        PropertyField outerFrameDepthField = new PropertyField(outerFrameDepth) { label = "Depth" };
-        outerFrameDepthField.BindProperty(outerFrameDepth);
+        PropertyField outerFrameDepthField = new PropertyField(props.OuterFrameDepth) { label = "Depth" };
+        outerFrameDepthField.BindProperty(props.OuterFrameDepth);
 
         outerFrameFoldout.Add(outerScaleField);
         outerFrameFoldout.Add(outerFrameDepthField);
@@ -38,25 +35,19 @@ public class WindowDataDrawer : PropertyDrawer
         #endregion
 
         #region Inner Frame
-
-        SerializedProperty cols = data.FindPropertyRelative("m_InnerFrameColumns");
-        SerializedProperty rows = data.FindPropertyRelative("m_InnerFrameRows");
-        SerializedProperty innerFrameScale = data.FindPropertyRelative("m_InnerFrameScale");
-        SerializedProperty innerFrameDepth = data.FindPropertyRelative("m_InnerFrameDepth");
-
         Foldout innerFrameFoldout = new Foldout() { text = "Inner Frame" };
 
-        PropertyField colsField = new PropertyField(cols) { label = "Columns" };
-        colsField.BindProperty(cols);
+        PropertyField colsField = new PropertyField(props.InnerFrameColumns) { label = "Columns" };
+        colsField.BindProperty(props.InnerFrameColumns);
 
-        PropertyField rowsField = new PropertyField(rows) { label = "Rows" };
-        rowsField.BindProperty(rows);
+        PropertyField rowsField = new PropertyField(props.InnerFrameRows) { label = "Rows" };
+        rowsField.BindProperty(props.InnerFrameRows);
 
-        PropertyField innerFrameScaleField = new PropertyField(innerFrameScale) { label = "Scale" };
-        innerFrameScaleField.BindProperty(innerFrameScale);
+        PropertyField innerFrameScaleField = new PropertyField(props.InnerFrameScale) { label = "Scale" };
+        innerFrameScaleField.BindProperty(props.InnerFrameScale);
 
-        PropertyField innerFrameDepthField = new PropertyField(innerFrameDepth) { label = "Depth" };
-        innerFrameDepthField.BindProperty(innerFrameDepth);
+        PropertyField innerFrameDepthField = new PropertyField(props.InnerFrameDepth) { label = "Depth" };
+        innerFrameDepthField.BindProperty(props.InnerFrameDepth);
 
         innerFrameFoldout.Add(colsField);
         innerFrameFoldout.Add(rowsField);
@@ -66,28 +57,23 @@ public class WindowDataDrawer : PropertyDrawer
         #endregion
 
         #region Pane
-        SerializedProperty paneDepth = data.FindPropertyRelative("m_PaneDepth");
-
         Foldout paneFoldout = new Foldout() { text = "Pane" };
 
-        PropertyField paneDepthField = new PropertyField(paneDepth) { label = "Depth" };
-        paneDepthField.BindProperty(paneDepth);
+        PropertyField paneDepthField = new PropertyField(props.PaneDepth) { label = "Depth" };
+        paneDepthField.BindProperty(props.PaneDepth);
 
         paneFoldout.Add(paneDepthField);
 
         #endregion
 
         #region Shutters
-        SerializedProperty shuttersDepth = data.FindPropertyRelative("m_ShuttersDepth");
-        SerializedProperty shuttersAngle = data.FindPropertyRelative("m_ShuttersAngle");
-
         Foldout shuttersFoldout = new Foldout() { text = "Shutters" };
 
-        PropertyField shuttersDepthField = new PropertyField(shuttersDepth) { label = "Depth" };
-        shuttersDepthField.BindProperty(shuttersDepth);
+        PropertyField shuttersDepthField = new PropertyField(props.ShuttersDepth) { label = "Depth" };
+        shuttersDepthField.BindProperty(props.ShuttersDepth);
 
-        PropertyField shuttersAngleField = new PropertyField(shuttersAngle) { label = "Angle" };
-        shuttersAngleField.BindProperty(shuttersAngle);
+        PropertyField shuttersAngleField = new PropertyField(props.ShuttersAngle) { label = "Angle" };
+        shuttersAngleField.BindProperty(props.ShuttersAngle);
 
         shuttersFoldout.Add(shuttersDepthField);
         shuttersFoldout.Add(shuttersAngleField);
@@ -95,15 +81,12 @@ public class WindowDataDrawer : PropertyDrawer
         #endregion
 
         #region Register Value Change Callback
-        activeElementsField.RegisterValueChangedCallback(evt => 
+        activeElementsField.RegisterValueChangeCallback(evt => 
         {
             if (evt == null)
                 return;
 
-            if (evt.newValue == null)
-                return;
-
-            WindowElement currentlyActive = (WindowElement) evt.newValue;
+            WindowElement currentlyActive = evt.changedProperty.GetEnumValue<WindowElement>();
 
             bool isOuterFrameActive = currentlyActive.IsElementActive(WindowElement.OuterFrame);
             bool isInnerFrameActive = currentlyActive.IsElementActive(WindowElement.InnerFrame);
@@ -115,10 +98,9 @@ public class WindowDataDrawer : PropertyDrawer
             paneFoldout.SetEnabled(isPaneActive);
             shuttersFoldout.SetEnabled(areShuttersActive);
 
-            if (evt.newValue == evt.previousValue)
-                return;
-
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
+
+            bool rebuild = false;
 
             foreach (WindowData win in windows)
             {
@@ -128,24 +110,41 @@ public class WindowDataDrawer : PropertyDrawer
                 bool wereShuttersActive = win.AreShuttersActive;
 
                 if (isOuterFrameActive == true && wasOuterFrameActive == false)
+                {
                     win.DoesOuterFrameNeedRebuild = true;
+                    rebuild = true;
+                }
+                    
                 if (isInnerFrameActive == true && wasInnerFrameActive == false)
+                {
                     win.DoesInnerFrameNeedRebuild = true;
+                    rebuild = true;
+                }
+                    
                 if (isPaneActive == true && wasPaneActive == false)
+                {
                     win.DoesPaneNeedRebuild = true;
+                    rebuild = true;
+                }
+                    
                 if (areShuttersActive == true && wereShuttersActive == false)
+                {
                     win.DoShuttersNeedRebuild = true;
+                    rebuild = true;
+                }
 
                 if(buildable is not Window)
                     win.ActiveElements = currentlyActive;
             }
 
-            if(isOuterFrameActive || isInnerFrameActive || isPaneActive || areShuttersActive)
+            if(rebuild)
             {
                 buildable.Demolish();
                 buildable.Build();
             }
         });
+
+        #region Outer Frame
         outerScaleField.RegisterValueChangeCallback(evt => 
         {
             if (evt == null)
@@ -196,6 +195,9 @@ public class WindowDataDrawer : PropertyDrawer
                 buildable.Build();
             }
         });
+        #endregion
+
+        #region Inner Frame
         colsField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
@@ -299,6 +301,9 @@ public class WindowDataDrawer : PropertyDrawer
                 buildable.Build();
             }
         });
+        #endregion
+
+        #region Pane
         paneDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
@@ -324,6 +329,9 @@ public class WindowDataDrawer : PropertyDrawer
                 buildable.Build();
             }
         });
+        #endregion
+
+        #region Shutters
         shuttersDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
@@ -375,6 +383,7 @@ public class WindowDataDrawer : PropertyDrawer
             }
         });
         #endregion
+        #endregion
 
         #region Add Fields to Container
         container.Add(activeElementsField);
@@ -395,9 +404,9 @@ public class WindowDataDrawer : PropertyDrawer
         {
             case Wall:
                 {
+                    // TODO: instead of the first section index, get the one currently selected in the wall inspector.
                     Wall wall = buildable as Wall;
-                    dataset = new WindowData[1];
-                    dataset[0] = wall.Data.Sections[0].WindowData; // TODO: Replace 0,0 with the actively selected section
+                    dataset = wall.Data.Sections[0].Windows;
                 }
                 break;
             case WallSection:
@@ -409,8 +418,7 @@ public class WindowDataDrawer : PropertyDrawer
             case Window:
                 {
                     Window window = buildable as Window;
-                    dataset = new WindowData[1];
-                    dataset[0] = window.Data;
+                    dataset = new WindowData[] { window.Data };
                 }
                 break;
         }

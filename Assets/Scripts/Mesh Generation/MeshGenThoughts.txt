@@ -1,0 +1,22 @@
+﻿Arch Door:
+
+Use an animation curve for the arch, instead of the quadratic curve being used currently.
+
+Here is some sample code I wrote:
+
+                AnimationCurve archCurve = new AnimationCurve();
+
+                int archLOD = 10;
+
+                float[] curveSamplePoints = new float[archLOD];
+
+                float timeStep = 1 / archLOD;
+                float samplePoint = 0;
+
+                for(int k = 0; k < archLOD; k++)
+                {
+                    curveSamplePoints[i] = archCurve.Evaluate(samplePoint);
+                    samplePoint += timeStep;
+                }
+
+The sample points are the height modifier for the arch.

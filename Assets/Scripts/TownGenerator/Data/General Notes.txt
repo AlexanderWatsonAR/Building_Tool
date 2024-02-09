@@ -19,3 +19,4 @@ Data relevant to individual shape profiles could be saved in a file.
 Checking the shape profile for a repeating shape is slightly different than checking a static one.
 
 This will need to connect to the gable data, as that relates to specific shapes.
+

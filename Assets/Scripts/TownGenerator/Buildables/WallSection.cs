@@ -23,13 +23,15 @@ public class WallSection : MonoBehaviour, IBuildable
     {
         m_Data = wallSectionData as WallSectionData;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        return this;//
+        return this;
     }
 
     public void Build()
     {
         if (m_PreviousElement != m_Data.WallElement)
             transform.DeleteChildren();
+
+        Debug.Log("Build: ", this);
 
         m_PreviousElement = m_Data.WallElement;
 
@@ -238,20 +240,6 @@ public class WallSection : MonoBehaviour, IBuildable
                 m_ProBuilderMesh.Refresh();
                 break;      
         }
-
-        if(m_Data.WallElement != WallElement.Extension)
-        {
-            if(TryGetComponent(out Storey storey))
-            {
-                DestroyImmediate(storey);
-            }
-
-            if (TryGetComponent(out Roof roof))
-            {
-                DestroyImmediate(roof);
-            }
-        }
-
     }
 
     #region Calculate

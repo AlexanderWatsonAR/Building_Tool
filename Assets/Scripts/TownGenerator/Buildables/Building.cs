@@ -15,14 +15,10 @@ public class Building : MonoBehaviour, IBuildable
 
     private void Reset()
     {
-        //
         m_Data = new BuildingData();
     }
     private void OnEnable()
     {
-        // Calling build is a quick way of maintaining the object reference after serialization.
-        //if(m_Data != null)
-        //    Build();
         UnityEditor.EditorApplication.update = Update;
     }
     private void OnDisable()
@@ -79,9 +75,6 @@ public class Building : MonoBehaviour, IBuildable
         transform.DeleteChildren();
         if (!m_Data.Path.IsPathValid/* || !m_HasInitialized*/)
             return;
-
-        //
-
 
         Vector3 pos = Vector3.zero;
 
