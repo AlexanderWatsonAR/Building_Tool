@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Rendering;
+using System.Linq;
 
 [CustomPropertyDrawer(typeof(WindowData))]
 public class WindowDataDrawer : PropertyDrawer
@@ -17,6 +18,7 @@ public class WindowDataDrawer : PropertyDrawer
 
         IBuildable buildable = data.serializedObject.targetObject as IBuildable;
 
+        #region Declare Fields
         PropertyField activeElementsField = new PropertyField(props.ActiveElements);
         activeElementsField.BindProperty(props.ActiveElements);
 
@@ -78,6 +80,7 @@ public class WindowDataDrawer : PropertyDrawer
         shuttersFoldout.Add(shuttersDepthField);
         shuttersFoldout.Add(shuttersAngleField);
 
+        #endregion
         #endregion
 
         #region Register Value Change Callback
@@ -150,8 +153,6 @@ public class WindowDataDrawer : PropertyDrawer
             if (evt == null)
                 return;
 
-            bool rebuild = false;
-
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
             foreach (WindowData win in windows)
@@ -161,21 +162,17 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.OuterFrameScale = evt.changedProperty.floatValue;
                 win.DoesOuterFrameNeedRebuild = true;
-                rebuild = true;
+                win.DoesInnerFrameNeedRebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
+            return;
+            
         });
         outerFrameDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -186,14 +183,10 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.OuterFrameDepth = evt.changedProperty.floatValue;
                 win.DoesOuterFrameNeedRebuild = true;
-                rebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
+
         });
         #endregion
 
@@ -202,8 +195,6 @@ public class WindowDataDrawer : PropertyDrawer
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable); 
 
@@ -215,22 +206,15 @@ public class WindowDataDrawer : PropertyDrawer
                 win.InnerFrameColumns = evt.changedProperty.intValue;
                 win.InnerFrameHolePoints = Window.CalculateInnerFrame(win);
                 win.DoesInnerFrameNeedRebuild = true;
-                rebuild = true;
             }
 
-            if(rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
                 
         });
         rowsField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -242,21 +226,14 @@ public class WindowDataDrawer : PropertyDrawer
                 win.InnerFrameRows = evt.changedProperty.intValue;
                 win.InnerFrameHolePoints = Window.CalculateInnerFrame(win);
                 win.DoesInnerFrameNeedRebuild = true;
-                rebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
         });
         innerFrameScaleField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -267,21 +244,15 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.InnerFrameScale = evt.changedProperty.floatValue;
                 win.DoesInnerFrameNeedRebuild = true;
-                rebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
+
         });
         innerFrameDepthField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -292,14 +263,9 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.InnerFrameDepth = evt.changedProperty.floatValue;
                 win.DoesInnerFrameNeedRebuild = true;
-                rebuild = true;
             }
+            Build(buildable);
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
         });
         #endregion
 
@@ -308,8 +274,6 @@ public class WindowDataDrawer : PropertyDrawer
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -320,14 +284,9 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.PaneDepth = evt.changedProperty.floatValue;
                 win.DoesPaneNeedRebuild = true;
-                rebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
         });
         #endregion
 
@@ -336,8 +295,6 @@ public class WindowDataDrawer : PropertyDrawer
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -348,21 +305,14 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.ShuttersDepth = evt.changedProperty.floatValue;
                 win.DoShuttersNeedRebuild = true;
-                rebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
         });
         shuttersAngleField.RegisterValueChangeCallback(evt =>
         {
             if (evt == null)
                 return;
-
-            bool rebuild = false;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -373,14 +323,9 @@ public class WindowDataDrawer : PropertyDrawer
 
                 win.ShuttersAngle = evt.changedProperty.floatValue;
                 win.DoShuttersNeedRebuild = true;
-                rebuild = true;
             }
 
-            if (rebuild)
-            {
-                buildable.Demolish();
-                buildable.Build();
-            }
+            Build(buildable);
         });
         #endregion
         #endregion
@@ -395,7 +340,13 @@ public class WindowDataDrawer : PropertyDrawer
 
         return container;
     }
-
+    /// <summary>
+    /// Window data could be attached to different buildable objects.
+    /// In some instances, we want to apply window data changes to multiple other
+    /// data elements that are contained in those buildable objects.
+    /// </summary>
+    /// <param name="buildable"></param>
+    /// <returns></returns>
     private WindowData[] GetWindowDataFromBuildable(IBuildable buildable)
     {
         WindowData[] dataset = new WindowData[0];
@@ -424,5 +375,31 @@ public class WindowDataDrawer : PropertyDrawer
         }
 
         return dataset;
+    }
+
+    private void Build(IBuildable buildable)
+    {
+        switch(buildable)
+        {
+            case Wall:
+                // TODO the the wall section that is selected in the inspector & do the section build case.
+                break;
+            case WallSection:
+                {
+                    WallSection section = buildable as WallSection;
+
+                    for (int i = 0; i < section.transform.childCount; i++)
+                    {
+                        if (section.transform.GetChild(i).TryGetComponent(out Window window))
+                        {
+                            window.Build();
+                        }
+                    }
+                }
+                break;
+            case Window:
+                buildable.Build();
+                break;
+        }
     }
 }

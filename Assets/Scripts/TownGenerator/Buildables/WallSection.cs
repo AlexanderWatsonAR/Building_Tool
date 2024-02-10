@@ -29,7 +29,7 @@ public class WallSection : MonoBehaviour, IBuildable
     public void Build()
     {
         if (m_PreviousElement != m_Data.WallElement)
-            transform.DeleteChildren();
+            Demolish();
 
         Debug.Log("Build: ", this);
 
@@ -171,14 +171,6 @@ public class WallSection : MonoBehaviour, IBuildable
                     else
                     {
                         holePoints = new List<IList<Vector3>>();
-
-                        // Bug: Probuilder meshes can only be created from the main thread.
-                        //Parallel.ForEach(m_Data.Windows, data =>
-                        //{
-                        //    holePoints.Add(data.ControlPoints.ToList());
-
-                        //    BuildWindow(data);
-                        //});
 
                         foreach (WindowData data in m_Data.Windows)
                         {
@@ -329,13 +321,7 @@ public class WallSection : MonoBehaviour, IBuildable
 
     public void Demolish()
     {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            if (transform.GetChild(i).TryGetComponent(out IBuildable buildable))
-            {
-                buildable.Demolish();
-            }
-        }
+        transform.DeleteChildren();
     }
 
     private WallSection Rebuild(ProBuilderMesh mesh)

@@ -25,7 +25,6 @@ public class Window : MonoBehaviour, IBuildable
     {
         m_Data = data as WindowData;
         
-
         // Height variable may need calculating based on the forward vector
         Extensions.MinMax(m_Data.ControlPoints, out Vector3 min, out Vector3 max);
         m_Data.Height = max.y - min.y;
@@ -162,8 +161,6 @@ public class Window : MonoBehaviour, IBuildable
         rightShutter.transform.SetParent(transform, false);
         return rightShutter;
     }
-    #endregion
-
     public void Build()
     {
         if (m_Data.ActiveElements == WindowElement.Nothing)
@@ -186,8 +183,7 @@ public class Window : MonoBehaviour, IBuildable
             // Inner Frame
             m_InnerFrame ??= BuildInnerFrame();
 
-            if (m_Data.InnerFrameHolePoints == null || m_Data.InnerFrameHolePoints.Count == 0)
-                m_Data.InnerFrameHolePoints = CalculateInnerFrame(m_Data);
+            m_Data.InnerFrameHolePoints = CalculateInnerFrame(m_Data);
 
             IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
@@ -197,7 +193,7 @@ public class Window : MonoBehaviour, IBuildable
             }
 
             m_InnerFrame.CreateShapeFromPolygon(points, m_Data.Forward, holePoints);
-            m_InnerFrame.Solidify(m_Data.OuterFrameDepth);
+            m_InnerFrame.Solidify(m_Data.InnerFrameDepth);
             m_Data.DoesInnerFrameNeedRebuild = false;
         }
 
@@ -235,24 +231,37 @@ public class Window : MonoBehaviour, IBuildable
             {
                 shutterVertices = new List<IList<Vector3>>();
 
-                shutterVertices.Add(m_RightShutter.GetComponent<Door>().DoorData.ControlPoints);
-                shutterVertices.Add(m_LeftShutter.GetComponent<Door>().DoorData.ControlPoints);
+                shutterVertices.Add(m_RightShutter.GetComponent<Door>().Data.ControlPoints);
+                shutterVertices.Add(m_LeftShutter.GetComponent<Door>().Data.ControlPoints);
             }
 
             m_RightShutter ??= BuildRightShutter();
             m_LeftShutter ??= BuildLeftShutter();
 
+            m_RightShutter.transform.localPosition = Vector3.zero + (m_Data.Forward * m_Data.OuterFrameDepth);
+            m_LeftShutter.transform.localPosition = Vector3.zero + (m_Data.Forward * m_Data.OuterFrameDepth);
+
             Door rightShutter = m_RightShutter.GetOrAddComponent<Door>();
             Door leftShutter = m_LeftShutter.GetOrAddComponent<Door>();
 
-            if (rightShutter.DoorData == null)
+            if (rightShutter.Data == null)
             {
                 rightShutter.Initialize(CalculateRightShutterData(shutterVertices[0]));
             }
+            else
+            {
+                rightShutter.Data.Depth = m_Data.ShuttersDepth;
+                rightShutter.Data.HingeEulerAngles = -Vector3.up * m_Data.ShuttersAngle;
+            }
             
-            if(leftShutter.DoorData == null)
+            if(leftShutter.Data == null)
             {
                 leftShutter.Initialize(CalculateLeftShutterData(shutterVertices[1]));
+            }
+            else
+            {
+                leftShutter.Data.Depth = m_Data.ShuttersDepth;
+                leftShutter.Data.HingeEulerAngles = Vector3.up * m_Data.ShuttersAngle;
             }
 
             rightShutter.Build();
@@ -261,7 +270,7 @@ public class Window : MonoBehaviour, IBuildable
             m_Data.DoShuttersNeedRebuild = false;
         }
     }
-
+    #endregion
     /// <summary>
     /// This method removes only the window components that are inactive
     /// </summary>

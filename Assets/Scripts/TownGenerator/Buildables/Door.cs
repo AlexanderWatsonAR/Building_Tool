@@ -16,7 +16,7 @@ public class Door : MonoBehaviour, IBuildable
     [SerializeField] private ProBuilderMesh m_DoorHandleMesh;
     [SerializeReference] private DoorData m_Data;
 
-    public DoorData DoorData => m_Data;
+    public DoorData Data => m_Data;
 
     public IBuildable Initialize(IData data)
     {
