@@ -44,7 +44,7 @@ public class WallSection : MonoBehaviour, IBuildable
                 {
                     int size = m_Data.DoorColumns * m_Data.DoorRows;
 
-                    if(m_Data.Doors == null || m_Data.Doors.Length == 0)
+                    if(m_Data.Doors == null || m_Data.Doors.Length == 0 || m_Data.Doors.Length != size)
                     {
                         m_Data.Doors = new DoorData[size];
                     }
@@ -282,7 +282,7 @@ public class WallSection : MonoBehaviour, IBuildable
     #endregion
 
     #region Build
-    private void BuildSection(IList<IList<Vector3>> holePoints)
+    public void BuildSection(IList<IList<Vector3>> holePoints)
     {
         m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.FaceNormal, holePoints);
         m_ProBuilderMesh.Solidify(m_Data.WallDepth);

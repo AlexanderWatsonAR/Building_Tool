@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,7 +14,7 @@ public class WallSectionData : IData
 
     [SerializeField] private WallElement m_WallElement;
 
-    public WallElement WallElement => m_WallElement;
+    public WallElement WallElement { get { return m_WallElement; } set { m_WallElement = value; } }
 
     #region Window Properties
     [SerializeField] private WindowData m_WindowData;
@@ -56,15 +57,16 @@ public class WallSectionData : IData
     [SerializeField] private DoorData[] m_Doors;
 
     public DoorData DoorData { get { return m_DoorData; } set { m_DoorData = value; } }
-    public DoorwayElement ActiveDoorElements => m_ActiveDoorwayElements;
-    public float DoorPedimentHeight => m_DoorPedimentHeight;
-    public float DoorSideWidth => m_DoorSideWidth;
-    public float DoorSideOffset => m_DoorSideOffset;
-    public int DoorColumns => m_DoorColumns;
-    public int DoorRows => m_DoorRows;
+    public DoorwayElement ActiveDoorElements { get { return m_ActiveDoorwayElements; } set { m_ActiveDoorwayElements = value; } }
+    public float DoorPedimentHeight { get { return m_DoorPedimentHeight; } set { m_DoorPedimentHeight = value; } }
+    public float DoorSideWidth { get { return m_DoorSideWidth; } set { m_DoorSideWidth = value; } }
+    public float DoorSideOffset { get { return m_DoorSideOffset; } set { m_DoorSideOffset = value; } }
+    public int DoorColumns { get { return m_DoorColumns; } set { m_DoorColumns = value; } }
+    public int DoorRows { get { return m_DoorRows; } set { m_DoorRows = value; } }
     public float DoorFrameInsideScale { get { return m_DoorFrameInsideScale; } set { m_DoorFrameInsideScale = value; } }
     public float DoorFrameDepth { get { return m_DoorFrameDepth; } set { m_DoorFrameDepth = value; } }
     public DoorData[] Doors { get { return m_Doors; } set { m_Doors = value; } }
+    public IList<List<Vector3>> DoorHoles => Doors.Select(door => door.ControlPoints.ToList()).ToList();
     #endregion
 
     #region Arch Properties
@@ -98,6 +100,7 @@ public class WallSectionData : IData
     public float ArchDoorFrameInsideScale { get { return m_ArchDoorFrameInsideScale; } set { m_ArchDoorFrameInsideScale = value; } }
     public float ArchDoorFrameDepth { get { return m_ArchDoorFrameDepth; } set { m_ArchDoorFrameDepth = value; } }
     public DoorData[] ArchDoors { get { return m_ArchDoors; } set { m_ArchDoors = value; } }
+    public IList<List<Vector3>> ArchHoles => ArchDoors.Select(door => door.ControlPoints.ToList()).ToList();
     #endregion
 
     #region Extension Properties
@@ -162,9 +165,6 @@ public class WallSectionData : IData
         m_DoorFrameInsideScale = doorFrameInsideScale;
         #endregion
 
-        m_ArchHeight = archHeight;
-        m_ArchSides = archSides;
-
         #region Arch
         m_ArchPedimentHeight = archPedimentHeight;
         m_ArchSideWidth = archSideWidth;
@@ -175,6 +175,8 @@ public class WallSectionData : IData
         m_ArchDoorData = archDoorData;
         m_ArchDoorFrameDepth = archDoorFrameDepth;
         m_ArchDoorFrameInsideScale = archDoorFrameInsideScale;
+        m_ArchHeight = archHeight;
+        m_ArchSides = archSides;
         #endregion
 
         #region Extension

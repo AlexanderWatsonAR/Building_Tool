@@ -89,6 +89,9 @@ public class WindowDataDrawer : PropertyDrawer
             if (evt == null)
                 return;
 
+            // We seem to get a callback whenever the use clicks on the window or wall section
+            Debug.Log("activeElementsField Callback");
+
             WindowElement currentlyActive = evt.changedProperty.GetEnumValue<WindowElement>();
 
             bool isOuterFrameActive = currentlyActive.IsElementActive(WindowElement.OuterFrame);
@@ -107,6 +110,8 @@ public class WindowDataDrawer : PropertyDrawer
 
             foreach (WindowData win in windows)
             {
+                // This doesn't seem to be a reliable method of detecting if an active element has changed for window.
+
                 bool wasOuterFrameActive = win.IsOuterFrameActive;
                 bool wasInnerFrameActive = win.IsInnerFrameActive;
                 bool wasPaneActive = win.IsPaneActive;
@@ -140,10 +145,11 @@ public class WindowDataDrawer : PropertyDrawer
                     win.ActiveElements = currentlyActive;
             }
 
-            if(rebuild)
+            Demolish(buildable);
+
+            if (rebuild)
             {
-                buildable.Demolish();
-                buildable.Build();
+                Build(buildable);
             }
         });
 
@@ -399,6 +405,32 @@ public class WindowDataDrawer : PropertyDrawer
                 break;
             case Window:
                 buildable.Build();
+                break;
+        }
+    }
+
+    private void Demolish(IBuildable buildable)
+    {
+        switch (buildable)
+        {
+            case Wall:
+                // TODO the the wall section that is selected in the inspector & do the section demolish case.
+                break;
+            case WallSection:
+                {
+                    WallSection section = buildable as WallSection;
+
+                    for (int i = 0; i < section.transform.childCount; i++)
+                    {
+                        if (section.transform.GetChild(i).TryGetComponent(out Window window))
+                        {
+                            window.Demolish();
+                        }
+                    }
+                }
+                break;
+            case Window:
+                buildable.Demolish();
                 break;
         }
     }

@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Rendering;
+using static System.Collections.Specialized.BitVector32;
 
 [CustomPropertyDrawer(typeof(DoorData))]
 public class DoorDataDrawer : PropertyDrawer
@@ -21,28 +22,14 @@ public class DoorDataDrawer : PropertyDrawer
         scaleField.BindProperty(props.Scale);
         scaleField.RegisterValueChangeCallback(evt => 
         {
-            if (buildable is WallSection)
-            {
-                WallSection section = buildable as WallSection;
+            DoorData[] doors = GetDoorDataFromBuildable(buildable);
 
-                switch (section.Data.WallElement)
-                {
-                    case WallElement.Doorway:
-                        foreach (DoorData data in section.Data.Doors)
-                        {
-                            data.Scale = evt.changedProperty.floatValue;
-                        }
-                        break;
-                    case WallElement.Archway:
-                        foreach (DoorData data in section.Data.ArchDoors)
-                        {
-                            data.Scale = evt.changedProperty.floatValue;
-                        }
-                        break;
-                }
+            foreach(DoorData door in doors)
+            {
+                door.Scale = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            Build(buildable);
         });
 
         Foldout hingeFoldout = new Foldout() { text = "Hinge" };
@@ -51,84 +38,42 @@ public class DoorDataDrawer : PropertyDrawer
         hingePointField.BindProperty(props.HingePoint);
         hingePointField.RegisterValueChangeCallback(evt => 
         {
-            if(buildable is WallSection)
-            {
-                WallSection section = buildable as WallSection;
+            DoorData[] doors = GetDoorDataFromBuildable(buildable);
 
-                switch (section.Data.WallElement)
-                {
-                    case WallElement.Doorway:
-                        foreach(DoorData data in section.Data.Doors)
-                        {
-                            data.HingePoint = evt.changedProperty.GetEnumValue<TransformPoint>();
-                        }
-                        break;
-                    case WallElement.Archway:
-                        foreach (DoorData data in section.Data.ArchDoors)
-                        {
-                            data.HingePoint = evt.changedProperty.GetEnumValue<TransformPoint>();
-                        }
-                        break;
-                }
+            foreach (DoorData door in doors)
+            {
+                door.HingePoint = evt.changedProperty.GetEnumValue<TransformPoint>();
             }
 
-            buildable.Build();
+            Build(buildable);
         });
 
         PropertyField hingeOffsetField = new PropertyField(props.HingeOffset) { label = "Offset" };
         hingeOffsetField.BindProperty(props.HingeOffset);
         hingeOffsetField.RegisterValueChangeCallback(evt =>
         {
-            if (buildable is WallSection)
-            {
-                WallSection section = buildable as WallSection;
+            DoorData[] doors = GetDoorDataFromBuildable(buildable);
 
-                switch (section.Data.WallElement)
-                {
-                    case WallElement.Doorway:
-                        foreach (DoorData data in section.Data.Doors)
-                        {
-                            data.HingeOffset = evt.changedProperty.vector3Value;
-                        }
-                        break;
-                    case WallElement.Archway:
-                        foreach (DoorData data in section.Data.ArchDoors)
-                        {
-                            data.HingeOffset = evt.changedProperty.vector3Value;
-                        }
-                        break;
-                }
+            foreach (DoorData door in doors)
+            {
+                door.HingeOffset = evt.changedProperty.vector3Value;
             }
 
-            buildable.Build();
+            Build(buildable);
         });
 
         PropertyField hingeEulerAnglesField = new PropertyField(props.HingeEulerAngle) { label = "Euler Angles"};
         hingeEulerAnglesField.BindProperty(props.HingeEulerAngle);
         hingeEulerAnglesField.RegisterValueChangeCallback(evt =>
         {
-            if (buildable is WallSection)
-            {
-                WallSection section = buildable as WallSection;
+            DoorData[] doors = GetDoorDataFromBuildable(buildable);
 
-                switch (section.Data.WallElement)
-                {
-                    case WallElement.Doorway:
-                        foreach (DoorData data in section.Data.Doors)
-                        {
-                            data.HingeEulerAngles = evt.changedProperty.vector3Value;
-                        }
-                        break;
-                    case WallElement.Archway:
-                        foreach (DoorData data in section.Data.ArchDoors)
-                        {
-                            data.HingeEulerAngles = evt.changedProperty.vector3Value;
-                        }
-                        break;
-                }
+            foreach (DoorData door in doors)
+            {
+                door.HingeEulerAngles = evt.changedProperty.vector3Value;
             }
 
-            buildable.Build();
+            Build(buildable);
         });
 
         if (buildable is Door)
@@ -152,58 +97,6 @@ public class DoorDataDrawer : PropertyDrawer
         }
 
 
-        //else if (buildable is WallSection)
-        //{
-        //    SerializedProperty sectionData = data.serializedObject.FindProperty("m_Data");
-        //    SerializedProperty activeElementsDoorway = sectionData.FindPropertyRelative("m_ActiveDoorwayElements");
-        //    SerializedProperty activeElementsArchway = sectionData.FindPropertyRelative("m_ActiveArchDoorElements");
-
-        //    WallSection section = buildable as WallSection;
-
-        //    switch (section.Data.WallElement)
-        //    {
-        //        case WallElement.Doorway:
-        //            {
-        //                PropertyField activeElementsDoorwayField = new PropertyField(activeElementsDoorway) { label = "Active Elements" };
-        //                activeElementsDoorwayField.BindProperty(activeElementsDoorway);
-        //                activeElementsDoorwayField.RegisterValueChangeCallback(evt =>
-        //                {
-        //                    bool isDoorActive = evt.changedProperty.GetEnumValue<DoorElement>().IsElementActive(DoorElement.Door);
-
-        //                    scaleField.SetEnabled(isDoorActive);
-        //                    hingePointField.SetEnabled(isDoorActive);
-        //                    hingeOffsetField.SetEnabled(isDoorActive);
-        //                    hingeEulerAnglesField.SetEnabled(isDoorActive);
-
-        //                    buildable.Build();
-        //                });
-
-        //                content.Add(activeElementsDoorwayField);
-        //            }
-        //            break;
-        //        case WallElement.Archway:
-        //            {
-        //                PropertyField activeElementsArchwayField = new PropertyField(activeElementsArchway) { label = "Active Elements" };
-        //                activeElementsArchwayField.BindProperty(activeElementsArchway);
-        //                activeElementsArchwayField.RegisterValueChangeCallback(evt =>
-        //                {
-        //                    bool isDoorActive = evt.changedProperty.GetEnumValue<DoorElement>().IsElementActive(DoorElement.Door);
-
-        //                    scaleField.SetEnabled(isDoorActive);
-        //                    hingePointField.SetEnabled(isDoorActive);
-        //                    hingeOffsetField.SetEnabled(isDoorActive);
-        //                    hingeEulerAnglesField.SetEnabled(isDoorActive);
-
-        //                    buildable.Build();
-        //                });
-
-        //                content.Add(activeElementsArchwayField);
-        //            }
-        //            break;
-        //    }
-
-        //}
-
         content.Add(scaleField);
         content.Add(hingeFoldout);
         hingeFoldout.Add(hingePointField);
@@ -211,6 +104,83 @@ public class DoorDataDrawer : PropertyDrawer
         hingeFoldout.Add(hingeEulerAnglesField);
 
         return content;
+    }
+
+
+    private DoorData[] GetDoorDataFromBuildable(IBuildable buildable)
+    {
+        DoorData[] dataset = new DoorData[0];
+
+        switch (buildable)
+        {
+            case Wall:
+                {
+                    // TODO: instead of the first section index, get the one currently selected in the wall inspector.
+                    Wall wall = buildable as Wall;
+                    WallSectionData wallSection = wall.Data.Sections[0];
+
+                    switch (wallSection.WallElement)
+                    {
+                        case WallElement.Doorway:
+                            dataset = wallSection.Doors;
+                            break;
+                        case WallElement.Archway:
+                            dataset = wallSection.ArchDoors;
+                            break;
+                    }
+
+                }
+                break;
+            case WallSection:
+                {
+                    WallSection wallSection = buildable as WallSection;
+
+                    switch (wallSection.Data.WallElement)
+                    {
+                        case WallElement.Doorway:
+                            dataset = wallSection.Data.Doors;
+                            break;
+                        case WallElement.Archway:
+                            dataset = wallSection.Data.ArchDoors;
+                            break;
+                    }
+                }
+                break;
+            case Door:
+                {
+                    Door door = buildable as Door;
+                    dataset = new DoorData[] { door.Data };
+                }
+                break;
+        }
+
+        return dataset;
+    }
+
+    private void Build(IBuildable buildable)
+    {
+        switch (buildable)
+        {
+            case Wall:
+                // TODO the the wall section that is selected in the inspector & do the section build case.
+                break;
+            case WallSection:
+                {
+                    WallSection section = buildable as WallSection;
+
+                    for (int i = 0; i < section.transform.childCount; i++)
+                    {
+                        if (section.transform.GetChild(i).TryGetComponent(out Door door))
+                        {
+                            door.Build();
+                        }
+                    }
+                }
+                break;
+            case Door:
+                buildable.Build();
+                break;
+        }
     }
 
 }

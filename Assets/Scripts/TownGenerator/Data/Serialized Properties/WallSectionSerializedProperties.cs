@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 public class WallSectionDataSerializedProperties
 {
     [SerializeField] SerializedObject m_SerializedObject;
-    [SerializeField] private SerializedProperty m_WallSectionData;
+    [SerializeField] SerializedProperty m_WallSectionData;
     [SerializeField] WindowDataSerializedProperties m_WindowSerializedProperties;
     [SerializeField] DoorDataSerializedProperties m_DoorSerializedProperties;
     [SerializeField] DoorDataSerializedProperties m_ArchDoorSerializedProperties;

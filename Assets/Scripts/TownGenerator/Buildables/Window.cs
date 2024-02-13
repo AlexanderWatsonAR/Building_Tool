@@ -170,7 +170,7 @@ public class Window : MonoBehaviour, IBuildable
 
         if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_OuterFrame.positions.Count == 0 || m_Data.DoesOuterFrameNeedRebuild))
         {
-            m_OuterFrame ??= BuildOuterFrame();
+            m_OuterFrame = m_OuterFrame != null ? m_OuterFrame : BuildOuterFrame();
 
             IList<IList<Vector3>> holePoints = CalculateOuterFrame(m_Data);
             m_OuterFrame.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward, holePoints);
@@ -180,8 +180,7 @@ public class Window : MonoBehaviour, IBuildable
 
         if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_InnerFrame.positions.Count == 0 || m_Data.DoesInnerFrameNeedRebuild))
         {
-            // Inner Frame
-            m_InnerFrame ??= BuildInnerFrame();
+            m_InnerFrame = m_InnerFrame != null ? m_InnerFrame : BuildInnerFrame();
 
             m_Data.InnerFrameHolePoints = CalculateInnerFrame(m_Data);
 
@@ -199,7 +198,7 @@ public class Window : MonoBehaviour, IBuildable
 
         if (m_Data.IsPaneActive && (m_Pane == null || m_Pane.positions.Count == 0 || m_Data.DoesPaneNeedRebuild))
         {
-            m_Pane ??= BuildPane();
+            m_Pane = m_Pane != null ? m_Pane : BuildPane();
             m_Pane.CreateShapeFromPolygon(points, m_Data.Forward);
             m_Pane.Solidify(m_Data.PaneDepth);
             m_Data.DoesPaneNeedRebuild = false;
@@ -235,8 +234,8 @@ public class Window : MonoBehaviour, IBuildable
                 shutterVertices.Add(m_LeftShutter.GetComponent<Door>().Data.ControlPoints);
             }
 
-            m_RightShutter ??= BuildRightShutter();
-            m_LeftShutter ??= BuildLeftShutter();
+            m_RightShutter = m_RightShutter != null ? m_RightShutter : BuildRightShutter();
+            m_LeftShutter = m_LeftShutter != null ? m_LeftShutter : BuildLeftShutter();
 
             m_RightShutter.transform.localPosition = Vector3.zero + (m_Data.Forward * m_Data.OuterFrameDepth);
             m_LeftShutter.transform.localPosition = Vector3.zero + (m_Data.Forward * m_Data.OuterFrameDepth);
@@ -281,30 +280,35 @@ public class Window : MonoBehaviour, IBuildable
             m_OuterFrame.Clear();
             m_OuterFrame.ToMesh();
             m_OuterFrame.Refresh();
+            DestroyImmediate(m_OuterFrame.gameObject);
         }
         if (!m_Data.IsInnerFrameActive && m_InnerFrame != null)
         {
             m_InnerFrame.Clear();
             m_InnerFrame.ToMesh();
             m_InnerFrame.Refresh();
+            DestroyImmediate(m_InnerFrame.gameObject);
         }
         if (!m_Data.IsPaneActive && m_Pane != null)
         {
             m_Pane.Clear();
             m_Pane.ToMesh();
             m_Pane.Refresh();
+            DestroyImmediate(m_Pane.gameObject);
         }
         if (!m_Data.AreShuttersActive && m_LeftShutter != null)
         {
             m_LeftShutter.Clear();
             m_LeftShutter.ToMesh();
             m_LeftShutter.Refresh();
+            DestroyImmediate(m_LeftShutter.gameObject);
         }
         if (!m_Data.AreShuttersActive && m_RightShutter != null)
         {
             m_RightShutter.Clear();
             m_RightShutter.ToMesh();
             m_RightShutter.Refresh();
+            DestroyImmediate(m_RightShutter.gameObject);
         }
     }
 }
