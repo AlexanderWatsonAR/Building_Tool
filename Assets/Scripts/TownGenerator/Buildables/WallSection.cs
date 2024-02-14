@@ -96,7 +96,7 @@ public class WallSection : MonoBehaviour, IBuildable
                 {
                     int size = m_Data.ArchColumns * m_Data.ArchRows;
 
-                    if (m_Data.ArchDoors == null || m_Data.ArchDoors.Length == 0)
+                    if (m_Data.ArchDoors == null || m_Data.ArchDoors.Length == 0 || m_Data.ArchDoors.Length != size)
                     {
                         m_Data.ArchDoors = new DoorData[size];
                     }
@@ -148,7 +148,7 @@ public class WallSection : MonoBehaviour, IBuildable
                 {
                     int size = m_Data.WindowColumns * m_Data.WindowRows;
 
-                    if(m_Data.Windows == null || m_Data.Windows.Length == 0)
+                    if(m_Data.Windows == null || m_Data.Windows.Length == 0 || m_Data.Windows.Length != size)
                     {
                         m_Data.Windows = new WindowData[size];
                     }

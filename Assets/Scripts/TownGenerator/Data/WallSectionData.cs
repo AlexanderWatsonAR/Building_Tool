@@ -29,13 +29,13 @@ public class WallSectionData : IData
 
     public WindowData WindowData { get { return m_WindowData; } set { m_WindowData = value; } }
     public WindowData[] Windows { get { return m_Windows; } set { m_Windows = value; } }
-    public int WindowSides => m_WindowSides;
-    public float WindowAngle => m_WindowAngle;
-    public float WindowHeight => m_WindowHeight;
-    public float WindowWidth => m_WindowWidth;
-    public int WindowColumns => m_WindowColumns;
-    public int WindowRows => m_WindowRows;
-    public bool WindowSmooth => m_WindowSmooth;
+    public int WindowSides { get { return m_WindowSides; } set { m_WindowSides = value; } }
+    public float WindowAngle { get { return m_WindowAngle; } set { m_WindowAngle = value; } }
+    public float WindowHeight { get { return m_WindowHeight; } set { m_WindowHeight = value; } }
+    public float WindowWidth { get { return m_WindowWidth; } set { m_WindowWidth = value; } }
+    public int WindowColumns { get { return m_WindowColumns; } set { m_WindowColumns = value; } }
+    public int WindowRows { get { return m_WindowRows; } set { m_WindowRows = value; } }
+    public bool WindowSmooth { get { return m_WindowSmooth; } set { m_WindowSmooth = value; } }
 
     #endregion
 
@@ -88,15 +88,15 @@ public class WallSectionData : IData
 
     [SerializeField] private DoorData[] m_ArchDoors;
 
-    public float ArchHeight => m_ArchHeight;
-    public int ArchSides => m_ArchSides;
+    public float ArchHeight { get { return m_ArchHeight; } set { m_ArchHeight = value; } }
+    public int ArchSides { get { return m_ArchSides; } set { m_ArchSides = value; } }
     public DoorData ArchDoorData { get { return m_ArchDoorData; } set { m_ArchDoorData = value; } }
-    public DoorwayElement ActiveArchDoorElements => m_ActiveArchDoorElements;
-    public float ArchPedimentHeight => m_ArchPedimentHeight;
-    public float ArchSideWidth => m_ArchSideWidth;
-    public float ArchSideOffset => m_ArchSideOffset;
-    public int ArchColumns => m_ArchColumns;
-    public int ArchRows => m_ArchRows;
+    public DoorwayElement ActiveArchDoorElements { get { return m_ActiveArchDoorElements; } set { m_ActiveArchDoorElements = value; } }
+    public float ArchPedimentHeight { get { return m_ArchPedimentHeight; } set { m_ArchPedimentHeight = value; } }
+    public float ArchSideWidth { get { return m_ArchSideWidth; } set { m_ArchSideWidth = value; } }
+    public float ArchSideOffset { get { return m_ArchSideOffset; } set { m_ArchSideOffset = value; } }
+    public int ArchColumns { get { return m_ArchColumns; } set { m_ArchColumns = value; } }
+    public int ArchRows { get { return m_ArchRows; } set { m_ArchRows = value; } }
     public float ArchDoorFrameInsideScale { get { return m_ArchDoorFrameInsideScale; } set { m_ArchDoorFrameInsideScale = value; } }
     public float ArchDoorFrameDepth { get { return m_ArchDoorFrameDepth; } set { m_ArchDoorFrameDepth = value; } }
     public DoorData[] ArchDoors { get { return m_ArchDoors; } set { m_ArchDoors = value; } }
@@ -137,12 +137,17 @@ public class WallSectionData : IData
     public WallSectionData(Vector3[] controlPoints, float wallDepth, WindowData windowData, float windowHeight, float windowWidth, int windowSides, int windowColumns, int windowRows, float windowAngle, bool windowSmooth,
         float doorPedimentHeight, float doorSideWidth, float doorSideOffset, int doorColumns, int doorRows, DoorwayElement activeDoorElements, DoorData doorData, float doorFrameDepth, float doorFrameInsideScale,
         float archHeight, int archSides, float archPedimentHeight, float archSideWidth, float archSideOffset, int archColumns, int archRows, DoorwayElement activeArchDoorElements, DoorData archDoorData, float archDoorFrameDepth, float archDoorFrameInsideScale,
-        float extendDistance, float extendHeight, float extendWidth, Vector3 normal, WindowData[] windows, DoorData[] doors/* StoreyData storeyExtension, RoofData roofExtension*/)
+        float extendDistance, float extendHeight, float extendWidth, Vector3 normal, WindowData[] windows, DoorData[] doors, DoorData[] archDoors, WallElement wallElement/* StoreyData storeyExtension, RoofData roofExtension*/)
     {
+        #region General
         m_ControlPoints = controlPoints;
         m_WallDepth = wallDepth;
+        m_FaceNormal = normal;
+        m_WallElement = WallElement;
+        #endregion
 
         #region Window
+        m_Windows = windows;
         m_WindowData = windowData;
         m_WindowHeight = windowHeight;
         m_WindowWidth = windowWidth;
@@ -154,6 +159,7 @@ public class WallSectionData : IData
         #endregion
 
         #region Door
+        m_Doors = doors;
         m_DoorPedimentHeight = doorPedimentHeight;
         m_DoorSideWidth = doorSideWidth;
         m_DoorSideOffset = doorSideOffset;
@@ -166,6 +172,7 @@ public class WallSectionData : IData
         #endregion
 
         #region Arch
+        m_ArchDoors = archDoors;
         m_ArchPedimentHeight = archPedimentHeight;
         m_ArchSideWidth = archSideWidth;
         m_ArchSideOffset = archSideOffset;
@@ -185,9 +192,9 @@ public class WallSectionData : IData
         m_ExtensionWidth = extendWidth;
         #endregion
 
-        m_FaceNormal = normal;
-        m_Windows = windows;
-        m_Doors = doors;
+
+        
+
     }
 
     public WallSectionData(WallSectionData data) : this

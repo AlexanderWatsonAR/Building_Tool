@@ -18,80 +18,39 @@ public class WindowDataDrawer : PropertyDrawer
 
         IBuildable buildable = data.serializedObject.targetObject as IBuildable;
 
-        #region Declare Fields
+        #region Fields
         PropertyField activeElementsField = new PropertyField(props.ActiveElements);
-        activeElementsField.BindProperty(props.ActiveElements);
-
-        #region Outer Frame
-        Foldout outerFrameFoldout = new Foldout() { text = "Outer Frame"};
-
-        PropertyField outerScaleField = new PropertyField(props.OuterFrameScale) { label = "Scale"};
-        outerScaleField.BindProperty(props.OuterFrameScale);
-
+        Foldout outerFrameFoldout = new Foldout() { text = "Outer Frame" };
+        PropertyField outerScaleField = new PropertyField(props.OuterFrameScale) { label = "Scale" };
         PropertyField outerFrameDepthField = new PropertyField(props.OuterFrameDepth) { label = "Depth" };
-        outerFrameDepthField.BindProperty(props.OuterFrameDepth);
-
-        outerFrameFoldout.Add(outerScaleField);
-        outerFrameFoldout.Add(outerFrameDepthField);
-
-        #endregion
-
-        #region Inner Frame
         Foldout innerFrameFoldout = new Foldout() { text = "Inner Frame" };
-
         PropertyField colsField = new PropertyField(props.InnerFrameColumns) { label = "Columns" };
-        colsField.BindProperty(props.InnerFrameColumns);
-
         PropertyField rowsField = new PropertyField(props.InnerFrameRows) { label = "Rows" };
-        rowsField.BindProperty(props.InnerFrameRows);
-
         PropertyField innerFrameScaleField = new PropertyField(props.InnerFrameScale) { label = "Scale" };
-        innerFrameScaleField.BindProperty(props.InnerFrameScale);
-
         PropertyField innerFrameDepthField = new PropertyField(props.InnerFrameDepth) { label = "Depth" };
-        innerFrameDepthField.BindProperty(props.InnerFrameDepth);
-
-        innerFrameFoldout.Add(colsField);
-        innerFrameFoldout.Add(rowsField);
-        innerFrameFoldout.Add(innerFrameScaleField);
-        innerFrameFoldout.Add(innerFrameDepthField);
-
-        #endregion
-
-        #region Pane
         Foldout paneFoldout = new Foldout() { text = "Pane" };
-
         PropertyField paneDepthField = new PropertyField(props.PaneDepth) { label = "Depth" };
-        paneDepthField.BindProperty(props.PaneDepth);
-
-        paneFoldout.Add(paneDepthField);
-
-        #endregion
-
-        #region Shutters
         Foldout shuttersFoldout = new Foldout() { text = "Shutters" };
-
         PropertyField shuttersDepthField = new PropertyField(props.ShuttersDepth) { label = "Depth" };
-        shuttersDepthField.BindProperty(props.ShuttersDepth);
-
         PropertyField shuttersAngleField = new PropertyField(props.ShuttersAngle) { label = "Angle" };
-        shuttersAngleField.BindProperty(props.ShuttersAngle);
-
-        shuttersFoldout.Add(shuttersDepthField);
-        shuttersFoldout.Add(shuttersAngleField);
-
         #endregion
+
+        #region Bind
+        activeElementsField.BindProperty(props.ActiveElements);
+        outerScaleField.BindProperty(props.OuterFrameScale);
+        outerFrameDepthField.BindProperty(props.OuterFrameDepth);
+        colsField.BindProperty(props.InnerFrameColumns);
+        rowsField.BindProperty(props.InnerFrameRows);
+        innerFrameScaleField.BindProperty(props.InnerFrameScale);
+        innerFrameDepthField.BindProperty(props.InnerFrameDepth);
+        paneDepthField.BindProperty(props.PaneDepth);
+        shuttersDepthField.BindProperty(props.ShuttersDepth);
+        shuttersAngleField.BindProperty(props.ShuttersAngle);
         #endregion
 
         #region Register Value Change Callback
         activeElementsField.RegisterValueChangeCallback(evt => 
         {
-            if (evt == null)
-                return;
-
-            // We seem to get a callback whenever the use clicks on the window or wall section
-            Debug.Log("activeElementsField Callback");
-
             WindowElement currentlyActive = evt.changedProperty.GetEnumValue<WindowElement>();
 
             bool isOuterFrameActive = currentlyActive.IsElementActive(WindowElement.OuterFrame);
@@ -110,8 +69,6 @@ public class WindowDataDrawer : PropertyDrawer
 
             foreach (WindowData win in windows)
             {
-                // This doesn't seem to be a reliable method of detecting if an active element has changed for window.
-
                 bool wasOuterFrameActive = win.IsOuterFrameActive;
                 bool wasInnerFrameActive = win.IsInnerFrameActive;
                 bool wasPaneActive = win.IsPaneActive;
@@ -149,6 +106,7 @@ public class WindowDataDrawer : PropertyDrawer
 
             if (rebuild)
             {
+                Debug.Log("activeElementsField Build");
                 Build(buildable);
             }
         });
@@ -337,6 +295,15 @@ public class WindowDataDrawer : PropertyDrawer
         #endregion
 
         #region Add Fields to Container
+        outerFrameFoldout.Add(outerScaleField);
+        outerFrameFoldout.Add(outerFrameDepthField);
+        innerFrameFoldout.Add(colsField);
+        innerFrameFoldout.Add(rowsField);
+        innerFrameFoldout.Add(innerFrameScaleField);
+        innerFrameFoldout.Add(innerFrameDepthField);
+        paneFoldout.Add(paneDepthField);
+        shuttersFoldout.Add(shuttersDepthField);
+        shuttersFoldout.Add(shuttersAngleField);
         container.Add(activeElementsField);
         container.Add(outerFrameFoldout);
         container.Add(innerFrameFoldout);
