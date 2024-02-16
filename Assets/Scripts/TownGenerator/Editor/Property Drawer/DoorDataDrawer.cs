@@ -122,10 +122,10 @@ public class DoorDataDrawer : PropertyDrawer
                     switch (wallSection.WallElement)
                     {
                         case WallElement.Doorway:
-                            dataset = wallSection.Doors;
+                            dataset = wallSection.Doorway.Doors;
                             break;
                         case WallElement.Archway:
-                            dataset = wallSection.ArchDoors;
+                            dataset = wallSection.Archway.Doors;
                             break;
                     }
 
@@ -138,10 +138,10 @@ public class DoorDataDrawer : PropertyDrawer
                     switch (wallSection.Data.WallElement)
                     {
                         case WallElement.Doorway:
-                            dataset = wallSection.Data.Doors;
+                            dataset = wallSection.Data.Doorway.Doors;
                             break;
                         case WallElement.Archway:
-                            dataset = wallSection.Data.ArchDoors;
+                            dataset = wallSection.Data.Archway.Doors;
                             break;
                     }
                 }

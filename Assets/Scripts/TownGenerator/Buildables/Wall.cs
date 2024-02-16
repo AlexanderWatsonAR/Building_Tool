@@ -63,16 +63,20 @@ public class Wall : MonoBehaviour, IBuildable
             Material = defaultMat,
         };
 
+        DoorwayData doorway = new DoorwayData()
+        {
+            FrameScale = doorData.Scale,
+            FrameDepth = m_Data.Depth * 1.1f
+        };
+
         m_Data.SectionData = new WallSectionData()
         {
             WallDepth = m_Data.Depth,
             FaceNormal = faceNormal,
             WindowData = winData,
             DoorData = doorData,
-            DoorFrameInsideScale = doorData.Scale,
-            DoorFrameDepth = m_Data.Depth * 1.1f
+            Doorway = doorway
         };
-
 
         return this;
     }

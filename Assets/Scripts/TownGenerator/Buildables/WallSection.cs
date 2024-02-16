@@ -35,6 +35,8 @@ public class WallSection : MonoBehaviour, IBuildable
 
         m_PreviousElement = m_Data.WallElement;
 
+        // TODO: change to use opening data
+
         switch(m_Data.WallElement)
         {
             case WallElement.Wall:
@@ -42,32 +44,34 @@ public class WallSection : MonoBehaviour, IBuildable
                 break;
             case WallElement.Doorway:
                 {
-                    int size = m_Data.DoorColumns * m_Data.DoorRows;
+                    DoorwayData doorway = m_Data.Doorway;
 
-                    if(m_Data.Doors == null || m_Data.Doors.Length == 0 || m_Data.Doors.Length != size)
+                    int size = doorway.Columns * doorway.Rows;
+
+                    if(doorway.Doors == null || doorway.Doors.Length == 0 || doorway.Doors.Length != size)
                     {
-                        m_Data.Doors = new DoorData[size];
+                        doorway.Doors = new DoorData[size];
                     }
 
                     IList<IList<Vector3>> holePoints;
 
-                    if (m_Data.Doors[0] == null || m_Data.Doors[0].ControlPoints == null || m_Data.Doors[0].ControlPoints.Length == 0)
+                    if (doorway.Doors[0] == null || doorway.Doors[0].ControlPoints == null || doorway.Doors[0].ControlPoints.Length == 0)
                     {
                         holePoints = CalculateDoorway(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
-                            if (m_Data.Doors[i] == null || m_Data.Doors[i].ControlPoints == null || m_Data.Doors[i].ControlPoints.Length == 0)
+                            if (doorway.Doors[i] == null || doorway.Doors[i].ControlPoints == null || doorway.Doors[i].ControlPoints.Length == 0)
                             {
-                                m_Data.Doors[i] = CalculateDoor(i, holePoints[i]);
+                                doorway.Doors[i] = CalculateDoor(i, holePoints[i]);
 
-                                if (m_Data.ActiveDoorElements.IsElementActive(DoorwayElement.Door))
-                                    BuildDoor(m_Data.Doors[i]);
+                                if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
+                                    BuildDoor(doorway.Doors[i]);
 
-                                if (!m_Data.ActiveDoorElements.IsElementActive(DoorwayElement.Frame))
+                                if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                     continue;
 
-                                BuildFrame(m_Data.Doors[i].ControlPoints, m_Data.DoorFrameInsideScale, m_Data.DoorFrameDepth);
+                                BuildFrame(doorway.Doors[i].ControlPoints, doorway.FrameScale, doorway.FrameDepth);
 
                             }
                         }
@@ -75,17 +79,17 @@ public class WallSection : MonoBehaviour, IBuildable
                     else
                     {
                         holePoints = new List<IList<Vector3>>();
-                        foreach (DoorData data in m_Data.Doors)
+                        foreach (DoorData door in doorway.Doors)
                         {
-                            holePoints.Add(data.ControlPoints.ToList());
+                            holePoints.Add(door.ControlPoints.ToList());
 
-                            if (m_Data.ActiveArchDoorElements.IsElementActive(DoorwayElement.Door))
-                                BuildDoor(data);
+                            if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
+                                BuildDoor(door);
 
-                            if (!m_Data.ActiveDoorElements.IsElementActive(DoorwayElement.Frame))
+                            if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                 continue;
 
-                            BuildFrame(data.ControlPoints, m_Data.DoorFrameInsideScale, m_Data.DoorFrameDepth);
+                            BuildFrame(door.ControlPoints, doorway.FrameScale, doorway.FrameDepth);
                         }
                     }
 
@@ -94,49 +98,51 @@ public class WallSection : MonoBehaviour, IBuildable
                 break;
             case WallElement.Archway:
                 {
-                    int size = m_Data.ArchColumns * m_Data.ArchRows;
+                    ArchwayData archway = m_Data.Archway;
 
-                    if (m_Data.ArchDoors == null || m_Data.ArchDoors.Length == 0 || m_Data.ArchDoors.Length != size)
+                    int size = archway.Columns * archway.Rows;
+
+                    if (archway.Doors == null || archway.Doors.Length == 0 || archway.Doors.Length != size)
                     {
-                        m_Data.ArchDoors = new DoorData[size];
+                        archway.Doors = new DoorData[size];
                     }
 
                     IList<IList<Vector3>> holePoints;
 
-                    if (m_Data.ArchDoors[0] == null || m_Data.ArchDoors[0].ControlPoints == null || m_Data.ArchDoors[0].ControlPoints.Length == 0)
+                    if (archway.Doors[0] == null || archway.Doors[0].ControlPoints == null || archway.Doors[0].ControlPoints.Length == 0)
                     {
                         holePoints = CalculateArchway(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
-                            if (m_Data.ArchDoors[i] == null || m_Data.ArchDoors[i].ControlPoints == null || m_Data.ArchDoors[i].ControlPoints.Length == 0)
+                            if (archway.Doors[i] == null || archway.Doors[i].ControlPoints == null || archway.Doors[i].ControlPoints.Length == 0)
                             {
-                                m_Data.ArchDoors[i] = CalculateDoor(i, holePoints[i]);
+                                archway.Doors[i] = CalculateDoor(i, holePoints[i]);
 
-                                if (m_Data.ActiveArchDoorElements.IsElementActive(DoorwayElement.Door))
-                                    BuildDoor(m_Data.ArchDoors[i]);
+                                if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
+                                    BuildDoor(archway.Doors[i]);
 
-                                if (!m_Data.ActiveDoorElements.IsElementActive(DoorwayElement.Frame))
+                                if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                     continue;
 
-                                BuildFrame(m_Data.ArchDoors[i].ControlPoints, m_Data.ArchDoorFrameInsideScale, m_Data.ArchDoorFrameDepth);
+                                BuildFrame(archway.Doors[i].ControlPoints, archway.FrameScale, archway.FrameDepth);
                             }
                         }
                     }
                     else
                     {
                         holePoints = new List<IList<Vector3>>();
-                        foreach (DoorData data in m_Data.ArchDoors)
+                        foreach (DoorData door in archway.Doors)
                         {
-                            holePoints.Add(data.ControlPoints.ToList());
+                            holePoints.Add(door.ControlPoints.ToList());
 
-                            if(m_Data.ActiveArchDoorElements.IsElementActive(DoorwayElement.Door))
-                                BuildDoor(data);
+                            if(archway.ActiveElements.IsElementActive(DoorwayElement.Door))
+                                BuildDoor(door);
 
-                            if (!m_Data.ActiveDoorElements.IsElementActive(DoorwayElement.Frame))
+                            if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                 continue;
 
-                            BuildFrame(data.ControlPoints, m_Data.ArchDoorFrameInsideScale, m_Data.ArchDoorFrameDepth);
+                            BuildFrame(door.ControlPoints, archway.FrameScale, archway.FrameDepth);
 
                         }
                     }
@@ -146,25 +152,27 @@ public class WallSection : MonoBehaviour, IBuildable
                 break;
             case WallElement.Window:
                 {
-                    int size = m_Data.WindowColumns * m_Data.WindowRows;
+                    WindowOpeningData windowOpening = m_Data.WindowOpening;
 
-                    if(m_Data.Windows == null || m_Data.Windows.Length == 0 || m_Data.Windows.Length != size)
+                    int size = windowOpening.Columns * windowOpening.Rows;
+
+                    if(windowOpening.Windows == null || windowOpening.Windows.Length == 0 || windowOpening.Windows.Length != size)
                     {
-                        m_Data.Windows = new WindowData[size];
+                        windowOpening.Windows = new WindowData[size];
                     }
 
                     IList<IList<Vector3>> holePoints;
 
-                    if (m_Data.Windows[0] == null || m_Data.Windows[0].ControlPoints == null || m_Data.Windows[0].ControlPoints.Length == 0)
+                    if (windowOpening.Windows[0] == null || windowOpening.Windows[0].ControlPoints == null || windowOpening.Windows[0].ControlPoints.Length == 0)
                     {
                         holePoints = CalculateWindow(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
-                            if(m_Data.Windows[i] == null || m_Data.Windows[i].ControlPoints == null || m_Data.Windows[i].ControlPoints.Length == 0)
+                            if(windowOpening.Windows[i] == null || windowOpening.Windows[i].ControlPoints == null || windowOpening.Windows[i].ControlPoints.Length == 0)
                             {
-                                m_Data.Windows[i] = CalculateWindow(i, holePoints[i]);
-                                BuildWindow(m_Data.Windows[i]);
+                                windowOpening.Windows[i] = CalculateWindow(i, holePoints[i]);
+                                BuildWindow(windowOpening.Windows[i]);
                             }
                         }
                     }
@@ -172,11 +180,11 @@ public class WallSection : MonoBehaviour, IBuildable
                     {
                         holePoints = new List<IList<Vector3>>();
 
-                        foreach (WindowData data in m_Data.Windows)
+                        foreach (WindowData window in windowOpening.Windows)
                         {
-                            holePoints.Add(data.ControlPoints.ToList());
+                            holePoints.Add(window.ControlPoints.ToList());
 
-                            BuildWindow(data);
+                            BuildWindow(window);
                         }
                     }
 
@@ -251,15 +259,16 @@ public class WallSection : MonoBehaviour, IBuildable
         {
             ID = index,
             ControlPoints = controlPoints.ToArray(),
-            ActiveElements = m_Data.ActiveDoorElements.ToDoorElement()
+            ActiveElements = m_Data.Doorway.ActiveElements.ToDoorElement() // Does this need changing?
         };
 
         return data;
     }
     public static IList<IList<Vector3>> CalculateDoorway(WallSectionData data)
     {
-        Vector3 doorScale = new Vector3(data.DoorSideWidth, data.DoorPedimentHeight);
-        return MeshMaker.NPolyHoleGrid(data.ControlPoints, doorScale, data.DoorColumns, data.DoorRows, 4, 0, Vector3.right * data.DoorSideOffset, new Vector3(0, -0.999f));
+        DoorwayData doorway = data.Doorway;
+        Vector3 doorScale = new Vector3(doorway.Width, doorway.Height);
+        return MeshMaker.NPolyHoleGrid(data.ControlPoints, doorScale, doorway.Columns, doorway.Rows, 4, 0, Vector3.right * doorway.PositionOffset, new Vector3(0, -0.999f));
     }
     /// <summary>
     /// Calculates the points for the window hole(s)
@@ -267,16 +276,19 @@ public class WallSection : MonoBehaviour, IBuildable
     /// <returns></returns>
     public static IList<IList<Vector3>> CalculateWindow(WallSectionData data)
     {
-        Vector3 winScale = new Vector3(data.WindowWidth, data.WindowHeight);
-        return MeshMaker.NPolyHoleGrid(data.ControlPoints, winScale, data.WindowColumns, data.WindowRows, data.WindowSides, data.WindowAngle);
+        WindowOpeningData windowOpening = data.WindowOpening;
+        Vector3 winScale = new Vector3(windowOpening.Width, windowOpening.Height);
+        return MeshMaker.NPolyHoleGrid(data.ControlPoints, winScale, windowOpening.Columns, windowOpening.Rows, windowOpening.Sides, windowOpening.Angle);
     }
     public static IList<IList<Vector3>> CalculateArchway(WallSectionData data)
     {
-        return MeshMaker.ArchedDoorHoleGrid(data.ControlPoints, data.ArchSideWidth, data.ArchColumns, data.ArchRows, data.ArchPedimentHeight, data.ArchHeight, data.ArchSides, Vector3.right * data.ArchSideOffset);
+        ArchwayData archway = data.Archway;
+        return MeshMaker.ArchedDoorHoleGrid(data.ControlPoints, archway.Width, archway.Columns, archway.Rows, archway.Height, archway.ArchHeight, archway.ArchSides, Vector3.right * archway.PositionOffset);
     }
     public static IList<IList<Vector3>> CalculateExtension(WallSectionData data)
     {
-        Vector3 scale = new Vector3(data.ExtensionWidth, data.ExtensionHeight);
+        ExtensionData extension = data.Extension;
+        Vector3 scale = new Vector3(extension.Width, extension.Height);
         return MeshMaker.NPolyHoleGrid(data.ControlPoints, scale, 1, 1, 4, 0, null, new Vector3(0, -0.999f)); // Outside
     }
     #endregion

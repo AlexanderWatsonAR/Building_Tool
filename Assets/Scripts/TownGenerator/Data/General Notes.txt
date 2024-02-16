@@ -20,3 +20,14 @@ Checking the shape profile for a repeating shape is slightly different than chec
 
 This will need to connect to the gable data, as that relates to specific shapes.
 
+14.02.2024
+
+I've began implementing the Opening Data base & sub classes.
+
+The data classes are pretty much done.
+
+However, I need to start connecting that those data classes to the buildable so they can be initialized & used.
+
+The serialized properties classes will also have to be changed.
+ - we just need to update where the accessors point to. If we add or remove any accessors, we will also have to change the property drawer.
+

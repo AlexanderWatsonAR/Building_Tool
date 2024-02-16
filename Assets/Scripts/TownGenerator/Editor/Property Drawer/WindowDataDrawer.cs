@@ -330,13 +330,13 @@ public class WindowDataDrawer : PropertyDrawer
                 {
                     // TODO: instead of the first section index, get the one currently selected in the wall inspector.
                     Wall wall = buildable as Wall;
-                    dataset = wall.Data.Sections[0].Windows;
+                    dataset = wall.Data.Sections[0].WindowOpening.Windows;
                 }
                 break;
             case WallSection:
                 {
                     WallSection wallSection = buildable as WallSection;
-                    dataset = wallSection.Data.Windows;
+                    dataset = wallSection.Data.WindowOpening.Windows;
                 }
                 break;
             case Window:
