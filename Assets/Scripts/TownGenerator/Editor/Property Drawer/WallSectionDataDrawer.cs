@@ -56,7 +56,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                         Foldout sizePosFold = new Foldout() { text = "Size & Position" };
                         PropertyField offsetField = new PropertyField(doorway.PositionOffset, "Offset") { label = "Offset" };
                         PropertyField heightField = new PropertyField(doorway.Height, "Height") { label = "Height" };
-                        PropertyField widthField = new PropertyField(props.DoorWidth, "Width") { label = "Width" };
+                        PropertyField widthField = new PropertyField(doorway.Width, "Width") { label = "Width" };
                         Foldout doorFoldout = new Foldout() { text = "Door" };
                         PropertyField doorDataField = new PropertyField(door.Data);
                         Foldout frameFoldout = new Foldout() { text = "Frame" };
@@ -473,17 +473,19 @@ public class WallSectionDataDrawer : PropertyDrawer
                     break;
                 case WallElement.Extension:
                     {
+                        var extension = props.Extension;
+
                         Foldout extensionFoldout = new Foldout() { text = "Extension" };
-                        PropertyField extensionDistance = new PropertyField(props.ExtensionDistance);
-                        extensionDistance.BindProperty(props.ExtensionDistance);
+                        PropertyField extensionDistance = new PropertyField(extension.Distance);
+                        extensionDistance.BindProperty(extension.Distance);
                         extensionDistance.RegisterValueChangeCallback(evt => buildable.Build());
 
-                        PropertyField extensionHeight = new PropertyField(props.ExtensionHeight);
-                        extensionHeight.BindProperty(props.ExtensionHeight);
+                        PropertyField extensionHeight = new PropertyField(extension.Height);
+                        extensionHeight.BindProperty(extension.Height);
                         extensionHeight.RegisterValueChangeCallback(evt => buildable.Build());
 
-                        PropertyField extensionWidth = new PropertyField(props.ExtensionWidth);
-                        extensionWidth.BindProperty(props.ExtensionWidth);
+                        PropertyField extensionWidth = new PropertyField(extension.Width);
+                        extensionWidth.BindProperty(extension.Width);
                         extensionWidth.RegisterValueChangeCallback(evt => buildable.Build());
 
                         Foldout storeyFoldout = new Foldout() { text = "Storey" };
