@@ -5,13 +5,23 @@ using UnityEditor;
 
 public class DoorwayDataSerializedProperties : OpeningDataSerializedProperties
 {
-    public SerializedProperty Doors => m_OpeningData.FindPropertyRelative("m_Doors");
-    public SerializedProperty ActiveElements => m_OpeningData.FindPropertyRelative("m_ActiveElements");
-    public SerializedProperty FrameDepth => m_OpeningData.FindPropertyRelative("m_FrameDepth");
-    public SerializedProperty FrameScale => m_OpeningData.FindPropertyRelative("m_FrameScale");
-    public SerializedProperty PositionOffset => m_OpeningData.FindPropertyRelative("m_PositionOffset");
+    #region Constants
+    const string k_Doors = "m_Doors";
+    const string k_ActiveElements = "m_ActiveElements";
+    const string k_FrameDepth = "m_FrameDepth";
+    const string k_FrameScale = "m_FrameScale";
+    const string k_PositionOffset = "m_PositionOffset";
+    #endregion
 
-    public DoorwayDataSerializedProperties(SerializedProperty data) : base(data)
+    #region Accessors
+    public SerializedProperty Doors => m_Data.FindPropertyRelative(k_Doors);
+    public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
+    public SerializedProperty FrameDepth => m_Data.FindPropertyRelative(k_FrameDepth);
+    public SerializedProperty FrameScale => m_Data.FindPropertyRelative(k_FrameScale);
+    public SerializedProperty PositionOffset => m_Data.FindPropertyRelative(k_PositionOffset);
+    #endregion
+
+    public DoorwayDataSerializedProperties(SerializedProperty doorwayData) : base(doorwayData)
     {
 
     }

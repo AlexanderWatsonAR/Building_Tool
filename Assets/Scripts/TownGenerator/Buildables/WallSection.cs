@@ -35,8 +35,6 @@ public class WallSection : MonoBehaviour, IBuildable
 
         m_PreviousElement = m_Data.WallElement;
 
-        // TODO: change to use opening data
-
         switch(m_Data.WallElement)
         {
             case WallElement.Wall:

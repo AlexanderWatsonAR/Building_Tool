@@ -34,6 +34,8 @@ public class Door : MonoBehaviour, IBuildable
         if (!m_Data.ActiveElements.IsElementActive(DoorElement.Door))
             return;
 
+        Debug.Log("Door Build ", this);
+
         m_DoorMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward);
         ProBuilderMesh inside = Instantiate(m_DoorMesh);
         inside.faces[0].Reverse();

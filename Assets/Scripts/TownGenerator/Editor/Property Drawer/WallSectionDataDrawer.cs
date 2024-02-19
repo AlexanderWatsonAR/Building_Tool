@@ -176,7 +176,6 @@ public class WallSectionDataDrawer : PropertyDrawer
                         #endregion
 
                         #region Add Fields to Container
-
                         gridFoldout.Add(cols);
                         gridFoldout.Add(rows);
                         wallElementContainer.Add(gridFoldout);

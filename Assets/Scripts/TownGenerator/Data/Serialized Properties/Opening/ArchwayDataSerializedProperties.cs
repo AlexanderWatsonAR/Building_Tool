@@ -5,10 +5,17 @@ using UnityEditor;
 
 public class ArchwayDataSerializedProperties : DoorwayDataSerializedProperties
 {
-    public SerializedProperty ArchHeight => m_OpeningData.FindPropertyRelative("m_ArchHeight");
-    public SerializedProperty ArchSides => m_OpeningData.FindPropertyRelative("m_ArchSides");
+    #region Constants
+    const string k_ArchHeight = "m_ArchHeight";
+    const string k_ArchSides = "m_ArchHeight";
+    #endregion
 
-    public ArchwayDataSerializedProperties(SerializedProperty data) : base(data)
+    #region Accessors
+    public SerializedProperty ArchHeight => m_Data.FindPropertyRelative(k_ArchHeight);
+    public SerializedProperty ArchSides => m_Data.FindPropertyRelative(k_ArchSides);
+    #endregion
+
+    public ArchwayDataSerializedProperties(SerializedProperty archwayData) : base(archwayData)
     {
 
     }

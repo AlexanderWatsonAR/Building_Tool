@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class OpeningDataSerializedProperties
+public class OpeningDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] protected SerializedObject m_SerializedObject;
-    [SerializeField] protected SerializedProperty m_OpeningData;
+    #region Constants
+    const string k_Columns = "m_Columns";
+    const string k_Rows = "m_Rows";
+    const string k_Height = "m_Height";
+    const string k_Width = "m_Width";
+    #endregion
 
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty Columns => m_OpeningData.FindPropertyRelative("m_Columns");
-    public SerializedProperty Rows => m_OpeningData.FindPropertyRelative("m_Rows");
-    public SerializedProperty Height => m_OpeningData.FindPropertyRelative("m_Height");
-    public SerializedProperty Width => m_OpeningData.FindPropertyRelative("m_Width");
+    public SerializedProperty Columns => m_Data.FindPropertyRelative(k_Columns);
+    public SerializedProperty Rows => m_Data.FindPropertyRelative(k_Rows);
+    public SerializedProperty Height => m_Data.FindPropertyRelative(k_Height);
+    public SerializedProperty Width => m_Data.FindPropertyRelative(k_Width);
 
-    public OpeningDataSerializedProperties(SerializedProperty data)
+    public OpeningDataSerializedProperties(SerializedProperty openingData) : base(openingData)
     {
-        m_OpeningData = data;
-        m_SerializedObject = data.serializedObject;
     }
 }

@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class DoorDataSerializedProperties
+public class DoorDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] SerializedObject m_SerializedObject;
-    [SerializeField] SerializedProperty m_Data;
-
     #region Constants
     const string k_ActiveElements = "m_ActiveElements";
     const string k_Depth = "m_Depth";
@@ -21,8 +18,6 @@ public class DoorDataSerializedProperties
     #endregion
 
     #region Accessors
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty Data => m_Data;
     public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
     public SerializedProperty Depth => m_Data.FindPropertyRelative(k_Depth);
     public SerializedProperty Scale => m_Data.FindPropertyRelative(k_Scale); 
@@ -34,10 +29,8 @@ public class DoorDataSerializedProperties
     public SerializedProperty HandleScale => m_Data.FindPropertyRelative(k_HandleScale);
     #endregion
 
-    public DoorDataSerializedProperties(SerializedProperty doorData)
+    public DoorDataSerializedProperties(SerializedProperty doorData) : base(doorData)
     {
-        m_Data = doorData;
-        m_SerializedObject = doorData.serializedObject;
     }
 
 }

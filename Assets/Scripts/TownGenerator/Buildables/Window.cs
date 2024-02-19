@@ -166,6 +166,8 @@ public class Window : MonoBehaviour, IBuildable
         if (m_Data.ActiveElements == WindowElement.Nothing)
             return;
 
+        Debug.Log("Window build ", this);
+
         Vector3[] points = m_Data.IsOuterFrameActive ? CalculateOuterFrame(m_Data)[0].ToArray() : m_Data.ControlPoints;
 
         if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_OuterFrame.positions.Count == 0 || m_Data.DoesOuterFrameNeedRebuild))
@@ -173,8 +175,10 @@ public class Window : MonoBehaviour, IBuildable
             m_OuterFrame = m_OuterFrame != null ? m_OuterFrame : BuildOuterFrame();
 
             IList<IList<Vector3>> holePoints = CalculateOuterFrame(m_Data);
+            
             m_OuterFrame.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Forward, holePoints);
             m_OuterFrame.Solidify(m_Data.OuterFrameDepth);
+            UnityEditor.ProBuilder.EditorMeshUtility.Optimize(m_OuterFrame);
             m_Data.DoesOuterFrameNeedRebuild = false;
         }
 
@@ -193,6 +197,7 @@ public class Window : MonoBehaviour, IBuildable
 
             m_InnerFrame.CreateShapeFromPolygon(points, m_Data.Forward, holePoints);
             m_InnerFrame.Solidify(m_Data.InnerFrameDepth);
+            m_InnerFrame.Refresh();
             m_Data.DoesInnerFrameNeedRebuild = false;
         }
 
@@ -201,6 +206,7 @@ public class Window : MonoBehaviour, IBuildable
             m_Pane = m_Pane != null ? m_Pane : BuildPane();
             m_Pane.CreateShapeFromPolygon(points, m_Data.Forward);
             m_Pane.Solidify(m_Data.PaneDepth);
+            m_Pane.Refresh();
             m_Data.DoesPaneNeedRebuild = false;
         }
 
@@ -265,6 +271,8 @@ public class Window : MonoBehaviour, IBuildable
 
             rightShutter.Build();
             leftShutter.Build();
+            m_RightShutter.Refresh();
+            m_LeftShutter.Refresh();
 
             m_Data.DoShuttersNeedRebuild = false;
         }

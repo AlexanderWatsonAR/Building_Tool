@@ -13,6 +13,18 @@ public class RoofData : IData
 
     [SerializeField] private RoofTileData m_RoofTileData;
 
+    // Notes
+    // Class for grouping together common sets of roof data values
+    // What would we call the classes?
+    // We could rename this class 'variable roof data' and make a seperate abstract roof class.
+    // The other roof class would contain generic roof data. 
+    // E.G. roof tile array, height. Then create seperate classes that inherit from roof.
+    // MansardData : RoofData
+
+    [SerializeField] Gable m_Gable;
+    [SerializeField] Mansard m_Mansard;
+    [SerializeField] RoofShapeData m_Pyramid;
+
     [SerializeField, HideInInspector] private RoofTileData[] m_PyramidRoofTiles;
     [SerializeField, HideInInspector] private RoofTileData[] m_GableRoofTiles;
     [SerializeField, HideInInspector] private RoofTileData[] m_MansardRoofTiles;

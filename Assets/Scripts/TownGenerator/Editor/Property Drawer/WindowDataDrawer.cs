@@ -6,15 +6,22 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Rendering;
 using System.Linq;
+using Unity.VisualScripting;
 
 [CustomPropertyDrawer(typeof(WindowData))]
 public class WindowDataDrawer : PropertyDrawer
 {
+    [SerializeField] WindowData m_CurrentWindowData;
+    [SerializeField] WindowData m_PreviousWindowData;
+
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
         VisualElement container = new VisualElement();
 
         WindowDataSerializedProperties props = new WindowDataSerializedProperties(data);
+
+        m_CurrentWindowData = data.GetUnderlyingValue() as WindowData;
+        m_PreviousWindowData = new WindowData(m_CurrentWindowData);
 
         IBuildable buildable = data.serializedObject.targetObject as IBuildable;
 
@@ -114,8 +121,10 @@ public class WindowDataDrawer : PropertyDrawer
         #region Outer Frame
         outerScaleField.RegisterValueChangeCallback(evt => 
         {
-            if (evt == null)
+            if (m_CurrentWindowData.OuterFrameScale == m_PreviousWindowData.OuterFrameScale)
                 return;
+
+            m_PreviousWindowData.OuterFrameScale = m_CurrentWindowData.OuterFrameScale;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -135,8 +144,10 @@ public class WindowDataDrawer : PropertyDrawer
         });
         outerFrameDepthField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.OuterFrameDepth == m_PreviousWindowData.OuterFrameDepth)
                 return;
+
+            m_PreviousWindowData.OuterFrameDepth = m_CurrentWindowData.OuterFrameDepth;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -157,8 +168,10 @@ public class WindowDataDrawer : PropertyDrawer
         #region Inner Frame
         colsField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.InnerFrameColumns == m_PreviousWindowData.InnerFrameColumns)
                 return;
+
+            m_PreviousWindowData.InnerFrameColumns = m_CurrentWindowData.InnerFrameColumns;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable); 
 
@@ -177,8 +190,10 @@ public class WindowDataDrawer : PropertyDrawer
         });
         rowsField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.InnerFrameRows == m_PreviousWindowData.InnerFrameRows)
                 return;
+
+            m_PreviousWindowData.InnerFrameRows = m_CurrentWindowData.InnerFrameRows;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -196,8 +211,10 @@ public class WindowDataDrawer : PropertyDrawer
         });
         innerFrameScaleField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.InnerFrameScale == m_PreviousWindowData.InnerFrameScale)
                 return;
+
+            m_PreviousWindowData.InnerFrameScale = m_CurrentWindowData.InnerFrameScale;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -215,8 +232,10 @@ public class WindowDataDrawer : PropertyDrawer
         });
         innerFrameDepthField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.InnerFrameDepth == m_PreviousWindowData.InnerFrameDepth)
                 return;
+
+            m_PreviousWindowData.InnerFrameDepth = m_CurrentWindowData.InnerFrameDepth;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -236,8 +255,10 @@ public class WindowDataDrawer : PropertyDrawer
         #region Pane
         paneDepthField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.PaneDepth == m_PreviousWindowData.PaneDepth)
                 return;
+
+            m_PreviousWindowData.PaneDepth = m_CurrentWindowData.PaneDepth;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -257,8 +278,10 @@ public class WindowDataDrawer : PropertyDrawer
         #region Shutters
         shuttersDepthField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.ShuttersDepth == m_PreviousWindowData.ShuttersDepth)
                 return;
+
+            m_PreviousWindowData.ShuttersDepth = m_CurrentWindowData.ShuttersDepth;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 
@@ -275,8 +298,10 @@ public class WindowDataDrawer : PropertyDrawer
         });
         shuttersAngleField.RegisterValueChangeCallback(evt =>
         {
-            if (evt == null)
+            if (m_CurrentWindowData.ShuttersAngle == m_PreviousWindowData.ShuttersAngle)
                 return;
+
+            m_PreviousWindowData.ShuttersAngle = m_CurrentWindowData.ShuttersAngle;
 
             WindowData[] windows = GetWindowDataFromBuildable(buildable);
 

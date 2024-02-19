@@ -30,7 +30,7 @@ public class RoofDataDrawer : PropertyDrawer
     {
         VisualElement optionsContainer = new VisualElement();
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
 
         int[] frames = roofData.AvailableFrames;
 
@@ -119,7 +119,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private void DisplayGable(VisualElement container)
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Gable"};
@@ -255,7 +255,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private void DisplayPyramid(VisualElement container)
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Pyramid" };
@@ -285,7 +285,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private void DisplayMansard(VisualElement container)
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Mansard" };
@@ -344,7 +344,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private VisualElement Tile()
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Tile" };

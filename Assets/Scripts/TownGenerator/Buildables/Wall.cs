@@ -52,7 +52,8 @@ public class Wall : MonoBehaviour, IBuildable
             OuterFrameMaterial = defaultMat,
             InnerFrameMaterial = defaultMat,
             PaneMaterial = defaultMat,
-            ShuttersMaterial = defaultMat
+            ShuttersMaterial = defaultMat,
+            ShuttersDepth = m_Data.Depth * 0.5f
         };
 
         DoorData doorData = new DoorData()

@@ -20,3 +20,22 @@ Here is some sample code I wrote:
                 }
 
 The sample points are the height modifier for the arch.
+
+-----------------------------------------------------
+Polygon Recoginition
+
+Shape profiles.
+
+In a seperate project, I've created a system for loading in a set of image files. These files store data
+
+pretaining to a shape. The system can then recognise if an organised set of control points match one of the loaded shapes.
+
+I want to integrate that system into this project. And replace the existing system of having built in shape profiles stored.
+
+An issue with this, is that the gable data (midline points, tile indices, extend indices, wall indices) is tied to those in-built data structures.
+
+Index data could be stored in a csv file.
+
+Most of the midline point are midway points between 2 control points, however some require an instersection method to calculate.
+
+If we stored the mid-line data to a file. How would we desern between the calc points & lerp points?

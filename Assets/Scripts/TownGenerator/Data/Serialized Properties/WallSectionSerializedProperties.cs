@@ -2,14 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using Unity.VisualScripting;
 
-public class WallSectionDataSerializedProperties
+public class WallSectionDataSerializedProperties : SerializedPropertyGroup
 {
     #region Member Variables
-    [SerializeField] SerializedObject m_SerializedObject;
-    [SerializeField] SerializedProperty m_WallSectionData;
-
     [SerializeField] WindowOpeningDataSerializedProperties m_WindowOpeningDataSerializedProperties;
     [SerializeField] ArchwayDataSerializedProperties m_ArchwayDataSerializedProperties;
     [SerializeField] DoorwayDataSerializedProperties m_DoorwayDataSerializedProperties;
@@ -32,9 +28,7 @@ public class WallSectionDataSerializedProperties
     #endregion
 
     #region Accessors
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty WallSectionData => m_WallSectionData;
-    public SerializedProperty WallElement => WallSectionData.FindPropertyRelative(k_WallElement);
+    public SerializedProperty WallElement => m_Data.FindPropertyRelative(k_WallElement);
     public DoorDataSerializedProperties Door => m_DoorSerializedProperties;
     public DoorDataSerializedProperties ArchDoor => m_ArchDoorSerializedProperties;
     public WindowDataSerializedProperties Window => m_WindowSerializedProperties;
@@ -44,19 +38,16 @@ public class WallSectionDataSerializedProperties
     public ExtensionDataSerializedProperties Extension => m_ExtensionDataSerializedProperties;
     #endregion
 
-    public WallSectionDataSerializedProperties(SerializedProperty data)
+    public WallSectionDataSerializedProperties(SerializedProperty wallSectionData) : base(wallSectionData)
     {
-        m_WallSectionData = data;
-        m_SerializedObject = data.serializedObject;
+        m_WindowSerializedProperties = new WindowDataSerializedProperties(m_Data.FindPropertyRelative(k_WindowData));
+        m_DoorSerializedProperties = new DoorDataSerializedProperties(m_Data.FindPropertyRelative(k_DoorData));
+        m_ArchDoorSerializedProperties = new DoorDataSerializedProperties(m_Data.FindPropertyRelative(k_ArchDoorData));
 
-        m_WindowSerializedProperties = new WindowDataSerializedProperties(data.FindPropertyRelative(k_WindowData));
-        m_DoorSerializedProperties = new DoorDataSerializedProperties(data.FindPropertyRelative(k_DoorData));
-        m_ArchDoorSerializedProperties = new DoorDataSerializedProperties(data.FindPropertyRelative(k_ArchDoorData));
-
-        m_WindowOpeningDataSerializedProperties = new WindowOpeningDataSerializedProperties(data.FindPropertyRelative(k_WindowOpeningData));
-        m_DoorwayDataSerializedProperties = new DoorwayDataSerializedProperties(data.FindPropertyRelative(k_DoorwayData));
-        m_ArchwayDataSerializedProperties = new ArchwayDataSerializedProperties(data.FindPropertyRelative(k_ArchwayData));
-        m_ExtensionDataSerializedProperties = new ExtensionDataSerializedProperties(data.FindPropertyRelative(k_ExtensionData));
+        m_WindowOpeningDataSerializedProperties = new WindowOpeningDataSerializedProperties(m_Data.FindPropertyRelative(k_WindowOpeningData));
+        m_DoorwayDataSerializedProperties = new DoorwayDataSerializedProperties(m_Data.FindPropertyRelative(k_DoorwayData));
+        m_ArchwayDataSerializedProperties = new ArchwayDataSerializedProperties(m_Data.FindPropertyRelative(k_ArchwayData));
+        m_ExtensionDataSerializedProperties = new ExtensionDataSerializedProperties(m_Data.FindPropertyRelative(k_ExtensionData));
     }
 
 }

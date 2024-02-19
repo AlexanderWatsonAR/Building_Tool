@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class FloorDataSerializedProperties
+public class FloorDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] private SerializedProperty m_FloorData;
-    [SerializeField] private SerializedObject m_SerializedObject;
-
-    #region Accessors
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty Height => m_FloorData.FindPropertyRelative("m_Height");
+    #region Constants
+    const string k_Height = "m_Height";
     #endregion
 
-    public FloorDataSerializedProperties(SerializedProperty floorData)
+    #region Accessors
+    public SerializedProperty Height => m_Data.FindPropertyRelative(k_Height);
+    #endregion
+
+    public FloorDataSerializedProperties(SerializedProperty floorData) : base(floorData)
     {
-        m_FloorData = floorData;
-        m_SerializedObject = floorData.serializedObject;
     }
 }

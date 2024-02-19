@@ -6,10 +6,11 @@ using UnityEditor;
 [System.Serializable]
 public class ExtensionDataSerializedProperties : OpeningDataSerializedProperties
 {
+    const string k_Distance = "m_Distance";
 
-    public SerializedProperty Distance => m_OpeningData.FindPropertyRelative("m_Distance");
+    public SerializedProperty Distance => m_Data.FindPropertyRelative(k_Distance);
 
-    public ExtensionDataSerializedProperties(SerializedProperty data) : base(data)
+    public ExtensionDataSerializedProperties(SerializedProperty extensionData) : base(extensionData)
     {
 
     }

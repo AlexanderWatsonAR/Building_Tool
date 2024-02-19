@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class WindowDataSerializedProperties
+public class WindowDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] SerializedObject m_SerializedObject;
-    [SerializeField] SerializedProperty m_Data;
-
     #region Constants
     const string k_ActiveElements = "m_ActiveElements";
     const string k_InnerFrameColumns = "m_InnerFrameColumns";
@@ -22,8 +19,6 @@ public class WindowDataSerializedProperties
     #endregion
 
     #region Accessors
-    public SerializedProperty Data => m_Data;
-    public SerializedObject SerializedObject => m_SerializedObject;
     public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
     public SerializedProperty InnerFrameColumns => m_Data.FindPropertyRelative(k_InnerFrameColumns);
     public SerializedProperty InnerFrameRows => m_Data.FindPropertyRelative(k_InnerFrameRows);
@@ -36,9 +31,7 @@ public class WindowDataSerializedProperties
     public SerializedProperty ShuttersAngle => m_Data.FindPropertyRelative(k_ShuttersAngle);
     #endregion
 
-    public WindowDataSerializedProperties(SerializedProperty windowData)
+    public WindowDataSerializedProperties(SerializedProperty windowData) : base(windowData)
     {
-        m_Data = windowData;
-        m_SerializedObject = m_Data.serializedObject;
     }
 }

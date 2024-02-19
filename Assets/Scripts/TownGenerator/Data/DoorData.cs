@@ -110,13 +110,14 @@ public class DoorData : IData
     public Vector3 HandlePosition => m_HandlePosition;
     public Material Material { get { return m_Material; } set { m_Material = value; } }
 
-    public DoorData() : this(new Vector3[0], Vector3.zero, Vector3.zero, 0.2f, 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, 0.2f, 1, TransformPoint.Right, null)
+    public DoorData() : this(DoorElement.Everything, new Vector3[0], Vector3.zero, Vector3.zero, 0.2f, 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, 0.2f, 1, TransformPoint.Right, null)
     {
 
     }
 
     public DoorData(DoorData data) : this
     (
+        data.ActiveElements,
         data.ControlPoints,
         data.Forward,
         data.Right,
@@ -133,9 +134,10 @@ public class DoorData : IData
     {
     }
 
-    public DoorData(IEnumerable<Vector3> controlPoints, Vector3 forward, Vector3 right, float depth, float scale, TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles, float handleSize, float handleScale, TransformPoint handlePoint, Material material)
+    public DoorData(DoorElement activeElements, IEnumerable<Vector3> controlPoints, Vector3 forward, Vector3 right, float depth, float scale, TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles, float handleSize, float handleScale, TransformPoint handlePoint, Material material)
     {
         SetControlPoints(controlPoints);
+        m_ActiveElements = activeElements;
         m_Forward = forward;
         m_Right = right;
         m_Depth = depth;

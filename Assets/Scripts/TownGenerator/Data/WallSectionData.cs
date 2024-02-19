@@ -52,12 +52,12 @@ public class WallSectionData : IData
 
     }
 
-    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal) : this(wallElement, controlPoints, id, depth, normal, new WindowOpeningData(), new DoorwayData(), new ArchwayData(), new ExtensionData())
+    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal) : this(wallElement, controlPoints, id, depth, normal, new WindowOpeningData(), new DoorwayData(), new ArchwayData(), new ExtensionData(), new WindowData(), new DoorData(), new DoorData())
     {
 
     }
 
-    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal, WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData)
+    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal, WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData, WindowData windowData, DoorData doorData, DoorData archDoorData)
     {
         m_WallElement = wallElement;
         m_ControlPoints = controlPoints;
@@ -68,10 +68,12 @@ public class WallSectionData : IData
         m_DoorwayData = new (doorwayData);
         m_ArchwayData = new (archwayData);
         m_ExtensionData = new (extensionData);
+        m_WindowData = windowData;
+        m_DoorData = doorData;
+        m_ArchDoorData = archDoorData;
     }
 
-    public WallSectionData(WallSectionData data) : this(data.WallElement, data.ControlPoints, data.ID, data.WallDepth, data.FaceNormal, data.WindowOpening, data.Doorway, data.Archway, data.Extension)
+    public WallSectionData(WallSectionData data) : this(data.WallElement, data.ControlPoints, data.ID, data.WallDepth, data.FaceNormal, data.WindowOpening, data.Doorway, data.Archway, data.Extension, data.WindowData, data.DoorData, data.ArchDoorData)
     {
-        m_WallElement = data.WallElement;
     }
 }
