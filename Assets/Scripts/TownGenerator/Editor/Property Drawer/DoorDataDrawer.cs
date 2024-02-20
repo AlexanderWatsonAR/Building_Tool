@@ -207,6 +207,7 @@ public class DoorDataDrawer : PropertyDrawer
                 {
                     WallSection section = buildable as WallSection;
 
+                    // Issue: building in this way is causing rendering problems.
                     for (int i = 0; i < section.transform.childCount; i++)
                     {
                         if (section.transform.GetChild(i).TryGetComponent(out Door door))

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
@@ -11,6 +12,14 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static void BuildCollection(this IEnumerable<IBuildable> buildables)
+    {
+        foreach (IBuildable buildable in buildables)
+        {
+            buildable.Build();
+        }
+    }
+
     public static Vector3[] ScaleOneLine(this Vector3[] oneLine, OneLineShape shape, float scale)
     {
         switch (shape)

@@ -386,13 +386,7 @@ public class WindowDataDrawer : PropertyDrawer
                 {
                     WallSection section = buildable as WallSection;
 
-                    for (int i = 0; i < section.transform.childCount; i++)
-                    {
-                        if (section.transform.GetChild(i).TryGetComponent(out Window window))
-                        {
-                            window.Build();
-                        }
-                    }
+                    section.BuildChildren();
                 }
                 break;
             case Window:

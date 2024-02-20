@@ -7,7 +7,7 @@ public class ArchwayDataSerializedProperties : DoorwayDataSerializedProperties
 {
     #region Constants
     const string k_ArchHeight = "m_ArchHeight";
-    const string k_ArchSides = "m_ArchHeight";
+    const string k_ArchSides = "m_ArchSides";
     #endregion
 
     #region Accessors
