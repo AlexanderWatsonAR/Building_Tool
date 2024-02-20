@@ -20,14 +20,14 @@ public class ArchwayData : DoorwayData
         m_ArchSides = archSides;
     }
 
-    public ArchwayData(float height, float width, int cols, int rows, float posOffset, DoorwayElement activeElements, float frameDepth, float frameScale, DoorData[] doors, float archHeight, int archSides) :
-        base(height, width, cols, rows, posOffset, activeElements, frameDepth, frameScale, doors)
+    public ArchwayData(float height, float width, int cols, int rows, float posOffset, DoorwayElement activeElements, DoorFrameData[] frames, DoorData[] doors, float archHeight, int archSides) :
+        base(height, width, cols, rows, posOffset, activeElements, frames, doors)
     {
         m_ArchHeight = archHeight;
         m_ArchSides = archSides;
     }
 
-    public ArchwayData(ArchwayData data) : this(data.Height, data.Width, data.Columns, data.Rows, data.PositionOffset, data.ActiveElements, data.FrameDepth, data.FrameScale, data.Doors, data.m_ArchHeight, data.m_ArchSides)
+    public ArchwayData(ArchwayData data) : this(data.Height, data.Width, data.Columns, data.Rows, data.PositionOffset, data.ActiveElements, data.Frames, data.Doors, data.m_ArchHeight, data.m_ArchSides)
     {
     }
 }

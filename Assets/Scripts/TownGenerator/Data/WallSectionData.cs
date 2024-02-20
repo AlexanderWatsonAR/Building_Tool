@@ -17,6 +17,7 @@ public class WallSectionData : IData
     [SerializeField] private WindowData m_WindowData;
     [SerializeField] private DoorData m_DoorData;
     [SerializeField] private DoorData m_ArchDoorData;
+    [SerializeField] private DoorFrameData m_DoorFrameData;
 
     [SerializeField] WindowOpeningData m_WindowOpeningData;
     [SerializeField] DoorwayData m_DoorwayData;
@@ -28,7 +29,8 @@ public class WallSectionData : IData
     public WallElement WallElement { get { return m_WallElement; } set { m_WallElement = value; } }
     public WindowData WindowData { get { return m_WindowData; } set { m_WindowData = value; } }
     public DoorData DoorData { get { return m_DoorData; } set { m_DoorData = value; } }
-    public DoorData ArchDoorData { get { return m_ArchDoorData; } set { m_ArchDoorData = value; } } // not used?
+    public DoorData ArchDoorData { get { return m_ArchDoorData; } set { m_ArchDoorData = value; } } 
+    public DoorFrameData DoorFrameData { get { return m_DoorFrameData; } set { m_DoorFrameData = value; } }
     public Vector2Int ID { get { return m_ID; } set { m_ID = value; } }
     public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public float WallDepth { get { return m_WallDepth; } set { m_WallDepth = value; } }
@@ -52,12 +54,12 @@ public class WallSectionData : IData
 
     }
 
-    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal) : this(wallElement, controlPoints, id, depth, normal, new WindowOpeningData(), new DoorwayData(), new ArchwayData(), new ExtensionData(), new WindowData(), new DoorData(), new DoorData())
+    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal) : this(wallElement, controlPoints, id, depth, normal, new WindowOpeningData(), new DoorwayData(), new ArchwayData(), new ExtensionData(), new WindowData(), new DoorData(), new DoorData(), new DoorFrameData())
     {
 
     }
 
-    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal, WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData, WindowData windowData, DoorData doorData, DoorData archDoorData)
+    public WallSectionData(WallElement wallElement, Vector3[] controlPoints, Vector2Int id, float depth, Vector3 normal, WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData, WindowData windowData, DoorData doorData, DoorData archDoorData, DoorFrameData doorFrameData)
     {
         m_WallElement = wallElement;
         m_ControlPoints = controlPoints;
@@ -71,9 +73,10 @@ public class WallSectionData : IData
         m_WindowData = windowData;
         m_DoorData = doorData;
         m_ArchDoorData = archDoorData;
+        m_DoorFrameData = doorFrameData;
     }
 
-    public WallSectionData(WallSectionData data) : this(data.WallElement, data.ControlPoints, data.ID, data.WallDepth, data.FaceNormal, data.WindowOpening, data.Doorway, data.Archway, data.Extension, data.WindowData, data.DoorData, data.ArchDoorData)
+    public WallSectionData(WallSectionData data) : this(data.WallElement, data.ControlPoints, data.ID, data.WallDepth, data.FaceNormal, data.WindowOpening, data.Doorway, data.Archway, data.Extension, data.WindowData, data.DoorData, data.ArchDoorData, data.DoorFrameData)
     {
     }
 }

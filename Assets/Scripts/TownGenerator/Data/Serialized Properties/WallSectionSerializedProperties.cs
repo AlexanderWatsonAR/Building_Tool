@@ -14,6 +14,7 @@ public class WallSectionDataSerializedProperties : SerializedPropertyGroup
     [SerializeField] WindowDataSerializedProperties m_WindowSerializedProperties;
     [SerializeField] DoorDataSerializedProperties m_DoorSerializedProperties;
     [SerializeField] DoorDataSerializedProperties m_ArchDoorSerializedProperties;
+    [SerializeField] FrameDataSerializedProperties m_FrameDataSerializedProperties;
     #endregion
 
     #region Constants
@@ -25,6 +26,7 @@ public class WallSectionDataSerializedProperties : SerializedPropertyGroup
     const string k_DoorwayData = "m_DoorwayData";
     const string k_ArchwayData = "m_ArchwayData";
     const string k_ExtensionData = "m_ExtensionData";
+    const string k_DoorFrameData = "m_DoorFrameData";
     #endregion
 
     #region Accessors
@@ -36,6 +38,7 @@ public class WallSectionDataSerializedProperties : SerializedPropertyGroup
     public DoorwayDataSerializedProperties Doorway => m_DoorwayDataSerializedProperties;
     public ArchwayDataSerializedProperties Archway => m_ArchwayDataSerializedProperties;
     public ExtensionDataSerializedProperties Extension => m_ExtensionDataSerializedProperties;
+    public FrameDataSerializedProperties Frame => m_FrameDataSerializedProperties;
     #endregion
 
     public WallSectionDataSerializedProperties(SerializedProperty wallSectionData) : base(wallSectionData)
@@ -48,6 +51,7 @@ public class WallSectionDataSerializedProperties : SerializedPropertyGroup
         m_DoorwayDataSerializedProperties = new DoorwayDataSerializedProperties(m_Data.FindPropertyRelative(k_DoorwayData));
         m_ArchwayDataSerializedProperties = new ArchwayDataSerializedProperties(m_Data.FindPropertyRelative(k_ArchwayData));
         m_ExtensionDataSerializedProperties = new ExtensionDataSerializedProperties(m_Data.FindPropertyRelative(k_ExtensionData));
+        m_FrameDataSerializedProperties = new FrameDataSerializedProperties(m_Data.FindPropertyRelative(k_DoorFrameData));
     }
 
 }

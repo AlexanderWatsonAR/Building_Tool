@@ -18,6 +18,7 @@ public class WallSection : MonoBehaviour, IBuildable
     [SerializeField] WallElement m_PreviousElement;
     [SerializeField] List<Window> m_Windows;
     [SerializeField] List<Door> m_Doors;
+    [SerializeField] List<DoorFrame> m_Frames;
 
     public WallSectionData Data => m_Data;
 
@@ -35,14 +36,18 @@ public class WallSection : MonoBehaviour, IBuildable
 
         switch(m_Data.WallElement)
         {
+            case WallElement.Wall:
+                return;
             case WallElement.Window:
                 m_Windows.BuildCollection();
                 break;
             case WallElement.Doorway:
                 m_Doors.BuildCollection();
+                m_Frames.BuildCollection();
                 break;
             case WallElement.Archway:
                 m_Doors.BuildCollection();
+                m_Frames.BuildCollection();
                 break;
         }
     }
@@ -70,6 +75,7 @@ public class WallSection : MonoBehaviour, IBuildable
                     if(doorway.Doors == null || doorway.Doors.Length == 0 || doorway.Doors.Length != size)
                     {
                         doorway.Doors = new DoorData[size];
+                        doorway.Frames = new DoorFrameData[size];
                     }
 
                     IList<IList<Vector3>> holePoints;
@@ -77,12 +83,14 @@ public class WallSection : MonoBehaviour, IBuildable
                     if (doorway.Doors[0] == null || doorway.Doors[0].ControlPoints == null || doorway.Doors[0].ControlPoints.Length == 0)
                     {
                         holePoints = CalculateDoorway(m_Data);
+                        
 
                         for (int i = 0; i < size; i++)
                         {
                             if (doorway.Doors[i] == null || doorway.Doors[i].ControlPoints == null || doorway.Doors[i].ControlPoints.Length == 0)
                             {
                                 doorway.Doors[i] = CalculateDoor(i, holePoints[i]);
+                                doorway.Frames[i] = CalculateFrame(holePoints[i], m_Data.DoorFrameData.Scale, m_Data.DoorFrameData.Depth);
 
                                 if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
                                 {
@@ -93,7 +101,8 @@ public class WallSection : MonoBehaviour, IBuildable
                                 if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                     continue;
 
-                                BuildFrame(doorway.Doors[i].ControlPoints, doorway.FrameScale, doorway.FrameDepth);
+                                DoorFrame frame = CreateFrame(doorway.Frames[i]);
+                                m_Frames.Add(frame);
 
                             }
                         }
@@ -102,8 +111,10 @@ public class WallSection : MonoBehaviour, IBuildable
                     {
                         holePoints = new List<IList<Vector3>>();
 
-                        foreach (DoorData data in doorway.Doors)
+                        for (int i = 0; i < doorway.Doors.Length; i++)
                         {
+                            DoorData data = doorway.Doors[i];
+
                             holePoints.Add(data.ControlPoints.ToList());
 
                             if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
@@ -115,7 +126,8 @@ public class WallSection : MonoBehaviour, IBuildable
                             if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                 continue;
 
-                            BuildFrame(data.ControlPoints, doorway.FrameScale, doorway.FrameDepth);
+                            DoorFrame frame = CreateFrame(doorway.Frames[i]);
+                            m_Frames.Add(frame);
                         }
                     }
 
@@ -131,6 +143,7 @@ public class WallSection : MonoBehaviour, IBuildable
                     if (archway.Doors == null || archway.Doors.Length == 0 || archway.Doors.Length != size)
                     {
                         archway.Doors = new DoorData[size];
+                        archway.Frames = new DoorFrameData[size];
                     }
 
                     IList<IList<Vector3>> holePoints;
@@ -144,6 +157,7 @@ public class WallSection : MonoBehaviour, IBuildable
                             if (archway.Doors[i] == null || archway.Doors[i].ControlPoints == null || archway.Doors[i].ControlPoints.Length == 0)
                             {
                                 archway.Doors[i] = CalculateDoor(i, holePoints[i]);
+                                archway.Frames[i] = CalculateFrame(holePoints[i], m_Data.DoorFrameData.Scale, m_Data.DoorFrameData.Depth);
 
                                 if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
                                 {
@@ -154,15 +168,18 @@ public class WallSection : MonoBehaviour, IBuildable
                                 if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                     continue;
 
-                                BuildFrame(archway.Doors[i].ControlPoints, archway.FrameScale, archway.FrameDepth);
+                                DoorFrame frame = CreateFrame(archway.Frames[i]);
+                                m_Frames.Add(frame);
                             }
                         }
                     }
                     else
                     {
                         holePoints = new List<IList<Vector3>>();
-                        foreach (DoorData data in archway.Doors)
+                        for (int i = 0; i < archway.Doors.Length; i++)
                         {
+                            DoorData data = archway.Doors[i];
+
                             holePoints.Add(data.ControlPoints.ToList());
 
                             if(archway.ActiveElements.IsElementActive(DoorwayElement.Door))
@@ -174,7 +191,8 @@ public class WallSection : MonoBehaviour, IBuildable
                             if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                                 continue;
 
-                            BuildFrame(data.ControlPoints, archway.FrameScale, archway.FrameDepth);
+                            DoorFrame frame = CreateFrame(archway.Frames[i]);
+                            m_Frames.Add(frame);
 
                         }
                     }
@@ -306,6 +324,16 @@ public class WallSection : MonoBehaviour, IBuildable
         Vector3 doorScale = new Vector3(doorway.Width, doorway.Height);
         return MeshMaker.NPolyHoleGrid(data.ControlPoints, doorScale, doorway.Columns, doorway.Rows, 4, 0, Vector3.right * doorway.PositionOffset, new Vector3(0, -0.999f));
     }
+    private DoorFrameData CalculateFrame(IEnumerable<Vector3> controlPoints, float insideScale, float depth)
+    {
+        DoorFrameData frameData = new DoorFrameData()
+        {
+            ControlPoints = controlPoints.ToArray(),
+            Scale = insideScale,
+            Depth = depth
+        };
+        return frameData;
+    }
     /// <summary>
     /// Calculates the points for the window hole(s)
     /// </summary>
@@ -329,12 +357,7 @@ public class WallSection : MonoBehaviour, IBuildable
     }
     #endregion
 
-    #region Build
-    public void BuildSection(IList<IList<Vector3>> holePoints)
-    {
-        m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.FaceNormal, holePoints);
-        m_ProBuilderMesh.Solidify(m_Data.WallDepth);
-    }
+    #region Create
     private Window CreateWindow(WindowData data)
     {
         ProBuilderMesh windowMesh = ProBuilderMesh.Create();
@@ -353,20 +376,23 @@ public class WallSection : MonoBehaviour, IBuildable
         door.Initialize(data);
         return door;
     }
-    private void BuildFrame(IList<Vector3> controlPoints, float insideScale, float depth)
+    private DoorFrame CreateFrame(DoorFrameData data)
     {
-        Vector3[] scaledControlPoints = controlPoints.ScalePolygon(insideScale);
-        List<IList<Vector3>> holePoints = new();
-        holePoints.Add(scaledControlPoints);
-
-        ProBuilderMesh doorFrameMesh = ProBuilderMesh.Create();
-        doorFrameMesh.name = "Frame";
-        doorFrameMesh.transform.SetParent(transform, false);
-        doorFrameMesh.CreateShapeFromPolygon(controlPoints, m_Data.FaceNormal, holePoints);
-        doorFrameMesh.Extrude(doorFrameMesh.faces, ExtrudeMethod.FaceNormal, depth);
-        doorFrameMesh.ToMesh();
-        doorFrameMesh.Refresh();
+        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
+        frameMesh.transform.SetParent(transform, false);
+        DoorFrame doorFrame = frameMesh.AddComponent<DoorFrame>();
+        doorFrame.Initialize(data);
+        return doorFrame;
     }
+    #endregion
+
+    #region Build
+    public void BuildSection(IList<IList<Vector3>> holePoints)
+    {
+        m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.FaceNormal, holePoints);
+        m_ProBuilderMesh.Solidify(m_Data.WallDepth);
+    }
+
     #endregion
 
     public void Demolish()
@@ -374,6 +400,7 @@ public class WallSection : MonoBehaviour, IBuildable
         transform.DeleteChildren();
         m_Doors.Clear();
         m_Windows.Clear();
+        m_Frames.Clear();
     }
 
     private WallSection Rebuild(ProBuilderMesh mesh)

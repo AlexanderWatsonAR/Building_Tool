@@ -48,6 +48,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                     {
                         var doorway = props.Doorway;
                         var door = props.Door;
+                        var frame = props.Frame;
 
                         #region Fields
                         Foldout gridFoldout = new Foldout() { text = "Grid" };
@@ -60,8 +61,8 @@ public class WallSectionDataDrawer : PropertyDrawer
                         Foldout doorFoldout = new Foldout() { text = "Door" };
                         PropertyField doorDataField = new PropertyField(door.Data);
                         Foldout frameFoldout = new Foldout() { text = "Frame" };
-                        PropertyField doorFrameDepthField = new PropertyField(doorway.FrameDepth, "Depth") { label = "Depth" };
-                        PropertyField doorFrameScaleField = new PropertyField(doorway.FrameScale, "Scale") { label = "Scale" };
+                        PropertyField doorFrameDepthField = new PropertyField(frame.Depth, "Depth") { label = "Depth" };
+                        PropertyField doorFrameScaleField = new PropertyField(frame.Scale, "Scale") { label = "Scale" };
                         PropertyField activeDoorwayElements = new PropertyField(doorway.ActiveElements, "Active Elements") { label = "Active Elements" };
                         #endregion
 
@@ -73,8 +74,8 @@ public class WallSectionDataDrawer : PropertyDrawer
                         heightField.BindProperty(doorway.Height);
                         widthField.BindProperty(doorway.Width);
                         doorDataField.BindProperty(door.Data);
-                        doorFrameDepthField.BindProperty(doorway.FrameDepth);
-                        doorFrameScaleField.BindProperty(doorway.FrameScale);
+                        doorFrameDepthField.BindProperty(frame.Depth);
+                        doorFrameScaleField.BindProperty(frame.Scale);
                         activeDoorwayElements.BindProperty(doorway.ActiveElements);
                         #endregion
 
@@ -134,10 +135,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameDepthField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.FrameDepth == m_PreviousSectionData.Doorway.FrameDepth)
+                            if (currentSectionData.DoorFrameData.Depth == m_PreviousSectionData.DoorFrameData.Depth)
                                 return;
 
-                            m_PreviousSectionData.Doorway.FrameDepth = currentSectionData.Doorway.FrameDepth;
+                            m_PreviousSectionData.DoorFrameData.Depth = currentSectionData.DoorFrameData.Depth;
 
                             currentSectionData.Doorway.Doors = null;
 
@@ -145,12 +146,12 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameScaleField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.FrameScale == m_PreviousSectionData.Doorway.FrameScale)
+                            if (currentSectionData.DoorFrameData.Scale == m_PreviousSectionData.DoorFrameData.Scale)
                                 return;
 
                             currentSectionData.Doorway.Doors = null;
 
-                            m_PreviousSectionData.Doorway.FrameScale = currentSectionData.Doorway.FrameScale;
+                            m_PreviousSectionData.DoorFrameData.Scale = currentSectionData.DoorFrameData.Scale;
                             Build(buildable);
                         });
                         activeDoorwayElements.RegisterValueChangeCallback(evt =>
@@ -196,6 +197,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                     {
                         var archway = props.Archway;
                         var archDoor = props.ArchDoor;
+                        var frame = props.Frame;
 
                         #region Fields
                         Foldout gridFoldout = new Foldout() { text = "Grid" };
@@ -210,8 +212,8 @@ public class WallSectionDataDrawer : PropertyDrawer
                         Foldout doorFoldout = new Foldout() { text = "Door" };
                         PropertyField archDataField = new PropertyField(archDoor.Data);
                         Foldout frameFoldout = new Foldout() { text = "Frame" };
-                        PropertyField doorFrameDepthField = new PropertyField(archway.FrameDepth) { label = "Depth" };
-                        PropertyField doorFrameScaleField = new PropertyField(archway.FrameScale) { label = "Scale" };
+                        PropertyField doorFrameDepthField = new PropertyField(frame.Depth) { label = "Depth" };
+                        PropertyField doorFrameScaleField = new PropertyField(frame.Scale) { label = "Scale" };
                         PropertyField activeDoorwayElements = new PropertyField(archway.ActiveElements) { label = "Active Elements" };
                         #endregion
 
@@ -224,8 +226,8 @@ public class WallSectionDataDrawer : PropertyDrawer
                         heightField.BindProperty(archway.Height);
                         widthField.BindProperty(archway.Width);
                         archDataField.BindProperty(archDoor.Data);
-                        doorFrameDepthField.BindProperty(archway.FrameDepth);
-                        doorFrameScaleField.BindProperty(archway.FrameScale);
+                        doorFrameDepthField.BindProperty(frame.Depth);
+                        doorFrameScaleField.BindProperty(frame.Scale);
                         activeDoorwayElements.BindProperty(archway.ActiveElements);
                         #endregion
 
@@ -306,19 +308,19 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameDepthField.RegisterValueChangeCallback(evt => 
                         {
-                            if (currentSectionData.Archway.FrameDepth == m_PreviousSectionData.Archway.FrameDepth)
+                            if (currentSectionData.DoorFrameData.Depth == m_PreviousSectionData.DoorFrameData.Depth)
                                 return;
 
-                            m_PreviousSectionData.Archway.FrameDepth = currentSectionData.Archway.FrameDepth;
+                            m_PreviousSectionData.DoorFrameData.Depth = currentSectionData.DoorFrameData.Depth;
 
                             Build(buildable);
                         });
                         doorFrameScaleField.RegisterValueChangeCallback(evt => 
                         {
-                            if (currentSectionData.Archway.FrameScale == m_PreviousSectionData.Archway.FrameScale)
+                            if (currentSectionData.DoorFrameData.Scale == m_PreviousSectionData.DoorFrameData.Scale)
                                 return;
 
-                            m_PreviousSectionData.Archway.FrameScale = currentSectionData.Archway.FrameScale;
+                            m_PreviousSectionData.DoorFrameData.Scale = currentSectionData.DoorFrameData.Scale;
 
                             Build(buildable);
                         });
