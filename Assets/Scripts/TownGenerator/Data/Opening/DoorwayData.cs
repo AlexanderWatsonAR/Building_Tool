@@ -11,13 +11,13 @@ public class DoorwayData : OpeningData
 
     [SerializeField] protected DoorwayElement m_ActiveElements;
 
-    [SerializeField] protected DoorFrameData[] m_Frames;
+    [SerializeField] protected FrameData[] m_Frames;
 
     [SerializeField] protected DoorData[] m_Doors;
 
     public DoorwayElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
     public float PositionOffset { get { return m_PositionOffset; } set { m_PositionOffset = value; } }
-    public DoorFrameData[] Frames { get { return m_Frames; } set { m_Frames = value; } }
+    public FrameData[] Frames { get { return m_Frames; } set { m_Frames = value; } }
     public DoorData[] Doors { get { return m_Doors; } set { m_Doors = value; } }
     public IList<List<Vector3>> DoorHoles => Doors.Select(door => door.ControlPoints.ToList()).ToList();
 
@@ -25,7 +25,7 @@ public class DoorwayData : OpeningData
     {
     }
 
-    public DoorwayData(float posOffset, DoorwayElement activeElements, DoorFrameData[] frames, DoorData[] doors) : base()
+    public DoorwayData(float posOffset, DoorwayElement activeElements, FrameData[] frames, DoorData[] doors) : base()
     {
         m_PositionOffset = posOffset;
         m_ActiveElements = activeElements;
@@ -33,7 +33,7 @@ public class DoorwayData : OpeningData
         m_Doors = doors;
     }
 
-    public DoorwayData(float height, float width, int cols, int rows, float posOffset, DoorwayElement activeElements, DoorFrameData[] frames, DoorData[] doors) : base (height, width, cols, rows)
+    public DoorwayData(float height, float width, int cols, int rows, float posOffset, DoorwayElement activeElements, FrameData[] frames, DoorData[] doors) : base (height, width, cols, rows)
     {
         m_PositionOffset = posOffset;
         m_ActiveElements = activeElements;

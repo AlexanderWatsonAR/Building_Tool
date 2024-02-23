@@ -20,7 +20,7 @@ public class ArchwayData : DoorwayData
         m_ArchSides = archSides;
     }
 
-    public ArchwayData(float height, float width, int cols, int rows, float posOffset, DoorwayElement activeElements, DoorFrameData[] frames, DoorData[] doors, float archHeight, int archSides) :
+    public ArchwayData(float height, float width, int cols, int rows, float posOffset, DoorwayElement activeElements, FrameData[] frames, DoorData[] doors, float archHeight, int archSides) :
         base(height, width, cols, rows, posOffset, activeElements, frames, doors)
     {
         m_ArchHeight = archHeight;

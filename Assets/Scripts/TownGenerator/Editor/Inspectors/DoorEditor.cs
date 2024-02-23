@@ -22,7 +22,7 @@ public class DoorEditor : Editor
         PropertyField dataField = new PropertyField(data);
         dataField.BindProperty(data);
         
-        Vector3 forward = data.FindPropertyRelative("m_Forward").vector3Value;
+        Vector3 forward = data.FindPropertyRelative("m_Normal").vector3Value;
 
         m_HingeRotation = Quaternion.LookRotation(forward, Vector3.up);
 

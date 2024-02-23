@@ -28,31 +28,23 @@ public class WindowDataDrawer : PropertyDrawer
         #region Fields
         PropertyField activeElementsField = new PropertyField(props.ActiveElements);
         Foldout outerFrameFoldout = new Foldout() { text = "Outer Frame" };
-        PropertyField outerScaleField = new PropertyField(props.OuterFrameScale) { label = "Scale" };
-        PropertyField outerFrameDepthField = new PropertyField(props.OuterFrameDepth) { label = "Depth" };
+        PropertyField outerFrameField = new PropertyField(props.OuterFrame.Data);
         Foldout innerFrameFoldout = new Foldout() { text = "Inner Frame" };
-        PropertyField colsField = new PropertyField(props.InnerFrameColumns) { label = "Columns" };
-        PropertyField rowsField = new PropertyField(props.InnerFrameRows) { label = "Rows" };
-        PropertyField innerFrameScaleField = new PropertyField(props.InnerFrameScale) { label = "Scale" };
-        PropertyField innerFrameDepthField = new PropertyField(props.InnerFrameDepth) { label = "Depth" };
+        PropertyField innerFrameField = new PropertyField(props.InnerFrame.Data);
         Foldout paneFoldout = new Foldout() { text = "Pane" };
-        PropertyField paneDepthField = new PropertyField(props.PaneDepth) { label = "Depth" };
+        PropertyField paneField = new PropertyField(props.Data);
         Foldout shuttersFoldout = new Foldout() { text = "Shutters" };
-        PropertyField shuttersDepthField = new PropertyField(props.ShuttersDepth) { label = "Depth" };
-        PropertyField shuttersAngleField = new PropertyField(props.ShuttersAngle) { label = "Angle" };
+        PropertyField leftShutter = new PropertyField(props.LeftShutter.Data);
+        PropertyField rightShutter = new PropertyField(props.RightShutter.Data);
         #endregion
 
         #region Bind
         activeElementsField.BindProperty(props.ActiveElements);
-        outerScaleField.BindProperty(props.OuterFrameScale);
-        outerFrameDepthField.BindProperty(props.OuterFrameDepth);
-        colsField.BindProperty(props.InnerFrameColumns);
-        rowsField.BindProperty(props.InnerFrameRows);
-        innerFrameScaleField.BindProperty(props.InnerFrameScale);
-        innerFrameDepthField.BindProperty(props.InnerFrameDepth);
-        paneDepthField.BindProperty(props.PaneDepth);
-        shuttersDepthField.BindProperty(props.ShuttersDepth);
-        shuttersAngleField.BindProperty(props.ShuttersAngle);
+        outerFrameField.BindProperty(props.OuterFrame.Data);
+        innerFrameField.BindProperty(props.InnerFrame.Data);
+        paneField.BindProperty(props.Pane.Data);
+        leftShutter.BindProperty(props.LeftShutter.Data);
+        rightShutter.BindProperty(props.RightShutter.Data);
         #endregion
 
         #region Register Value Change Callback
@@ -117,218 +109,14 @@ public class WindowDataDrawer : PropertyDrawer
                 Build(buildable);
             }
         });
-
-        #region Outer Frame
-        outerScaleField.RegisterValueChangeCallback(evt => 
-        {
-            if (m_CurrentWindowData.OuterFrameScale == m_PreviousWindowData.OuterFrameScale)
-                return;
-
-            m_PreviousWindowData.OuterFrameScale = m_CurrentWindowData.OuterFrameScale;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.OuterFrameScale == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.OuterFrameScale = evt.changedProperty.floatValue;
-                win.DoesOuterFrameNeedRebuild = true;
-                win.DoesInnerFrameNeedRebuild = true;
-            }
-
-            Build(buildable);
-            return;
-            
-        });
-        outerFrameDepthField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.OuterFrameDepth == m_PreviousWindowData.OuterFrameDepth)
-                return;
-
-            m_PreviousWindowData.OuterFrameDepth = m_CurrentWindowData.OuterFrameDepth;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.OuterFrameDepth == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.OuterFrameDepth = evt.changedProperty.floatValue;
-                win.DoesOuterFrameNeedRebuild = true;
-            }
-
-            Build(buildable);
-
-        });
-        #endregion
-
-        #region Inner Frame
-        colsField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.InnerFrameColumns == m_PreviousWindowData.InnerFrameColumns)
-                return;
-
-            m_PreviousWindowData.InnerFrameColumns = m_CurrentWindowData.InnerFrameColumns;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable); 
-
-            foreach (WindowData win in windows)
-            {
-                if (win.InnerFrameColumns == evt.changedProperty.intValue && buildable is not Window)
-                    continue;
-
-                win.InnerFrameColumns = evt.changedProperty.intValue;
-                win.InnerFrameHolePoints = Window.CalculateInnerFrame(win);
-                win.DoesInnerFrameNeedRebuild = true;
-            }
-
-            Build(buildable);
-                
-        });
-        rowsField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.InnerFrameRows == m_PreviousWindowData.InnerFrameRows)
-                return;
-
-            m_PreviousWindowData.InnerFrameRows = m_CurrentWindowData.InnerFrameRows;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.InnerFrameRows == evt.changedProperty.intValue && buildable is not Window)
-                    continue;
-
-                win.InnerFrameRows = evt.changedProperty.intValue;
-                win.InnerFrameHolePoints = Window.CalculateInnerFrame(win);
-                win.DoesInnerFrameNeedRebuild = true;
-            }
-
-            Build(buildable);
-        });
-        innerFrameScaleField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.InnerFrameScale == m_PreviousWindowData.InnerFrameScale)
-                return;
-
-            m_PreviousWindowData.InnerFrameScale = m_CurrentWindowData.InnerFrameScale;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.InnerFrameScale == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.InnerFrameScale = evt.changedProperty.floatValue;
-                win.DoesInnerFrameNeedRebuild = true;
-            }
-
-            Build(buildable);
-
-        });
-        innerFrameDepthField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.InnerFrameDepth == m_PreviousWindowData.InnerFrameDepth)
-                return;
-
-            m_PreviousWindowData.InnerFrameDepth = m_CurrentWindowData.InnerFrameDepth;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.InnerFrameDepth == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.InnerFrameDepth = evt.changedProperty.floatValue;
-                win.DoesInnerFrameNeedRebuild = true;
-            }
-            Build(buildable);
-
-        });
-        #endregion
-
-        #region Pane
-        paneDepthField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.PaneDepth == m_PreviousWindowData.PaneDepth)
-                return;
-
-            m_PreviousWindowData.PaneDepth = m_CurrentWindowData.PaneDepth;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.PaneDepth == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.PaneDepth = evt.changedProperty.floatValue;
-                win.DoesPaneNeedRebuild = true;
-            }
-
-            Build(buildable);
-        });
-        #endregion
-
-        #region Shutters
-        shuttersDepthField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.ShuttersDepth == m_PreviousWindowData.ShuttersDepth)
-                return;
-
-            m_PreviousWindowData.ShuttersDepth = m_CurrentWindowData.ShuttersDepth;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.ShuttersDepth == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.ShuttersDepth = evt.changedProperty.floatValue;
-                win.DoShuttersNeedRebuild = true;
-            }
-
-            Build(buildable);
-        });
-        shuttersAngleField.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentWindowData.ShuttersAngle == m_PreviousWindowData.ShuttersAngle)
-                return;
-
-            m_PreviousWindowData.ShuttersAngle = m_CurrentWindowData.ShuttersAngle;
-
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
-
-            foreach (WindowData win in windows)
-            {
-                if (win.ShuttersAngle == evt.changedProperty.floatValue && buildable is not Window)
-                    continue;
-
-                win.ShuttersAngle = evt.changedProperty.floatValue;
-                win.DoShuttersNeedRebuild = true;
-            }
-
-            Build(buildable);
-        });
-        #endregion
         #endregion
 
         #region Add Fields to Container
-        outerFrameFoldout.Add(outerScaleField);
-        outerFrameFoldout.Add(outerFrameDepthField);
-        innerFrameFoldout.Add(colsField);
-        innerFrameFoldout.Add(rowsField);
-        innerFrameFoldout.Add(innerFrameScaleField);
-        innerFrameFoldout.Add(innerFrameDepthField);
-        paneFoldout.Add(paneDepthField);
-        shuttersFoldout.Add(shuttersDepthField);
-        shuttersFoldout.Add(shuttersAngleField);
+        outerFrameFoldout.Add(outerFrameField);
+        innerFrameFoldout.Add(innerFrameField);
+        paneFoldout.Add(paneField);
+        shuttersFoldout.Add(leftShutter);
+        shuttersFoldout.Add(rightShutter);
         container.Add(activeElementsField);
         container.Add(outerFrameFoldout);
         container.Add(innerFrameFoldout);

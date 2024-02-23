@@ -142,8 +142,6 @@ public class DoorDataDrawer : PropertyDrawer
 
         return content;
     }
-
-
     private DoorData[] GetDoorDataFromBuildable(IBuildable buildable)
     {
         DoorData[] dataset = new DoorData[0];
@@ -193,7 +191,6 @@ public class DoorDataDrawer : PropertyDrawer
 
         return dataset;
     }
-
     private void Build(IBuildable buildable)
     {
         switch (buildable)

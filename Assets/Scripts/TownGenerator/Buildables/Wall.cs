@@ -41,46 +41,72 @@ public class Wall : MonoBehaviour, IBuildable
         Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
         Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
 
-        Material defaultMat = BuiltinMaterials.defaultMaterial;
-
-        WindowData winData = new WindowData()
-        {
-            Forward = faceNormal,
-            OuterFrameDepth = m_Data.Depth,
-            InnerFrameDepth = m_Data.Depth * 0.5f,
-            PaneDepth = m_Data.Depth * 0.25f,
-            OuterFrameMaterial = defaultMat,
-            InnerFrameMaterial = defaultMat,
-            PaneMaterial = defaultMat,
-            ShuttersMaterial = defaultMat,
-            ShuttersDepth = m_Data.Depth * 0.5f
-        };
-
-        DoorData doorData = new DoorData()
-        {
-            Forward = faceNormal,
-            Right = right,
-            HingePoint = TransformPoint.Left,
-            Material = defaultMat,
-        };
-
-        DoorFrameData frameData = new DoorFrameData()
-        {
-            Scale = doorData.Scale,
-            Depth = m_Data.Depth * 1.1f,
-            Normal = faceNormal
-        };
-
         m_Data.SectionData = new WallSectionData()
         {
             WallDepth = m_Data.Depth,
-            FaceNormal = faceNormal,
-            WindowData = winData,
-            DoorData = doorData,
-            DoorFrameData = frameData
+            Normal = faceNormal,
+            WindowData = DefineWindowDefaults(faceNormal),
+            DoorData = DefineDoorDefaults(faceNormal),
+            DoorFrameData = DefineFrameDefaults(faceNormal),
         };
 
         return this;
+    }
+
+    private WindowData DefineWindowDefaults(Vector3 normal)
+    {
+        FrameData outerFrame = new FrameData()
+        {
+            Depth = m_Data.Depth
+        };
+        GridFrameData innerFrame = new GridFrameData()
+        {
+            Depth = m_Data.Depth * 0.5f
+        };
+        Polygon3DData pane = new Polygon3DData()
+        {
+            Depth = m_Data.Depth * 0.25f
+        };
+        DoorData leftShutter = new DoorData()
+        {
+            Depth = m_Data.Depth * 0.5f
+        };
+        DoorData rightShutter = new DoorData()
+        {
+            Depth = m_Data.Depth * 0.5f
+        };
+
+        WindowData winData = new WindowData()
+        {
+            OuterFrame = outerFrame,
+            InnerFrame = innerFrame,
+            Pane = pane,
+            LeftShutter = leftShutter,
+            RightShutter = rightShutter
+        };
+
+        return winData;
+    }
+
+    private DoorData DefineDoorDefaults(Vector3 normal)
+    {
+        DoorData doorData = new DoorData()
+        {
+            Normal = normal,
+            HingePoint = TransformPoint.Left,
+        };
+        return doorData;
+    }
+
+    private FrameData DefineFrameDefaults(Vector3 normal)
+    {
+        FrameData frameData = new FrameData()
+        {
+            Depth = m_Data.Depth * 1.1f,
+            Normal = normal
+        };
+
+        return frameData;
     }
 
     public void Build()

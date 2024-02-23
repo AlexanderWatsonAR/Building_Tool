@@ -4,16 +4,15 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
-public class DoorFrame : Polygon3D
+public class Frame : Polygon3D
 {
-    private DoorFrameData m_Data;
+    [SerializeField] FrameData m_Data;
 
-    public DoorFrameData Data => m_Data;
+    public FrameData Data => m_Data;
 
     public override IBuildable Initialize(IData data)
     {
-        name = "Frame";
-        m_Data = data as DoorFrameData;
+        m_Data = data as FrameData;
         base.Initialize(data);
         return this;
     }
@@ -21,7 +20,7 @@ public class DoorFrame : Polygon3D
     public override void Build()
     {
         m_Data.HolePoints = new Vector3[1][];
-        m_Data.HolePoints[0] = m_Data.ControlPoints.ScalePolygon(m_Data.Scale);
+        m_Data.HolePoints[0] = m_Data.ControlPoints.ScalePolygon(m_Data.Scale, m_Data.Position);
         base.Build();
     }
 }
