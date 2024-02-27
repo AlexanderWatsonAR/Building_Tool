@@ -6,10 +6,10 @@ using UnityEngine;
 [System.Serializable]
 public class WindowOpeningData : OpeningData
 {
-    [SerializeField, Range(3, 16)] private int m_Sides = 3;
-    [SerializeField, Range(-180, 180)] private float m_Angle;
-    [SerializeField] private bool m_IsSmooth;
-    [SerializeField] private WindowData[] m_Windows;
+    [SerializeField, Range(3, 16)] int m_Sides = 3;
+    [SerializeField, Range(-180, 180)] float m_Angle;
+    [SerializeField] bool m_IsSmooth;
+    [SerializeField] WindowData[] m_Windows;
 
     public int Sides { get { return m_Sides; } set { m_Sides = value; } }
     public float Angle { get { return m_Angle; } set { m_Angle = value; } }

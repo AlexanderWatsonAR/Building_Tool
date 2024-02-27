@@ -14,8 +14,8 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
 
     [SerializeField] Polygon3DData m_PreviousData;
     [SerializeField] Polygon3DData m_CurrentData;
-    [SerializeField] Polygon3DDataSerializedProperties m_Polygon3DProps;
 
+    Polygon3DDataSerializedProperties m_Polygon3DProps;
     VisualElement m_Root;
     PropertyField m_Depth;
 
@@ -40,7 +40,6 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
         m_Polygon3DProps = new Polygon3DDataSerializedProperties(data);
         m_Buildable = data.serializedObject.targetObject as IBuildable;
     }
-
     public void DefineFields()
     {
         m_Depth = new PropertyField(m_Polygon3DProps.Depth, "Depth");
@@ -58,7 +57,7 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
 
             m_PreviousData.Depth = m_CurrentData.Depth;
 
-            Build(m_Buildable);
+            Build();
         });
     }
     public void AddFieldsToRoot()
@@ -66,15 +65,16 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
         m_Root.Add(m_Depth);
     }
 
-    public void Build(IBuildable buildable)
+    public void Build()
     {
-        switch(buildable)
+        switch(m_Buildable)
         {
             case Pane:
-                buildable.Build();
+                m_Buildable.Build();
             break;
             case Window:
-                // TODO: build the pane inside window.
+                Window window = m_Buildable as Window;
+                window.BuildPane();
                 break;
         }
     }

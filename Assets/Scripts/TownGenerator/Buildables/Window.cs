@@ -12,9 +12,8 @@ using UnityEngine.UIElements;
 
 public class Window : MonoBehaviour, IBuildable
 {
-    [SerializeReference] private WindowData m_Data;
+    [SerializeReference] WindowData m_Data;
 
-    // TODO: incorporate the polygon3d, frame and grid frame classes into window.
     // Changes to the outer frame scale affect the inner frame, pane & doors.
     // It may wise to disable the scale in its prop drawer.
     [SerializeField] Frame m_OuterFrame;
@@ -31,6 +30,7 @@ public class Window : MonoBehaviour, IBuildable
         return this;
     }
 
+    #region Create
     private Frame CreateOuterFrame()
     {
         ProBuilderMesh outerFrameMesh = ProBuilderMesh.Create();
@@ -65,7 +65,7 @@ public class Window : MonoBehaviour, IBuildable
         leftShutterMesh.transform.SetParent(transform, false);
         Door leftShutter = leftShutterMesh.AddComponent<Door>();
         DoorData data = m_Data.LeftShutter;
-        data.ControlPoints = controlPoints;
+        data.Polygon.ControlPoints = controlPoints;
         leftShutter.Initialize(data);
         return leftShutter;
     }
@@ -76,30 +76,34 @@ public class Window : MonoBehaviour, IBuildable
         rightShutterMesh.transform.SetParent(transform, false);
         Door rightShutter = rightShutterMesh.AddComponent<Door>();
         DoorData data = m_Data.RightShutter;
-        data.ControlPoints = controlPoints;
+        data.Polygon.ControlPoints = controlPoints;
         rightShutter.Initialize(data);
         return rightShutter;
     }
+    #endregion
+
+    #region Calculate
     private FrameData CalculateOuterFrame()
     {
         FrameData frameData = m_Data.OuterFrame;
-        frameData.ControlPoints = m_Data.ControlPoints;
+        frameData.Polygon.ControlPoints = m_Data.Polygon.ControlPoints;
         return frameData;
     }
     private GridFrameData CalculateInnerFrame()
     {
         GridFrameData frameData = m_Data.InnerFrame;
-        frameData.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.HolePoints[0] : m_Data.ControlPoints;
+        frameData.Polygon.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
         return frameData;
     }
     private Polygon3DData CalculatePane()
     {
         Polygon3DData pane = m_Data.Pane;
-        pane.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.HolePoints[0] : m_Data.ControlPoints;
+        pane.Polygon.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
         return pane;
-
     }
+    #endregion
 
+    #region Build
     public void BuildOuterFrame()
     {
         if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.DoesOuterFrameNeedRebuild))
@@ -109,7 +113,6 @@ public class Window : MonoBehaviour, IBuildable
             m_Data.DoesOuterFrameNeedRebuild = false;
         }
     }
-
     public void BuildInnerFrame()
     {
         if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_Data.DoesInnerFrameNeedRebuild))
@@ -119,7 +122,6 @@ public class Window : MonoBehaviour, IBuildable
             m_Data.DoesInnerFrameNeedRebuild = false;
         }
     }
-
     public void BuildPane()
     {
         if (m_Data.IsPaneActive && (m_Pane == null || m_Data.DoesPaneNeedRebuild))
@@ -128,31 +130,18 @@ public class Window : MonoBehaviour, IBuildable
             m_Data.DoesPaneNeedRebuild = false;
         }
     }
-
-    public void Build()
+    public void BuildShutters()
     {
-        Demolish();
-
-        if (m_Data.ActiveElements == WindowElement.Nothing)
-            return;
-
-        Debug.Log("Window build ", this);
-
-
-        BuildOuterFrame();
-        BuildInnerFrame();
-        BuildPane();
-
-        if(m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.DoShuttersNeedRebuild))
+        if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.DoShuttersNeedRebuild))
         {
             IList<IList<Vector3>> shutterControlPoints;
-            Vector3[] points = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.HolePoints[0] : m_Data.ControlPoints;
+            Vector3[] points = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
 
             float height = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Height : m_OuterFrame.Data.Height;
             float width = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Width : m_OuterFrame.Data.Width;
             Vector3 position = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Position : m_OuterFrame.Data.Position;
 
-            shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_Data.Normal);
+            shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_Data.Polygon.Normal);
 
             m_LeftShutter = m_LeftShutter != null ? m_LeftShutter : CreateLeftShutter(shutterControlPoints[1].ToArray());
             m_LeftShutter.Build();
@@ -163,6 +152,22 @@ public class Window : MonoBehaviour, IBuildable
             m_Data.DoShuttersNeedRebuild = false;
         }
     }
+    public void Build()
+    {
+        Demolish();
+
+        if (m_Data.ActiveElements == WindowElement.Nothing)
+            return;
+
+        Debug.Log("Window build ", this);
+
+        BuildOuterFrame();
+        BuildInnerFrame();
+        BuildPane();
+        BuildShutters();
+
+    }
+    #endregion
     /// <summary>
     /// This method removes only the window components that are inactive
     /// </summary>

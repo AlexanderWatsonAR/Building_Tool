@@ -8,25 +8,25 @@ using UnityEngine.UIElements;
 [System.Serializable]
 public class DoorData : Polygon3DData
 {
-    [SerializeField] private int m_ID;
-    [SerializeField] private DoorElement m_ActiveElements;
+    [SerializeField] int m_ID;
+    [SerializeField] DoorElement m_ActiveElements;
 
     // Door
-    [SerializeField, HideInInspector] private Vector3 m_Right;
-    [SerializeField, Range(0, 0.999f)] private float m_Scale;
-    [SerializeField] private TransformPoint m_HingePoint;
-    [SerializeField] private Vector3 m_HingePosition;
-    [SerializeField] private Vector3 m_HingeOffset;
-    [SerializeField] private Vector3 m_HingeEulerAngles;
+    [SerializeField, HideInInspector] Vector3 m_Right;
+    [SerializeField, Range(0, 0.999f)] float m_Scale;
+    [SerializeField] TransformPoint m_HingePoint;
+    [SerializeField] Vector3 m_HingePosition;
+    [SerializeField] Vector3 m_HingeOffset;
+    [SerializeField] Vector3 m_HingeEulerAngles;
 
     #region Handle
-    [SerializeField] private float m_HandleSize;
-    [SerializeField, Range(0, 1)] private float m_HandleScale;
-    [SerializeField] private Vector3 m_HandlePosition;
-    [SerializeField] private TransformPoint m_HandlePoint;
+    [SerializeField] float m_HandleSize;
+    [SerializeField, Range(0, 1)] float m_HandleScale;
+    [SerializeField] Vector3 m_HandlePosition;
+    [SerializeField] TransformPoint m_HandlePoint;
     #endregion
 
-    [SerializeField] private Material m_Material;
+    [SerializeField] Material m_Material;
 
     #region Accessors
     public int ID { get { return m_ID; } set { m_ID = value; } }
@@ -110,8 +110,8 @@ public class DoorData : Polygon3DData
     public DoorData(DoorData data) : this
     (
         data.ActiveElements,
-        data.ControlPoints,
-        data.HolePoints,
+        data.Polygon,
+        data.Holes,
         data.Normal,
         data.Right,
         data.Height,
@@ -130,10 +130,10 @@ public class DoorData : Polygon3DData
     {
     }
 
-    public DoorData(DoorElement activeElements, Vector3[] controlPoints, Vector3[][] holePoints, Vector3 normal,
+    public DoorData(DoorElement activeElements, PolygonData polygon, PolygonData[] holes, Vector3 normal,
         Vector3 right, float height, float width, float depth, float scale, Vector3 position,
         TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles,
-        float handleSize, float handleScale, TransformPoint handlePoint, Material material) : base (controlPoints, holePoints, normal, height, width, depth, position)
+        float handleSize, float handleScale, TransformPoint handlePoint, Material material) : base (polygon, holes, normal, height, width, depth, position)
     {
         m_ActiveElements = activeElements;
         m_Right = right;
@@ -157,16 +157,16 @@ public class DoorData : Polygon3DData
                 position = Position;
                 break;
             case TransformPoint.Top:
-                position = Position + (Vector3.up * Height * 0.5f);
+                position = Position + (0.5f * Height * Vector3.up);
                 break;
             case TransformPoint.Bottom:
-                position = Position - (Vector3.up * Height * 0.5f);
+                position = Position - (0.5f * Height * Vector3.up);
                 break;
             case TransformPoint.Left:
-                position = Position - (m_Right * Width * 0.5f);
+                position = Position - (0.5f * Width * m_Right);
                 break;
             case TransformPoint.Right:
-                position = Position + (m_Right * Width * 0.5f);
+                position = Position + (0.5f * Width * m_Right);
                 break;
         }
 

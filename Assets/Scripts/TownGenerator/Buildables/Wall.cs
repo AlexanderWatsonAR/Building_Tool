@@ -10,7 +10,7 @@ using System;
 
 public class Wall : MonoBehaviour, IBuildable
 {
-    [SerializeReference] private WallData m_Data;
+    [SerializeReference] WallData m_Data;
     private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
     private List<Vector3[]> SubPoints
@@ -41,19 +41,18 @@ public class Wall : MonoBehaviour, IBuildable
         Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
         Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
 
-        m_Data.SectionData = new WallSectionData()
+        m_Data.SectionData = new WallSectionData
         {
-            WallDepth = m_Data.Depth,
-            Normal = faceNormal,
-            WindowData = DefineWindowDefaults(faceNormal),
-            DoorData = DefineDoorDefaults(faceNormal),
-            DoorFrameData = DefineFrameDefaults(faceNormal),
+            Depth = m_Data.Depth,
+            Window = DefineWindowDefaults(),
+            Door = DefineDoorDefaults(faceNormal),
+            DoorFrame = DefineFrameDefaults(faceNormal),
         };
 
         return this;
     }
 
-    private WindowData DefineWindowDefaults(Vector3 normal)
+    private WindowData DefineWindowDefaults()
     {
         FrameData outerFrame = new FrameData()
         {
@@ -135,21 +134,15 @@ public class Wall : MonoBehaviour, IBuildable
                 wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
                 wallSectionMesh.transform.SetParent(transform, false);
 
-                try
+                m_Data.Sections[count] ??= new WallSectionData(m_Data.SectionData)
                 {
-                    m_Data.Sections[count] ??= new WallSectionData(m_Data.SectionData)
-                    {
-                        ID = new Vector2Int(x, y)
-                    };
-                }
-                catch (IndexOutOfRangeException)
-                {
-                    Debug.Break();
-                }
-                
+                    ID = new Vector2Int(x, y),
+                    Polygon = new PolygonData(points),
+                    Depth = m_Data.Depth
+                };
 
-                m_Data.Sections[count].ControlPoints = points;
-                m_Data.Sections[count].WallDepth = m_Data.Depth;
+                m_Data.Sections[count].Polygon.ControlPoints = points;
+                m_Data.Sections[count].Depth = m_Data.Depth;
 
                 WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[count]) as WallSection;
                 wallSection.Build();

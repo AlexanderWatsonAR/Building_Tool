@@ -18,15 +18,13 @@ public class GridFrame : Polygon3D
 
     public override void Build()
     {
-        Vector3[][] holePoints = MeshMaker.SpiltPolygon(m_Data.ControlPoints, m_Data.Width, m_Data.Height, m_Data.Columns, m_Data.Rows, m_Data.Position, m_Data.Normal).Select(list => list.ToArray()).ToArray();
+        Vector3[][] holePoints = MeshMaker.SpiltPolygon(m_Data.Polygon.ControlPoints, m_Data.Width, m_Data.Height, m_Data.Columns, m_Data.Rows, m_Data.Position, m_Data.Normal).Select(list => list.ToArray()).ToArray();
+        m_Data.Holes = new PolygonData[holePoints.Length];
 
-        for(int i = 0; i < holePoints.Length; i++)
+        for (int i = 0; i < holePoints.Length; i++)
         {
-            holePoints[i] = holePoints[i].ScalePolygon(m_Data.Scale);
-
+            m_Data.Holes[i] = new PolygonData(holePoints[i].ScalePolygon(m_Data.Scale).ToArray());
         }
-
-        m_Data.HolePoints = holePoints;
 
         base.Build();
     }

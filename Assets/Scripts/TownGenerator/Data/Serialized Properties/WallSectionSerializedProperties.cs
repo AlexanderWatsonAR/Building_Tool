@@ -19,14 +19,14 @@ public class WallSectionDataSerializedProperties : SerializedPropertyGroup
 
     #region Constants
     const string k_WallElement = "m_WallElement";
-    const string k_WindowData = "m_WindowData";
-    const string k_DoorData = "m_DoorData";
-    const string k_ArchDoorData = "m_ArchDoorData";
-    const string k_WindowOpeningData = "m_WindowOpeningData";
-    const string k_DoorwayData = "m_DoorwayData";
-    const string k_ArchwayData = "m_ArchwayData";
-    const string k_ExtensionData = "m_ExtensionData";
-    const string k_DoorFrameData = "m_DoorFrameData";
+    const string k_WindowData = "m_Window";
+    const string k_DoorData = "m_Door";
+    const string k_ArchDoorData = "m_ArchDoor";
+    const string k_WindowOpeningData = "m_WindowOpening";
+    const string k_DoorwayData = "m_Doorway";
+    const string k_ArchwayData = "m_Archway";
+    const string k_ExtensionData = "m_Extension";
+    const string k_DoorFrameData = "m_DoorFrame";
     #endregion
 
     #region Accessors

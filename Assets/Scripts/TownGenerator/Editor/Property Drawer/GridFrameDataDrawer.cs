@@ -12,9 +12,9 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     IBuildable m_Buildable;
 
     [SerializeField] GridFrameData m_PreviousData;
-    [SerializeField] GridFrameData m_CurrentData;
-    [SerializeField] GridFrameDataSerializedProperties m_Props;
+    //[SerializeField] GridFrameData m_CurrentData;
 
+    GridFrameDataSerializedProperties m_Props;
     VisualElement m_Root;
     Foldout m_Grid;
     PropertyField m_Depth, m_Scale, m_Columns, m_Rows;
@@ -23,8 +23,8 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         Initialize(data);
         m_Root.name = nameof(GridFrameData) + "_Root";
-        m_CurrentData = data.GetUnderlyingValue() as GridFrameData;
-        m_PreviousData = new GridFrameData(m_CurrentData);
+        GridFrameData current = data.GetUnderlyingValue() as GridFrameData;
+        m_PreviousData = new GridFrameData(current);
 
         DefineFields();
         BindFields();
@@ -59,58 +59,42 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Scale.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentData.Scale == m_PreviousData.Scale)
+            if (evt.changedProperty.floatValue == m_PreviousData.Scale)
                 return;
 
-            m_PreviousData.Scale = m_CurrentData.Scale;
+            m_PreviousData.Scale = evt.changedProperty.floatValue;
             Build();
         });
         m_Depth.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentData.Depth == m_PreviousData.Depth)
+            if (evt.changedProperty.floatValue == m_PreviousData.Depth)
                 return;
 
-            m_PreviousData.Depth = m_CurrentData.Depth;
+            m_PreviousData.Depth = evt.changedProperty.floatValue;
 
             Build();
         });
         m_Columns.RegisterValueChangeCallback(evt => 
         {
-            if (m_CurrentData.Columns == m_PreviousData.Columns)
+            if (evt.changedProperty.intValue == m_PreviousData.Columns)
                 return;
 
-            m_PreviousData.Columns = m_CurrentData.Columns;
+            Debug.Log("Grid frame colums change");
+
+            m_PreviousData.Columns = evt.changedProperty.intValue;
 
             Build();
 
         });
         m_Rows.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentData.Rows == m_PreviousData.Rows)
+            if (evt.changedProperty.intValue == m_PreviousData.Rows)
                 return;
 
-            m_PreviousData.Rows = m_CurrentData.Rows;
+            m_PreviousData.Rows = evt.changedProperty.intValue;
 
             Build();
 
-        });
-        m_Scale.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentData.Scale == m_PreviousData.Scale)
-                return;
-
-            m_PreviousData.Scale = m_CurrentData.Scale;
-
-            Build();
-        });
-        m_Depth.RegisterValueChangeCallback(evt =>
-        {
-            if (m_CurrentData.Depth == m_PreviousData.Depth)
-                return;
-
-            m_PreviousData.Depth = m_CurrentData.Depth;
-
-            Build();
         });
     }
     public void AddFieldsToRoot()
@@ -130,8 +114,20 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                 m_Buildable.Build();
                 break;
             case Window:
-                Window window = m_Buildable as Window;
-                window.BuildOuterFrame();
+                {
+                    Window window = m_Buildable as Window;
+                    window.Data.DoesInnerFrameNeedRebuild = true;
+                    window.BuildInnerFrame();
+                }
+                break;
+            case WallSection:
+                WallSection section = m_Buildable as WallSection;
+                switch(section.Data.WallElement)
+                {
+                    case WallElement.Window:
+                        section.BuildWindows(false, true);
+                        break;
+                }
                 break;
         }
     }

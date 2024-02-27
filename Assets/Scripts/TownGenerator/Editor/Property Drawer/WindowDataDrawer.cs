@@ -11,17 +11,11 @@ using Unity.VisualScripting;
 [CustomPropertyDrawer(typeof(WindowData))]
 public class WindowDataDrawer : PropertyDrawer
 {
-    [SerializeField] WindowData m_CurrentWindowData;
-    [SerializeField] WindowData m_PreviousWindowData;
-
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
         VisualElement container = new VisualElement();
 
         WindowDataSerializedProperties props = new WindowDataSerializedProperties(data);
-
-        m_CurrentWindowData = data.GetUnderlyingValue() as WindowData;
-        m_PreviousWindowData = new WindowData(m_CurrentWindowData);
 
         IBuildable buildable = data.serializedObject.targetObject as IBuildable;
 
@@ -34,6 +28,7 @@ public class WindowDataDrawer : PropertyDrawer
         Foldout paneFoldout = new Foldout() { text = "Pane" };
         PropertyField paneField = new PropertyField(props.Data);
         Foldout shuttersFoldout = new Foldout() { text = "Shutters" };
+        // How did this look before?
         PropertyField leftShutter = new PropertyField(props.LeftShutter.Data);
         PropertyField rightShutter = new PropertyField(props.RightShutter.Data);
         #endregion
@@ -173,7 +168,6 @@ public class WindowDataDrawer : PropertyDrawer
             case WallSection:
                 {
                     WallSection section = buildable as WallSection;
-
                     section.BuildChildren();
                 }
                 break;

@@ -13,7 +13,7 @@ using System.Runtime.Remoting.Messaging;
 [CustomPropertyDrawer(typeof(WallSectionData))]
 public class WallSectionDataDrawer : PropertyDrawer
 {
-    [SerializeField] private WallSectionData m_PreviousSectionData; // This is a copy of data, used to determine if data values actually change.
+    [SerializeField] WallSectionData m_PreviousSectionData; // This is a copy of data, used to determine if data values actually change.
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
@@ -135,10 +135,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameDepthField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.DoorFrameData.Depth == m_PreviousSectionData.DoorFrameData.Depth)
+                            if (currentSectionData.DoorFrame.Depth == m_PreviousSectionData.DoorFrame.Depth)
                                 return;
 
-                            m_PreviousSectionData.DoorFrameData.Depth = currentSectionData.DoorFrameData.Depth;
+                            m_PreviousSectionData.DoorFrame.Depth = currentSectionData.DoorFrame.Depth;
 
                             currentSectionData.Doorway.Doors = null;
 
@@ -146,12 +146,12 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameScaleField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.DoorFrameData.Scale == m_PreviousSectionData.DoorFrameData.Scale)
+                            if (currentSectionData.DoorFrame.Scale == m_PreviousSectionData.DoorFrame.Scale)
                                 return;
 
                             currentSectionData.Doorway.Doors = null;
 
-                            m_PreviousSectionData.DoorFrameData.Scale = currentSectionData.DoorFrameData.Scale;
+                            m_PreviousSectionData.DoorFrame.Scale = currentSectionData.DoorFrame.Scale;
                             Build(buildable);
                         });
                         activeDoorwayElements.RegisterValueChangeCallback(evt =>
@@ -308,19 +308,19 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameDepthField.RegisterValueChangeCallback(evt => 
                         {
-                            if (currentSectionData.DoorFrameData.Depth == m_PreviousSectionData.DoorFrameData.Depth)
+                            if (currentSectionData.DoorFrame.Depth == m_PreviousSectionData.DoorFrame.Depth)
                                 return;
 
-                            m_PreviousSectionData.DoorFrameData.Depth = currentSectionData.DoorFrameData.Depth;
+                            m_PreviousSectionData.DoorFrame.Depth = currentSectionData.DoorFrame.Depth;
 
                             Build(buildable);
                         });
                         doorFrameScaleField.RegisterValueChangeCallback(evt => 
                         {
-                            if (currentSectionData.DoorFrameData.Scale == m_PreviousSectionData.DoorFrameData.Scale)
+                            if (currentSectionData.DoorFrame.Scale == m_PreviousSectionData.DoorFrame.Scale)
                                 return;
 
-                            m_PreviousSectionData.DoorFrameData.Scale = currentSectionData.DoorFrameData.Scale;
+                            m_PreviousSectionData.DoorFrame.Scale = currentSectionData.DoorFrame.Scale;
 
                             Build(buildable);
                         });
@@ -380,6 +380,7 @@ public class WallSectionDataDrawer : PropertyDrawer
                         PropertyField width = new PropertyField(opening.Width) { label = "Width" };
                         PropertyField angle = new PropertyField(opening.Angle) { label = "Angle" };
                         Foldout windowFoldout = new Foldout() { text = "Window" };
+                        // Issue: I'm unable to maniputate the window data in the wall section inspector. 
                         PropertyField windowDataField = new PropertyField(window.Data);
                         #endregion
 

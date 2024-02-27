@@ -9,14 +9,13 @@ using UnityEngine.UIElements;
 [CustomPropertyDrawer(typeof(FrameData))]
 public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
 {
+    IBuildable m_Buildable;
     [SerializeField] FrameData m_PreviousData;
     [SerializeField] FrameData m_CurrentData;
-    [SerializeField] FrameDataSerializedProperties m_FrameDataProps;
 
-    private VisualElement m_Root;
-    private PropertyField m_Depth;
-    private IBuildable m_Buildable;
-    private PropertyField m_Scale;
+    FrameDataSerializedProperties m_FrameDataProps;
+    VisualElement m_Root;
+    PropertyField m_Depth, m_Scale;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
@@ -44,6 +43,8 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Scale = new PropertyField(m_FrameDataProps.Scale);
         m_Depth = new PropertyField(m_FrameDataProps.Depth);
+
+        m_Scale.SetEnabled(m_Buildable is not Frame);
     }
 
     public void BindFields()
@@ -88,7 +89,8 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
                 m_Buildable.Build();
             break;
             case Window:
-                // TODO add build case.
+                Window window = m_Buildable as Window;
+                window.BuildOuterFrame();
             break;
         }
     }

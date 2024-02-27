@@ -19,8 +19,8 @@ public class Frame : Polygon3D
 
     public override void Build()
     {
-        m_Data.HolePoints = new Vector3[1][];
-        m_Data.HolePoints[0] = m_Data.ControlPoints.ScalePolygon(m_Data.Scale, m_Data.Position);
+        m_Data.Holes = new PolygonData[1];
+        m_Data.Holes[0] = new PolygonData(m_Data.Polygon.ControlPoints.ScalePolygon(m_Data.Scale, m_Data.Position), m_Data.Polygon.Normal);
         base.Build();
     }
 }
