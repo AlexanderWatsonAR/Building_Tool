@@ -1,0 +1,5 @@
+Bugs list
+
+19-02-2024
+
+When modifying wall section elements (windows, doors) through the wall section inspector the promesh isn't being updated.

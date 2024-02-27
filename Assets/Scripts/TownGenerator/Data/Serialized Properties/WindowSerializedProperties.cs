@@ -3,27 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class WindowDataSerializedProperties
+public class WindowDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] SerializedObject m_SerializedObject;
-    [SerializeField] SerializedProperty m_Data;
+    #region Member Variables
+    [SerializeField] readonly FrameDataSerializedProperties m_OuterFrame;
+    [SerializeField] readonly GridFrameDataSerializedProperties m_InnerFrame;
+    [SerializeField] readonly Polygon3DDataSerializedProperties m_Pane;
+    [SerializeField] readonly DoorDataSerializedProperties m_LeftShutter;
+    [SerializeField] readonly DoorDataSerializedProperties m_RightShutter;
+    #endregion
 
-    public SerializedProperty Data => m_Data;
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty ActiveElements => m_Data.FindPropertyRelative("m_ActiveElements");
-    public SerializedProperty InnerFrameColumns => m_Data.FindPropertyRelative("m_InnerFrameColumns");
-    public SerializedProperty InnerFrameRows => m_Data.FindPropertyRelative("m_InnerFrameRows");
-    public SerializedProperty InnerFrameScale => m_Data.FindPropertyRelative("m_InnerFrameScale");
-    public SerializedProperty InnerFrameDepth => m_Data.FindPropertyRelative("m_InnerFrameDepth");
-    public SerializedProperty OuterFrameScale => m_Data.FindPropertyRelative("m_OuterFrameScale"); 
-    public SerializedProperty OuterFrameDepth => m_Data.FindPropertyRelative("m_OuterFrameDepth");
-    public SerializedProperty PaneDepth => m_Data.FindPropertyRelative("m_PaneDepth");
-    public SerializedProperty ShuttersDepth => m_Data.FindPropertyRelative("m_ShuttersDepth");
-    public SerializedProperty ShuttersAngle => m_Data.FindPropertyRelative("m_ShuttersAngle");
+    #region Constants
+    const string k_ActiveElements = "m_ActiveElements";
+    const string k_OuterFrame = "m_OuterFrame";
+    const string k_InnerFrame = "m_InnerFrame";
+    const string k_Pane = "m_Pane";
+    const string k_LeftShutter = "m_LeftShutter";
+    const string k_RightShutter = "m_RightShutter";
+    #endregion
 
-    public WindowDataSerializedProperties(SerializedProperty windowData)
+    #region Accessors
+    public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
+    public FrameDataSerializedProperties OuterFrame => m_OuterFrame;
+    public GridFrameDataSerializedProperties InnerFrame => m_InnerFrame;
+    public Polygon3DDataSerializedProperties Pane => m_Pane;
+    public DoorDataSerializedProperties LeftShutter => m_LeftShutter;
+    public DoorDataSerializedProperties RightShutter => m_RightShutter;
+    #endregion
+
+    public WindowDataSerializedProperties(SerializedProperty windowData) : base(windowData)
     {
-        m_Data = windowData;
-        m_SerializedObject = m_Data.serializedObject;
+        m_OuterFrame = new FrameDataSerializedProperties(m_Data.FindPropertyRelative(k_OuterFrame));
+        m_InnerFrame = new GridFrameDataSerializedProperties(m_Data.FindPropertyRelative(k_InnerFrame));
+        m_Pane = new Polygon3DDataSerializedProperties(m_Data.FindPropertyRelative(k_Pane));
+        m_LeftShutter = new DoorDataSerializedProperties(m_Data.FindPropertyRelative(k_LeftShutter));
+        m_RightShutter = new DoorDataSerializedProperties(m_Data.FindPropertyRelative(k_RightShutter));
+
     }
 }

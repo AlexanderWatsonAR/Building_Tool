@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class BuildingDataSerializedProperties
+public class BuildingDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] private SerializedProperty m_Data;
-    [SerializeField] private List<StoreyDataSerializedProperties> m_Storeys;
-    [SerializeField] private RoofDataSerializedProperties m_Roof;
+    [SerializeField] List<StoreyDataSerializedProperties> m_Storeys;
+    [SerializeField] RoofDataSerializedProperties m_Roof;
 
-    public SerializedObject SerializedObject => m_Data.serializedObject;
+    #region Constants
+    const string k_Roof = "m_Roof";
+    const string k_Storeys = "m_Storeys";
+    #endregion
 
-    public SerializedProperty Data => m_Data;
-
+    #region Accessor
     public List<StoreyDataSerializedProperties> Storeys => m_Storeys;
     public RoofDataSerializedProperties Roof => m_Roof;
+    #endregion
 
-    public BuildingDataSerializedProperties(SerializedProperty buildingData)
+    public BuildingDataSerializedProperties(SerializedProperty buildingData) : base(buildingData)
     {
-        m_Data = buildingData;
-        m_Roof = new RoofDataSerializedProperties(m_Data.FindPropertyRelative("m_Roof"));
+        m_Roof = new RoofDataSerializedProperties(m_Data.FindPropertyRelative(k_Roof));
 
-        SerializedProperty storeys = m_Data.FindPropertyRelative("m_Storeys");
+        SerializedProperty storeys = m_Data.FindPropertyRelative(k_Storeys);
 
         m_Storeys = new List<StoreyDataSerializedProperties>(storeys.arraySize);
 

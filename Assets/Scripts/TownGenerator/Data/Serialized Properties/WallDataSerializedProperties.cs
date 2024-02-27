@@ -1,25 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 
-public class WallDataSerializedProperties
+public class WallDataSerializedProperties : SerializedPropertyGroup
 {
-    private SerializedProperty m_WallData;
-    private SerializedObject m_SerializedObject;
-
-    #region Accessors
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty Height => m_WallData.FindPropertyRelative("m_Height");
-    public SerializedProperty Depth => m_WallData.FindPropertyRelative("m_Depth");
-    public SerializedProperty Columns => m_WallData.FindPropertyRelative("m_Columns");
-    public SerializedProperty Rows => m_WallData.FindPropertyRelative("m_Rows");
+    #region Constants
+    const string k_Height = "m_Height";
+    const string k_Depth = "m_Depth";
+    const string k_Columns = "m_Columns";
+    const string k_Rows = "m_Rows";
     #endregion
 
-    public WallDataSerializedProperties(SerializedProperty wallData)
+    #region Accessors
+    public SerializedProperty Height => m_Data.FindPropertyRelative(k_Height);
+    public SerializedProperty Depth => m_Data.FindPropertyRelative(k_Depth);
+    public SerializedProperty Columns => m_Data.FindPropertyRelative(k_Columns);
+    public SerializedProperty Rows => m_Data.FindPropertyRelative(k_Rows);
+    #endregion
+
+    public WallDataSerializedProperties(SerializedProperty wallData) : base(wallData)
     {
-        m_WallData = wallData;
-        m_SerializedObject = wallData.serializedObject;
     }
 
 }

@@ -3,26 +3,34 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class DoorDataSerializedProperties
+public class DoorDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] private SerializedObject m_SerializedObject;
-    [SerializeField] private SerializedProperty m_Data;
+    #region Constants
+    const string k_ActiveElements = "m_ActiveElements";
+    const string k_Depth = "m_Depth";
+    const string k_Scale = "m_Scale";
+    const string k_HingeOffset = "m_HingeOffset";
+    const string k_HingeEulerAngles = "m_HingeEulerAngles";
+    const string k_HingePoint = "m_HingePoint";
+    const string k_HandlePoint = "m_HandlePoint";
+    const string k_HandlePosition = "m_HandlePosition";
+    const string k_HandleScale = "m_HandleScale";
+    #endregion
 
-    public SerializedObject SerializedObject => m_SerializedObject;
-    public SerializedProperty ActiveElements => m_Data.FindPropertyRelative("m_ActiveElements");
-    public SerializedProperty Depth => m_Data.FindPropertyRelative("m_Depth");
-    public SerializedProperty Scale => m_Data.FindPropertyRelative("m_Scale"); 
-    public SerializedProperty HingeOffset => m_Data.FindPropertyRelative("m_HingeOffset");
-    public SerializedProperty HingeEulerAngle => m_Data.FindPropertyRelative("m_HingeEulerAngles");
-    public SerializedProperty HingePoint => m_Data.FindPropertyRelative("m_HingePoint");
-    public SerializedProperty HandlePoint => m_Data.FindPropertyRelative("m_HandlePoint");
-    public SerializedProperty HandlePosition => m_Data.FindPropertyRelative("m_HandlePosition");
-    public SerializedProperty HandleScale => m_Data.FindPropertyRelative("m_HandleScale");
+    #region Accessors
+    public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
+    public SerializedProperty Depth => m_Data.FindPropertyRelative(k_Depth);
+    public SerializedProperty Scale => m_Data.FindPropertyRelative(k_Scale); 
+    public SerializedProperty HingeOffset => m_Data.FindPropertyRelative(k_HingeOffset);
+    public SerializedProperty HingeEulerAngle => m_Data.FindPropertyRelative(k_HingeEulerAngles);
+    public SerializedProperty HingePoint => m_Data.FindPropertyRelative(k_HingePoint);
+    public SerializedProperty HandlePoint => m_Data.FindPropertyRelative(k_HandlePoint);
+    public SerializedProperty HandlePosition => m_Data.FindPropertyRelative(k_HandlePosition);
+    public SerializedProperty HandleScale => m_Data.FindPropertyRelative(k_HandleScale);
+    #endregion
 
-    public DoorDataSerializedProperties(SerializedProperty doorData)
+    public DoorDataSerializedProperties(SerializedProperty doorData) : base(doorData)
     {
-        m_Data = doorData;
-        m_SerializedObject = doorData.serializedObject;
     }
 
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
@@ -11,6 +12,14 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static void BuildCollection(this IEnumerable<IBuildable> buildables)
+    {
+        foreach (IBuildable buildable in buildables)
+        {
+            buildable.Build();
+        }
+    }
+
     public static Vector3[] ScaleOneLine(this Vector3[] oneLine, OneLineShape shape, float scale)
     {
         switch (shape)
@@ -269,7 +278,22 @@ public static class Extensions
         }
     }
 
+    public static Vector3[] RotatePolygon(this IEnumerable<Vector3> polygon, Vector3 currentNormal, Vector3 endNormal, Vector3? rotatePoint = null)
+    {
+        Vector3[] positions = polygon.ToArray();
 
+        rotatePoint ??= ProMaths.Average(positions);
+
+        Vector3 euler = Quaternion.FromToRotation(currentNormal, endNormal).eulerAngles;
+        
+        for(int i = 0; i < positions.Length; i++)
+        {
+            Vector3 v = Quaternion.Euler(euler) * (positions[i] - rotatePoint.Value) + rotatePoint.Value;
+            positions[i] = v;
+        }
+
+        return positions;
+    }
     public static Vector3[] ScalePolygon(this IEnumerable<Vector3> polygon, float scaleFactor, Vector3? scalePoint = null)
     {
         return ScalePolygon(polygon, Vector3.one * scaleFactor, scalePoint);

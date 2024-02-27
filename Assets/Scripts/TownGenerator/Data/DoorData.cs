@@ -1,48 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 [System.Serializable]
-public class DoorData : IData
+public class DoorData : Polygon3DData
 {
-    [SerializeField] private int m_ID;
-    [SerializeField] private DoorElement m_ActiveElements;
+    [SerializeField] int m_ID;
+    [SerializeField] DoorElement m_ActiveElements;
 
     // Door
-    [SerializeField, HideInInspector] private Vector3[] m_ControlPoints;
-    [SerializeField, HideInInspector] private Vector3 m_Forward;
-    [SerializeField, HideInInspector] private Vector3 m_Right;
-    [SerializeField, Range(0, 0.999f)] private float m_Depth;
-    [SerializeField, Range(0, 0.999f)] private float m_Scale;
-    [SerializeField, HideInInspector] private Vector3 m_CentrePosition;
-    [SerializeField] private TransformPoint m_HingePoint;
-    [SerializeField] private Vector3 m_HingePosition;
-    [SerializeField] private Vector3 m_HingeOffset;
-    [SerializeField] private Vector3 m_HingeEulerAngles;
-    [SerializeField, HideInInspector] private float m_Height;
-    [SerializeField, HideInInspector] private float m_Width;
+    [SerializeField, HideInInspector] Vector3 m_Right;
+    [SerializeField, Range(0, 0.999f)] float m_Scale;
+    [SerializeField] TransformPoint m_HingePoint;
+    [SerializeField] Vector3 m_HingePosition;
+    [SerializeField] Vector3 m_HingeOffset;
+    [SerializeField] Vector3 m_HingeEulerAngles;
 
-    // Handle
-    [SerializeField] private float m_HandleSize;
-    [SerializeField, Range(0, 1)] private float m_HandleScale;
-    [SerializeField] private Vector3 m_HandlePosition;
-    [SerializeField] private TransformPoint m_HandlePoint;
+    #region Handle
+    [SerializeField] float m_HandleSize;
+    [SerializeField, Range(0, 1)] float m_HandleScale;
+    [SerializeField] Vector3 m_HandlePosition;
+    [SerializeField] TransformPoint m_HandlePoint;
+    #endregion
 
-    [SerializeField] private Material m_Material;
+    [SerializeField] Material m_Material;
 
+    #region Accessors
     public int ID { get { return m_ID; } set { m_ID = value; } }
     public DoorElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
-    public Vector3[] ControlPoints{ get{ return m_ControlPoints;} set{ SetControlPoints(value); }}
-    public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
     public Vector3 Right { get { return m_Right; } set { m_Right = value; } }
-    public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public float Scale { get { return m_Scale; } set { m_Scale = value; } }
-    public float Height => m_Height;
-    public float Width => m_Width;
-    public Vector3 Centre => m_CentrePosition;
-
     public TransformPoint HingePoint
     {
         get
@@ -62,13 +52,9 @@ public class DoorData : IData
             m_HingePosition = TransformPointToPosition(m_HingePoint);
         }
     }
-
-    
-
     public Vector3 HingePosition => m_HingePosition;
     public Vector3 HingeOffset { get { return m_HingeOffset; } set { m_HingeOffset = value; } }
     public Vector3 HingeEulerAngles { get { return m_HingeEulerAngles; } set { m_HingeEulerAngles = value; } }
-
     public float HandleSize { get { return m_HandleSize; } set{ m_HandleSize = value; } }
     public float HandleScale { get { return m_HandleScale; } set{ m_HandleScale = value; } }
     public TransformPoint HandlePoint
@@ -82,9 +68,9 @@ public class DoorData : IData
             m_HandlePoint = value;
             m_HandlePosition = TransformPointToPosition(m_HandlePoint);
 
-            m_HandlePosition -= m_CentrePosition;
-            m_HandlePosition = Vector3.Scale(m_HandlePosition, Vector3.one * m_Scale) + m_CentrePosition;
-            m_HandlePosition += m_Forward * m_Depth;
+            m_HandlePosition -= Position;
+            m_HandlePosition = Vector3.Scale(m_HandlePosition, Vector3.one * m_Scale) + Position;
+            m_HandlePosition += Normal * Depth;
 
             float size = m_HandleSize * m_HandleScale;
 
@@ -109,19 +95,30 @@ public class DoorData : IData
     }
     public Vector3 HandlePosition => m_HandlePosition;
     public Material Material { get { return m_Material; } set { m_Material = value; } }
+    #endregion
 
-    public DoorData() : this(new Vector3[0], Vector3.zero, Vector3.zero, 0.2f, 0.9f, TransformPoint.Left, Vector3.zero, Vector3.zero, 0.2f, 1, TransformPoint.Right, null)
+    // I don't care for these empty constructors that use dummy data.
+    public DoorData() : this
+    (
+        DoorElement.Everything, null, null, Vector3.forward,
+        Vector3.right, 1, 1, 1, 1, Vector3.zero, TransformPoint.Left,
+        Vector3.zero, Vector3.zero, 0.2f, 1, TransformPoint.Right, null
+    )
     {
-
     }
 
     public DoorData(DoorData data) : this
     (
-        data.ControlPoints,
-        data.Forward,
+        data.ActiveElements,
+        data.Polygon,
+        data.Holes,
+        data.Normal,
         data.Right,
+        data.Height,
+        data.Width,
         data.Depth,
         data.Scale,
+        data.Position,
         data.HingePoint,
         data.HingeOffset,
         data.HingeEulerAngles,
@@ -133,71 +130,43 @@ public class DoorData : IData
     {
     }
 
-    public DoorData(IEnumerable<Vector3> controlPoints, Vector3 forward, Vector3 right, float depth, float scale, TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles, float handleSize, float handleScale, TransformPoint handlePoint, Material material)
+    public DoorData(DoorElement activeElements, PolygonData polygon, PolygonData[] holes, Vector3 normal,
+        Vector3 right, float height, float width, float depth, float scale, Vector3 position,
+        TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles,
+        float handleSize, float handleScale, TransformPoint handlePoint, Material material) : base (polygon, holes, normal, height, width, depth, position)
     {
-        SetControlPoints(controlPoints);
-        m_Forward = forward;
+        m_ActiveElements = activeElements;
         m_Right = right;
-        m_Depth = depth;
         m_Scale = scale;
-
         HingePoint = hingePoint;
         m_HingeOffset = hingeOffset;
         m_HingeEulerAngles = hingeEulerAngles;
-
         m_HandleSize = handleSize;
         m_HandleScale = handleScale;
         m_HandlePoint = handlePoint;
-
         m_Material = material;
-    }
-
-    private void SetControlPoints(IEnumerable<Vector3> controlPoints)
-    {
-        if (controlPoints == null)
-            return;
-
-        if (controlPoints.Count() == 0)
-            return;
-
-        m_ControlPoints = controlPoints.ToArray();
-
-        Vector3 min, max;
-        Extensions.MinMax(m_ControlPoints, out min, out max);
-        m_Height = max.y - min.y;
-        m_Width = max.x - min.x + (max.z - min.z);
-
-        m_CentrePosition = Vector3.Lerp(min, max, 0.5f);
-        m_HandleSize = Height * m_Scale * 0.05f;
-        SetHandlePosition();
-        
-    }
-
-    private void SetHandlePosition()
-    {
-        HandlePoint = m_HandlePoint;
     }
 
     private Vector3 TransformPointToPosition(TransformPoint transformPoint)
     {
-        Vector3 position = m_CentrePosition;
+        Vector3 position = Position;
 
         switch (transformPoint)
         {
             case TransformPoint.Middle:
-                position = m_CentrePosition;
+                position = Position;
                 break;
             case TransformPoint.Top:
-                position = m_CentrePosition + (Vector3.up * m_Height * 0.5f);
+                position = Position + (0.5f * Height * Vector3.up);
                 break;
             case TransformPoint.Bottom:
-                position = m_CentrePosition - (Vector3.up * m_Height * 0.5f);
+                position = Position - (0.5f * Height * Vector3.up);
                 break;
             case TransformPoint.Left:
-                position = m_CentrePosition - (m_Right * m_Width * 0.5f);
+                position = Position - (0.5f * Width * m_Right);
                 break;
             case TransformPoint.Right:
-                position = m_CentrePosition + (m_Right * m_Width * 0.5f);
+                position = Position + (0.5f * Width * m_Right);
                 break;
         }
 

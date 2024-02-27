@@ -1542,7 +1542,7 @@ public static class PolygonRecognition
                     shapeIndex = mPointIndices[0];
                     return true;
                 }
-                else if(points.IsPolygonKShaped(out int[] kPointIndices))
+                else if (points.IsPolygonKShaped(out int[] kPointIndices))
                 {
                     oneLine = new Vector3[6];
 

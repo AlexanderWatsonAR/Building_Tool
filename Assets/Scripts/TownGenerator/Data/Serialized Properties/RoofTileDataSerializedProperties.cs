@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class RoofTileDataSerializedProperties
+public class RoofTileDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] private SerializedProperty m_RoofTileData;
-
-    #region Accessors
-    public SerializedProperty Thickness => m_RoofTileData.FindPropertyRelative("m_Thickness");
-    public SerializedProperty Extend => m_RoofTileData.FindPropertyRelative("m_Extend");
-    public SerializedProperty Height => m_RoofTileData.FindPropertyRelative("m_Height");
-    public SerializedProperty Columns => m_RoofTileData.FindPropertyRelative("m_Columns");
-    public SerializedProperty Rows => m_RoofTileData.FindPropertyRelative("m_Rows");
+    #region Constants
+    const string k_Thickness = "m_Thickness";
+    const string k_Extend = "m_Extend";
+    const string k_Height = "m_Height";
+    const string k_Columns = "m_Columns";
+    const string k_Rows = "m_Rows";
     #endregion
 
-    public RoofTileDataSerializedProperties(SerializedProperty roofTileData)
+
+    #region Accessors
+    public SerializedProperty Thickness => m_Data.FindPropertyRelative(k_Thickness);
+    public SerializedProperty Extend => m_Data.FindPropertyRelative(k_Extend);
+    public SerializedProperty Height => m_Data.FindPropertyRelative(k_Height);
+    public SerializedProperty Columns => m_Data.FindPropertyRelative(k_Columns);
+    public SerializedProperty Rows => m_Data.FindPropertyRelative(k_Rows);
+    #endregion
+
+    public RoofTileDataSerializedProperties(SerializedProperty roofTileData) : base(roofTileData)
     {
-        m_RoofTileData = roofTileData;
     }
 }

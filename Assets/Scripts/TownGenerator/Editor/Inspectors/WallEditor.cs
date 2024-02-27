@@ -4,16 +4,61 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
-using static Codice.Client.BaseCommands.BranchExplorer.Layout.BrExLayout;
-using System;
-using static UnityEngine.Rendering.CoreUtils;
+using UnityEngine.Serialization;
+using UnityEditor.Rendering;
+using Unity.VisualScripting;
 
 [CustomEditor(typeof(Wall))]
 public class WallEditor : Editor
 {
+    [SerializeField] private SerializedProperty m_ActiveSection;
+
+    class Section : VisualElement
+    {
+        private SerializedProperty m_WallSection;
+        public SerializedProperty WallSection => m_WallSection;
+
+        public Section(SerializedProperty wallSection, float height, float width, Color? border = null)
+        {
+            m_WallSection = wallSection;
+            Color edge = border.HasValue ? border.Value: Color.white;
+            style.width = width;
+            style.height = height;
+
+            style.marginRight = 5;
+            style.marginBottom = 5;
+
+            style.borderBottomWidth = 1;
+            style.borderTopWidth = 1;
+            style.borderLeftWidth = 1;
+            style.borderRightWidth = 1;
+            style.borderBottomColor = edge;
+            style.borderTopColor = edge;
+            style.borderLeftColor = edge;
+            style.borderRightColor = edge;
+            style.justifyContent = Justify.Center;
+            style.alignContent = Align.Center;
+            style.alignItems = Align.Center;
+
+            SerializedProperty wallElement = wallSection.FindPropertyRelative("m_WallElement");
+            string text = wallElement.GetEnumName<WallElement>();
+
+            SerializedProperty id = wallSection.FindPropertyRelative("m_ID");
+
+            Label label = new (text);
+            Add(label);
+
+            //this.AddManipulator(new Clickable(() =>
+            //{
+
+            //    Debug.Log(id.vector2IntValue);
+            //}));
+        }
+    }
+
     public override VisualElement CreateInspectorGUI()
     {
-        VisualElement container = new VisualElement() { name = "Wall Container"};
+        VisualElement root = new VisualElement() { name = "Wall Container"};
 
         serializedObject.Update();
 
@@ -24,13 +69,21 @@ public class WallEditor : Editor
         SerializedProperty columns = data.FindPropertyRelative("m_Columns");
         SerializedProperty rows = data.FindPropertyRelative("m_Rows");
 
-        VisualElement selectableBoxContainer = new VisualElement();
-        selectableBoxContainer.style.height = 200;
-        selectableBoxContainer.style.width = 200;
-        selectableBoxContainer.style.left = 20;
-        selectableBoxContainer.style.top = 1;
+        VisualElement selectableBoxContainer = new VisualElement()
+        {
+            name = "Box Container",
+            style =
+            {
+                height = 200,
+                width = 200,
+                left = 20,
+                top = 1
+            }
+        };
 
-        PropertyField columnsField = new PropertyField(columns);
+        VisualElement sectionContainer = new VisualElement() { name = "Section Container"};
+
+        PropertyField columnsField = new PropertyField(columns) { name = "Columns"};
         columnsField.style.minWidth = 300;
         columnsField.BindProperty(columns);
         columnsField.RegisterValueChangeCallback(evt =>
@@ -38,15 +91,26 @@ public class WallEditor : Editor
             if (evt == null)
                 return;
 
-            wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
+            bool rebuild = false;
+
+            if(wall.Data.Sections == null || wall.Data.Sections.Length < 1 || wall.Data.Sections[0] == null || wall.Data.Sections.Length != wall.Data.Columns * wall.Data.Rows)
+                rebuild = true;
+
+            if (!rebuild)
+                return;
+
+            Debug.Log("Sections have been re-initialized");
+            wall.Data.Sections = new WallSectionData[wall.Data.Columns * wall.Data.Rows];
             wall.Build();
-            wall.OnDataChange_Invoke();
+
+            data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.Data.Sections);
 
             selectableBoxContainer.Clear();
-            AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
+            AddGridOfSelectableBoxes(selectableBoxContainer, sectionContainer, columns.intValue, rows.intValue);
+            sectionContainer.Clear();
         });
 
-        PropertyField rowsField = new PropertyField(rows);
+        PropertyField rowsField = new PropertyField(rows) { name = "Rows"};
         rowsField.style.minWidth = 300;
         rowsField.BindProperty(rows);
         rowsField.RegisterValueChangeCallback(evt =>
@@ -54,36 +118,40 @@ public class WallEditor : Editor
             if (evt == null)
                 return;
 
-            wall.Data.Sections = new WallSectionData[wall.Data.Columns, wall.Data.Rows];
+            bool rebuild = false;
+
+            if (wall.Data.Sections == null || wall.Data.Sections.Length < 1 || wall.Data.Sections[0] == null || wall.Data.Sections.Length != wall.Data.Columns * wall.Data.Rows)
+                rebuild = true;
+
+            if (!rebuild)
+                return;
+
+            Debug.Log("Sections have been re-initialized");
+            wall.Data.Sections = new WallSectionData[wall.Data.Columns * wall.Data.Rows];
             wall.Build();
-            wall.OnDataChange_Invoke();
+
+            data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.Data.Sections);
 
             selectableBoxContainer.Clear();
-            AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
+            AddGridOfSelectableBoxes(selectableBoxContainer, sectionContainer, columns.intValue, rows.intValue);
+            sectionContainer.Clear();
         });
 
-        VisualElement sliderContainer = new VisualElement();
-        sliderContainer.style.height = 200;
-
+        VisualElement sliderContainer = new VisualElement() { name = "Sliders"};
         sliderContainer.Add(columnsField);
         sliderContainer.Add(rowsField);
 
-        AddGridOfSelectableBoxes(selectableBoxContainer, columns.intValue, rows.intValue);
+        AddGridOfSelectableBoxes(selectableBoxContainer, sectionContainer, columns.intValue, rows.intValue);
 
-        VisualElement wallBox = new VisualElement();
-        wallBox.style.height = 200;
-        wallBox.style.left = 0;
-        wallBox.style.right = 0;
-        wallBox.style.flexDirection = FlexDirection.Row;
-        wallBox.Add(sliderContainer);
-        wallBox.Add(selectableBoxContainer);
+        root.Add(sliderContainer);
+        root.Add(selectableBoxContainer);
+        root.Add(sectionContainer);
 
-        container.Add(wallBox);
 
-        return container;
+        return root;
     }
 
-    private void AddGridOfSelectableBoxes(VisualElement root, int columns, int rows)
+    private void AddGridOfSelectableBoxes(VisualElement container, VisualElement sectionContainer, int columns, int rows)
     {
         Wall wall = target as Wall;
 
@@ -102,25 +170,24 @@ public class WallEditor : Editor
                 return;
         }
 
-        // Define the grid parameters
         float gridSpace = 200;
         float spacing = 5f;
         float borderWidth = 1f;
 
-        // Calculate the width and height of the grid container
         float boxWidth = (gridSpace / columns) - spacing;
         float boxHeight = (gridSpace / rows) - spacing;
 
-        // Create a grid container
         VisualElement gridContainer = new VisualElement();
         gridContainer.style.width = gridSpace;
         gridContainer.style.height = gridSpace;
         gridContainer.style.flexDirection = FlexDirection.Column;
         gridContainer.style.flexWrap = Wrap.Wrap;
 
-        
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+        SerializedProperty sections = data.FindPropertyRelative("m_Sections");
 
-        // Create and add selectable boxes to the grid
+        int count = 0;
+
         for (int x = 0; x < columns; x++)
         {
             VisualElement colContainer = new VisualElement();
@@ -128,62 +195,33 @@ public class WallEditor : Editor
 
             for (int y = 0; y < rows; y++)
             {
-                // Create a selectable box
-                VisualElement box = new VisualElement();
-                box.style.width = boxWidth;
-                box.style.height = boxHeight;
-                box.style.marginRight = spacing;
-                box.style.marginBottom = spacing;
+                Section section = new Section(sections.GetArrayElementAtIndex(count), boxHeight, boxWidth);
 
-                // Add a border to the box
-                box.style.borderBottomWidth = borderWidth;
-                box.style.borderTopWidth = borderWidth;
-                box.style.borderLeftWidth = borderWidth;
-                box.style.borderRightWidth = borderWidth;
-                box.style.borderBottomColor = Color.white;
-                box.style.borderTopColor = Color.white;
-                box.style.borderLeftColor = Color.white;
-                box.style.borderRightColor = Color.white;
-                box.style.alignContent = Align.Center;
-                box.style.alignItems = Align.Center;
-
-                Label label = new Label();
-
-                // Add a click event handler (for example)
-                box.AddManipulator(new Clickable(() =>
+                section.AddManipulator(new Clickable(() =>
                 {
-                    SerializedProperty mdata = serializedObject.FindProperty("m_Data");
-                    SerializedProperty sections = mdata.FindPropertyRelative("m_Sections");
-                    SerializedProperty columnArrayElement = sections.GetArrayElementAtIndex(x);
-                    SerializedProperty sectionElement = columnArrayElement.GetArrayElementAtIndex(y);
-
-                    PropertyField sectionField = new PropertyField(sectionElement);
-                    sectionField.BindProperty(sectionElement);
-                    
-                    root.Add(sectionField);
+                    AddSection(sectionContainer, section.WallSection);
                 }));
 
-                //if (wall != null && wall.Data != null && wall.Data.Sections != null)
-                //{
-                //    try
-                //    {
-                //        WallSectionData data = wall.Data.Sections[x,y];
-                //    }
-                //    catch(IndexOutOfRangeException ex)
-                //    {
-                //        Debug.Log("Cols " + x + " Rows " + y);
-                //    }
-                //}
-
-                box.Add(label);
-
-                // Add the box to the grid container
-                colContainer.Add(box);
+                colContainer.Add(section);
+                count++;
             }
             gridContainer.Add(colContainer);
         }
+        container.Add(gridContainer);
+    }
 
-        // Add the grid container to the root
-        root.Add(gridContainer);
+    private void AddSection(VisualElement container, SerializedProperty section)
+    {
+        container.Clear();
+
+        WallSectionData data = section.GetUnderlyingValue() as WallSectionData;
+
+        Foldout foldout = new Foldout() { text = "Wall Section " + data.ID };
+
+        PropertyField sectionField = new PropertyField(section);
+        sectionField.BindProperty(section);
+
+        foldout.Add(sectionField);
+        container.Add(foldout);
     }
 }

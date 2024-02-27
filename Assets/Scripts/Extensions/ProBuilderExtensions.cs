@@ -52,6 +52,9 @@ public static class ProBuilderExtensions
 
     public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IList<Vector3> points, Vector3 normal, IList<IList<Vector3>> holePoints = null)
     {
+        if (proBuilderMesh == null)
+            throw new NullReferenceException();
+
         ActionResult result = ActionResult.NoSelection;
 
         if (holePoints != null)

@@ -30,7 +30,7 @@ public class RoofDataDrawer : PropertyDrawer
     {
         VisualElement optionsContainer = new VisualElement();
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
 
         int[] frames = roofData.AvailableFrames;
 
@@ -119,7 +119,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private void DisplayGable(VisualElement container)
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Gable"};
@@ -255,7 +255,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private void DisplayPyramid(VisualElement container)
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Pyramid" };
@@ -266,12 +266,18 @@ public class RoofDataDrawer : PropertyDrawer
             if (roofData.PyramidTiles == null)
                 return;
 
+            bool rebuild = false;
+
             for (int i = 0; i < roofData.PyramidTiles.Length; i++)
             {
+                if(roofData.PyramidTiles[i].Height != evt.changedProperty.floatValue)
+                    rebuild = true;
+
                 roofData.PyramidTiles[i].Height = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            if(rebuild)
+                buildable.Build();
         });
 
         foldout.Add(height);
@@ -279,7 +285,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private void DisplayMansard(VisualElement container)
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Mansard" };
@@ -290,28 +296,46 @@ public class RoofDataDrawer : PropertyDrawer
             if (roofData.MansardTiles == null)
                 return;
 
+            bool rebuild = false;
+
             for (int i = 0; i < roofData.MansardTiles.Length; i++)
             {
+                if (roofData.MansardTiles[i].Height != evt.changedProperty.floatValue)
+                    rebuild = true;
+
                 roofData.MansardTiles[i].Height = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            if(rebuild)
+                buildable.Build();
         });
 
-        PropertyField scale = new PropertyField(m_Props.MansardScale) { label = "Scale" };
-        scale.BindProperty(m_Props.MansardScale);
+        PropertyField scale = new PropertyField(m_Props.MansardScale, "Scale") { label = "Scale" };
+        scale.label = "Scale";
+        //scale.
+        //scale.BindProperty(m_Props.MansardScale);
         scale.RegisterValueChangeCallback(evt =>
         {
             if (roofData.MansardTiles == null)
                 return;
 
+            bool rebuild = false;
+
+
             for (int i = 0; i < roofData.MansardTiles.Length; i++)
             {
+                if(roofData.MansardTiles[i].ControlPoints[1].T != evt.changedProperty.floatValue ||
+                roofData.MansardTiles[i].ControlPoints[2].T != evt.changedProperty.floatValue)
+                {
+                    rebuild = true;
+                }
+
                 roofData.MansardTiles[i].ControlPoints[1].T = evt.changedProperty.floatValue;
                 roofData.MansardTiles[i].ControlPoints[2].T = evt.changedProperty.floatValue;
             }
 
-            buildable.Build();
+            if(rebuild)
+                buildable.Build();
         });
 
         foldout.Add(height);
@@ -320,7 +344,7 @@ public class RoofDataDrawer : PropertyDrawer
     }
     private VisualElement Tile()
     {
-        RoofData roofData = m_Props.RoofData.GetUnderlyingValue() as RoofData;
+        RoofData roofData = m_Props.Data.GetUnderlyingValue() as RoofData;
         IBuildable buildable = m_Props.SerializedObject.targetObject as IBuildable;
 
         Foldout foldout = new Foldout() { text = "Tile" };

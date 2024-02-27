@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 /// <summary>
-/// Control Points Exists on the XZ plane
+/// Control Points Exist on the XZ plane
 /// </summary>
 [System.Serializable]
 public class ControlPoint
 {
+    #region Member Variables
     [SerializeField, HideInInspector] private Vector3 m_Position;
     [SerializeField, HideInInspector] private Vector3 m_Forward;
     [SerializeField, HideInInspector] private float m_Weight;
+    #endregion
 
+    #region Accessors
     public Vector3 Position => m_Position;
     public Vector3 Forward => m_Forward;
     public Vector3 Backward { get { return -Forward; } }
@@ -20,31 +23,31 @@ public class ControlPoint
     public Vector3 Right { get { return Vector3.Cross(Up, Forward);}}
     public Vector3 Left { get { return -Right;}}
     public float Weight => m_Weight;
+    #endregion
 
+    #region Constructors
     public ControlPoint(ControlPoint controlPoint)
     {
         m_Position = controlPoint.Position;
         m_Forward = controlPoint.Forward;
         m_Weight = controlPoint.Weight;
     }
-
     public ControlPoint(Vector3 position, Vector3 forward)
     {
         m_Position = position;
         m_Forward = forward;
     }
-
     public ControlPoint(Vector3 position, Vector3 forward, float weight)
     {
         m_Position = position;
         m_Forward = forward;
         m_Weight = weight;
     }
-
     public ControlPoint(Vector3 position)
     {
         m_Position = position;
     }
+    #endregion
 
     public void SetForward(Vector3 forward)
     {
@@ -60,7 +63,7 @@ public class ControlPoint
         m_Weight = weight;
     }
 
-    // Operators
+    #region Operators
     public static ControlPoint operator +(ControlPoint a) => a;
     public static ControlPoint operator -(ControlPoint a)
     {
@@ -90,5 +93,5 @@ public class ControlPoint
     {
         return new ControlPoint(Vector3.Scale(a.Position, b), a.Forward);
     }
-    // End Operators
+    #endregion
 }

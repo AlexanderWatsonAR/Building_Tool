@@ -90,16 +90,16 @@ public static class GablePersistentData
     };//
     public static readonly ushort[][] fIndices = new ushort[][]
     {
-        new ushort[] { 1, 0, 1, 0 },//
-        new ushort[] { 3, 3, 0, 2 },//
-        new ushort[] { 4, 4, 3, 3 },//
-        new ushort[] { 6, 3, 4, 5 },//
-        new ushort[] { 7, 1, 3, 6 },//
-        new ushort[] { 8, 2, 1, 7 },//
-        new ushort[] { 0, 1, 2, 9 },//
-        new ushort[] { 2, 0, 0, 1 },//
-        new ushort[] { 9, 2, 2, 8 },//
-        new ushort[] { 5, 4, 4, 4 }//
+        new ushort[] { 1, 0, 1, 0 },
+        new ushort[] { 3, 3, 0, 2 },
+        new ushort[] { 4, 4, 3, 3 },
+        new ushort[] { 6, 3, 4, 5 },
+        new ushort[] { 7, 1, 3, 6 },
+        new ushort[] { 8, 2, 1, 7 },
+        new ushort[] { 0, 1, 2, 9 },
+        new ushort[] { 2, 0, 0, 1 },
+        new ushort[] { 9, 2, 2, 8 },
+        new ushort[] { 5, 4, 4, 4 }
     }; //
     public static readonly ushort[][] simpleMIndices = new ushort[][]
     {
@@ -116,18 +116,18 @@ public static class GablePersistentData
     }; //
     public static readonly ushort[][] nIndices = new ushort[][]
     {
-        new ushort[] { 1, 0, 1, 0 },//
-        new ushort[] { 3, 1, 0, 2 },//
-        new ushort[] { 4, 2, 1, 3 },//
-        new ushort[] { 5, 3, 2, 4 },//
-        new ushort[] { 5, 4, 3, 5 },//
-        new ushort[] { 6, 5, 4, 5 },//
-        new ushort[] { 8, 4, 5, 7 },//
-        new ushort[] { 9, 3, 4, 8 },//
-        new ushort[] { 0, 2, 3, 9 },//
-        new ushort[] { 0, 1, 2, 0 },//
-        new ushort[] { 2, 0, 0, 1 },//
-        new ushort[] { 7, 5, 5, 6 }//
+        new ushort[] { 1, 0, 1, 0 },
+        new ushort[] { 3, 1, 0, 2 },
+        new ushort[] { 4, 2, 1, 3 },
+        new ushort[] { 5, 3, 2, 4 },
+        new ushort[] { 5, 4, 3, 5 },
+        new ushort[] { 6, 5, 4, 5 },
+        new ushort[] { 8, 4, 5, 7 },
+        new ushort[] { 9, 3, 4, 8 },
+        new ushort[] { 0, 2, 3, 9 },
+        new ushort[] { 0, 1, 2, 0 },
+        new ushort[] { 2, 0, 0, 1 },
+        new ushort[] { 7, 5, 5, 6 }
     };
     public static readonly ushort[][] eIndices = new ushort[][]
     {
@@ -190,7 +190,7 @@ public static class GablePersistentData
         new ushort[] { 11, 0, 1, 0 },
         new ushort[] { 3, 6, 6, 4 },
         new ushort[] { 10, 0, 0, 11 }
-    }; // 95%
+    }; 
     public static readonly ushort[][] interYIndices = new ushort[][]
     {
         new ushort[] { 7, 0, 1, 8},
@@ -232,7 +232,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] lExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
@@ -242,7 +241,6 @@ public static class GablePersistentData
         new bool[] { false, true, true, false },
         new bool[] { false, true, false, true }
     };
-
     public static readonly bool[][] arrowExtend = new bool[][]
     {
         new bool[] { false, true, true, false },
@@ -255,7 +253,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] simpleNExtend = new bool[][]
     {
         new bool[] { false, true, false, false },
@@ -267,7 +264,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] tExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
@@ -279,7 +275,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] uExtend = new bool[][]
     {
         new bool[] { false, true, false, false },
@@ -291,7 +286,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] yExtend = new bool[][]
     {
         new bool[] { false, true, false, true },
@@ -304,7 +298,6 @@ public static class GablePersistentData
         new bool[] { false, true, false, false },
         new bool[] { false, true, false, false }
     };
-
     public static readonly bool[][] fExtend = new bool[][]
     {
         new bool[] { false, true, true, false },
@@ -423,7 +416,6 @@ public static class GablePersistentData
         new bool[] {  false, true, false, true },
         new bool[] {  false, true, false, true }
     };
-
     public static readonly bool[][] xExtend = new bool[][]
     {
         new bool[] {  false, true, true, false },

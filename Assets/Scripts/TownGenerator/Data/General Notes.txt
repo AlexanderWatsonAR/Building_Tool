@@ -1,0 +1,33 @@
+﻿A building could receive different scriptable objects in the custom editor:
+- Building Data object, contains control points, number of storeys, roof type etc.
+- Style data, a list of materials for different components.
+
+How could I store data relating to the inside of the building?
+
+I think on reflection, the style data works with scriptable objects but the building data really
+relates to specific game objects & shouldn't be made into a scriptbale object.
+
+Polygon Recognition
+The polygon recognition functions are mostly doing the same thing:
+	- Looking for concave points.
+	- checking for the number of concave points
+	- checking for the number of control points
+	- checking if certain points in the poly path, relative to a concave point, are or aren't concave points.
+
+Data relevant to individual shape profiles could be saved in a file.
+
+Checking the shape profile for a repeating shape is slightly different than checking a static one.
+
+This will need to connect to the gable data, as that relates to specific shapes.
+
+14.02.2024
+
+I've began implementing the Opening Data base & sub classes.
+
+The data classes are pretty much done.
+
+However, I need to start connecting that those data classes to the buildable so they can be initialized & used.
+
+The serialized properties classes will also have to be changed.
+ - we just need to update where the accessors point to. If we add or remove any accessors, we will also have to change the property drawer.
+

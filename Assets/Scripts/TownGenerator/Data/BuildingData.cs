@@ -6,7 +6,13 @@ using UnityEngine;
 [System.Serializable]
 public class BuildingData : IData
 {
-    // Should this data just be for saving & loading?
+    // Thoughts on data structures & persistance of data.
+    // Would changing IData to an abstract base class effect serilization?
+    // How can I maintain object reference after serilization without invoking Building.Build().
+    // Am I structuring my data correctly?
+    // I am currently using a hierachical data model. Is that correct?
+    // Is there a reason for storey to be a monobehaviour?
+
     [SerializeField] private PolyPath m_Path;
     [SerializeField] private List<StoreyData> m_Storeys;
     [SerializeField] private RoofData m_Roof;
