@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[CustomEditor(typeof(Pane))]
-public class PaneEditor : DataEditor
+[CustomEditor(typeof(Corner))]
+public class CornerEditor : DataEditor
 {
     public override VisualElement CreateInspectorGUI()
     {

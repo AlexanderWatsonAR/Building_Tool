@@ -57,7 +57,10 @@ public class WindowData : IData
     public WindowElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
     #endregion
 
-    public WindowData() { }
+    public WindowData()
+    {
+        m_ActiveElements = WindowElement.Everything;
+    }
 
     public WindowData(WindowData data) : this
     (

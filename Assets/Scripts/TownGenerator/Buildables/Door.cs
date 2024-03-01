@@ -1,19 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.ProBuilder.MeshOperations;
-using UnityEngine.UIElements;
-using ProMaths = UnityEngine.ProBuilder.Math;
-using Edge = UnityEngine.ProBuilder.Edge;
-using System;
 
 public class Door : Polygon3D
 {
     //[SerializeField] private ProBuilderMesh m_DoorHandleMesh;
-    [SerializeReference] private DoorData m_Data;
+    [SerializeReference] DoorData m_Data;
 
     public DoorData Data => m_Data;
 

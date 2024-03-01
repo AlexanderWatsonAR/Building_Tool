@@ -1,27 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(Pillar))]
-public class PillarEditor : Editor
+public class PillarEditor : DataEditor
 {
-    public override void OnInspectorGUI()
+    public override VisualElement CreateInspectorGUI()
     {
-        Pillar pillar = (Pillar)target;
-        serializedObject.Update();
-
-        SerializedProperty data = serializedObject.FindProperty("m_Data");
-
-        bool enter = true;
-        while (data.NextVisible(enter))
-        {
-            EditorGUILayout.PropertyField(data);
-        }
-
-        if(serializedObject.ApplyModifiedProperties())
-        {
-            pillar.Build();
-        }
+        return base.CreateInspectorGUI();
     }
 }

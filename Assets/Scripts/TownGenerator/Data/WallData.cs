@@ -8,16 +8,17 @@ using UnityEngine;
 public class WallData : IData
 {
     #region Member Variables
-    [SerializeField, HideInInspector] private int m_ID;
-    [SerializeField, HideInInspector] private ControlPoint m_Start, m_End;
-    [SerializeField, HideInInspector] private Vector3 m_Normal;
-    [SerializeField, Range(1, 5)] private int m_Columns, m_Rows;
-    [SerializeField, Range(1, 50)] private float m_Height;
-    [SerializeField, Range(0, 1)] private float m_Depth;
-    [SerializeField, HideInInspector] private bool m_IsTriangle;
-    [SerializeField, HideInInspector] private Material m_Material;
-    [SerializeField] private WallSectionData m_SectionData;
-    [SerializeField] private WallSectionData[] m_Sections; // Sections doesn't seem to be serialized properly (when it was a 2D array)
+    [SerializeField, HideInInspector] int m_ID;
+    [SerializeField, HideInInspector] ControlPoint m_Start, m_End;
+    [SerializeField, HideInInspector] Vector3 m_Normal;
+
+    [SerializeField, Range(1, 5)] int m_Columns, m_Rows;
+    [SerializeField, Range(1, 50)] float m_Height;
+    [SerializeField, Range(0, 1)] float m_Depth;
+    [SerializeField, HideInInspector] bool m_IsTriangle;
+    [SerializeField, HideInInspector] Material m_Material;
+    [SerializeField] WallSectionData m_SectionData;
+    [SerializeField] WallSectionData[] m_Sections; // Sections doesn't seem to be serialized properly (when it was a 2D array)
     #endregion
 
 

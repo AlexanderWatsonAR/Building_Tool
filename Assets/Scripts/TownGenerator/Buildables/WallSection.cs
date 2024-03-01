@@ -239,7 +239,7 @@ public class WallSection : Polygon3D
 
                     if (windowOpening.Windows[0] == null || windowOpening.Windows[0].Polygon.ControlPoints == null || windowOpening.Windows[0].Polygon.ControlPoints.Length == 0)
                     {
-                        holePoints = CalculateWindow(m_Data);
+                        holePoints = CalculateWindowOpening(m_Data);
 
                         for (int i = 0; i < size; i++)
                         {
@@ -328,8 +328,8 @@ public class WallSection : Polygon3D
         WindowData data = new WindowData(m_Data.Window)
         {
             ID = index,
+            Polygon = new PolygonData(controlPoints.ToArray(), m_Data.Normal)
         };
-        data.Polygon = new PolygonData(controlPoints.ToArray());
         return data;
     }
     private DoorData CalculateDoor(int index, IEnumerable<Vector3> controlPoints)
@@ -337,46 +337,39 @@ public class WallSection : Polygon3D
         DoorData data = new DoorData(m_Data.Door)
         {
             ID = index,
+            Polygon = new PolygonData(controlPoints.ToArray(), m_Data.Normal),
             ActiveElements = m_Data.Doorway.ActiveElements.ToDoorElement() // Does this need changing?
         };
-
-        data.Polygon = new PolygonData(controlPoints.ToArray());
-
         return data;
-    }
-    public static IList<IList<Vector3>> CalculateDoorway(WallSectionData data)
-    {
-        DoorwayData doorway = data.Doorway;
-        Vector3 doorScale = new Vector3(doorway.Width, doorway.Height);
-        return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, doorScale, doorway.Columns, doorway.Rows, 4, 0, Vector3.right * doorway.PositionOffset, new Vector3(0, -0.999f));
     }
     private FrameData CalculateFrame(IEnumerable<Vector3> controlPoints, float insideScale, float depth)
     {
-
         FrameData frameData = new FrameData()
         {
-            Polygon = new PolygonData(controlPoints.ToArray()),
+            Polygon = new PolygonData(controlPoints.ToArray(), m_Data.Normal),
             Scale = insideScale,
             Depth = depth
         };
         return frameData;
     }
-    /// <summary>
-    /// Calculates the points for the window hole(s)
-    /// </summary>
-    /// <returns></returns>
-    public static IList<IList<Vector3>> CalculateWindow(WallSectionData data)
+    private IList<IList<Vector3>> CalculateDoorway(WallSectionData data)
+    {
+        DoorwayData doorway = data.Doorway;
+        Vector3 doorScale = new Vector3(doorway.Width, doorway.Height);
+        return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, doorScale, doorway.Columns, doorway.Rows, 4, 0, Vector3.right * doorway.PositionOffset, new Vector3(0, -0.999f));
+    }
+    private IList<IList<Vector3>> CalculateWindowOpening(WallSectionData data)
     {
         WindowOpeningData windowOpening = data.WindowOpening;
         Vector3 winScale = new Vector3(windowOpening.Width, windowOpening.Height);
         return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, winScale, windowOpening.Columns, windowOpening.Rows, windowOpening.Sides, windowOpening.Angle);
     }
-    public static IList<IList<Vector3>> CalculateArchway(WallSectionData data)
+    private IList<IList<Vector3>> CalculateArchway(WallSectionData data)
     {
         ArchwayData archway = data.Archway;
         return MeshMaker.ArchedDoorHoleGrid(data.Polygon.ControlPoints, archway.Width, archway.Columns, archway.Rows, archway.Height, archway.ArchHeight, archway.ArchSides, Vector3.right * archway.PositionOffset);
     }
-    public static IList<IList<Vector3>> CalculateExtension(WallSectionData data)
+    private IList<IList<Vector3>> CalculateExtension(WallSectionData data)
     {
         ExtensionData extension = data.Extension;
         Vector3 scale = new Vector3(extension.Width, extension.Height);

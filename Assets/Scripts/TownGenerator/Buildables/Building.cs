@@ -1,16 +1,20 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-
+using UnityEngine.ProBuilder;
 
 [ExecuteAlways]
 [DisallowMultipleComponent]
 public class Building : MonoBehaviour, IBuildable
 {
-    [SerializeField] private BuildingData m_Data;
+    [SerializeField] BuildingData m_Data;
 
-    [SerializeField] private bool m_IsPolyPathHandleSelected;
+    [SerializeField] bool m_IsPolyPathHandleSelected;
+
+    [SerializeField] List<Storey> m_Storeys;
+    [SerializeField] Roof m_Roof;
+
     public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
-
     public BuildingData Data => m_Data;
 
     private void Reset()
@@ -57,14 +61,14 @@ public class Building : MonoBehaviour, IBuildable
     {
         m_Data.RoofData = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
 
-        int count = m_Data.StoreysData.Count;
+        int count = m_Data.Storeys.Count;
 
-        m_Data.StoreysData = new List<StoreyData>(count);
+        m_Data.Storeys = new List<StoreyData>(count);
 
         for(int i = 0; i < count; i++)
         {
             StoreyData storey = new StoreyData() { ControlPoints = m_Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString()};
-            m_Data.StoreysData.Add(storey);
+            m_Data.Storeys.Add(storey);
         }
 
         Build();
@@ -72,18 +76,18 @@ public class Building : MonoBehaviour, IBuildable
 
     public void Build()
     {
-        transform.DeleteChildren();
-        if (!m_Data.Path.IsPathValid/* || !m_HasInitialized*/)
+        Demolish();
+
+        if (!m_Data.Path.IsPathValid)
             return;
 
         Vector3 pos = Vector3.zero;
 
-        for (int i = 0; i < m_Data.StoreysData.Count; i++)
+        for (int i = 0; i < m_Data.Storeys.Count; i++)
         {
-            GameObject next = new GameObject("Storey " + i.ToString());
-            next.transform.SetParent(transform, false);
-            next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
+            Storey storey = CreateStorey(m_Data.Storeys[i]);
+            storey.transform.SetParent(transform, false);
+            storey.transform.localPosition = pos;
             storey.Build();
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
@@ -94,12 +98,26 @@ public class Building : MonoBehaviour, IBuildable
         roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
     }
 
-    public void Demolish()
+    private Storey CreateStorey(StoreyData data)
     {
-
+        ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create();
+        proBuilderMesh.name = "Storey " + data.ID;
+        Storey storey = proBuilderMesh.AddComponent<Storey>();
+        storey.Initialize(data);
+        return storey;
     }
 
-    public void RevertBuilding()
+    public void BuildStorey(int index)
+    {
+        m_Storeys[index].Build();
+    }
+
+    public void BuildStoreys()
+    {
+        m_Storeys.BuildCollection();
+    }
+
+    public void Demolish()
     {
         transform.DeleteChildren();
     }

@@ -38,15 +38,15 @@ public class Wall : MonoBehaviour, IBuildable
     {
         m_Data = data as WallData;
 
-        Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
-        Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
+        //Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
+        //Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
 
         m_Data.SectionData = new WallSectionData
         {
             Depth = m_Data.Depth,
             Window = DefineWindowDefaults(),
-            Door = DefineDoorDefaults(faceNormal),
-            DoorFrame = DefineFrameDefaults(faceNormal),
+            Door = DefineDoorDefaults(),
+            DoorFrame = DefineFrameDefaults(),
         };
 
         return this;
@@ -56,25 +56,32 @@ public class Wall : MonoBehaviour, IBuildable
     {
         FrameData outerFrame = new FrameData()
         {
-            Depth = m_Data.Depth
+            Depth = m_Data.Depth,
+            Normal = m_Data.Normal
+            
         };
         GridFrameData innerFrame = new GridFrameData()
         {
-            Depth = m_Data.Depth * 0.5f
+            Depth = m_Data.Depth * 0.5f,
+            Normal = m_Data.Normal
+            
         };
         Polygon3DData pane = new Polygon3DData()
         {
-            Depth = m_Data.Depth * 0.25f
+            Depth = m_Data.Depth * 0.25f,
+            Normal = m_Data.Normal
         };
         DoorData leftShutter = new DoorData()
         {
-            Depth = m_Data.Depth * 0.5f
+            Depth = m_Data.Depth * 0.5f,
+            Normal = m_Data.Normal
+
         };
         DoorData rightShutter = new DoorData()
         {
-            Depth = m_Data.Depth * 0.5f
+            Depth = m_Data.Depth * 0.5f,
+            Normal = m_Data.Normal
         };
-
         WindowData winData = new WindowData()
         {
             OuterFrame = outerFrame,
@@ -83,28 +90,26 @@ public class Wall : MonoBehaviour, IBuildable
             LeftShutter = leftShutter,
             RightShutter = rightShutter
         };
-
         return winData;
     }
 
-    private DoorData DefineDoorDefaults(Vector3 normal)
+    private DoorData DefineDoorDefaults()
     {
         DoorData doorData = new DoorData()
         {
-            Normal = normal,
+            Normal = m_Data.Normal,
             HingePoint = TransformPoint.Left,
         };
         return doorData;
     }
 
-    private FrameData DefineFrameDefaults(Vector3 normal)
+    private FrameData DefineFrameDefaults()
     {
         FrameData frameData = new FrameData()
         {
             Depth = m_Data.Depth * 1.1f,
-            Normal = normal
+            Normal = m_Data.Normal
         };
-
         return frameData;
     }
 
@@ -137,8 +142,8 @@ public class Wall : MonoBehaviour, IBuildable
                 m_Data.Sections[count] ??= new WallSectionData(m_Data.SectionData)
                 {
                     ID = new Vector2Int(x, y),
-                    Polygon = new PolygonData(points),
-                    Depth = m_Data.Depth
+                    Polygon = new PolygonData(points, m_Data.Normal),
+                    Depth = m_Data.Depth,                 
                 };
 
                 m_Data.Sections[count].Polygon.ControlPoints = points;

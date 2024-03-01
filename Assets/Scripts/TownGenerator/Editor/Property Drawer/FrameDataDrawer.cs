@@ -11,7 +11,6 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
 {
     IBuildable m_Buildable;
     [SerializeField] FrameData m_PreviousData;
-    [SerializeField] FrameData m_CurrentData;
 
     FrameDataSerializedProperties m_FrameDataProps;
     VisualElement m_Root;
@@ -21,8 +20,7 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         Initialize(data);
         m_Root.name = nameof(FrameData) + "_Root";
-        m_CurrentData = data.GetUnderlyingValue() as FrameData;
-        m_PreviousData = new FrameData(m_CurrentData);
+        m_PreviousData = new FrameData(data.GetUnderlyingValue() as FrameData);
 
         DefineFields();
         BindFields();
@@ -57,19 +55,23 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Scale.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentData.Scale == m_PreviousData.Scale)
+            float scale = evt.changedProperty.floatValue;
+
+            if (scale == m_PreviousData.Scale)
                 return;
 
-            m_PreviousData.Scale = m_CurrentData.Scale;
+            m_PreviousData.Scale = scale;
 
             Build();
         });
         m_Depth.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentData.Depth == m_PreviousData.Depth)
+            float depth = evt.changedProperty.floatValue;
+
+            if (depth == m_PreviousData.Depth)
                 return;
 
-            m_PreviousData.Depth = m_CurrentData.Depth;
+            m_PreviousData.Depth = depth;
 
             Build();
         });
@@ -91,6 +93,10 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
             case Window:
                 Window window = m_Buildable as Window;
                 window.BuildOuterFrame();
+            break;
+            case WallSection:
+                WallSection wallSection = m_Buildable as WallSection;
+                wallSection.BuildWindows(true, true, true, true);
             break;
         }
     }

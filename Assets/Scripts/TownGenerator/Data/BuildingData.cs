@@ -18,7 +18,7 @@ public class BuildingData : IData
     [SerializeField] private RoofData m_Roof;
 
     public PolyPath Path => m_Path;
-    public List<StoreyData> StoreysData { get { return m_Storeys; } set { m_Storeys = value; } }
+    public List<StoreyData> Storeys { get { return m_Storeys; } set { m_Storeys = value; } }
     public RoofData RoofData { get{ return m_Roof;} set{ m_Roof = value; } }
 
     public BuildingData() : this(new PolyPath(), new List<StoreyData>(), new RoofData())
@@ -29,7 +29,7 @@ public class BuildingData : IData
     {
         m_Path.CalculateForwards();
     }
-    public BuildingData(BuildingData data) : this (data.Path, data.StoreysData, data.RoofData)
+    public BuildingData(BuildingData data) : this (data.Path, data.Storeys, data.RoofData)
     {
 
     }

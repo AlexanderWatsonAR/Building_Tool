@@ -14,6 +14,8 @@ public abstract class Polygon3D : MonoBehaviour, IBuildable
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
         m_Poly3DData = data as Polygon3DData;
 
+        AssignDefaultMaterial();
+
         if (m_Poly3DData.Polygon.ControlPoints == null || m_Poly3DData.Polygon.ControlPoints.Length == 0)
             return this;
 
@@ -25,10 +27,20 @@ public abstract class Polygon3D : MonoBehaviour, IBuildable
         return this;
     }
 
+    private void AssignDefaultMaterial()
+    {
+        Renderer renderer = GetComponent<Renderer>();
+
+        if (renderer.sharedMaterials.Length == 1 && renderer.sharedMaterials[0] == null)
+        {
+            renderer.sharedMaterial = BuiltinMaterials.defaultMaterial;
+        }
+    }
+
     public virtual void Build()
     {
         IList<IList<Vector3>> holePoints = m_Poly3DData.GetHoles();
-        m_ProBuilderMesh.CreateShapeFromPolygon(m_Poly3DData.Polygon.ControlPoints, m_Poly3DData.Normal, holePoints);
+        m_ProBuilderMesh.CreateShapeFromPolygon(m_Poly3DData.Polygon.ControlPoints, m_Poly3DData.Polygon.Normal, holePoints);
         m_ProBuilderMesh.Solidify(m_Poly3DData.Depth);
     }
 

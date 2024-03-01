@@ -79,7 +79,7 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
             if (evt.changedProperty.intValue == m_PreviousData.Columns)
                 return;
 
-            Debug.Log("Grid frame colums change");
+            Debug.Log("Grid frame columns change");
 
             m_PreviousData.Columns = evt.changedProperty.intValue;
 

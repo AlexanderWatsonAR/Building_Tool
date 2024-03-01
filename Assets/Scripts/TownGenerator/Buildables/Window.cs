@@ -87,18 +87,21 @@ public class Window : MonoBehaviour, IBuildable
     {
         FrameData frameData = m_Data.OuterFrame;
         frameData.Polygon.ControlPoints = m_Data.Polygon.ControlPoints;
+        frameData.Polygon.Normal = m_Data.Polygon.Normal;
         return frameData;
     }
     private GridFrameData CalculateInnerFrame()
     {
         GridFrameData frameData = m_Data.InnerFrame;
         frameData.Polygon.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+        frameData.Polygon.Normal = m_Data.Polygon.Normal;
         return frameData;
     }
     private Polygon3DData CalculatePane()
     {
         Polygon3DData pane = m_Data.Pane;
         pane.Polygon.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+        pane.Polygon.Normal = m_Data.Polygon.Normal;
         return pane;
     }
     #endregion

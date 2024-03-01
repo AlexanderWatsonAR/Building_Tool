@@ -15,21 +15,21 @@ using UnityEditor.IMGUI.Controls;
 [CustomEditor(typeof(Building))]
 public class BuildingEditor : Editor
 {
-    private Building m_Building;
-    private PolyPath m_Path;
-    private SerializedProperty m_Data;
-    private Vector3 m_MousePosition;
-    private Color m_CP_Valid = Color.green;
-    private Color m_CP_Invalid = Color.red;
-    private bool m_IsValidPoint;
+    Building m_Building;
+    PolyPath m_Path;
+    SerializedProperty m_Data;
+    Vector3 m_MousePosition;
+    Color m_CP_Valid = Color.green;
+    Color m_CP_Invalid = Color.red;
+    bool m_IsValidPoint;
     MouseCursor m_MouseCursor;
-    private Vector3[] m_GlobalControlPointPositions;
+    Vector3[] m_GlobalControlPointPositions;
 
-    [SerializeField] private VisualElement m_Root;
+    [SerializeField] VisualElement m_Root;
 
-    [SerializeField] private bool m_IsValidPolygon;
-    [SerializeField] private bool m_IsAHandleSelected;
-    [SerializeField] private int m_SelectedHandle = -1;
+    [SerializeField] bool m_IsValidPolygon;
+    [SerializeField] bool m_IsAHandleSelected;
+    [SerializeField] int m_SelectedHandle = -1;
 
     public override VisualElement CreateInspectorGUI()
     {

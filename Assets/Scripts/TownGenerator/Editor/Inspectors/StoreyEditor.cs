@@ -6,17 +6,11 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 
 [CustomEditor(typeof(Storey))]
-public class StoreyEditor : Editor
+public class StoreyEditor : DataEditor
 {
     public override VisualElement CreateInspectorGUI()
     {
-        serializedObject.Update();
-
-        VisualElement myInspector = new VisualElement();
-
-        myInspector.Add(new PropertyField(serializedObject.FindProperty("m_Data")));
-
-        return myInspector;
+        return base.CreateInspectorGUI();
     }
 
 }

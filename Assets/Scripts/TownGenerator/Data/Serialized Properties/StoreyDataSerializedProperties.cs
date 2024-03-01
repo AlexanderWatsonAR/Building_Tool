@@ -6,10 +6,10 @@ using Unity.VisualScripting;
 
 public class StoreyDataSerializedProperties : SerializedPropertyGroup
 {
-    [SerializeField] private WallDataSerializedProperties m_WallSerializedProperties;
-    [SerializeField] private PillarDataSerializedProperties m_PillarSerializedProperties;
-    [SerializeField] private CornerDataSerializedProperties m_CornerSerializedProperties;
-    [SerializeField] private FloorDataSerializedProperties m_FloorSerializedProperties;
+    [SerializeField] WallDataSerializedProperties m_WallSerializedProperties;
+    [SerializeField] PillarDataSerializedProperties m_PillarSerializedProperties;
+    [SerializeField] CornerDataSerializedProperties m_CornerSerializedProperties;
+    [SerializeField] FloorDataSerializedProperties m_FloorSerializedProperties;
 
     #region Constants
     const string k_ActiveElements = "m_ActiveElements";
@@ -17,10 +17,14 @@ public class StoreyDataSerializedProperties : SerializedPropertyGroup
     const string k_Pillar = "m_Pillar";
     const string k_Corner = "m_Corner";
     const string k_Floor = "m_Floor";
+    const string k_ID = "m_ID";
+    const string k_Name = "m_Name";
     #endregion
 
     #region Accessors
+    public SerializedProperty ID => m_Data.FindPropertyRelative(k_ID);
     public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
+    public SerializedProperty Name => m_Data.FindPropertyRelative(k_Name);
     public WallDataSerializedProperties Wall => m_WallSerializedProperties;
     public PillarDataSerializedProperties Pillar => m_PillarSerializedProperties;
     public CornerDataSerializedProperties Corner => m_CornerSerializedProperties;
