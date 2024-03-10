@@ -9,6 +9,8 @@ public abstract class Polygon3D : MonoBehaviour, IBuildable
     [SerializeField] protected ProBuilderMesh m_ProBuilderMesh;
     [SerializeReference] Polygon3DData m_Poly3DData;
 
+    public Polygon3DData Poly3DData => m_Poly3DData;
+
     public virtual IBuildable Initialize(IData data)
     {
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
@@ -46,7 +48,6 @@ public abstract class Polygon3D : MonoBehaviour, IBuildable
 
     public virtual void Demolish()
     {
-        m_ProBuilderMesh.Clear();
-        DestroyImmediate(m_ProBuilderMesh);
+        DestroyImmediate(gameObject);
     }
 }

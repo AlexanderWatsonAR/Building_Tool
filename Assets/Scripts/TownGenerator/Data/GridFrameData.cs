@@ -30,4 +30,26 @@ public class GridFrameData : FrameData
 
     }
 
+    public override bool Equals(object obj)
+    {
+        GridFrameData other = obj as GridFrameData;
+
+        if (other == null)
+            return false;
+
+        if(m_Columns == other.Columns &&
+           m_Rows == other.Rows &&
+           base.Equals(obj))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
 }

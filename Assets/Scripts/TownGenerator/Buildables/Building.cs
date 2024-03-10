@@ -7,6 +7,7 @@ using UnityEngine.ProBuilder;
 [DisallowMultipleComponent]
 public class Building : MonoBehaviour, IBuildable
 {
+    [SerializeField] BuildingScriptableObject m_Container;
     [SerializeField] BuildingData m_Data;
 
     [SerializeField] bool m_IsPolyPathHandleSelected;
@@ -16,11 +17,8 @@ public class Building : MonoBehaviour, IBuildable
 
     public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
     public BuildingData Data => m_Data;
+    public BuildingScriptableObject Container { get { return m_Container; } set { m_Container = value; } }
 
-    private void Reset()
-    {
-        m_Data = new BuildingData();
-    }
     private void OnEnable()
     {
         UnityEditor.EditorApplication.update = Update;
@@ -59,7 +57,7 @@ public class Building : MonoBehaviour, IBuildable
 
     private void Rebuild()
     {
-        m_Data.RoofData = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
+        m_Data.Roof = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
 
         int count = m_Data.Storeys.Count;
 
@@ -95,7 +93,7 @@ public class Building : MonoBehaviour, IBuildable
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
+        roofGO.AddComponent<Roof>().Initialize(m_Data.Roof).Build();
     }
 
     private Storey CreateStorey(StoreyData data)
@@ -105,6 +103,16 @@ public class Building : MonoBehaviour, IBuildable
         Storey storey = proBuilderMesh.AddComponent<Storey>();
         storey.Initialize(data);
         return storey;
+    }
+
+    public void AddStorey(string name)
+    {
+        m_Data.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_Data.Path.ControlPoints.ToArray() });
+    }
+
+    public void InitializeRoof()
+    {
+        m_Data.Roof.ControlPoints = m_Data.Path.ControlPoints.ToArray();
     }
 
     public void BuildStorey(int index)

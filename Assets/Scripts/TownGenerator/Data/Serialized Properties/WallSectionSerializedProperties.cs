@@ -6,15 +6,15 @@ using UnityEditor;
 public class WallSectionDataSerializedProperties : SerializedPropertyGroup
 {
     #region Member Variables
-    [SerializeField] WindowOpeningDataSerializedProperties m_WindowOpeningDataSerializedProperties;
-    [SerializeField] ArchwayDataSerializedProperties m_ArchwayDataSerializedProperties;
-    [SerializeField] DoorwayDataSerializedProperties m_DoorwayDataSerializedProperties;
-    [SerializeField] ExtensionDataSerializedProperties m_ExtensionDataSerializedProperties;
+    readonly WindowOpeningDataSerializedProperties m_WindowOpeningDataSerializedProperties;
+    readonly ArchwayDataSerializedProperties m_ArchwayDataSerializedProperties;
+    readonly DoorwayDataSerializedProperties m_DoorwayDataSerializedProperties;
+    readonly ExtensionDataSerializedProperties m_ExtensionDataSerializedProperties;
 
-    [SerializeField] WindowDataSerializedProperties m_WindowSerializedProperties;
-    [SerializeField] DoorDataSerializedProperties m_DoorSerializedProperties;
-    [SerializeField] DoorDataSerializedProperties m_ArchDoorSerializedProperties;
-    [SerializeField] FrameDataSerializedProperties m_FrameDataSerializedProperties;
+    readonly WindowDataSerializedProperties m_WindowSerializedProperties;
+    readonly DoorDataSerializedProperties m_DoorSerializedProperties;
+    readonly DoorDataSerializedProperties m_ArchDoorSerializedProperties;
+    readonly FrameDataSerializedProperties m_FrameDataSerializedProperties;
     #endregion
 
     #region Constants

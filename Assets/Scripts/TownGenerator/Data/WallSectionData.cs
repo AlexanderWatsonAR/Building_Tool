@@ -51,7 +51,6 @@ public class WallSectionData : Polygon3DData
         m_ArchDoor = new DoorData();
         m_DoorFrame = new FrameData();
 
-
         m_WindowOpening = new WindowOpeningData();
         m_Doorway = new DoorwayData();
         m_Archway = new ArchwayData();

@@ -1,0 +1,11 @@
+﻿
+10-03-2024
+
+
+Create data in drawers
+
+Currently, some of the data is being generated in the buildable scripts.
+
+I want to decouple the data from the buildables. as I would like to be able to show data in scriptable objects.
+
+Ideally, the buildable should just be in charge of creating promeshs / game objects.

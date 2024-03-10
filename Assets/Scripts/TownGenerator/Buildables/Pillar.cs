@@ -8,8 +8,8 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class Pillar : MonoBehaviour, IBuildable
 {
-    [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
-    [SerializeReference] private PillarData m_Data;
+    [SerializeField] ProBuilderMesh m_ProBuilderMesh;
+    [SerializeReference] PillarData m_Data;
 
     public IBuildable Initialize(IData data)
     {

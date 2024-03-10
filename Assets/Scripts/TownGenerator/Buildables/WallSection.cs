@@ -68,6 +68,24 @@ public class WallSection : Polygon3D
         }
     }
 
+    ///// <summary>
+    /////  hmmm this isn't decoupling data from buildables.
+    ///// </summary>
+    ///// <param name="outerFrame"></param>
+    ///// <param name="innerFrame"></param>
+    ///// <param name="pane"></param>
+    ///// <param name="leftShutter"></param>
+    ///// <param name="rightShutter"></param>
+    //public void BuildWindows(FrameData outerFrame = null, GridFrameData innerFrame = null, Polygon3DData pane = null, DoorData leftShutter = null, DoorData rightShutter = null)
+    //{
+
+    //    foreach(Window window in m_Windows)
+    //    {
+            
+    //    }
+
+    //}
+
     /// <summary>
     /// Build should only be called if changes have been made to the wall section
     /// </summary>
@@ -409,9 +427,9 @@ public class WallSection : Polygon3D
     public override void Demolish()
     {
         transform.DeleteChildren();
-        m_Doors.Clear();
-        m_Windows.Clear();
-        m_Frames.Clear();
+        m_Doors?.Clear();
+        m_Windows?.Clear();
+        m_Frames?.Clear();
     }
 
 }

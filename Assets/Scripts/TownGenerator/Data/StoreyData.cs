@@ -43,9 +43,9 @@ public class StoreyData : IData
 
     public ControlPoint[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
     public WallPoints[] WallPoints { get { return m_WallPoints; } set { m_WallPoints = value; } }
-    public StoreyElement ActiveElements {get { return m_ActiveElements; } set { m_ActiveElements = value; } }
+    public StoreyElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
     public string Name { get { return m_Name; } set { m_Name = value; } }
-    public int ID { get{ return m_ID; } set { m_ID = value; } }
+    public int ID { get { return m_ID; } set { m_ID = value; } }
     #endregion
 
     public Vector3[] InsidePoints
@@ -64,8 +64,8 @@ public class StoreyData : IData
         }
     }
 
-    public StoreyData() : this(0, new ControlPoint[0], new WallPoints[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData(), null, null, null){}
-    public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.WallPoints, data.ActiveElements, data.WallData, data.Pillar, data.CornerData, data.FloorData, data.Walls, data.Pillars, data.Corners){}
+    public StoreyData() : this(0, new ControlPoint[0], new WallPoints[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData(), null, null, null) { }
+    public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.WallPoints, data.ActiveElements, data.WallData, data.Pillar, data.CornerData, data.FloorData, data.Walls, data.Pillars, data.Corners) { }
     public StoreyData(int id, ControlPoint[] controlPoints, WallPoints[] wallPoints, StoreyElement activeElements,
         WallData wallData, PillarData pillarData, CornerData cornerData, FloorData floorData,
         WallData[] walls, PillarData[] pillars, CornerData[] corners)

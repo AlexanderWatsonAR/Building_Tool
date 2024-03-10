@@ -7,16 +7,18 @@ using UnityEngine.UIElements;
 
 public abstract class DataEditor : Editor
 {
+    protected SerializedProperty m_Data;
+
     public override VisualElement CreateInspectorGUI()
     {
         VisualElement root = new VisualElement();
 
         serializedObject.Update();
 
-        SerializedProperty data = serializedObject.FindProperty("m_Data");
+        m_Data = serializedObject.FindProperty("m_Data");
 
-        PropertyField dataField = new PropertyField(data);
-        dataField.BindProperty(data);
+        PropertyField dataField = new PropertyField(m_Data);
+        dataField.BindProperty(m_Data);
 
         root.Add(dataField);
 

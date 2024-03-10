@@ -9,11 +9,12 @@ using Unity.VisualScripting;
 using System.Linq;
 using static PlasticGui.LaunchDiffParameters;
 using System.Runtime.Remoting.Messaging;
+using static PlasticPipe.Server.MonitorStats;
 
 [CustomPropertyDrawer(typeof(WallSectionData))]
 public class WallSectionDataDrawer : PropertyDrawer
 {
-    [SerializeField] WallSectionData m_PreviousSectionData; // This is a copy of data, used to determine if data values actually change.
+    [SerializeField] WallSectionData m_PreviousData; // This is a copy of data, used to determine if data values actually change.
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
@@ -21,7 +22,7 @@ public class WallSectionDataDrawer : PropertyDrawer
 
         WallSectionDataSerializedProperties props = new WallSectionDataSerializedProperties(data);
 
-        m_PreviousSectionData = new WallSectionData(data.GetUnderlyingValue() as WallSectionData);
+        m_PreviousData = new WallSectionData(data.GetUnderlyingValue() as WallSectionData);
 
         PropertyField wallElementField = new PropertyField(props.WallElement) { label = "Wall Element" };
         wallElementField.BindProperty(props.WallElement);
@@ -35,7 +36,7 @@ public class WallSectionDataDrawer : PropertyDrawer
         {
             WallSectionData currentSectionData = GetWallSectionDataFromBuildable(buildable);
 
-            if ((currentSectionData.WallElement == m_PreviousSectionData.WallElement) && wallElementContainer.childCount > 0)
+            if ((currentSectionData.WallElement == m_PreviousData.WallElement) && wallElementContainer.childCount > 0)
                 return;
 
             wallElementContainer.Clear();
@@ -83,28 +84,28 @@ public class WallSectionDataDrawer : PropertyDrawer
                         // We are relying on unity triggering these callbacks when the user clicks on an object with a non-hidden & serialized wall section data.
                         cols.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.Columns == m_PreviousSectionData.Doorway.Columns)
+                            if (currentSectionData.Doorway.Columns == m_PreviousData.Doorway.Columns)
                                 return;
 
-                            m_PreviousSectionData.Doorway.Columns = currentSectionData.Doorway.Columns;
+                            m_PreviousData.Doorway.Columns = currentSectionData.Doorway.Columns;
 
                             Build(buildable);
                         });
                         rows.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.Rows == m_PreviousSectionData.Doorway.Rows)
+                            if (currentSectionData.Doorway.Rows == m_PreviousData.Doorway.Rows)
                                 return;
 
-                            m_PreviousSectionData.Doorway.Rows = currentSectionData.Doorway.Rows;
+                            m_PreviousData.Doorway.Rows = currentSectionData.Doorway.Rows;
 
                             Build(buildable);
                         });
                         offsetField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.PositionOffset == m_PreviousSectionData.Doorway.PositionOffset)
+                            if (currentSectionData.Doorway.PositionOffset == m_PreviousData.Doorway.PositionOffset)
                                 return;
 
-                            m_PreviousSectionData.Doorway.PositionOffset = currentSectionData.Doorway.PositionOffset;
+                            m_PreviousData.Doorway.PositionOffset = currentSectionData.Doorway.PositionOffset;
 
                             // Here we either need to set door to null or update door control points.
                             currentSectionData.Doorway.Doors = null;
@@ -113,10 +114,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         heightField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.Height == m_PreviousSectionData.Doorway.Height)
+                            if (currentSectionData.Doorway.Height == m_PreviousData.Doorway.Height)
                                 return;
 
-                            m_PreviousSectionData.Doorway.Height = currentSectionData.Doorway.Height;
+                            m_PreviousData.Doorway.Height = currentSectionData.Doorway.Height;
 
                             currentSectionData.Doorway.Doors = null;
 
@@ -124,10 +125,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         widthField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Doorway.Width == m_PreviousSectionData.Doorway.Width)
+                            if (currentSectionData.Doorway.Width == m_PreviousData.Doorway.Width)
                                 return;
 
-                            m_PreviousSectionData.Doorway.Width = currentSectionData.Doorway.Width;
+                            m_PreviousData.Doorway.Width = currentSectionData.Doorway.Width;
 
                             currentSectionData.Doorway.Doors = null;
 
@@ -135,10 +136,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameDepthField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.DoorFrame.Depth == m_PreviousSectionData.DoorFrame.Depth)
+                            if (currentSectionData.DoorFrame.Depth == m_PreviousData.DoorFrame.Depth)
                                 return;
 
-                            m_PreviousSectionData.DoorFrame.Depth = currentSectionData.DoorFrame.Depth;
+                            m_PreviousData.DoorFrame.Depth = currentSectionData.DoorFrame.Depth;
 
                             currentSectionData.Doorway.Doors = null;
 
@@ -146,12 +147,12 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameScaleField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.DoorFrame.Scale == m_PreviousSectionData.DoorFrame.Scale)
+                            if (currentSectionData.DoorFrame.Scale == m_PreviousData.DoorFrame.Scale)
                                 return;
 
                             currentSectionData.Doorway.Doors = null;
 
-                            m_PreviousSectionData.DoorFrame.Scale = currentSectionData.DoorFrame.Scale;
+                            m_PreviousData.DoorFrame.Scale = currentSectionData.DoorFrame.Scale;
                             Build(buildable);
                         });
                         activeDoorwayElements.RegisterValueChangeCallback(evt =>
@@ -162,10 +163,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                             doorDataField.SetEnabled(isDoorActive);
                             frameFoldout.SetEnabled(isFrameActive);
 
-                            if (currentSectionData.Doorway.ActiveElements == m_PreviousSectionData.Doorway.ActiveElements)
+                            if (currentSectionData.Doorway.ActiveElements == m_PreviousData.Doorway.ActiveElements)
                                 return;
 
-                            m_PreviousSectionData.Doorway.ActiveElements = currentSectionData.Doorway.ActiveElements;
+                            m_PreviousData.Doorway.ActiveElements = currentSectionData.Doorway.ActiveElements;
 
                             foreach (DoorData door in currentSectionData.Doorway.Doors)
                             {
@@ -234,28 +235,28 @@ public class WallSectionDataDrawer : PropertyDrawer
                         #region Register Value Change Callback
                         cols.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.Columns == m_PreviousSectionData.Archway.Columns)
+                            if (currentSectionData.Archway.Columns == m_PreviousData.Archway.Columns)
                                 return;
 
-                            m_PreviousSectionData.Archway.Columns = currentSectionData.Archway.Columns;
+                            m_PreviousData.Archway.Columns = currentSectionData.Archway.Columns;
 
                             Build(buildable);
                         });
                         rows.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.Rows == m_PreviousSectionData.Archway.Rows)
+                            if (currentSectionData.Archway.Rows == m_PreviousData.Archway.Rows)
                                 return;
 
-                            m_PreviousSectionData.Archway.Rows = currentSectionData.Archway.Rows;
+                            m_PreviousData.Archway.Rows = currentSectionData.Archway.Rows;
 
                             Build(buildable);
                         });
                         offsetField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.PositionOffset == m_PreviousSectionData.Archway.PositionOffset)
+                            if (currentSectionData.Archway.PositionOffset == m_PreviousData.Archway.PositionOffset)
                                 return;
 
-                            m_PreviousSectionData.Archway.PositionOffset = currentSectionData.Archway.PositionOffset;
+                            m_PreviousData.Archway.PositionOffset = currentSectionData.Archway.PositionOffset;
 
                             currentSectionData.Archway.Doors = null;
 
@@ -263,10 +264,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         archHeightField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.ArchHeight == m_PreviousSectionData.Archway.ArchHeight)
+                            if (currentSectionData.Archway.ArchHeight == m_PreviousData.Archway.ArchHeight)
                                 return;
 
-                            m_PreviousSectionData.Archway.ArchHeight = currentSectionData.Archway.ArchHeight;
+                            m_PreviousData.Archway.ArchHeight = currentSectionData.Archway.ArchHeight;
 
                             currentSectionData.Archway.Doors = null;
 
@@ -275,10 +276,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         archSidesField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.ArchSides == m_PreviousSectionData.Archway.ArchSides)
+                            if (currentSectionData.Archway.ArchSides == m_PreviousData.Archway.ArchSides)
                                 return;
 
-                            m_PreviousSectionData.Archway.ArchSides = currentSectionData.Archway.ArchSides;
+                            m_PreviousData.Archway.ArchSides = currentSectionData.Archway.ArchSides;
 
                             currentSectionData.Archway.Doors = null;
 
@@ -286,10 +287,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         heightField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.Height == m_PreviousSectionData.Archway.Height)
+                            if (currentSectionData.Archway.Height == m_PreviousData.Archway.Height)
                                 return;
 
-                            m_PreviousSectionData.Archway.Height = currentSectionData.Archway.Height;
+                            m_PreviousData.Archway.Height = currentSectionData.Archway.Height;
 
                             currentSectionData.Archway.Doors = null;
 
@@ -297,10 +298,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         widthField.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.Archway.Width == m_PreviousSectionData.Archway.Width)
+                            if (currentSectionData.Archway.Width == m_PreviousData.Archway.Width)
                                 return;
 
-                            m_PreviousSectionData.Archway.Width = currentSectionData.Archway.Width;
+                            m_PreviousData.Archway.Width = currentSectionData.Archway.Width;
 
                             currentSectionData.Archway.Doors = null;
 
@@ -308,19 +309,19 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         doorFrameDepthField.RegisterValueChangeCallback(evt => 
                         {
-                            if (currentSectionData.DoorFrame.Depth == m_PreviousSectionData.DoorFrame.Depth)
+                            if (currentSectionData.DoorFrame.Depth == m_PreviousData.DoorFrame.Depth)
                                 return;
 
-                            m_PreviousSectionData.DoorFrame.Depth = currentSectionData.DoorFrame.Depth;
+                            m_PreviousData.DoorFrame.Depth = currentSectionData.DoorFrame.Depth;
 
                             Build(buildable);
                         });
                         doorFrameScaleField.RegisterValueChangeCallback(evt => 
                         {
-                            if (currentSectionData.DoorFrame.Scale == m_PreviousSectionData.DoorFrame.Scale)
+                            if (currentSectionData.DoorFrame.Scale == m_PreviousData.DoorFrame.Scale)
                                 return;
 
-                            m_PreviousSectionData.DoorFrame.Scale = currentSectionData.DoorFrame.Scale;
+                            m_PreviousData.DoorFrame.Scale = currentSectionData.DoorFrame.Scale;
 
                             Build(buildable);
                         });
@@ -332,10 +333,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                             archDataField.SetEnabled(isDoorActive);
                             frameFoldout.SetEnabled(isFrameActive);
 
-                            if (currentSectionData.Archway.ActiveElements == m_PreviousSectionData.Archway.ActiveElements)
+                            if (currentSectionData.Archway.ActiveElements == m_PreviousData.Archway.ActiveElements)
                                 return;
 
-                            m_PreviousSectionData.Archway.ActiveElements = currentSectionData.Archway.ActiveElements;
+                            m_PreviousData.Archway.ActiveElements = currentSectionData.Archway.ActiveElements;
 
                             foreach (DoorData archDoor in currentSectionData.Archway.Doors)
                             {
@@ -397,28 +398,28 @@ public class WallSectionDataDrawer : PropertyDrawer
                         #region Register Value Change Callbacks
                         cols.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.WindowOpening.Columns == m_PreviousSectionData.WindowOpening.Columns)
+                            if (currentSectionData.WindowOpening.Columns == m_PreviousData.WindowOpening.Columns)
                                 return;
 
-                            m_PreviousSectionData.WindowOpening.Columns = currentSectionData.WindowOpening.Columns;
+                            m_PreviousData.WindowOpening.Columns = currentSectionData.WindowOpening.Columns;
 
                             Build(buildable);
                         });
                         rows.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.WindowOpening.Rows == m_PreviousSectionData.WindowOpening.Rows)
+                            if (currentSectionData.WindowOpening.Rows == m_PreviousData.WindowOpening.Rows)
                                 return;
 
-                            m_PreviousSectionData.WindowOpening.Rows = currentSectionData.WindowOpening.Rows;
+                            m_PreviousData.WindowOpening.Rows = currentSectionData.WindowOpening.Rows;
 
                             Build(buildable);
                         });
                         sides.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.WindowOpening.Sides == m_PreviousSectionData.WindowOpening.Sides)
+                            if (currentSectionData.WindowOpening.Sides == m_PreviousData.WindowOpening.Sides)
                                 return;
 
-                            m_PreviousSectionData.WindowOpening.Sides = currentSectionData.WindowOpening.Sides;
+                            m_PreviousData.WindowOpening.Sides = currentSectionData.WindowOpening.Sides;
 
                             currentSectionData.WindowOpening.Windows = null;
 
@@ -426,10 +427,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         height.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.WindowOpening.Height == m_PreviousSectionData.WindowOpening.Height)
+                            if (currentSectionData.WindowOpening.Height == m_PreviousData.WindowOpening.Height)
                                 return;
 
-                            m_PreviousSectionData.WindowOpening.Height = currentSectionData.WindowOpening.Height;
+                            m_PreviousData.WindowOpening.Height = currentSectionData.WindowOpening.Height;
 
                             currentSectionData.WindowOpening.Windows = null;
 
@@ -437,10 +438,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         width.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.WindowOpening.Width == m_PreviousSectionData.WindowOpening.Width)
+                            if (currentSectionData.WindowOpening.Width == m_PreviousData.WindowOpening.Width)
                                 return;
 
-                            m_PreviousSectionData.WindowOpening.Width = currentSectionData.WindowOpening.Width;
+                            m_PreviousData.WindowOpening.Width = currentSectionData.WindowOpening.Width;
 
                             currentSectionData.WindowOpening.Windows = null;
 
@@ -448,14 +449,25 @@ public class WallSectionDataDrawer : PropertyDrawer
                         });
                         angle.RegisterValueChangeCallback(evt =>
                         {
-                            if (currentSectionData.WindowOpening.Angle == m_PreviousSectionData.WindowOpening.Angle)
+                            if (currentSectionData.WindowOpening.Angle == m_PreviousData.WindowOpening.Angle)
                                 return;
 
-                            m_PreviousSectionData.WindowOpening.Angle = currentSectionData.WindowOpening.Angle;
+                            m_PreviousData.WindowOpening.Angle = currentSectionData.WindowOpening.Angle;
 
                             currentSectionData.WindowOpening.Windows = null;
 
                             Build(buildable);
+                        });
+                        windowDataField.RegisterValueChangeCallback(evt => 
+                        {
+                            WindowData currentWindow = evt.changedProperty.GetUnderlyingValue() as WindowData;
+
+                            if (m_PreviousData.Window.Equals(currentWindow))
+                            {
+                                return;
+                            }
+
+
                         });
                         #endregion
 
@@ -513,10 +525,10 @@ public class WallSectionDataDrawer : PropertyDrawer
                     break;
             }
 
-            if(currentSectionData.WallElement != m_PreviousSectionData.WallElement)
+            if(currentSectionData.WallElement != m_PreviousData.WallElement)
             {
                 Build(buildable);
-                m_PreviousSectionData.WallElement = currentSectionData.WallElement;
+                m_PreviousData.WallElement = currentSectionData.WallElement;
             }
         });
 

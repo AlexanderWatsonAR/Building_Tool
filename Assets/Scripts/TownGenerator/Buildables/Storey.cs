@@ -181,6 +181,11 @@ public class Storey : MonoBehaviour, IBuildable
     #endregion
 
     #region Calculate
+    /// <summary>
+    /// Can we migrate all of this to the Corners class?
+    /// </summary>
+    /// <param name="cornerIndex"></param>
+    /// <returns></returns>
     private CornerData CalculateCorner(int cornerIndex)
     {
         bool isConcave = m_Data.ControlPoints.IsConcave(out int[] concavePoints);

@@ -27,11 +27,13 @@ public class PolyBuildingEditorWindow : EditorWindow
         (
             () =>
             {
-                ProBuilderMesh building = ProBuilderMesh.Create();
-                building.name = "Poly Building";
-                building.AddComponent<Building>();
-                Building build = building.GetComponent<Building>();
-                build.Data.Path.PolyMode = PolyMode.Draw;
+                ProBuilderMesh buildingMesh = ProBuilderMesh.Create();
+                buildingMesh.name = "Poly Building";
+                buildingMesh.AddComponent<Building>();
+                Building building = buildingMesh.GetComponent<Building>();
+                building.Container = ScriptableObject.CreateInstance<BuildingScriptableObject>();
+                building.Initialize(building.Container.Data);
+                building.Data.Path.PolyMode = PolyMode.Draw;
                 Selection.activeGameObject = building.gameObject;
             }
         );
@@ -42,8 +44,7 @@ public class PolyBuildingEditorWindow : EditorWindow
         (
             () =>
             {
-                // Error: You can use this to create an asset from a game object.
-                AssetDatabase.CreateAsset(m_ActiveBuilding, "Assets/Export/" + m_ActiveBuilding.name + ".asset");
+                AssetDatabase.CreateAsset(m_ActiveBuilding.Container, "Assets/Export/" + m_ActiveBuilding.name + ".asset");
             }
         )
         { text = "Save Building"};
@@ -52,40 +53,6 @@ public class PolyBuildingEditorWindow : EditorWindow
        rootVisualElement.Add(newPolyBuilding_btn);
        rootVisualElement.Add(save_btn);
     }
-
-
-    //private void OnGUI()
-    //{
-    //    if(GUILayout.Button("New Poly Building"))
-    //    {
-    //        ProBuilderMesh building = ProBuilderMesh.Create();
-    //        building.name = "Poly Building";
-    //        building.AddComponent<Building>();
-    //        Building build = building.GetComponent<Building>();
-    //        build.Data.Path.PolyMode = PolyMode.Draw;
-    //        Selection.activeGameObject = building.gameObject;
-    //    }
-
-    //    EditorGUI.BeginDisabledGroup(!m_IsActiveGameObjectABuilding);
-
-    //    if(GUILayout.Button("Merge"))
-    //    {
-    //        MergeWindow.ShowWindow();
-    //    }
-
-    //    if (GUILayout.Button("Export"))
-    //    {
-    //        ExportEditorWindow.ShowWindow();
-    //    }
-
-    //    EditorGUI.EndDisabledGroup();
-
-    //    if (GUILayout.Button("Material Presets"))
-    //    {
-    //        MaterialPresetWindow.ShowWindow();
-
-    //    }
-    //}
 
     private void OnSelectionChange()
     {

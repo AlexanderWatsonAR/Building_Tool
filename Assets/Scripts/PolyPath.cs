@@ -15,11 +15,11 @@ using UnityEditor;
 [System.Serializable]
 public class PolyPath
 {
-    [SerializeField] private List<ControlPoint> m_ControlPoints;
-    [SerializeField] private bool m_IsClosedLoop;
-    [SerializeField] private PolyMode m_PolyMode;
+    [SerializeField] List<ControlPoint> m_ControlPoints;
+    [SerializeField] bool m_IsClosedLoop;
+    [SerializeField] PolyMode m_PolyMode;
 
-    [SerializeField] private bool m_IsPathValid;
+    [SerializeField] bool m_IsPathValid;
 
     public bool IsPathValid => m_IsPathValid;
 

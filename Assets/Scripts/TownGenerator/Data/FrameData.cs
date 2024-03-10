@@ -28,4 +28,24 @@ public class FrameData : Polygon3DData
     {
 
     }
+
+    public override bool Equals(object obj)
+    {
+        FrameData other = obj as FrameData;
+
+        if (other == null)
+            return false;
+
+        if(m_Scale == other.Scale && base.Equals(obj))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 }

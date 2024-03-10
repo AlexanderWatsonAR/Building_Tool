@@ -33,7 +33,6 @@ public class Door : Polygon3D
         // Rotate
         m_ProBuilderMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
         m_ProBuilderMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
-        m_ProBuilderMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
         m_ProBuilderMesh.Refresh();
 
         if (!m_Data.ActiveElements.IsElementActive(DoorElement.Handle))

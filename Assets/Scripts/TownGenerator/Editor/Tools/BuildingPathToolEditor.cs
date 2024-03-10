@@ -30,11 +30,10 @@ public class BuildingToolEditor : EditorTool
             return m_IconContent;
         }
     }
+
     public override void OnToolGUI(EditorWindow window)
     {
-        
-
-        if (!(window is SceneView))
+        if (window is not SceneView)
             return;
 
         if (Event.current.type == EventType.Repaint)

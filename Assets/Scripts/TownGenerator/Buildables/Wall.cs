@@ -47,6 +47,7 @@ public class Wall : MonoBehaviour, IBuildable
             Window = DefineWindowDefaults(),
             Door = DefineDoorDefaults(),
             DoorFrame = DefineFrameDefaults(),
+            Normal = m_Data.Normal
         };
 
         return this;
@@ -143,10 +144,12 @@ public class Wall : MonoBehaviour, IBuildable
                 {
                     ID = new Vector2Int(x, y),
                     Polygon = new PolygonData(points, m_Data.Normal),
+                    Normal = m_Data.Normal,
                     Depth = m_Data.Depth,                 
                 };
 
                 m_Data.Sections[count].Polygon.ControlPoints = points;
+                m_Data.Sections[count].Polygon.Normal = m_Data.Normal;
                 m_Data.Sections[count].Depth = m_Data.Depth;
 
                 WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[count]) as WallSection;

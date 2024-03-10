@@ -107,6 +107,7 @@ public class CornerDataDrawer : PropertyDrawer, IFieldInitializer
                 cornerData = new CornerData[1];
                 cornerData[0] = m_Props.Data.GetUnderlyingValue() as CornerData;
                 break;
+
         }
 
         return cornerData;
@@ -127,6 +128,9 @@ public class CornerDataDrawer : PropertyDrawer, IFieldInitializer
             case Corner:
                 m_Buildable.Build();
             break;
+            //case Corners:
+            //    m_Buildable.Build();
+            //    break;
         }
     }
 }

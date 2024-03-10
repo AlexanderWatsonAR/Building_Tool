@@ -6,11 +6,11 @@ using UnityEditor;
 public class WindowDataSerializedProperties : SerializedPropertyGroup
 {
     #region Member Variables
-    [SerializeField] readonly FrameDataSerializedProperties m_OuterFrame;
-    [SerializeField] readonly GridFrameDataSerializedProperties m_InnerFrame;
-    [SerializeField] readonly Polygon3DDataSerializedProperties m_Pane;
-    [SerializeField] readonly DoorDataSerializedProperties m_LeftShutter;
-    [SerializeField] readonly DoorDataSerializedProperties m_RightShutter;
+    readonly FrameDataSerializedProperties m_OuterFrame;
+    readonly GridFrameDataSerializedProperties m_InnerFrame;
+    readonly Polygon3DDataSerializedProperties m_Pane;
+    readonly DoorDataSerializedProperties m_LeftShutter;
+    readonly DoorDataSerializedProperties m_RightShutter;
     #endregion
 
     #region Constants

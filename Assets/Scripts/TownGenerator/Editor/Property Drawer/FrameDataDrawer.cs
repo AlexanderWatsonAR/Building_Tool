@@ -92,11 +92,17 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
             break;
             case Window:
                 Window window = m_Buildable as Window;
-                window.BuildOuterFrame();
+                window.Rebuild();
             break;
             case WallSection:
                 WallSection wallSection = m_Buildable as WallSection;
-                wallSection.BuildWindows(true, true, true, true);
+
+                switch(wallSection.Data.WallElement)
+                {
+                    case WallElement.Window:
+                        wallSection.BuildWindows(true, true, true, true);
+                    break;
+                }
             break;
         }
     }

@@ -75,5 +75,23 @@ public class Polygon3DData : IData
 
         return holePoints;
     }
-    
+
+    public override bool Equals(object obj)
+    {
+        Polygon3DData other = obj as Polygon3DData;
+
+        if (other == null)
+            return false;
+
+        if (m_Depth == other.Depth)
+            return true;
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
 }

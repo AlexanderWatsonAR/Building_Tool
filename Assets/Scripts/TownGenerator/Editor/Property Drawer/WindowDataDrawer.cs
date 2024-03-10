@@ -57,7 +57,7 @@ public class WindowDataDrawer : PropertyDrawer
             paneFoldout.SetEnabled(isPaneActive);
             shuttersFoldout.SetEnabled(areShuttersActive);
 
-            WindowData[] windows = GetWindowDataFromBuildable(buildable);
+            WindowData[] windows = GetDataFromBuildable(buildable);
 
             bool rebuild = false;
 
@@ -100,7 +100,6 @@ public class WindowDataDrawer : PropertyDrawer
 
             if (rebuild)
             {
-                Debug.Log("activeElementsField Build");
                 Build(buildable);
             }
         });
@@ -128,7 +127,7 @@ public class WindowDataDrawer : PropertyDrawer
     /// </summary>
     /// <param name="buildable"></param>
     /// <returns></returns>
-    private WindowData[] GetWindowDataFromBuildable(IBuildable buildable)
+    private WindowData[] GetDataFromBuildable(IBuildable buildable)
     {
         WindowData[] dataset = new WindowData[0];
 

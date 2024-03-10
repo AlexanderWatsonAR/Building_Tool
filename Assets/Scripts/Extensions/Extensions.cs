@@ -20,6 +20,14 @@ public static class Extensions
         }
     }
 
+    public static void DemolishCollection(this IEnumerable<IBuildable> buildables)
+    {
+        foreach (IBuildable buildable in buildables)
+        {
+            buildable.Demolish();
+        }
+    }
+
     public static Vector3[] ScaleOneLine(this Vector3[] oneLine, OneLineShape shape, float scale)
     {
         switch (shape)

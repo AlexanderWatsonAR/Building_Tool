@@ -77,11 +77,36 @@ public class WindowData : IData
     public WindowData(WindowElement activeElements, PolygonData opening, FrameData outerFrame, GridFrameData innerFrame, Polygon3DData paneData, DoorData leftShutter, DoorData rightShutter)
     {
         m_ActiveElements = activeElements;
-        m_Polygon = opening;
-        m_OuterFrame = outerFrame;
-        m_InnerFrame = innerFrame;
-        m_Pane = paneData;
-        m_LeftShutter = leftShutter;
-        m_RightShutter = rightShutter;
+        m_Polygon =  new PolygonData(opening);
+        m_OuterFrame = new FrameData(outerFrame);
+        m_InnerFrame = new GridFrameData(innerFrame);
+        m_Pane = new Polygon3DData(paneData);
+        m_LeftShutter = new DoorData(leftShutter);
+        m_RightShutter = new DoorData(rightShutter);
+    }
+
+    public override bool Equals(object obj)
+    {
+        WindowData other = obj as WindowData;
+
+        if (other == null)
+            return false;
+
+        if(m_ActiveElements.Equals(other.m_ActiveElements) &&
+           m_OuterFrame.Equals(other.OuterFrame) &&
+           m_InnerFrame.Equals(other.InnerFrame) &&
+           m_Pane.Equals(other.Pane) &&
+           m_LeftShutter.Equals(other.LeftShutter) &&
+           m_RightShutter.Equals(other.RightShutter))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 }

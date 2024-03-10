@@ -8,7 +8,6 @@ using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
-using UnityEngine.UIElements;
 
 public class Window : MonoBehaviour, IBuildable
 {
@@ -107,6 +106,57 @@ public class Window : MonoBehaviour, IBuildable
     #endregion
 
     #region Build
+
+    public void Rebuild()
+    {
+        transform.DeleteChildren();
+
+        RebuildOuterFrame();
+        RebuildInnerFrame();
+        RebuildPane();
+        RebuildShutters();
+    }
+
+    public void RebuildOuterFrame()
+    {
+        if(m_OuterFrame != null)
+        {
+            m_OuterFrame.Demolish();
+        }
+
+        BuildOuterFrame();
+    }
+    public void RebuildInnerFrame()
+    {
+        if(m_InnerFrame != null)
+        {
+            m_InnerFrame.Demolish();
+        }
+
+        BuildInnerFrame();
+    }
+    public void RebuildPane()
+    {
+        if(m_Pane != null)
+        {
+            m_Pane.Demolish();
+        }
+
+        BuildPane();
+    }
+    public void RebuildShutters()
+    {
+        if (!m_Data.AreShuttersActive && m_LeftShutter != null)
+        {
+            m_LeftShutter.Demolish();
+        }
+        if (!m_Data.AreShuttersActive && m_RightShutter != null)
+        {
+            m_RightShutter.Demolish();
+        }
+
+        BuildShutters();
+    }
     public void BuildOuterFrame()
     {
         if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.DoesOuterFrameNeedRebuild))
@@ -130,6 +180,7 @@ public class Window : MonoBehaviour, IBuildable
         if (m_Data.IsPaneActive && (m_Pane == null || m_Data.DoesPaneNeedRebuild))
         {
             m_Pane = m_Pane != null ? m_Pane : CreatePane();
+            m_Pane.Build();
             m_Data.DoesPaneNeedRebuild = false;
         }
     }
@@ -179,27 +230,22 @@ public class Window : MonoBehaviour, IBuildable
         if (!m_Data.IsOuterFrameActive && m_OuterFrame != null)
         {
             m_OuterFrame.Demolish();
-            DestroyImmediate(m_OuterFrame.gameObject);
         }
         if (!m_Data.IsInnerFrameActive && m_InnerFrame != null)
         {
             m_InnerFrame.Demolish();
-            DestroyImmediate(m_InnerFrame.gameObject);
         }
         if (!m_Data.IsPaneActive && m_Pane != null)
         {
             m_Pane.Demolish();
-            DestroyImmediate(m_Pane.gameObject);
         }
         if (!m_Data.AreShuttersActive && m_LeftShutter != null)
         {
             m_LeftShutter.Demolish();
-            DestroyImmediate(m_LeftShutter.gameObject);
         }
         if (!m_Data.AreShuttersActive && m_RightShutter != null)
         {
             m_RightShutter.Demolish();
-            DestroyImmediate(m_RightShutter.gameObject);
         }
     }
 }

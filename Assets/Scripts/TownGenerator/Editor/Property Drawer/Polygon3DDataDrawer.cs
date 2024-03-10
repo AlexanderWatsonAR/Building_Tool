@@ -64,7 +64,6 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Root.Add(m_Depth);
     }
-
     public void Build()
     {
         switch(m_Buildable)
@@ -74,8 +73,18 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
             break;
             case Window:
                 Window window = m_Buildable as Window;
+                window.Data.DoesPaneNeedRebuild = true;
                 window.BuildPane();
-                break;
+            break;
+            case WallSection:
+                WallSection section = m_Buildable as WallSection;
+                switch(section.Data.WallElement)
+                {
+                    case WallElement.Window:
+                        section.BuildWindows(false, false, true);
+                    break;
+                }
+            break;
         }
     }
 

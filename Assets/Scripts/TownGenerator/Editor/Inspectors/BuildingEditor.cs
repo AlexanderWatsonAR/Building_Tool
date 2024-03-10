@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
-using UnityEditor.IMGUI.Controls;
+using Unity.VisualScripting;
 
 
 // Add Poly path stuff
@@ -54,7 +54,7 @@ public class BuildingEditor : Editor
         {
             text = "Build"
         };
-        Button reset_btn = new Button(() => m_Building.Build())
+        Button reset_btn = new Button(() => m_Building.Demolish())
         {
             text = "Reset"
         };
@@ -104,6 +104,20 @@ public class BuildingEditor : Editor
                 break;
             case PolyMode.Hide:
                 {
+                    SerializedProperty container = serializedObject.FindProperty("m_Container");
+                    PropertyField containerField = new PropertyField(container);
+                    containerField.RegisterValueChangeCallback(evt => 
+                    {
+                        BuildingScriptableObject so = evt.changedProperty.GetUnderlyingValue() as BuildingScriptableObject;
+
+                        if (so == null)
+                            return;
+
+                        m_Data.SetUnderlyingValue(so.Data);
+                        Debug.Log("building data changed");
+
+                    });
+
                     Button edit_btn = new Button(() =>
                     {
                         m_Path.PolyMode = PolyMode.Edit;
@@ -111,6 +125,7 @@ public class BuildingEditor : Editor
                     });
                     edit_btn.text = "Edit Building Path";
 
+                    m_Root.Add(containerField);
                     m_Root.Add(edit_btn);
                     m_Root.Add(new HelpBox("Editing the path will erase changes made to the building", HelpBoxMessageType.Warning));
 
@@ -124,7 +139,7 @@ public class BuildingEditor : Editor
 
                     Foldout roofFoldout = new Foldout() { text = "Roof" };
                     roofFoldout.Add(roofField);
-
+  
                     m_Root.Add(storeysField);
                     m_Root.Add(roofFoldout);
                 }
@@ -199,7 +214,9 @@ public class BuildingEditor : Editor
                         if(m_Path.IsValidPath())
                         {
                             m_Path.CalculateForwards();
-                            m_Building.Initialize(new BuildingData(m_Path)).Build();
+                            m_Building.AddStorey("Ground");
+                            m_Building.InitializeRoof();
+                            m_Building.Build();
                         }
                         
                         
