@@ -136,6 +136,9 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                         break;
                 }
            break;
+            case GridFrameData:
+                frameData = new GridFrameData[0];
+                break;
         }
 
         return frameData;

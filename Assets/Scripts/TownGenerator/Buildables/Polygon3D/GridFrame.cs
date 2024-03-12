@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GridFrame : Polygon3D
 {
-    [SerializeField] GridFrameData m_Data;
+    [SerializeReference] GridFrameData m_Data;
 
     public GridFrameData Data => m_Data;
 

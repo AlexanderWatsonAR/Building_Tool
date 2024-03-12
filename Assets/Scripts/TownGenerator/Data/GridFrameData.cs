@@ -20,12 +20,12 @@ public class GridFrameData : FrameData
         m_Columns = columns;
         m_Rows = rows;
     }
-    public GridFrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, float height, float width, float depth, float scale, int columns, int rows, Vector3 position) : base(polygon, holes, normal, height, width, depth, position, scale)
+    public GridFrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float height, float width, float depth, float scale, int columns, int rows, Vector3 position) : base(polygon, holes, normal, up, height, width, depth, position, scale)
     {
         m_Columns = columns;
         m_Rows = rows;
     }
-    public GridFrameData(GridFrameData data) :this(data.Polygon, data.Holes, data.Normal, data.Height, data.Width, data.Depth, data.Scale, data.Columns, data.Rows, data.Position)
+    public GridFrameData(GridFrameData data) :this(data.Polygon, data.Holes, data.Normal, data.Up, data.Height, data.Width, data.Depth, data.Scale, data.Columns, data.Rows, data.Position)
     {
 
     }

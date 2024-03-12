@@ -11,8 +11,7 @@ using Unity.VisualScripting;
 [CustomPropertyDrawer(typeof(DoorData))]
 public class DoorDataDrawer : PropertyDrawer
 {
-    [SerializeField] DoorData m_CurrentDoorData;
-    [SerializeField] DoorData m_PreviousDoorData;
+    [SerializeField] DoorData m_PreviousData;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
@@ -22,92 +21,101 @@ public class DoorDataDrawer : PropertyDrawer
 
         DoorDataSerializedProperties props = new DoorDataSerializedProperties(data);
 
-        m_CurrentDoorData = data.GetUnderlyingValue() as DoorData;
-        m_PreviousDoorData = new DoorData(m_CurrentDoorData);
+        DoorData current = data.GetUnderlyingValue() as DoorData;
+
+        m_PreviousData = current.DeepCopy();
+
+        var hingeData = props.HingeData;
 
         #region Fields
-        PropertyField scaleField = new PropertyField(props.Scale);
+        PropertyField scaleField = new PropertyField(hingeData.Scale); // this probably shouldn't be in hinge data.
         Foldout hingeFoldout = new Foldout() { text = "Hinge" };
-        PropertyField hingePointField = new PropertyField(props.HingePoint) { label = "Position" };
-        PropertyField hingeOffsetField = new PropertyField(props.HingeOffset) { label = "Offset" };
-        PropertyField hingeEulerAnglesField = new PropertyField(props.HingeEulerAngle) { label = "Euler Angles" };
+        PropertyField hingePointField = new PropertyField(hingeData.RelativePosition) { label = "Position" };
+        PropertyField hingeOffsetField = new PropertyField(hingeData.PositionOffset) { label = "Offset" };
+        PropertyField hingeEulerAngleField = new PropertyField(hingeData.EulerAngle) { label = "Euler Angle" };
 
         #endregion
 
         #region Binds
-        scaleField.BindProperty(props.Scale);
-        hingePointField.BindProperty(props.HingePoint);
-        hingeOffsetField.BindProperty(props.HingeOffset);
-        hingeEulerAnglesField.BindProperty(props.HingeEulerAngle);
-
+        scaleField.BindProperty(hingeData.Scale);
+        hingePointField.BindProperty(hingeData.RelativePosition);
+        hingeOffsetField.BindProperty(hingeData.PositionOffset);
+        hingeEulerAngleField.BindProperty(hingeData.EulerAngle);
         #endregion
 
         #region Register Value Change Callbacks
         scaleField.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentDoorData.Scale == m_PreviousDoorData.Scale)
+            Vector3 scale = evt.changedProperty.vector3Value;
+
+            if (scale == m_PreviousData.HingeData.Scale)
                 return;
 
-            m_PreviousDoorData.Scale = m_CurrentDoorData.Scale;
+            m_PreviousData.HingeData.Scale = scale;
 
-            DoorData[] doors = GetDoorDataFromBuildable(buildable);
+            DoorData[] doors = GetDataFromBuildable(buildable);
 
             foreach (DoorData door in doors)
             {
-                door.Scale = evt.changedProperty.floatValue;
+                door.HingeData.Scale = scale;
             }
 
             Build(buildable);
         });
         hingePointField.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentDoorData.HingePoint == m_PreviousDoorData.HingePoint)
+            RelativePosition relativePosition = evt.changedProperty.GetEnumValue<RelativePosition>();
+
+            if (relativePosition == m_PreviousData.HingeData.RelativePosition)
                 return;
 
-            m_PreviousDoorData.HingePoint = m_CurrentDoorData.HingePoint;
+            m_PreviousData.HingeData.RelativePosition = relativePosition;
 
-            DoorData[] doors = GetDoorDataFromBuildable(buildable);
+            DoorData[] doors = GetDataFromBuildable(buildable);
 
             foreach (DoorData door in doors)
             {
-                door.HingePoint = evt.changedProperty.GetEnumValue<TransformPoint>();
+                door.HingeData.RelativePosition = relativePosition;
             }
 
             Build(buildable);
         });
         hingeOffsetField.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentDoorData.HingeOffset == m_PreviousDoorData.HingeOffset)
+            Vector3 offset = evt.changedProperty.vector3Value;
+
+            if (offset == m_PreviousData.HingeData.PositionOffset)
                 return;
 
-            m_PreviousDoorData.HingeOffset = m_CurrentDoorData.HingeOffset;
+            m_PreviousData.HingeData.PositionOffset = offset;
 
-            DoorData[] doors = GetDoorDataFromBuildable(buildable);
+            DoorData[] doors = GetDataFromBuildable(buildable);
 
             foreach (DoorData door in doors)
             {
-                door.HingeOffset = evt.changedProperty.vector3Value;
+                door.HingeData.PositionOffset = offset;
             }
 
             Build(buildable);
         });
-        hingeEulerAnglesField.RegisterValueChangeCallback(evt =>
+        hingeEulerAngleField.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentDoorData.HingeEulerAngles == m_PreviousDoorData.HingeEulerAngles)
+            Vector3 euler = evt.changedProperty.vector3Value;
+
+            if (euler == m_PreviousData.HingeData.EulerAngle)
                 return;
 
-            m_PreviousDoorData.HingeEulerAngles = m_CurrentDoorData.HingeEulerAngles;
+            m_PreviousData.HingeData.EulerAngle = euler;
 
-            DoorData[] doors = GetDoorDataFromBuildable(buildable);
+            DoorData[] doors = GetDataFromBuildable(buildable);
 
             foreach (DoorData door in doors)
             {
-                door.HingeEulerAngles = evt.changedProperty.vector3Value;
+                door.HingeData.EulerAngle = euler;
             }
 
             Build(buildable);
         });
-
         #endregion
 
         if (buildable is Door)
@@ -116,12 +124,14 @@ public class DoorDataDrawer : PropertyDrawer
             activeElementsField.BindProperty(props.ActiveElements);
             activeElementsField.RegisterValueChangeCallback(evt =>
             {
-                if (m_CurrentDoorData.ActiveElements == m_PreviousDoorData.ActiveElements)
+                DoorElement activeElements = evt.changedProperty.GetEnumValue<DoorElement>();
+
+                if (activeElements == m_PreviousData.ActiveElements)
                     return;
 
-                m_PreviousDoorData.ActiveElements = m_CurrentDoorData.ActiveElements;
+                m_PreviousData.ActiveElements = activeElements;
 
-                bool isDoorActive = evt.changedProperty.GetEnumValue<DoorElement>().IsElementActive(DoorElement.Door);
+                bool isDoorActive = activeElements.IsElementActive(DoorElement.Door);
 
                 scaleField.SetEnabled(isDoorActive);
                 hingeFoldout.SetEnabled(isDoorActive);
@@ -137,12 +147,12 @@ public class DoorDataDrawer : PropertyDrawer
         content.Add(hingeFoldout);
         hingeFoldout.Add(hingePointField);
         hingeFoldout.Add(hingeOffsetField);
-        hingeFoldout.Add(hingeEulerAnglesField);
+        hingeFoldout.Add(hingeEulerAngleField);
         #endregion
 
         return content;
     }
-    private DoorData[] GetDoorDataFromBuildable(IBuildable buildable)
+    private DoorData[] GetDataFromBuildable(IBuildable buildable)
     {
         DoorData[] dataset = new DoorData[0];
 

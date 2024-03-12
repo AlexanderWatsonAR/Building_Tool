@@ -8,16 +8,20 @@ using UnityEditor.UIElements;
 [CustomEditor(typeof(Door))]
 public class DoorEditor : DataEditor
 {
+    DoorDataSerializedProperties m_Props;
     Vector3 m_HingePosition;
     Quaternion m_HingeRotation = Quaternion.identity;
 
     public override VisualElement CreateInspectorGUI()
     {
         VisualElement root = base.CreateInspectorGUI();
-        
-        Vector3 forward = m_Data.FindPropertyRelative("m_Normal").vector3Value;
 
-        m_HingeRotation = Quaternion.LookRotation(forward, Vector3.up);
+        m_Props = new DoorDataSerializedProperties(m_Data);
+        
+        Vector3 forward = m_Props.Normal.vector3Value;
+        Vector3 up = m_Props.Up.vector3Value;
+
+        m_HingeRotation = Quaternion.LookRotation(forward, up);
 
         return root;
     }
@@ -34,8 +38,8 @@ public class DoorEditor : DataEditor
     {
         serializedObject.Update();
         Door door = target as Door;
-        m_HingePosition = m_Data.FindPropertyRelative("m_HingePosition").vector3Value;
-        SerializedProperty hingeOffset = m_Data.FindPropertyRelative("m_HingeOffset");
+        m_HingePosition = m_Props.HingeData.AbsolutePosition.vector3Value;
+        SerializedProperty hingeOffset = m_Props.HingeData.PositionOffset;
         Vector3 position = Handles.DoPositionHandle(door.transform.TransformPoint(m_HingePosition + hingeOffset.vector3Value), m_HingeRotation);
         hingeOffset.vector3Value = door.transform.InverseTransformPoint(position - m_HingePosition);
         serializedObject.ApplyModifiedProperties();

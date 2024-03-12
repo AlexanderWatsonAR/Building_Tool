@@ -12,6 +12,32 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static Vector3 CalculateRelativePosition(this Polygon3DData polygon, RelativePosition relativePosition)
+    {
+        Vector3 position = Vector3.zero;
+
+        switch (relativePosition)
+        {
+            case RelativePosition.Middle:
+                position = polygon.Position;
+                break;
+            case RelativePosition.Top:
+                position = polygon.Position + (0.5f * polygon.Height * polygon.Up);
+                break;
+            case RelativePosition.Bottom:
+                position = polygon.Position - (0.5f * polygon.Height * polygon.Up);
+                break;
+            case RelativePosition.Left:
+                position = polygon.Position - (0.5f * polygon.Width * polygon.Right);
+                break;
+            case RelativePosition.Right:
+                position = polygon.Position + (0.5f * polygon.Width * polygon.Right);
+                break;
+        }
+
+        return position;
+    }
+
     public static void BuildCollection(this IEnumerable<IBuildable> buildables)
     {
         foreach (IBuildable buildable in buildables)
@@ -814,7 +840,7 @@ public static class Extensions
     /// <param name="transformPoint"></param>
     /// <param name="vertices"></param>
     /// <returns></returns>
-    public static Vector3 PointToVector3(this TransformPoint transformPoint, IEnumerable<Vector3> vertices)
+    public static Vector3 PointToVector3(this RelativePosition transformPoint, IEnumerable<Vector3> vertices)
     {
         Vector3 pivotPoint = Vector3.zero;
 
@@ -866,19 +892,19 @@ public static class Extensions
 
         switch (transformPoint)
         {
-            case TransformPoint.Top:
+            case RelativePosition.Top:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(topVertices);
                 break;
-            case TransformPoint.Left:
+            case RelativePosition.Left:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(leftVertices);
                 break;
-            case TransformPoint.Right:
+            case RelativePosition.Right:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(rightVertices);
                 break;
-            case TransformPoint.Middle:
+            case RelativePosition.Middle:
                 pivotPoint = centroid;
                 break;
-            case TransformPoint.Bottom:
+            case RelativePosition.Bottom:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(bottomVertices);
                 break;
         }

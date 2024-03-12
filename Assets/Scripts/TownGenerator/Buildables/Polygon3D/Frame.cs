@@ -6,7 +6,7 @@ using UnityEngine.ProBuilder;
 
 public class Frame : Polygon3D
 {
-    [SerializeField] FrameData m_Data;
+    [SerializeReference] FrameData m_Data;
 
     public FrameData Data => m_Data;
 

@@ -7,6 +7,7 @@ using UnityEngine;
 // onto a building and it constructing a building from that data.
 // This script is a container/wrapper for data that works largely the same as the gameObject equivalent
 
+// Could we have a nested serialized object structure that mirrors the buildable object structure?
 
 public class BuildingScriptableObject : ScriptableObject
 {

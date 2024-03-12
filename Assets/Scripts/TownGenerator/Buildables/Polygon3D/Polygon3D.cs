@@ -5,7 +5,6 @@ using UnityEngine.ProBuilder;
 
 public abstract class Polygon3D : MonoBehaviour, IBuildable
 {
-    // I think, upon serialization, the data is saved as a copy
     [SerializeField] protected ProBuilderMesh m_ProBuilderMesh;
     [SerializeReference] Polygon3DData m_Poly3DData;
 

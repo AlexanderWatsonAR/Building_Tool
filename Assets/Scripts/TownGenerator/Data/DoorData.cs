@@ -12,18 +12,13 @@ public class DoorData : Polygon3DData
     [SerializeField] DoorElement m_ActiveElements;
 
     // Door
-    [SerializeField, HideInInspector] Vector3 m_Right;
-    [SerializeField, Range(0, 0.999f)] float m_Scale;
-    [SerializeField] TransformPoint m_HingePoint;
-    [SerializeField] Vector3 m_HingePosition;
-    [SerializeField] Vector3 m_HingeOffset;
-    [SerializeField] Vector3 m_HingeEulerAngles;
+    [SerializeField] TransformData m_HingeData;
 
     #region Handle
     [SerializeField] float m_HandleSize;
     [SerializeField, Range(0, 1)] float m_HandleScale;
     [SerializeField] Vector3 m_HandlePosition;
-    [SerializeField] TransformPoint m_HandlePoint;
+    [SerializeField] RelativePosition m_HandlePoint;
     #endregion
 
     [SerializeField] Material m_Material;
@@ -31,68 +26,10 @@ public class DoorData : Polygon3DData
     #region Accessors
     public int ID { get { return m_ID; } set { m_ID = value; } }
     public DoorElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
-    public Vector3 Right { get { return m_Right; } set { m_Right = value; } }
-    public float Scale { get { return m_Scale; } set { m_Scale = value; } }
-    public TransformPoint HingePoint
-    {
-        get
-        {
-            return m_HingePoint;
-        }
-
-        set
-        {
-            if (m_HingePoint != value)
-            {
-                m_HingeOffset = Vector3.zero;
-            }
-
-            m_HingePoint = value;
-
-            m_HingePosition = TransformPointToPosition(m_HingePoint);
-        }
-    }
-    public Vector3 HingePosition => m_HingePosition;
-    public Vector3 HingeOffset { get { return m_HingeOffset; } set { m_HingeOffset = value; } }
-    public Vector3 HingeEulerAngles { get { return m_HingeEulerAngles; } set { m_HingeEulerAngles = value; } }
     public float HandleSize { get { return m_HandleSize; } set{ m_HandleSize = value; } }
     public float HandleScale { get { return m_HandleScale; } set{ m_HandleScale = value; } }
-    public TransformPoint HandlePoint
-    {
-        get
-        {
-            return m_HandlePoint;
-        }
-        set
-        {
-            m_HandlePoint = value;
-            m_HandlePosition = TransformPointToPosition(m_HandlePoint);
+    public TransformData HingeData { get { return m_HingeData; } set { m_HingeData = value; } }
 
-            m_HandlePosition -= Position;
-            m_HandlePosition = Vector3.Scale(m_HandlePosition, Vector3.one * m_Scale) + Position;
-            m_HandlePosition += Normal * Depth;
-
-            float size = m_HandleSize * m_HandleScale;
-
-            switch(m_HandlePoint)
-            {
-                case TransformPoint.Middle:
-                    break;
-                case TransformPoint.Top:
-                    m_HandlePosition +=  Vector3.up * -size;
-                    break;
-                case TransformPoint.Bottom:
-                    m_HandlePosition += Vector3.up * size;
-                    break;
-                case TransformPoint.Left:
-                    m_HandlePosition += m_Right * size;
-                    break;
-                case TransformPoint.Right:
-                    m_HandlePosition += m_Right * -size;
-                    break;
-            }
-        }
-    }
     public Vector3 HandlePosition => m_HandlePosition;
     public Material Material { get { return m_Material; } set { m_Material = value; } }
     #endregion
@@ -101,8 +38,7 @@ public class DoorData : Polygon3DData
     public DoorData() : this
     (
         DoorElement.Everything, null, null, Vector3.forward,
-        Vector3.right, 1, 1, 1, 1, Vector3.zero, TransformPoint.Left,
-        Vector3.zero, Vector3.zero, 0.2f, 1, TransformPoint.Right, null
+        Vector3.right, 1, 1, 1, Vector3.zero, null, null
     )
     {
     }
@@ -113,63 +49,38 @@ public class DoorData : Polygon3DData
         data.Polygon,
         data.Holes,
         data.Normal,
-        data.Right,
+        data.Up,
         data.Height,
         data.Width,
         data.Depth,
-        data.Scale,
         data.Position,
-        data.HingePoint,
-        data.HingeOffset,
-        data.HingeEulerAngles,
-        data.HandleSize,
-        data.HandleScale,
-        data.HandlePoint,
+        data.HingeData,
         data.Material
     )
     {
     }
 
     public DoorData(DoorElement activeElements, PolygonData polygon, PolygonData[] holes, Vector3 normal,
-        Vector3 right, float height, float width, float depth, float scale, Vector3 position,
-        TransformPoint hingePoint, Vector3 hingeOffset, Vector3 hingeEulerAngles,
-        float handleSize, float handleScale, TransformPoint handlePoint, Material material) : base (polygon, holes, normal, height, width, depth, position)
+        Vector3 up, float height, float width, float depth, Vector3 position,TransformData hingeData, Material material) : base (polygon, holes, normal, up, height, width, depth, position)
     {
         m_ActiveElements = activeElements;
-        m_Right = right;
-        m_Scale = scale;
-        HingePoint = hingePoint;
-        m_HingeOffset = hingeOffset;
-        m_HingeEulerAngles = hingeEulerAngles;
-        m_HandleSize = handleSize;
-        m_HandleScale = handleScale;
-        m_HandlePoint = handlePoint;
+        m_HingeData = hingeData;
         m_Material = material;
     }
 
-    private Vector3 TransformPointToPosition(TransformPoint transformPoint)
+    public DoorData ShallowCopy()
     {
-        Vector3 position = Position;
+        return this.MemberwiseClone() as DoorData;
+    }
 
-        switch (transformPoint)
-        {
-            case TransformPoint.Middle:
-                position = Position;
-                break;
-            case TransformPoint.Top:
-                position = Position + (0.5f * Height * Vector3.up);
-                break;
-            case TransformPoint.Bottom:
-                position = Position - (0.5f * Height * Vector3.up);
-                break;
-            case TransformPoint.Left:
-                position = Position - (0.5f * Width * m_Right);
-                break;
-            case TransformPoint.Right:
-                position = Position + (0.5f * Width * m_Right);
-                break;
-        }
+    public DoorData DeepCopy()
+    {
+        DoorData clone = ShallowCopy();
 
-        return position;
+        clone.Polygon = new PolygonData(clone.Polygon);
+        clone.SetHoles(GetHoles());
+        clone.HingeData = new TransformData(HingeData);
+
+        return clone;
     }
 }

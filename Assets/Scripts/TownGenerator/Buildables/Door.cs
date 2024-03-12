@@ -28,11 +28,13 @@ public class Door : Polygon3D
         base.Build();
 
         // Scale
-        m_ProBuilderMesh.transform.localScale = Vector3.one * m_Data.Scale;
+        m_ProBuilderMesh.transform.localScale = m_Data.HingeData.Scale;
         m_ProBuilderMesh.LocaliseVertices();
+
         // Rotate
-        m_ProBuilderMesh.transform.localEulerAngles = m_Data.HingeEulerAngles;
-        m_ProBuilderMesh.LocaliseVertices(m_Data.HingePosition + m_Data.HingeOffset);
+        m_ProBuilderMesh.transform.localEulerAngles = m_Data.HingeData.EulerAngle;
+        m_Data.HingeData.AbsolutePosition = m_Data.CalculateRelativePosition(m_Data.HingeData.RelativePosition);
+        m_ProBuilderMesh.LocaliseVertices(m_Data.HingeData.AbsolutePosition + m_Data.HingeData.PositionOffset);
         m_ProBuilderMesh.Refresh();
 
         if (!m_Data.ActiveElements.IsElementActive(DoorElement.Handle))

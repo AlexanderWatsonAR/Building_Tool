@@ -57,9 +57,9 @@ public class WallSectionData : Polygon3DData
         m_Extension = new ExtensionData();
     }
 
-    public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float height, float width, float depth, Vector3 normal, Vector3 position,
+    public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float height, float width, float depth, Vector3 normal, Vector3 up, Vector3 position,
         WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData,
-        WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) :base(polygon, holes, normal, height, width, depth, position)
+        WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) :base(polygon, holes, normal, up, height, width, depth, position)
     {
         m_WallElement = wallElement;
         m_ID = id;
@@ -83,6 +83,7 @@ public class WallSectionData : Polygon3DData
         data.Width,
         data.Depth,
         data.Normal,
+        data.Up,
         data.Position,
         data.WindowOpening,
         data.Doorway,

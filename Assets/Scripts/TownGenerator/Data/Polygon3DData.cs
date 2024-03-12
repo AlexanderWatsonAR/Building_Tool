@@ -9,7 +9,7 @@ public class Polygon3DData : IData
 {
     [SerializeField] PolygonData m_Polygon;
     [SerializeField] PolygonData[] m_Holes;
-    [SerializeField] Vector3 m_Normal;
+    [SerializeField] Vector3 m_Normal, m_Up;
     [SerializeField, Range(0, 0.999f)] float m_Depth;
 
     [SerializeField] float m_Height, m_Width;
@@ -18,17 +18,19 @@ public class Polygon3DData : IData
     public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; } }
     public PolygonData[] Holes { get { return m_Holes; } set { m_Holes = value; } }
     public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
+    public Vector3 Up { get { return m_Up; } set { m_Up = value; } }
+    public Vector3 Right { get { return Vector3.Cross(m_Up, m_Normal); } }
     public float Height { get { return m_Height; } set { m_Height = value; } }
     public float Width { get { return m_Width; } set { m_Width = value; } }
     public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
 
-    public Polygon3DData() : this(null, null, Vector3.forward, 0, 0, 0.1f, Vector3.zero)
+    public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0, 0, 0.1f, Vector3.zero)
     {
 
     }
 
-    public Polygon3DData(PolygonData polygon, PolygonData[] holes, Vector3 normal, float height, float width, float depth, Vector3 position)
+    public Polygon3DData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float height, float width, float depth, Vector3 position)
     {
         m_Polygon = polygon;
         m_Holes = holes;

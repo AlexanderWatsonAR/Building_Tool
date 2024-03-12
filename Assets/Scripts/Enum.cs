@@ -40,7 +40,7 @@ public enum Axis
     Z, MinusZ, X, MinusX, Y, MinusY
 }
 
-public enum TransformPoint
+public enum RelativePosition
 {
     Middle, Top, Bottom, Left, Right
 }

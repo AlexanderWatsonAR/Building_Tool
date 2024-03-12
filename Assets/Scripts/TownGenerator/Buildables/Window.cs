@@ -6,6 +6,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
@@ -13,8 +14,6 @@ public class Window : MonoBehaviour, IBuildable
 {
     [SerializeReference] WindowData m_Data;
 
-    // Changes to the outer frame scale affect the inner frame, pane & doors.
-    // It may wise to disable the scale in its prop drawer.
     [SerializeField] Frame m_OuterFrame;
     [SerializeField] GridFrame m_InnerFrame;
     [SerializeField] Pane m_Pane;
@@ -65,6 +64,7 @@ public class Window : MonoBehaviour, IBuildable
         Door leftShutter = leftShutterMesh.AddComponent<Door>();
         DoorData data = m_Data.LeftShutter;
         data.Polygon.ControlPoints = controlPoints;
+        data.Polygon.Normal = m_Data.Polygon.Normal;
         leftShutter.Initialize(data);
         return leftShutter;
     }
@@ -76,6 +76,7 @@ public class Window : MonoBehaviour, IBuildable
         Door rightShutter = rightShutterMesh.AddComponent<Door>();
         DoorData data = m_Data.RightShutter;
         data.Polygon.ControlPoints = controlPoints;
+        data.Polygon.Normal = m_Data.Polygon.Normal;
         rightShutter.Initialize(data);
         return rightShutter;
     }
@@ -106,7 +107,6 @@ public class Window : MonoBehaviour, IBuildable
     #endregion
 
     #region Build
-
     public void Rebuild()
     {
         transform.DeleteChildren();
@@ -116,7 +116,6 @@ public class Window : MonoBehaviour, IBuildable
         RebuildPane();
         RebuildShutters();
     }
-
     public void RebuildOuterFrame()
     {
         if(m_OuterFrame != null)
@@ -193,7 +192,15 @@ public class Window : MonoBehaviour, IBuildable
 
             float height = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Height : m_OuterFrame.Data.Height;
             float width = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Width : m_OuterFrame.Data.Width;
+            float depth = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Depth : m_OuterFrame.Data.Depth;
             Vector3 position = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Position : m_OuterFrame.Data.Position;
+
+            for(int i = 0; i < points.Length; i++)
+            {
+                points[i] += m_Data.Polygon.Normal * depth;
+            }
+
+            position += m_Data.Polygon.Normal * depth;
 
             shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_Data.Polygon.Normal);
 
