@@ -13,9 +13,8 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
     IBuildable m_Buildable;
 
     [SerializeField] Polygon3DData m_PreviousData;
-    [SerializeField] Polygon3DData m_CurrentData;
 
-    Polygon3DDataSerializedProperties m_Polygon3DProps;
+    Polygon3DDataSerializedProperties m_Props;
     VisualElement m_Root;
     PropertyField m_Depth;
 
@@ -23,8 +22,8 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
     {
         Initialize(data);
         m_Root.name = nameof(FrameData) + "_Root";
-        m_CurrentData = data.GetUnderlyingValue() as Polygon3DData;
-        m_PreviousData = new Polygon3DData(m_CurrentData);
+        Polygon3DData currentData = data.GetUnderlyingValue() as Polygon3DData;
+        m_PreviousData = currentData.Clone() as Polygon3DData;
 
         DefineFields();
         BindFields();
@@ -37,25 +36,27 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
     public void Initialize(SerializedProperty data)
     {
         m_Root = new VisualElement();
-        m_Polygon3DProps = new Polygon3DDataSerializedProperties(data);
+        m_Props = new Polygon3DDataSerializedProperties(data);
         m_Buildable = data.serializedObject.targetObject as IBuildable;
     }
     public void DefineFields()
     {
-        m_Depth = new PropertyField(m_Polygon3DProps.Depth, "Depth");
+        m_Depth = new PropertyField(m_Props.Depth, "Depth");
     }
     public void BindFields()
     {
-        m_Depth.BindProperty(m_Polygon3DProps.Depth);
+        m_Depth.BindProperty(m_Props.Depth);
     }
     public void RegisterValueChangeCallbacks()
     {
         m_Depth.RegisterValueChangeCallback(evt =>
         {
-            if (m_CurrentData.Depth == m_PreviousData.Depth)
+            float depth = evt.changedProperty.floatValue;
+
+            if (depth == m_PreviousData.Depth)
                 return;
 
-            m_PreviousData.Depth = m_CurrentData.Depth;
+            m_PreviousData.Depth = depth;
 
             Build();
         });

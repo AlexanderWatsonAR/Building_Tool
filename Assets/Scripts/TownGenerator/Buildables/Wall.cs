@@ -67,7 +67,7 @@ public class Wall : MonoBehaviour, IBuildable
             Normal = m_Data.Normal
             
         };
-        Polygon3DData pane = new Polygon3DData()
+        PaneData pane = new PaneData()
         {
             Depth = m_Data.Depth * 0.25f,
             Normal = m_Data.Normal

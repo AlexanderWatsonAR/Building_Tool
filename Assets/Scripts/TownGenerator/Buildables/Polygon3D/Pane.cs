@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Pane : Polygon3D
 {
-    [SerializeReference] Polygon3DData m_Data;
+    [SerializeReference] PaneData m_Data;
 
-    public Polygon3DData Data => m_Data;
+    public PaneData Data => m_Data;
 
     public override IBuildable Initialize(IData data)
     {
-        m_Data = data as Polygon3DData;
+        m_Data = data as PaneData;
         return base.Initialize(data);
     }
 

@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 public abstract class DataEditor : Editor
 {
     protected SerializedProperty m_Data;
+    protected IBuildable m_Buildable;
 
     public override VisualElement CreateInspectorGUI()
     {
@@ -16,6 +17,7 @@ public abstract class DataEditor : Editor
         serializedObject.Update();
 
         m_Data = serializedObject.FindProperty("m_Data");
+        m_Buildable = target as IBuildable;
 
         PropertyField dataField = new PropertyField(m_Data);
         dataField.BindProperty(m_Data);
@@ -25,19 +27,23 @@ public abstract class DataEditor : Editor
         return root;
     }
 
-    //private void OnEnable()
-    //{
-    //    EditorApplication.update = Build;
-    //}
+    private void OnEnable()
+    {
+        EditorApplication.update = Build;
+    }
 
-    //private void OnDisable()
-    //{
-    //    EditorApplication.update = null;
-    //}
+    private void OnDisable()
+    {
+        EditorApplication.update = null;
+    }
 
-    //private void Build()
-    //{
-    //    Debug.Log("Build");
-    //}
+    private void Build()
+    {
+        Debug.Log(GUIUtility.hotControl);
+
+
+
+        //m_Buildable.Build();
+    }
 
 }
