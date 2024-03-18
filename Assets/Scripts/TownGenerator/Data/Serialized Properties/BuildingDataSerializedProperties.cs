@@ -28,7 +28,7 @@ public class BuildingDataSerializedProperties : SerializedPropertyGroup
 
         for(int i = 0; i < storeys.arraySize; i++)
         {
-            m_Storeys[i] = new StoreyDataSerializedProperties(storeys.GetArrayElementAtIndex(i));
+            m_Storeys.Add(new StoreyDataSerializedProperties(storeys.GetArrayElementAtIndex(i)));
         }
     }
 }

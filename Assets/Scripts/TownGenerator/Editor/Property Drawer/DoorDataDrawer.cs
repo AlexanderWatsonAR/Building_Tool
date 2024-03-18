@@ -23,7 +23,7 @@ public class DoorDataDrawer : PropertyDrawer
 
         DoorData current = data.GetUnderlyingValue() as DoorData;
 
-        m_PreviousData = current.DeepCopy();
+        m_PreviousData = current.Clone() as DoorData;
 
         var hingeData = props.HingeData;
 

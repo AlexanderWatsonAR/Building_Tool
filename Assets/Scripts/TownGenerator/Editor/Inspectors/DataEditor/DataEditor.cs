@@ -24,4 +24,20 @@ public abstract class DataEditor : Editor
 
         return root;
     }
+
+    //private void OnEnable()
+    //{
+    //    EditorApplication.update = Build;
+    //}
+
+    //private void OnDisable()
+    //{
+    //    EditorApplication.update = null;
+    //}
+
+    //private void Build()
+    //{
+    //    Debug.Log("Build");
+    //}
+
 }

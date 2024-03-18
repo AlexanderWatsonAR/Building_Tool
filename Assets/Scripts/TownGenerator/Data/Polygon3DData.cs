@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,7 +6,7 @@ using TMPro;
 using UnityEngine;
 
 [System.Serializable]
-public class Polygon3DData : IData
+public class Polygon3DData : IData, ICloneable
 {
     [SerializeField] PolygonData m_Polygon;
     [SerializeField] PolygonData[] m_Holes;
@@ -94,6 +95,14 @@ public class Polygon3DData : IData
     public override int GetHashCode()
     {
         return base.GetHashCode();
+    }
+
+    public object Clone()
+    {
+        Polygon3DData copy = MemberwiseClone() as Polygon3DData;
+        copy.Polygon = new PolygonData(copy.Polygon);
+        copy.SetHoles(GetHoles());
+        return copy;
     }
 
 }

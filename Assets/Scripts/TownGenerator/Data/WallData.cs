@@ -21,7 +21,6 @@ public class WallData : IData
     [SerializeField] WallSectionData[] m_Sections; // Sections doesn't seem to be serialized properly (when it was a 2D array)
     #endregion
 
-
     #region Accessors
     public WallSectionData SectionData { get{ return m_SectionData; } set { m_SectionData = value; } }
     public int ID { get { return m_ID; } set { m_ID = value; } }

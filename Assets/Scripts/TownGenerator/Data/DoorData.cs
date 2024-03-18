@@ -68,19 +68,10 @@ public class DoorData : Polygon3DData
         m_Material = material;
     }
 
-    public DoorData ShallowCopy()
+    public new object Clone()
     {
-        return this.MemberwiseClone() as DoorData;
-    }
-
-    public DoorData DeepCopy()
-    {
-        DoorData clone = ShallowCopy();
-
-        clone.Polygon = new PolygonData(clone.Polygon);
-        clone.SetHoles(GetHoles());
-        clone.HingeData = new TransformData(HingeData);
-
-        return clone;
+        DoorData copy = base.Clone() as DoorData;
+        copy.HingeData = new TransformData(HingeData);
+        return copy;
     }
 }

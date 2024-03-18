@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 [System.Serializable]
-public class ArchwayData : DoorwayData
+public class ArchwayData : DoorwayData, ICloneable
 {
     // Maybe add an animation curve?
     [SerializeField, Range(0, 1)] private float m_ArchHeight;
@@ -29,5 +30,14 @@ public class ArchwayData : DoorwayData
 
     public ArchwayData(ArchwayData data) : this(data.Height, data.Width, data.Columns, data.Rows, data.PositionOffset, data.ActiveElements, data.Frames, data.Doors, data.m_ArchHeight, data.m_ArchSides)
     {
+    }
+
+    public new object Clone()
+    {
+        ArchwayData copy = base.Clone() as ArchwayData;
+        copy.ArchHeight = m_ArchHeight;
+        copy.ArchSides = m_ArchSides;
+        
+        return copy;
     }
 }
