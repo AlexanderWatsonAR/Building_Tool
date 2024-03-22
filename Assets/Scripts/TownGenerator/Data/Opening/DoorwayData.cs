@@ -48,19 +48,23 @@ public class DoorwayData : OpeningData, ICloneable
     /// Returns a deep copy.
     /// </summary>
     /// <returns></returns>
-    public object Clone()
+    public new object Clone()
     {
-        DoorwayData copy = MemberwiseClone() as DoorwayData;
-        copy.Doors = new DoorData[m_Doors.Length];
-        copy.Frames = new FrameData[m_Frames.Length];
+        DoorwayData clone = MemberwiseClone() as DoorwayData;
+
+        if (this.Doors == null && this.Frames == null)
+            return clone;
+
+        clone.Doors = new DoorData[m_Doors.Length];
+        clone.Frames = new FrameData[m_Frames.Length];
 
         for (int i = 0; i < m_Doors.Length; i++)
         {
-            copy.Doors[i] = m_Doors[i].Clone() as DoorData;
-            copy.Frames[i] = m_Frames[i].Clone() as FrameData;
+            clone.Doors[i] = m_Doors[i].Clone() as DoorData;
+            clone.Frames[i] = m_Frames[i].Clone() as FrameData;
         }
 
-        return copy;
+        return clone;
     }
 
 }

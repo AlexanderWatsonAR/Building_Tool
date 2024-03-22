@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Unity.VisualScripting;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 [CustomPropertyDrawer(typeof(DoorwayData))]
 public class DoorwayDataDrawer : PropertyDrawer, IFieldInitializer
@@ -25,7 +26,7 @@ public class DoorwayDataDrawer : PropertyDrawer, IFieldInitializer
         Initialize(data);
         DefineFields();
         BindFields();
-        //RegisterValueChangeCallbacks();
+        RegisterValueChangeCallbacks();
         AddFieldsToRoot();
 
         return m_Root;
@@ -72,6 +73,51 @@ public class DoorwayDataDrawer : PropertyDrawer, IFieldInitializer
 
     public void RegisterValueChangeCallbacks()
     {
-        throw new System.NotImplementedException();
+        m_Columns.RegisterValueChangeCallback(evt =>
+        {
+            int columns = evt.changedProperty.intValue;
+
+            if (columns == m_PreviousData.Columns)
+                return;
+
+            m_PreviousData.Columns = columns;
+        });
+        m_Rows.RegisterValueChangeCallback(evt =>
+        {
+            int rows = evt.changedProperty.intValue;
+
+            if (rows == m_PreviousData.Rows)
+                return;
+
+            m_PreviousData.Rows = rows;
+        });
+        m_PositionOffset.RegisterValueChangeCallback(evt =>
+        {
+            float offset = evt.changedProperty.floatValue;
+
+            if (offset == m_PreviousData.PositionOffset)
+                return;
+
+            m_PreviousData.PositionOffset = offset;
+        });
+        m_Height.RegisterValueChangeCallback(evt =>
+        {
+            float height = evt.changedProperty.floatValue;
+
+            if (height == m_PreviousData.Height)
+                return;
+
+            m_PreviousData.Height = height;
+
+        });
+        m_Width.RegisterValueChangeCallback(evt =>
+        {
+            float width = evt.changedProperty.floatValue;
+
+            if (width == m_PreviousData.Width)
+                return;
+
+            m_PreviousData.Width = width;
+        });
     }
 }

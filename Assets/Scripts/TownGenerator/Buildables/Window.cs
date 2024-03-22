@@ -107,6 +107,8 @@ public class Window : MonoBehaviour, IBuildable
     #endregion
 
     #region Build
+
+    #region Rebuild
     public void Rebuild()
     {
         transform.DeleteChildren();
@@ -156,36 +158,36 @@ public class Window : MonoBehaviour, IBuildable
 
         BuildShutters();
     }
+    #endregion
+
     public void BuildOuterFrame()
     {
-        if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.DoesOuterFrameNeedRebuild))
+        if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.OuterFrame.IsDirty))
         {
             m_OuterFrame = m_OuterFrame != null ? m_OuterFrame : CreateOuterFrame();
             m_OuterFrame.Build();
-            m_Data.DoesOuterFrameNeedRebuild = false;
+            m_OuterFrame.Data.IsDirty = false;
         }
     }
     public void BuildInnerFrame()
     {
-        if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_Data.DoesInnerFrameNeedRebuild))
+        if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_Data.InnerFrame.IsDirty))
         {
             m_InnerFrame = m_InnerFrame != null ? m_InnerFrame : CreateInnerFrame();
             m_InnerFrame.Build();
-            m_Data.DoesInnerFrameNeedRebuild = false;
         }
     }
     public void BuildPane()
     {
-        if (m_Data.IsPaneActive && (m_Pane == null || m_Data.DoesPaneNeedRebuild))
+        if (m_Data.IsPaneActive && (m_Pane == null || m_Data.Pane.IsDirty))
         {
             m_Pane = m_Pane != null ? m_Pane : CreatePane();
             m_Pane.Build();
-            m_Data.DoesPaneNeedRebuild = false;
         }
     }
     public void BuildShutters()
     {
-        if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.DoShuttersNeedRebuild))
+        if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.LeftShutter.IsDirty || m_Data.RightShutter.IsDirty))
         {
             IList<IList<Vector3>> shutterControlPoints;
             Vector3[] points = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
@@ -210,7 +212,6 @@ public class Window : MonoBehaviour, IBuildable
             m_RightShutter = m_RightShutter != null ? m_RightShutter : CreateRightShutter(shutterControlPoints[0].ToArray());
             m_RightShutter.Build();
 
-            m_Data.DoShuttersNeedRebuild = false;
         }
     }
     public void Build()

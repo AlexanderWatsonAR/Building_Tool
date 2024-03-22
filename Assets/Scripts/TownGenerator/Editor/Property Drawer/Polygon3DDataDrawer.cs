@@ -7,11 +7,12 @@ using UnityEditor.UIElements;
 using Unity.VisualScripting;
 using UnityEditor.Build.Reporting;
 
-[CustomPropertyDrawer(typeof(Polygon3DData))]
+[CustomPropertyDrawer(typeof(Polygon3DData), true)]
 public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
 {
     IBuildable m_Buildable;
 
+    [SerializeField] Polygon3DData m_CurrentData;
     [SerializeField] Polygon3DData m_PreviousData;
 
     Polygon3DDataSerializedProperties m_Props;
@@ -22,8 +23,8 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
     {
         Initialize(data);
         m_Root.name = nameof(FrameData) + "_Root";
-        Polygon3DData currentData = data.GetUnderlyingValue() as Polygon3DData;
-        m_PreviousData = currentData.Clone() as Polygon3DData;
+        m_CurrentData = data.GetUnderlyingValue() as Polygon3DData;
+        m_PreviousData = m_CurrentData.Clone() as Polygon3DData;
 
         DefineFields();
         BindFields();
@@ -58,35 +59,11 @@ public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
 
             m_PreviousData.Depth = depth;
 
-            Build();
+            m_CurrentData.IsDirty = true;
         });
     }
     public void AddFieldsToRoot()
     {
         m_Root.Add(m_Depth);
     }
-    public void Build()
-    {
-        switch(m_Buildable)
-        {
-            case Pane:
-                m_Buildable.Build();
-            break;
-            case Window:
-                Window window = m_Buildable as Window;
-                window.Data.DoesPaneNeedRebuild = true;
-                window.BuildPane();
-            break;
-            case WallSection:
-                WallSection section = m_Buildable as WallSection;
-                switch(section.Data.WallElement)
-                {
-                    case WallElement.Window:
-                        section.BuildWindows(false, false, true);
-                    break;
-                }
-            break;
-        }
-    }
-
 }

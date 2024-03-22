@@ -1,10 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class WindowData : IData
+public class WindowData : IData, ICloneable
 {
     [SerializeField] int m_ID;
     [SerializeField] PolygonData m_Polygon;
@@ -12,30 +14,24 @@ public class WindowData : IData
 
     #region Outer Frame
     [SerializeField] FrameData m_OuterFrame;
-    [SerializeField] bool m_DoesOuterFrameNeedRebuild;
 
     public FrameData OuterFrame { get { return m_OuterFrame; } set { m_OuterFrame = value; } }
     public bool IsOuterFrameActive => m_ActiveElements.IsElementActive(WindowElement.OuterFrame);
-    public bool DoesOuterFrameNeedRebuild { get { return m_DoesOuterFrameNeedRebuild; } set { m_DoesOuterFrameNeedRebuild = value; } }
     #endregion
 
     #region Inner Frame
     [SerializeField] GridFrameData m_InnerFrame;
     [SerializeField] Material m_InnerFrameMaterial;
-    [SerializeField] bool m_DoesInnerFrameNeedRebuild;
 
     public GridFrameData InnerFrame { get { return m_InnerFrame; } set { m_InnerFrame = value; } }
     public bool IsInnerFrameActive => m_ActiveElements.IsElementActive(WindowElement.InnerFrame);
-    public bool DoesInnerFrameNeedRebuild { get { return m_DoesInnerFrameNeedRebuild; } set { m_DoesInnerFrameNeedRebuild = value; } }
     #endregion
 
     #region Pane
     [SerializeField] PaneData m_Pane;
-    [SerializeField] bool m_DoesPaneNeedRebuild;
 
     public PaneData Pane {get { return m_Pane; } set { m_Pane = value; } }
     public bool IsPaneActive => m_ActiveElements.IsElementActive(WindowElement.Pane);
-    public bool DoesPaneNeedRebuild { get { return m_DoesPaneNeedRebuild; } set { m_DoesPaneNeedRebuild = value; } }
     #endregion
 
     #region Shutters
@@ -45,10 +41,7 @@ public class WindowData : IData
     public DoorData LeftShutter { get { return m_LeftShutter; } set { m_LeftShutter = value; } }
     public DoorData RightShutter { get { return m_RightShutter; } set { m_RightShutter = value; } }
 
-    [SerializeField] bool m_DoShuttersNeedRebuild;
-
     public bool AreShuttersActive => m_ActiveElements.IsElementActive(WindowElement.Shutters);
-    public bool DoShuttersNeedRebuild { get { return m_DoShuttersNeedRebuild; } set { m_DoShuttersNeedRebuild = value; } }
     #endregion
 
     #region Accessors
@@ -77,12 +70,12 @@ public class WindowData : IData
     public WindowData(WindowElement activeElements, PolygonData opening, FrameData outerFrame, GridFrameData innerFrame, PaneData paneData, DoorData leftShutter, DoorData rightShutter)
     {
         m_ActiveElements = activeElements;
-        m_Polygon =  new PolygonData(opening);
-        m_OuterFrame = new FrameData(outerFrame);
-        m_InnerFrame = new GridFrameData(innerFrame);
-        m_Pane = new PaneData(paneData);
-        m_LeftShutter = new DoorData(leftShutter);
-        m_RightShutter = new DoorData(rightShutter);
+        m_Polygon =  opening;
+        m_OuterFrame = outerFrame;
+        m_InnerFrame = innerFrame;
+        m_Pane = paneData;
+        m_LeftShutter = leftShutter;
+        m_RightShutter = rightShutter;
     }
 
     public override bool Equals(object obj)
@@ -106,5 +99,17 @@ public class WindowData : IData
     public override int GetHashCode()
     {
         return base.GetHashCode();
+    }
+
+    public object Clone()
+    {
+        WindowData clone = this.MemberwiseClone() as WindowData;
+        clone.Polygon = this.Polygon.Clone() as PolygonData;
+        clone.OuterFrame = this.OuterFrame.Clone() as FrameData;
+        clone.InnerFrame = this.InnerFrame.Clone() as GridFrameData;
+        clone.Pane = this.Pane.Clone() as PaneData;
+        clone.LeftShutter = this.LeftShutter.Clone() as DoorData;
+        clone.RightShutter = this.RightShutter.Clone() as DoorData;
+        return clone;
     }
 }

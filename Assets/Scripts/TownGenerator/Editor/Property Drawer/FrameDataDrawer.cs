@@ -61,8 +61,6 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Scale = scale;
-
-            Build();
         });
         m_Depth.RegisterValueChangeCallback(evt =>
         {
@@ -72,8 +70,6 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Depth = depth;
-
-            Build();
         });
     }
 
@@ -81,30 +77,6 @@ public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Root.Add(m_Scale);
         m_Root.Add(m_Depth);
-    }
-
-    private void Build()
-    {
-        switch(m_Buildable)
-        {
-            case Frame:
-                m_Buildable.Build();
-            break;
-            case Window:
-                Window window = m_Buildable as Window;
-                window.Rebuild();
-            break;
-            case WallSection:
-                WallSection wallSection = m_Buildable as WallSection;
-
-                switch(wallSection.Data.WallElement)
-                {
-                    case WallElement.Window:
-                        wallSection.BuildWindows(true, true, true, true);
-                    break;
-                }
-            break;
-        }
     }
 
 }

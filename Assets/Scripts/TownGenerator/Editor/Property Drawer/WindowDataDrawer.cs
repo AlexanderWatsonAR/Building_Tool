@@ -7,43 +7,70 @@ using UnityEditor.UIElements;
 using UnityEditor.Rendering;
 using System.Linq;
 using Unity.VisualScripting;
+using static PlasticPipe.Server.MonitorStats;
 
 [CustomPropertyDrawer(typeof(WindowData))]
-public class WindowDataDrawer : PropertyDrawer
+public class WindowDataDrawer : PropertyDrawer, IFieldInitializer
 {
+    VisualElement m_Root;
+    WindowDataSerializedProperties m_Props;
+    WindowData m_CurrentData;
+
+    Foldout m_OuterFrameFoldout, m_InnerFrameFoldout, m_PaneFoldout, m_ShuttersFoldout;
+    PropertyField m_ActiveElements, m_OuterFrame, m_InnerFrame, m_Pane, m_LeftShutter, m_RightShutter;
+
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
-        VisualElement container = new VisualElement();
+        Initialize(data);
+        m_Root.name = nameof(WindowData) + "_Root";
 
-        WindowDataSerializedProperties props = new WindowDataSerializedProperties(data);
+        DefineFields();
+        BindFields();
+        RegisterValueChangeCallbacks();
+        AddFieldsToRoot();
 
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable;
+        return m_Root;
+    }
 
+    public void Initialize(SerializedProperty data)
+    {
+        m_Root = new VisualElement();
+        m_Props = new WindowDataSerializedProperties(data);
+        m_CurrentData = data.GetUnderlyingValue() as WindowData;
+    }
+    public void DefineFields()
+    {
         #region Fields
-        PropertyField activeElementsField = new PropertyField(props.ActiveElements);
-        Foldout outerFrameFoldout = new Foldout() { text = "Outer Frame" };
-        PropertyField outerFrameField = new PropertyField(props.OuterFrame.Data);
-        Foldout innerFrameFoldout = new Foldout() { text = "Inner Frame" };
-        PropertyField innerFrameField = new PropertyField(props.InnerFrame.Data);
-        Foldout paneFoldout = new Foldout() { text = "Pane" };
-        PropertyField paneField = new PropertyField(props.Data);
-        Foldout shuttersFoldout = new Foldout() { text = "Shutters" };
+        m_ActiveElements = new PropertyField(m_Props.ActiveElements);
+        m_OuterFrameFoldout = new Foldout() { text = "Outer Frame" };
+        m_OuterFrame = new PropertyField(m_Props.OuterFrame.Data);
+        m_InnerFrameFoldout = new Foldout() { text = "Inner Frame" };
+        m_InnerFrame = new PropertyField(m_Props.InnerFrame.Data);
+        m_PaneFoldout = new Foldout() { text = "Pane" };
+        m_Pane = new PropertyField(m_Props.Data);
+        m_ShuttersFoldout = new Foldout() { text = "Shutters" };
         // How did this look before?
-        PropertyField leftShutter = new PropertyField(props.LeftShutter.Data);
-        PropertyField rightShutter = new PropertyField(props.RightShutter.Data);
+        m_LeftShutter = new PropertyField(m_Props.LeftShutter.Data);
+        m_RightShutter = new PropertyField(m_Props.RightShutter.Data);
         #endregion
+    }
 
+    public void BindFields()
+    {
         #region Bind
-        activeElementsField.BindProperty(props.ActiveElements);
-        outerFrameField.BindProperty(props.OuterFrame.Data);
-        innerFrameField.BindProperty(props.InnerFrame.Data);
-        paneField.BindProperty(props.Pane.Data);
-        leftShutter.BindProperty(props.LeftShutter.Data);
-        rightShutter.BindProperty(props.RightShutter.Data);
+        m_ActiveElements.BindProperty(m_Props.ActiveElements);
+        m_OuterFrame.BindProperty(m_Props.OuterFrame.Data);
+        m_InnerFrame.BindProperty(m_Props.InnerFrame.Data);
+        m_Pane.BindProperty(m_Props.Pane.Data);
+        m_LeftShutter.BindProperty(m_Props.LeftShutter.Data);
+        m_RightShutter.BindProperty(m_Props.RightShutter.Data);
         #endregion
+    }
 
+    public void RegisterValueChangeCallbacks()
+    {
         #region Register Value Change Callback
-        activeElementsField.RegisterValueChangeCallback(evt => 
+        m_ActiveElements.RegisterValueChangeCallback(evt =>
         {
             WindowElement currentlyActive = evt.changedProperty.GetEnumValue<WindowElement>();
 
@@ -52,153 +79,27 @@ public class WindowDataDrawer : PropertyDrawer
             bool isPaneActive = currentlyActive.IsElementActive(WindowElement.Pane);
             bool areShuttersActive = currentlyActive.IsElementActive(WindowElement.Shutters);
 
-            outerFrameFoldout.SetEnabled(isOuterFrameActive);
-            innerFrameFoldout.SetEnabled(isInnerFrameActive);
-            paneFoldout.SetEnabled(isPaneActive);
-            shuttersFoldout.SetEnabled(areShuttersActive);
-
-            WindowData[] windows = GetDataFromBuildable(buildable);
-
-            bool rebuild = false;
-
-            foreach (WindowData win in windows)
-            {
-                bool wasOuterFrameActive = win.IsOuterFrameActive;
-                bool wasInnerFrameActive = win.IsInnerFrameActive;
-                bool wasPaneActive = win.IsPaneActive;
-                bool wereShuttersActive = win.AreShuttersActive;
-
-                if (isOuterFrameActive == true && wasOuterFrameActive == false)
-                {
-                    win.DoesOuterFrameNeedRebuild = true;
-                    rebuild = true;
-                }
-                    
-                if (isInnerFrameActive == true && wasInnerFrameActive == false)
-                {
-                    win.DoesInnerFrameNeedRebuild = true;
-                    rebuild = true;
-                }
-                    
-                if (isPaneActive == true && wasPaneActive == false)
-                {
-                    win.DoesPaneNeedRebuild = true;
-                    rebuild = true;
-                }
-                    
-                if (areShuttersActive == true && wereShuttersActive == false)
-                {
-                    win.DoShuttersNeedRebuild = true;
-                    rebuild = true;
-                }
-
-                if(buildable is not Window)
-                    win.ActiveElements = currentlyActive;
-            }
-
-            Demolish(buildable);
-
-            if (rebuild)
-            {
-                Build(buildable);
-            }
+            m_OuterFrameFoldout.SetEnabled(isOuterFrameActive);
+            m_InnerFrameFoldout.SetEnabled(isInnerFrameActive);
+            m_PaneFoldout.SetEnabled(isPaneActive);
+            m_ShuttersFoldout.SetEnabled(areShuttersActive);
         });
         #endregion
+    }
 
+    public void AddFieldsToRoot()
+    {
         #region Add Fields to Container
-        outerFrameFoldout.Add(outerFrameField);
-        innerFrameFoldout.Add(innerFrameField);
-        paneFoldout.Add(paneField);
-        shuttersFoldout.Add(leftShutter);
-        shuttersFoldout.Add(rightShutter);
-        container.Add(activeElementsField);
-        container.Add(outerFrameFoldout);
-        container.Add(innerFrameFoldout);
-        container.Add(paneFoldout);
-        container.Add(shuttersFoldout);
+        m_OuterFrameFoldout.Add(m_OuterFrame);
+        m_InnerFrameFoldout.Add(m_InnerFrame);
+        m_PaneFoldout.Add(m_Pane);
+        m_ShuttersFoldout.Add(m_LeftShutter);
+        m_ShuttersFoldout.Add(m_RightShutter);
+        m_Root.Add(m_ActiveElements);
+        m_Root.Add(m_OuterFrameFoldout);
+        m_Root.Add(m_InnerFrameFoldout);
+        m_Root.Add(m_PaneFoldout);
+        m_Root.Add(m_ShuttersFoldout);
         #endregion
-
-        return container;
-    }
-    /// <summary>
-    /// Window data could be attached to different buildable objects.
-    /// In some instances, we want to apply window data changes to multiple other
-    /// data elements that are contained in those buildable objects.
-    /// </summary>
-    /// <param name="buildable"></param>
-    /// <returns></returns>
-    private WindowData[] GetDataFromBuildable(IBuildable buildable)
-    {
-        WindowData[] dataset = new WindowData[0];
-
-        switch (buildable)
-        {
-            case Wall:
-                {
-                    // TODO: instead of the first section index, get the one currently selected in the wall inspector.
-                    Wall wall = buildable as Wall;
-                    dataset = wall.Data.Sections[0].WindowOpening.Windows;
-                }
-                break;
-            case WallSection:
-                {
-                    WallSection wallSection = buildable as WallSection;
-                    dataset = wallSection.Data.WindowOpening.Windows;
-                }
-                break;
-            case Window:
-                {
-                    Window window = buildable as Window;
-                    dataset = new WindowData[] { window.Data };
-                }
-                break;
-        }
-
-        return dataset;
-    }
-
-    private void Build(IBuildable buildable)
-    {
-        switch(buildable)
-        {
-            case Wall:
-                // TODO the the wall section that is selected in the inspector & do the section build case.
-                break;
-            case WallSection:
-                {
-                    WallSection section = buildable as WallSection;
-                    section.BuildChildren();
-                }
-                break;
-            case Window:
-                buildable.Build();
-                break;
-        }
-    }
-
-    private void Demolish(IBuildable buildable)
-    {
-        switch (buildable)
-        {
-            case Wall:
-                // TODO the the wall section that is selected in the inspector & do the section demolish case.
-                break;
-            case WallSection:
-                {
-                    WallSection section = buildable as WallSection;
-
-                    for (int i = 0; i < section.transform.childCount; i++)
-                    {
-                        if (section.transform.GetChild(i).TryGetComponent(out Window window))
-                        {
-                            window.Demolish();
-                        }
-                    }
-                }
-                break;
-            case Window:
-                buildable.Demolish();
-                break;
-        }
     }
 }

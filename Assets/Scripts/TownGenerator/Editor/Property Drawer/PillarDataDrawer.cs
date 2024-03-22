@@ -62,8 +62,6 @@ public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Height = height;
-
-            Build();
         });
         m_Depth.RegisterValueChangeCallback(evt =>
         {
@@ -73,8 +71,6 @@ public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Depth = depth;
-
-            Build();
         });
         m_Width.RegisterValueChangeCallback(evt =>
         {
@@ -84,8 +80,6 @@ public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Width = width;
-
-            Build();
         });
         m_Sides.RegisterValueChangeCallback(evt =>
         {
@@ -95,8 +89,6 @@ public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Sides = sides;
-
-            Build();
         });
         m_IsSmooth.RegisterValueChangeCallback(evt =>
         {
@@ -106,8 +98,6 @@ public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.IsSmooth = isSmooth;
-
-            Build();
         });
     }
 
@@ -118,31 +108,6 @@ public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
         m_Root.Add(m_Depth);
         m_Root.Add(m_Sides);
         m_Root.Add(m_IsSmooth);
-    }
-
-    public PillarData[] GetPillarDataFromBuildable()
-    {
-        PillarData[] data = null;
-
-        switch(m_Buildable)
-        {
-            case Pillar:
-                data = new PillarData[1];
-                data[0] = m_Props.Data.GetUnderlyingValue() as PillarData;
-                break;
-        }
-
-        return data;
-    }
-
-    public void Build()
-    {
-        switch(m_Buildable)
-        {
-            case Pillar:
-                m_Buildable.Build();
-                break;
-        }
     }
 
 }

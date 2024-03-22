@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public abstract class OpeningData
+public abstract class OpeningData : ICloneable
 {
     [SerializeField, Range(0, 0.999f)] protected float m_Height, m_Width;
     [SerializeField, Range(1, 5)] protected int m_Columns, m_Rows;
@@ -28,6 +29,11 @@ public abstract class OpeningData
     public OpeningData(OpeningData data) : this(data.Height, data.Width, data.Columns, data.Rows)
     {
 
+    }
+
+    public object Clone()
+    {
+        return MemberwiseClone();
     }
 
 }

@@ -40,9 +40,13 @@ public abstract class Polygon3D : MonoBehaviour, IBuildable
 
     public virtual void Build()
     {
+        if (!m_Poly3DData.IsDirty)
+            return;
+
         IList<IList<Vector3>> holePoints = m_Poly3DData.GetHoles();
         m_ProBuilderMesh.CreateShapeFromPolygon(m_Poly3DData.Polygon.ControlPoints, m_Poly3DData.Polygon.Normal, holePoints);
         m_ProBuilderMesh.Solidify(m_Poly3DData.Depth);
+        m_Poly3DData.IsDirty = false;
     }
 
     public virtual void Demolish()

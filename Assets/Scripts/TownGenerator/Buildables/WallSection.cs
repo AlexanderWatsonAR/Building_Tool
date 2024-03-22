@@ -60,10 +60,6 @@ public class WallSection : Polygon3D
 
         foreach(Window window in m_Windows)
         {
-            window.Data.DoesOuterFrameNeedRebuild = rebuildOuterFrame;
-            window.Data.DoesInnerFrameNeedRebuild = rebuildInnerFrame;
-            window.Data.DoesPaneNeedRebuild = rebuildPane;
-            window.Data.DoShuttersNeedRebuild = rebuildShutters;
             window.Build();
         }
     }
@@ -242,48 +238,12 @@ public class WallSection : Polygon3D
                 break;
             case WallElement.Window:
                 {
-                    WindowOpeningData windowOpening = m_Data.WindowOpening;
-
-                    int size = windowOpening.Columns * windowOpening.Rows;
-
-                    if(windowOpening.Windows == null || windowOpening.Windows.Length == 0 || windowOpening.Windows.Length != size)
+                    if(m_Data.IsDirty)
                     {
-                        windowOpening.Windows = new WindowData[size];
+                        CreateWindows();
                     }
 
-                    IList<IList<Vector3>> holePoints;
-
-                    // TODO: Stick this if statement into a function to make it more readable.
-
-                    if (windowOpening.Windows[0] == null || windowOpening.Windows[0].Polygon.ControlPoints == null || windowOpening.Windows[0].Polygon.ControlPoints.Length == 0)
-                    {
-                        holePoints = CalculateWindowOpening(m_Data);
-
-                        for (int i = 0; i < size; i++)
-                        {
-                            if(windowOpening.Windows[i] == null || windowOpening.Windows[i].Polygon.ControlPoints == null || windowOpening.Windows[i].Polygon.ControlPoints.Length == 0)
-                            {
-                                windowOpening.Windows[i] = CalculateWindow(i, holePoints[i]);
-                                Window win = CreateWindow(windowOpening.Windows[i]);
-                                m_Windows.Add(win);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        holePoints = new List<IList<Vector3>>();
-                        foreach (WindowData window in windowOpening.Windows)
-                        {
-                            holePoints.Add(window.Polygon.ControlPoints.ToList());
-
-                            Window win = CreateWindow(window);
-                            m_Windows.Add(win);
-                        }
-                    }
-
-                    m_Data.SetHoles(holePoints);
                     base.Build();
-                    
                 }
                 break;
             case WallElement.Extension:
@@ -396,6 +356,47 @@ public class WallSection : Polygon3D
     #endregion
 
     #region Create
+    private void CreateWindows()
+    {
+        WindowOpeningData windowOpening = m_Data.WindowOpening;
+
+        int size = windowOpening.Columns * windowOpening.Rows;
+
+        if (windowOpening.Windows == null || windowOpening.Windows.Length == 0 || windowOpening.Windows.Length != size)
+        {
+            windowOpening.Windows = new WindowData[size];
+        }
+
+        IList<IList<Vector3>> holePoints;
+
+        if (windowOpening.Windows[0] == null || windowOpening.Windows[0].Polygon.ControlPoints == null || windowOpening.Windows[0].Polygon.ControlPoints.Length == 0)
+        {
+            holePoints = CalculateWindowOpening(m_Data);
+
+            for (int i = 0; i < size; i++)
+            {
+                if (windowOpening.Windows[i] == null || windowOpening.Windows[i].Polygon.ControlPoints == null || windowOpening.Windows[i].Polygon.ControlPoints.Length == 0)
+                {
+                    windowOpening.Windows[i] = CalculateWindow(i, holePoints[i]);
+                    Window win = CreateWindow(windowOpening.Windows[i]);
+                    m_Windows.Add(win);
+                }
+            }
+        }
+        else
+        {
+            holePoints = new List<IList<Vector3>>();
+            foreach (WindowData window in windowOpening.Windows)
+            {
+                holePoints.Add(window.Polygon.ControlPoints.ToList());
+
+                Window win = CreateWindow(window);
+                m_Windows.Add(win);
+            }
+        }
+
+        m_Data.SetHoles(holePoints);
+    }
     private Window CreateWindow(WindowData data)
     {
         ProBuilderMesh windowMesh = ProBuilderMesh.Create();

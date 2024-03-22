@@ -12,7 +12,7 @@ using System;
 [CustomPropertyDrawer(typeof(RoofData))]
 public class RoofDataDrawer : PropertyDrawer
 {
-    [SerializeField] private RoofDataSerializedProperties m_Props;
+    [SerializeField] RoofDataSerializedProperties m_Props;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {

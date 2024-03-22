@@ -11,7 +11,7 @@ using System;
 public class Wall : MonoBehaviour, IBuildable
 {
     [SerializeReference] WallData m_Data;
-    private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
+    List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
     private List<Vector3[]> SubPoints
     {
@@ -93,7 +93,6 @@ public class Wall : MonoBehaviour, IBuildable
         };
         return winData;
     }
-
     private DoorData DefineDoorDefaults()
     {
         DoorData doorData = new DoorData()
@@ -106,7 +105,6 @@ public class Wall : MonoBehaviour, IBuildable
         };
         return doorData;
     }
-
     private FrameData DefineFrameDefaults()
     {
         FrameData frameData = new FrameData()
@@ -148,7 +146,8 @@ public class Wall : MonoBehaviour, IBuildable
                     ID = new Vector2Int(x, y),
                     Polygon = new PolygonData(points, m_Data.Normal),
                     Normal = m_Data.Normal,
-                    Depth = m_Data.Depth,                 
+                    Depth = m_Data.Depth,
+                    IsDirty = true
                 };
 
                 m_Data.Sections[count].Polygon.ControlPoints = points;

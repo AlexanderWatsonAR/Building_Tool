@@ -16,6 +16,8 @@ public class Polygon3DData : IData, ICloneable
     [SerializeField] float m_Height, m_Width;
     [SerializeField] Vector3 m_Position;
 
+    [SerializeField] bool m_IsDirty; // data has changed.
+
     public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; } }
     public PolygonData[] Holes { get { return m_Holes; } set { m_Holes = value; } }
     public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
@@ -25,6 +27,7 @@ public class Polygon3DData : IData, ICloneable
     public float Width { get { return m_Width; } set { m_Width = value; } }
     public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
+    public bool IsDirty { get { return m_IsDirty; } set { m_IsDirty = value; } }
 
     public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0, 0, 0.1f, Vector3.zero)
     {
@@ -40,6 +43,7 @@ public class Polygon3DData : IData, ICloneable
         m_Width = width;
         m_Depth = depth;
         m_Position = position;
+        m_Up = up;
     }
 
     public Polygon3DData(Polygon3DData data)
@@ -99,10 +103,11 @@ public class Polygon3DData : IData, ICloneable
 
     public object Clone()
     {
-        Polygon3DData copy = MemberwiseClone() as Polygon3DData;
-        copy.Polygon = new PolygonData(copy.Polygon);
-        copy.SetHoles(GetHoles());
-        return copy;
+        Polygon3DData clone = MemberwiseClone() as Polygon3DData;
+        clone.Polygon = this.Polygon.Clone() as PolygonData;
+        if (Holes != null)
+            clone.Holes = this.Holes.Clone() as PolygonData[];
+        return clone;
     }
 
 }

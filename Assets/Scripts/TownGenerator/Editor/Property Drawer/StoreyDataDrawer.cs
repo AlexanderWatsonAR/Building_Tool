@@ -95,7 +95,6 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
             m_PillarFoldout.SetEnabled(isPillarActive);
             m_FloorFoldout.SetEnabled(isFloorActive);
 
-            m_Buildable.Build();
         });
         m_WallHeight.RegisterValueChangeCallback(evt =>
         {
@@ -119,8 +118,6 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
                 m_CurrentData.Walls[i].Height = height;
             }
 
-            if (rebuild)
-                m_Buildable.Build();
 
         });
         m_WallDepth.RegisterValueChangeCallback(evt =>
@@ -144,9 +141,6 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
 
                 m_CurrentData.Walls[i].Depth = depth;
             }
-
-            if (rebuild)
-                m_Buildable.Build();
         });
         m_Corner.RegisterValueChangeCallback(evt =>
         {
@@ -164,8 +158,6 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
             {
                 m_CurrentData.Corners[i] = new CornerData(corner);
             }
-
-            Build();
 
         });
         m_Pillar.RegisterValueChangeCallback(evt =>
@@ -187,9 +179,6 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
             {
                 m_CurrentData.Pillars[i] = new PillarData(pillar);
             }
-
-            Build();
-
         });
     }
 
@@ -206,22 +195,5 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
         m_StoreyFoldout.Add(m_WallFoldout);
         m_StoreyFoldout.Add(m_PillarFoldout);
         m_StoreyFoldout.Add(m_FloorFoldout);
-    }
-
-
-    private void Build()
-    {
-        switch(m_Buildable)
-        {
-            case Building:
-                // if the height has changed we want to rebuild everything.
-                // else just build the one storey that has changed
-                Building building = m_Buildable as Building;
-                building.BuildStorey(m_Props.ID.intValue);
-                break;
-            case Storey:
-                m_Buildable.Build();
-                break;
-        }
     }
 }

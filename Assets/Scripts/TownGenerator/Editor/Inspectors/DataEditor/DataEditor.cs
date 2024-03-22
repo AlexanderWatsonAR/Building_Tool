@@ -39,11 +39,7 @@ public abstract class DataEditor : Editor
 
     private void Build()
     {
-        Debug.Log(GUIUtility.hotControl);
-
-
-
-        //m_Buildable.Build();
+        m_Buildable.Build();
     }
 
 }

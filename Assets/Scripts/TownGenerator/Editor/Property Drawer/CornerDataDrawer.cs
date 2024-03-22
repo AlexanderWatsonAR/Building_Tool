@@ -55,13 +55,6 @@ public class CornerDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Type = type;
-
-            CornerData[] corners = GetDataFromBuildable();
-
-            foreach(CornerData corner in corners)
-            {
-                corner.Type = type;
-            }
         });
         m_Sides.RegisterValueChangeCallback(evt =>
         {
@@ -71,13 +64,6 @@ public class CornerDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Sides = sides;
-
-            CornerData[] corners = GetDataFromBuildable();
-
-            foreach (CornerData corner in corners)
-            {
-                corner.Sides = sides;
-            }
         });
 
     }
@@ -85,52 +71,5 @@ public class CornerDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Root.Add(m_Type);
         m_Root.Add(m_Sides);
-    }
-
-    private CornerData[] GetDataFromBuildable()
-    {
-        CornerData[] cornerData = null;
-
-        switch (m_Buildable)
-        {
-            case Building:
-                cornerData = new CornerData[0];
-                // How can I get the corners?
-                // we have a list of storey data
-                // how can I know which of them to get the corners data from.
-                break;
-            case Storey:
-                Storey storey = m_Buildable as Storey;
-                cornerData = storey.Data.Corners;
-                break;
-            case Corner:
-                cornerData = new CornerData[1];
-                cornerData[0] = m_Props.Data.GetUnderlyingValue() as CornerData;
-                break;
-
-        }
-
-        return cornerData;
-    }
-
-    private void Build()
-    {
-        switch (m_Buildable)
-        {
-            case Building:
-                Building building = m_Buildable as Building;
-                building.BuildStoreys();
-                break;
-            case Storey:
-                Storey storey = m_Buildable as Storey;
-                storey.BuildCorners();
-            break;
-            case Corner:
-                m_Buildable.Build();
-            break;
-            //case Corners:
-            //    m_Buildable.Build();
-            //    break;
-        }
     }
 }
