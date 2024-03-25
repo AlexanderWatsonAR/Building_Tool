@@ -1,0 +1,11 @@
+using UnityEditor;
+using UnityEngine.UIElements;
+
+[CustomEditor(typeof(#SCRIPTNAME#))]
+public class #SCRIPTNAME#Editor : DataEditor
+{
+    public override VisualElement CreateInspectorGUI()
+    {
+        return base.CreateInspectorGUI();
+    }
+}

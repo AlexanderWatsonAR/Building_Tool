@@ -118,6 +118,10 @@ public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
                 m_CurrentData.Walls[i].Height = height;
             }
 
+            // How do we build via update in this instance?
+            // The height should be the same for each wall, (the only place you can edit the wall height is here)
+            
+
 
         });
         m_WallDepth.RegisterValueChangeCallback(evt =>

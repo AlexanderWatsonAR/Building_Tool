@@ -1,0 +1,11 @@
+using UnityEditor;
+
+
+public class #SCRIPTNAME#DataSerializedProperties : SerializedPropertyGroup
+{
+
+	public #SCRIPTNAME#DataSerializedProperties(SerializedProperty data) : base(data)
+	{
+	}
+
+}

@@ -1,0 +1,22 @@
+using UnityEngine;
+
+public class #SCRIPTNAME# : MonoBehaviour, IBuildable
+{
+	[SerializeField] #SCRIPTNAME#Data m_Data;
+
+	public #SCRIPTNAME#Data Data => m_Data;
+
+	public IBuildable Initialize (IData data)
+	{
+		m_Data = data as #SCRIPTNAME#Data;
+		return this;
+	}
+	public void Build ()
+	{
+		
+	}
+	public void Demolish ()
+	{
+		
+	}
+}
