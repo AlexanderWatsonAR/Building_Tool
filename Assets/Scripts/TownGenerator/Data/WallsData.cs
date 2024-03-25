@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class WallsData : IData, ICloneable
+public class WallsData : DirtyData, ICloneable
 {
     [SerializeField] WallData m_Wall; // Is it appropriate to store this here? This is really just an inspector tool.
     [SerializeField] WallData[] m_Walls;

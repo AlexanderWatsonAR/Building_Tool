@@ -9,7 +9,7 @@ public class GridFrame : Polygon3D
 
     public GridFrameData Data => m_Data;
 
-    public override IBuildable Initialize(IData data)
+    public override IBuildable Initialize(DirtyData data)
     {
         m_Data = data as GridFrameData;
         base.Initialize(data);

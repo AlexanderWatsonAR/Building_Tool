@@ -20,7 +20,7 @@ public class RoofSection : MonoBehaviour, IBuildable
     [SerializeField] private WindowData m_WindowData;
     //---------- End of Window Properties -----------
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as RoofSectionData;
 

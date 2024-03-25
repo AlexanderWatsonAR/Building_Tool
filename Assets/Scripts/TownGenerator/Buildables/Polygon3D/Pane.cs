@@ -6,7 +6,7 @@ public class Pane : Polygon3D
 
     public PaneData Data => m_Data;
 
-    public override IBuildable Initialize(IData data)
+    public override IBuildable Initialize(DirtyData data)
     {
         m_Data = data as PaneData;
         return base.Initialize(data);

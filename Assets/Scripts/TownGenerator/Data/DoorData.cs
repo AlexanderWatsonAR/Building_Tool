@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [System.Serializable]
 public class DoorData : Polygon3DData
@@ -29,7 +28,6 @@ public class DoorData : Polygon3DData
     public float HandleSize { get { return m_HandleSize; } set{ m_HandleSize = value; } }
     public float HandleScale { get { return m_HandleScale; } set{ m_HandleScale = value; } }
     public TransformData HingeData { get { return m_HingeData; } set { m_HingeData = value; } }
-
     public Vector3 HandlePosition => m_HandlePosition;
     public Material Material { get { return m_Material; } set { m_Material = value; } }
     #endregion

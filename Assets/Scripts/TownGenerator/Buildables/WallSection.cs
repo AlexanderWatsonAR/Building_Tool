@@ -23,7 +23,7 @@ public class WallSection : Polygon3D
 
     public WallSectionData Data => m_Data;
 
-    public override IBuildable Initialize(IData wallSectionData)
+    public override IBuildable Initialize(DirtyData wallSectionData)
     {
         m_Data = wallSectionData as WallSectionData;
         m_Windows ??= new List<Window>();

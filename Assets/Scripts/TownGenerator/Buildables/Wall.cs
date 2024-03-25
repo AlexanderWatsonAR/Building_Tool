@@ -34,7 +34,7 @@ public class Wall : MonoBehaviour, IBuildable
 
     public WallData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as WallData;
 

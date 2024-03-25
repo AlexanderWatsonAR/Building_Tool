@@ -22,7 +22,7 @@ public class Window : MonoBehaviour, IBuildable
 
     public WindowData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as WindowData;
         return this;

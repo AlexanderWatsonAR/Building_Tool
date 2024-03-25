@@ -10,7 +10,7 @@ public class Frame : Polygon3D
 
     public FrameData Data => m_Data;
 
-    public override IBuildable Initialize(IData data)
+    public override IBuildable Initialize(DirtyData data)
     {
         m_Data = data as FrameData;
         base.Initialize(data);

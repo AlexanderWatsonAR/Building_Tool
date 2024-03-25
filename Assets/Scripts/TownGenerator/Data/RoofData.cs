@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class RoofData : IData
+public class RoofData : DirtyData
 {
     #region Member Variable
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;

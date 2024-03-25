@@ -14,7 +14,7 @@ public class Corner : MonoBehaviour, IBuildable
 
     [SerializeField] ProBuilderMesh m_ProBuilderMesh;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as CornerData;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();

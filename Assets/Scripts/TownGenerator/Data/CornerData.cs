@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class CornerData : IData
+public class CornerData : DirtyData
 {
     [SerializeField, HideInInspector] int m_ID;
     [SerializeField, HideInInspector] Vector3[] m_CornerPoints;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class RoofSectionData : IData
+public class RoofSectionData : DirtyData
 {
     [SerializeField] private RoofElement m_RoofElement;
 

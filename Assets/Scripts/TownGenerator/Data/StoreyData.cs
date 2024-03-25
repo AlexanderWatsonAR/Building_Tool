@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class StoreyData : IData
+public class StoreyData : DirtyData
 {
     // Notes of serialization. I may be repeating myself.
     // When creating a new building object a StoreyData object is instantiated and a reference is passed to an instance of Storey class.

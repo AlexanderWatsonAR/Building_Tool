@@ -6,7 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class WindowData : IData, ICloneable
+public class WindowData : DirtyData, ICloneable
 {
     [SerializeField] int m_ID;
     [SerializeField] PolygonData m_Polygon;

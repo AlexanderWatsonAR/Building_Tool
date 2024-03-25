@@ -7,7 +7,7 @@ public class Pillars : MonoBehaviour, IBuildable
     [SerializeField] PillarsData m_Data;
     [SerializeField] Pillar[] m_Pillars;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as PillarsData;
         m_Pillars = new Pillar[m_Data.Pillars.Length];

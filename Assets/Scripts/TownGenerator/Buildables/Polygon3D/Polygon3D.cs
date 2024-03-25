@@ -10,7 +10,7 @@ public abstract class Polygon3D : MonoBehaviour, IBuildable
 
     public Polygon3DData Poly3DData => m_Poly3DData;
 
-    public virtual IBuildable Initialize(IData data)
+    public virtual IBuildable Initialize(DirtyData data)
     {
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
         m_Poly3DData = data as Polygon3DData;

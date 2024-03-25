@@ -7,7 +7,7 @@ public class Door : Polygon3D
 
     public DoorData Data => m_Data;
 
-    public override IBuildable Initialize(IData data)
+    public override IBuildable Initialize(DirtyData data)
     {
         //m_DoorHandleMesh = ProBuilderMesh.Create();
         //m_DoorHandleMesh.transform.SetParent(transform, false);

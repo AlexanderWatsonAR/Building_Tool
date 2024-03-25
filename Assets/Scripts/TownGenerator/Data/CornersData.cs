@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [System.Serializable]
-public class CornersData : IData
+public class CornersData : DirtyData
 {
     [SerializeField] CornerData m_Corner;
     [SerializeField] CornerData[] m_Corners;

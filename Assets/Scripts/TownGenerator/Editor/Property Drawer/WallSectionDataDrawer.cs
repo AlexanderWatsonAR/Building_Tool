@@ -9,6 +9,8 @@ public class WallSectionDataDrawer : PropertyDrawer
 {
     [SerializeField] WallSectionData m_PreviousData; // This is a copy of data, used to determine if data values actually change.
 
+    [SerializeField] WallElement m_PreviousElement;
+
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
         VisualElement root = new VisualElement();
@@ -18,6 +20,8 @@ public class WallSectionDataDrawer : PropertyDrawer
         WallSectionData currentData = data.GetUnderlyingValue() as WallSectionData;
         m_PreviousData = currentData.Clone() as WallSectionData;
 
+        m_PreviousElement = currentData.WallElement;
+
         PropertyField wallElementField = new PropertyField(props.WallElement) { label = "Wall Element" };
         wallElementField.BindProperty(props.WallElement);
         root.Add(wallElementField);
@@ -26,11 +30,16 @@ public class WallSectionDataDrawer : PropertyDrawer
 
         wallElementField.RegisterValueChangeCallback(evt =>
         {
-            if ((currentData.WallElement == m_PreviousData.WallElement) && wallElementContainer.childCount > 0)
+            if ((currentData.WallElement == m_PreviousElement) && wallElementContainer.childCount > 0)
                 return;
 
+            if (currentData.WallElement != m_PreviousElement)
+            {
+                currentData.IsDirty = true;
+                m_PreviousElement = currentData.WallElement;
+            }         
+
             wallElementContainer.Clear();
-            currentData.IsDirty = true;
 
             switch (currentData.WallElement)
             {

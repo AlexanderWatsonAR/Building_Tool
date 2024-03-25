@@ -40,7 +40,6 @@ public class WindowDataDrawer : PropertyDrawer, IFieldInitializer
     }
     public void DefineFields()
     {
-        #region Fields
         m_ActiveElements = new PropertyField(m_Props.ActiveElements);
         m_OuterFrameFoldout = new Foldout() { text = "Outer Frame" };
         m_OuterFrame = new PropertyField(m_Props.OuterFrame.Data);
@@ -52,19 +51,16 @@ public class WindowDataDrawer : PropertyDrawer, IFieldInitializer
         // How did this look before?
         m_LeftShutter = new PropertyField(m_Props.LeftShutter.Data);
         m_RightShutter = new PropertyField(m_Props.RightShutter.Data);
-        #endregion
     }
 
     public void BindFields()
     {
-        #region Bind
         m_ActiveElements.BindProperty(m_Props.ActiveElements);
         m_OuterFrame.BindProperty(m_Props.OuterFrame.Data);
         m_InnerFrame.BindProperty(m_Props.InnerFrame.Data);
         m_Pane.BindProperty(m_Props.Pane.Data);
         m_LeftShutter.BindProperty(m_Props.LeftShutter.Data);
         m_RightShutter.BindProperty(m_Props.RightShutter.Data);
-        #endregion
     }
 
     public void RegisterValueChangeCallbacks()

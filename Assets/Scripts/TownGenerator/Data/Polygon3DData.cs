@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 
 [System.Serializable]
-public class Polygon3DData : IData, ICloneable
+public class Polygon3DData : DirtyData, ICloneable
 {
     [SerializeField] PolygonData m_Polygon;
     [SerializeField] PolygonData[] m_Holes;
@@ -15,8 +15,6 @@ public class Polygon3DData : IData, ICloneable
 
     [SerializeField] float m_Height, m_Width;
     [SerializeField] Vector3 m_Position;
-
-    [SerializeField] bool m_IsDirty; // data has changed.
 
     public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; } }
     public PolygonData[] Holes { get { return m_Holes; } set { m_Holes = value; } }
@@ -27,7 +25,6 @@ public class Polygon3DData : IData, ICloneable
     public float Width { get { return m_Width; } set { m_Width = value; } }
     public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
-    public bool IsDirty { get { return m_IsDirty; } set { m_IsDirty = value; } }
 
     public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0, 0, 0.1f, Vector3.zero)
     {

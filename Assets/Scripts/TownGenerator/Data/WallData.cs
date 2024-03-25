@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class WallData : IData, ICloneable
+public class WallData : DirtyData, ICloneable
 {
     #region Member Variables
     [SerializeField, HideInInspector] int m_ID;
