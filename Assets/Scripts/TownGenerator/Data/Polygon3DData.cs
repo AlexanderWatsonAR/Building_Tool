@@ -16,7 +16,7 @@ public class Polygon3DData : DirtyData, ICloneable
     [SerializeField] float m_Height, m_Width;
     [SerializeField] Vector3 m_Position;
 
-    public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; } }
+    public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value;  if (m_Polygon != null) { CalcualateInternal(); } } }
     public PolygonData[] Holes { get { return m_Holes; } set { m_Holes = value; } }
     public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
     public Vector3 Up { get { return m_Up; } set { m_Up = value; } }
@@ -26,21 +26,40 @@ public class Polygon3DData : DirtyData, ICloneable
     public float Depth { get { return m_Depth; } set { m_Depth = value; } }
     public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
 
-    public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0, 0, 0.1f, Vector3.zero)
+    public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0.1f)
     {
 
     }
 
-    public Polygon3DData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float height, float width, float depth, Vector3 position)
+    public Polygon3DData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth)
     {
         m_Polygon = polygon;
         m_Holes = holes;
         m_Normal = normal;
-        m_Height = height;
-        m_Width = width;
         m_Depth = depth;
-        m_Position = position;
         m_Up = up;
+
+        CalcualateInternal();
+    }
+
+    private void CalcualateInternal()
+    {
+        if (m_Polygon == null || m_Polygon.ControlPoints == null || m_Polygon.ControlPoints.Length == 0)
+            return;
+
+        m_Polygon.ControlPoints.MinMax(out Vector3 min, out Vector3 max);
+        m_Height = max.y - min.y;
+        m_Width = max.x - min.x + (max.z - min.z);
+        m_Position = Vector3.Lerp(min, max, 0.5f);
+    }
+
+    public void SetPolygon(Vector3[] controlPoints, Vector3 normal)
+    {
+        m_Polygon ??= new PolygonData(controlPoints, normal);
+        m_Polygon.ControlPoints = controlPoints;
+        m_Polygon.Normal = normal;
+
+        CalcualateInternal();
     }
 
     public Polygon3DData(Polygon3DData data)

@@ -43,9 +43,6 @@ public class WallSectionData : Polygon3DData, ICloneable
     // With an empty constructor we can create an empty object and fill the data later.
     // If it were null, checking the data would be simpler.
 
-    // 15.02.2024
-    // Instantiate the windowData, doorData, archDoorData in the constructors.
-
     public WallSectionData()
     {
         m_Window = new WindowData();
@@ -58,9 +55,10 @@ public class WallSectionData : Polygon3DData, ICloneable
         m_Extension = new ExtensionData();
     }
 
-    public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float height, float width, float depth, Vector3 normal, Vector3 up, Vector3 position,
+    // What is the purpose of this constructor?
+    public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float depth, Vector3 normal, Vector3 up,
         WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData,
-        WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) : base(polygon, holes, normal, up, height, width, depth, position)
+        WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) : base(polygon, holes, normal, up, depth)
     {
         m_WallElement = wallElement;
         m_ID = id;
@@ -80,12 +78,9 @@ public class WallSectionData : Polygon3DData, ICloneable
         data.Polygon,
         data.Holes,
         data.ID,
-        data.Height,
-        data.Width,
         data.Depth,
         data.Normal,
         data.Up,
-        data.Position,
         data.WindowOpening,
         data.Doorway,
         data.Archway,

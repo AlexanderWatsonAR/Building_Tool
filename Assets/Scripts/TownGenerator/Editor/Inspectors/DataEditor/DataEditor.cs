@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 public abstract class DataEditor : Editor
 {
     protected SerializedProperty m_Data;
-    protected IBuildable m_Buildable;
+    [SerializeField] protected IBuildable m_Buildable;
 
     public override VisualElement CreateInspectorGUI()
     {

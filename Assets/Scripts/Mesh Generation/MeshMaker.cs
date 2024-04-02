@@ -757,7 +757,7 @@ public static class MeshMaker
 
         return polygon;
     }
-    // Create a polygon data class?
+
     public static IList<IList<Vector3>> SpiltPolygon(IEnumerable<Vector3> polygon, float polygonWidth, float polygonHeight, int columns, int rows, Vector3? polygonPosition = null, Vector3? polygonNormal = null)
     {
         IList<IList<Vector3>> polygons = new List<IList<Vector3>>();
@@ -925,7 +925,7 @@ public static class MeshMaker
         proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
-        proBuilderMesh.MatchFaceToNormal(frameNormal);
+        proBuilderMesh.AlignPolygonNormals(frameNormal);
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
 

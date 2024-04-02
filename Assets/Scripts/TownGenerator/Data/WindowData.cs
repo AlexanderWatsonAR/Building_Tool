@@ -70,12 +70,12 @@ public class WindowData : DirtyData, ICloneable
     public WindowData(WindowElement activeElements, PolygonData opening, FrameData outerFrame, GridFrameData innerFrame, PaneData paneData, DoorData leftShutter, DoorData rightShutter)
     {
         m_ActiveElements = activeElements;
-        m_Polygon =  opening;
-        m_OuterFrame = outerFrame;
-        m_InnerFrame = innerFrame;
-        m_Pane = paneData;
-        m_LeftShutter = leftShutter;
-        m_RightShutter = rightShutter;
+        m_Polygon =  new PolygonData(opening);
+        m_OuterFrame = new FrameData(outerFrame);
+        m_InnerFrame = new GridFrameData(innerFrame);
+        m_Pane = new PaneData(paneData);
+        m_LeftShutter = new DoorData(leftShutter);
+        m_RightShutter = new DoorData(rightShutter);
     }
 
     public override bool Equals(object obj)
@@ -83,7 +83,7 @@ public class WindowData : DirtyData, ICloneable
         if (obj is not WindowData other)
             return false;
 
-        if (m_ActiveElements.Equals(other.m_ActiveElements) &&
+        if (m_ActiveElements.Equals(other.ActiveElements) &&
            m_OuterFrame.Equals(other.OuterFrame) &&
            m_InnerFrame.Equals(other.InnerFrame) &&
            m_Pane.Equals(other.Pane) &&

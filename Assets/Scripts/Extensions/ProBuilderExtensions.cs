@@ -19,14 +19,28 @@ public static class ProBuilderExtensions
     /// </summary>
     /// <param name="proBuilderMesh"></param>
     /// <param name="normal"></param>
-    public static void MatchFaceToNormal(this ProBuilderMesh proBuilderMesh, Vector3 normal)
+    public static void AlignPolygonNormals(this ProBuilderMesh proBuilderMesh, Vector3 normal)
     {
+        Vertex[] vertices = proBuilderMesh.GetVertices();
+
+        for(int i = 0; i < vertices.Length; i++)
+        {
+            vertices[i].normal = normal;
+        }
+
         Vector3 aveNormal = ProMaths.Average(proBuilderMesh.GetNormals());
 
         if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
         {
             proBuilderMesh.faces[0].Reverse();
         }
+
+        proBuilderMesh.SetVertices(vertices);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh(RefreshMask.Colors);
+        proBuilderMesh.Refresh(RefreshMask.Collisions);
+        proBuilderMesh.Refresh(RefreshMask.Tangents);
+        proBuilderMesh.Refresh(RefreshMask.UV);
     }
 
     /// <summary>
@@ -39,6 +53,7 @@ public static class ProBuilderExtensions
         ProBuilderMesh lid = UnityEngine.Object.Instantiate(polygon);
         lid.faces[0].Reverse();
         polygon.Extrude(polygon.faces, ExtrudeMethod.FaceNormal, extrude);
+        polygon.ToMesh();
         CombineMeshes.Combine(new ProBuilderMesh[] { polygon, lid }, polygon);
         UnityEngine.Object.DestroyImmediate(lid.gameObject);
         polygon.ToMesh();
@@ -57,7 +72,7 @@ public static class ProBuilderExtensions
 
         ActionResult result = ActionResult.NoSelection;
 
-        if (holePoints != null)
+        if (holePoints != null && holePoints.Count > 0)
         {
             result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
         }
@@ -68,9 +83,7 @@ public static class ProBuilderExtensions
 
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
-        proBuilderMesh.MatchFaceToNormal(normal);
-        proBuilderMesh.ToMesh();
-        proBuilderMesh.Refresh();
+        proBuilderMesh.AlignPolygonNormals(normal);
 
         return result;
     }

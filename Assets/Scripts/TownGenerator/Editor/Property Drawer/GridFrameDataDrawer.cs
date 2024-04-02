@@ -9,6 +9,7 @@ using Unity.VisualScripting;
 [CustomPropertyDrawer(typeof(GridFrameData))]
 public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
 {
+    [SerializeField] GridFrameData m_CurrentData;
     [SerializeField] GridFrameData m_PreviousData;
 
     GridFrameDataSerializedProperties m_Props;
@@ -20,8 +21,8 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         Initialize(data);
         m_Root.name = nameof(GridFrameData) + "_Root";
-        GridFrameData current = data.GetUnderlyingValue() as GridFrameData;
-        m_PreviousData = current.Clone() as GridFrameData;
+        m_CurrentData = data.GetUnderlyingValue() as GridFrameData;
+        m_PreviousData = m_CurrentData.Clone() as GridFrameData;
 
         DefineFields();
         BindFields();
@@ -61,6 +62,10 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Scale = scale;
+
+            GridFrame.CalculateHoleData(m_CurrentData);
+
+            m_CurrentData.IsDirty = true;
         });
         m_Depth.RegisterValueChangeCallback(evt =>
         {
@@ -68,6 +73,7 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Depth = evt.changedProperty.floatValue;
+            m_CurrentData.IsDirty = true;
         });
         m_Columns.RegisterValueChangeCallback(evt => 
         {
@@ -75,6 +81,10 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Columns = evt.changedProperty.intValue;
+
+            GridFrame.CalculateHoleData(m_CurrentData);
+
+            m_CurrentData.IsDirty = true;
         });
         m_Rows.RegisterValueChangeCallback(evt =>
         {
@@ -82,6 +92,10 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Rows = evt.changedProperty.intValue;
+
+            GridFrame.CalculateHoleData(m_CurrentData);
+
+            m_CurrentData.IsDirty = true;
         });
     }
     public void AddFieldsToRoot()

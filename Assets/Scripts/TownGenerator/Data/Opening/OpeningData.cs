@@ -36,4 +36,27 @@ public abstract class OpeningData : ICloneable
         return MemberwiseClone();
     }
 
+    public override bool Equals(object obj)
+    {
+        if (obj is not OpeningData)
+            return false;
+
+        OpeningData other = obj as OpeningData;
+
+        if(this.Height == other.Height &&
+           this.Width == other.Width &&
+           this.Columns == other.Columns &&
+           this.Rows == other.Rows)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
 }

@@ -287,28 +287,26 @@ public static class Extensions
         return ushortArray;
     }
 
-    public static void MinMax(IEnumerable<Vector3> points, out Vector3 min, out Vector3 max)
+    public static void MinMax(this Vector3[] points, out Vector3 min, out Vector3 max)
     {
-        Vector3[] vectors = points.ToArray();
+        min = points[0];
+        max = points[0];
 
-        min = vectors[0];
-        max = vectors[0];
-
-        for (int i = 1; i < vectors.Length; i++)
+        for (int i = 1; i < points.Length; i++)
         {
-            if (min.x > vectors[i].x)
-                min.x = vectors[i].x;
-            if (min.y > vectors[i].y)
-                min.y = vectors[i].y;
-            if (min.z > vectors[i].z)
-                min.z = vectors[i].z;
+            if (min.x > points[i].x)
+                min.x = points[i].x;
+            if (min.y > points[i].y)
+                min.y = points[i].y;
+            if (min.z > points[i].z)
+                min.z = points[i].z;
 
-            if (max.x < vectors[i].x)
-                max.x = vectors[i].x;
-            if (max.y < vectors[i].y)
-                max.y = vectors[i].y;
-            if (max.z < vectors[i].z)
-                max.z = vectors[i].z;
+            if (max.x < points[i].x)
+                max.x = points[i].x;
+            if (max.y < points[i].y)
+                max.y = points[i].y;
+            if (max.z < points[i].z)
+                max.z = points[i].z;
         }
     }
 

@@ -38,8 +38,8 @@ public class DoorEditor : DataEditor
     {
         serializedObject.Update();
         Door door = target as Door;
-        m_HingePosition = m_Props.HingeData.AbsolutePosition.vector3Value;
-        SerializedProperty hingeOffset = m_Props.HingeData.PositionOffset;
+        m_HingePosition = m_Props.Hinge.AbsolutePosition.vector3Value;
+        SerializedProperty hingeOffset = m_Props.Hinge.PositionOffset;
         Vector3 position = Handles.DoPositionHandle(door.transform.TransformPoint(m_HingePosition + hingeOffset.vector3Value), m_HingeRotation);
         hingeOffset.vector3Value = door.transform.InverseTransformPoint(position - m_HingePosition);
         serializedObject.ApplyModifiedProperties();

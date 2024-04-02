@@ -27,7 +27,7 @@ public class DoorData : Polygon3DData
     public DoorElement ActiveElements { get { return m_ActiveElements; } set { m_ActiveElements = value; } }
     public float HandleSize { get { return m_HandleSize; } set{ m_HandleSize = value; } }
     public float HandleScale { get { return m_HandleScale; } set{ m_HandleScale = value; } }
-    public TransformData HingeData { get { return m_HingeData; } set { m_HingeData = value; } }
+    public TransformData Hinge { get { return m_HingeData; } set { m_HingeData = value; } }
     public Vector3 HandlePosition => m_HandlePosition;
     public Material Material { get { return m_Material; } set { m_Material = value; } }
     #endregion
@@ -36,7 +36,7 @@ public class DoorData : Polygon3DData
     public DoorData() : this
     (
         DoorElement.Everything, null, null, Vector3.forward,
-        Vector3.right, 1, 1, 1, Vector3.zero, null, null
+        Vector3.right, 1, null, null
     )
     {
     }
@@ -48,18 +48,15 @@ public class DoorData : Polygon3DData
         data.Holes,
         data.Normal,
         data.Up,
-        data.Height,
-        data.Width,
         data.Depth,
-        data.Position,
-        data.HingeData,
+        data.Hinge,
         data.Material
     )
     {
     }
 
     public DoorData(DoorElement activeElements, PolygonData polygon, PolygonData[] holes, Vector3 normal,
-        Vector3 up, float height, float width, float depth, Vector3 position,TransformData hingeData, Material material) : base (polygon, holes, normal, up, height, width, depth, position)
+        Vector3 up, float depth, TransformData hingeData, Material material) : base (polygon, holes, normal, up, depth)
     {
         m_ActiveElements = activeElements;
         m_HingeData = hingeData;
@@ -68,8 +65,8 @@ public class DoorData : Polygon3DData
 
     public new object Clone()
     {
-        DoorData copy = base.Clone() as DoorData;
-        copy.HingeData = new TransformData(HingeData);
-        return copy;
+        DoorData clone = base.Clone() as DoorData;
+        clone.Hinge = this.Hinge.Clone() as TransformData;
+        return clone;
     }
 }

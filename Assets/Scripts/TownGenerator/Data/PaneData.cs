@@ -12,7 +12,7 @@ public class PaneData : Polygon3DData
 
     }
 
-    public PaneData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float height, float width, float depth, Vector3 position): base(polygon, holes, normal, up, height, width, depth, position)
+    public PaneData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth): base(polygon, holes, normal, up, depth)
     {
     }
 

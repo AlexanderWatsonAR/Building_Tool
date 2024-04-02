@@ -98,7 +98,7 @@ public class Wall : MonoBehaviour, IBuildable
         DoorData doorData = new DoorData()
         {
             Normal = m_Data.Normal,
-            HingeData = new TransformData()
+            Hinge = new TransformData()
             {
                 RelativePosition = RelativePosition.Left
             }

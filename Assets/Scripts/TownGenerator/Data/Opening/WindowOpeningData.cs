@@ -46,16 +46,42 @@ public class WindowOpeningData : OpeningData, ICloneable
         clone.Angle = this.Angle;
         clone.Smooth = this.Smooth;
 
-        if (this.Windows == null)
+        if (this.Windows == null || this.Windows.Length == 0)
+            return clone;
+
+        if (this.Windows[0] == null)
             return clone;
 
         clone.Windows = new WindowData[this.Windows.Length];
 
         for(int i = 0; i < clone.Windows.Length; i++)
         {
-            clone.Windows[i] = new WindowData(m_Windows[i]);
+            clone.Windows[i] = this.Windows[i].Clone() as WindowData;
         }
 
         return clone;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if(obj is not WindowOpeningData)
+            return false;
+
+        WindowOpeningData other = obj as WindowOpeningData;
+
+        if(base.Equals(obj) &&
+           this.Angle == other.Angle &&
+           this.Smooth == other.Smooth &&
+           this.Sides == other.Sides)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 }

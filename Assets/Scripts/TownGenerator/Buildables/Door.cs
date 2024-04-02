@@ -20,21 +20,22 @@ public class Door : Polygon3D
 
     public override void Build()
     {
-        if (!m_Data.ActiveElements.IsElementActive(DoorElement.Door))
+        if (!m_Data.IsDirty)
             return;
 
-        Debug.Log("Door Build ", this);
+        if (!m_Data.ActiveElements.IsElementActive(DoorElement.Door))
+            return;
 
         base.Build();
 
         // Scale
-        m_ProBuilderMesh.transform.localScale = m_Data.HingeData.Scale;
+        m_ProBuilderMesh.transform.localScale = m_Data.Hinge.Scale;
         m_ProBuilderMesh.LocaliseVertices();
 
         // Rotate
-        m_ProBuilderMesh.transform.localEulerAngles = m_Data.HingeData.EulerAngle;
-        m_Data.HingeData.AbsolutePosition = m_Data.CalculateRelativePosition(m_Data.HingeData.RelativePosition);
-        m_ProBuilderMesh.LocaliseVertices(m_Data.HingeData.AbsolutePosition + m_Data.HingeData.PositionOffset);
+        m_ProBuilderMesh.transform.localEulerAngles = m_Data.Hinge.EulerAngle;
+        m_Data.Hinge.AbsolutePosition = m_Data.CalculateRelativePosition(m_Data.Hinge.RelativePosition);
+        m_ProBuilderMesh.LocaliseVertices(m_Data.Hinge.AbsolutePosition + m_Data.Hinge.PositionOffset);
         m_ProBuilderMesh.Refresh();
 
         if (!m_Data.ActiveElements.IsElementActive(DoorElement.Handle))

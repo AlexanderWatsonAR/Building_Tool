@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
+using static PlasticPipe.Server.MonitorStats;
 
 [CustomPropertyDrawer(typeof(WallSectionData))]
 public class WallSectionDataDrawer : PropertyDrawer
@@ -192,7 +193,7 @@ public class WallSectionDataDrawer : PropertyDrawer
 
                         #region Fields
                         PropertyField windowOpening = new PropertyField(opening.Data);
-                        Foldout windowFoldout = new Foldout() { text = "Window" };
+                        Foldout windowFoldout = new Foldout() { text = "Windows", tooltip = "Altering this data will impact every window in the grid." };
                         PropertyField windowDataField = new PropertyField(window.Data);
                         #endregion
 
@@ -206,21 +207,62 @@ public class WallSectionDataDrawer : PropertyDrawer
                         {
                             WindowOpeningData openingData = evt.changedProperty.GetUnderlyingValue() as WindowOpeningData;
 
-                            if(m_PreviousData.Equals(openingData))
-                            {
-                                currentData.IsDirty = true;
-                            }
+                            if(m_PreviousData.WindowOpening.Equals(openingData))
+                                return;
+
+                            m_PreviousData.WindowOpening = openingData.Clone() as WindowOpeningData;
+
+                            openingData.Windows = null;
+                            currentData.IsDirty = true;
+                            
                         });
                         windowDataField.RegisterValueChangeCallback(evt => 
                         {
-                            // Is this needed?
+                            WindowData wallSectionWindow = evt.changedProperty.GetUnderlyingValue() as WindowData;
 
-                            WindowData currentWindow = evt.changedProperty.GetUnderlyingValue() as WindowData;
-
-                            if (m_PreviousData.Window.Equals(currentWindow))
-                            {
+                            if (m_PreviousData.Window.Equals(wallSectionWindow))
                                 return;
+
+                            m_PreviousData.Window = wallSectionWindow.Clone() as WindowData;
+
+                            WindowData[] windows = currentData.WindowOpening.Windows;
+
+                            for (int i = 0; i < windows.Length; i++)
+                            {
+                                WindowData window = windows[i];
+
+                                window.ActiveElements = wallSectionWindow.ActiveElements;
+
+                                if (wallSectionWindow.OuterFrame.IsDirty)
+                                {
+                                    window.OuterFrame.Scale = wallSectionWindow.OuterFrame.Scale;
+                                    window.OuterFrame.Depth = wallSectionWindow.OuterFrame.Depth;
+                                    window.OuterFrame.Holes = wallSectionWindow.OuterFrame.Holes;
+                                    window.OuterFrame.IsDirty = wallSectionWindow.OuterFrame.IsDirty;
+                                }
+
+                                //if(wallSectionWindow.InnerFrame.IsDirty)
+                                //{
+                                //    window.InnerFrame.Scale = wallSectionWindow.InnerFrame.Scale;
+                                //    window.InnerFrame.Depth = wallSectionWindow.InnerFrame.Depth;
+                                //    window.InnerFrame.Columns = wallSectionWindow.InnerFrame.Columns;
+                                //    window.InnerFrame.Rows = wallSectionWindow.InnerFrame.Rows;
+                                //    window.InnerFrame.IsDirty = wallSectionWindow.InnerFrame.IsDirty;
+                                //}
+
+                                //if(wallSectionWindow.Pane.IsDirty)
+                                //{
+                                //    window.Pane.Depth = wallSectionWindow.Pane.Depth;
+                                //    window.Pane.IsDirty = wallSectionWindow.Pane.IsDirty;
+                                //}
+
+                                //window.OuterFrame = wallSectionWindow.OuterFrame.IsDirty ? wallSectionWindow.OuterFrame.Clone() as FrameData : window.OuterFrame;
+                                //window.InnerFrame = wallSectionWindow.InnerFrame.IsDirty ? wallSectionWindow.InnerFrame.Clone() as GridFrameData : window.InnerFrame;
+                                //window.Pane = wallSectionWindow.Pane.IsDirty ? wallSectionWindow.Clone() as PaneData : window.Pane;
+                                //window.LeftShutter = wallSectionWindow.LeftShutter.IsDirty ? wallSectionWindow.LeftShutter.Clone() as DoorData : window.LeftShutter;
+                                //window.RightShutter = wallSectionWindow.RightShutter.IsDirty ? wallSectionWindow.RightShutter.Clone() as DoorData : window.RightShutter;
                             }
+
                         });
                         #endregion
 
