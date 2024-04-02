@@ -8,28 +8,27 @@ using UnityEngine.Rendering;
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
-using UnityEditor.IMGUI.Controls;
-
+using Unity.VisualScripting;
 
 // Add Poly path stuff
 [CustomEditor(typeof(Building))]
 public class BuildingEditor : Editor
 {
-    private Building m_Building;
-    private PolyPath m_Path;
-    private SerializedProperty m_Data;
-    private Vector3 m_MousePosition;
-    private Color m_CP_Valid = Color.green;
-    private Color m_CP_Invalid = Color.red;
-    private bool m_IsValidPoint;
+    Building m_Building;
+    PolyPath m_Path;
+    SerializedProperty m_Data;
+    Vector3 m_MousePosition;
+    Color m_CP_Valid = Color.green;
+    Color m_CP_Invalid = Color.red;
+    bool m_IsValidPoint;
     MouseCursor m_MouseCursor;
-    private Vector3[] m_GlobalControlPointPositions;
+    Vector3[] m_GlobalControlPointPositions;
 
-    [SerializeField] private VisualElement m_Root;
+    [SerializeField] VisualElement m_Root;
 
-    [SerializeField] private bool m_IsValidPolygon;
-    [SerializeField] private bool m_IsAHandleSelected;
-    [SerializeField] private int m_SelectedHandle = -1;
+    [SerializeField] bool m_IsValidPolygon;
+    [SerializeField] bool m_IsAHandleSelected;
+    [SerializeField] int m_SelectedHandle = -1;
 
     public override VisualElement CreateInspectorGUI()
     {
@@ -54,7 +53,7 @@ public class BuildingEditor : Editor
         {
             text = "Build"
         };
-        Button reset_btn = new Button(() => m_Building.Build())
+        Button reset_btn = new Button(() => m_Building.Demolish())
         {
             text = "Reset"
         };
@@ -104,6 +103,20 @@ public class BuildingEditor : Editor
                 break;
             case PolyMode.Hide:
                 {
+                    SerializedProperty container = serializedObject.FindProperty("m_Container");
+                    PropertyField containerField = new PropertyField(container);
+                    containerField.RegisterValueChangeCallback(evt => 
+                    {
+                        BuildingScriptableObject so = evt.changedProperty.GetUnderlyingValue() as BuildingScriptableObject;
+
+                        if (so == null)
+                            return;
+
+                        m_Data.SetUnderlyingValue(so.Data);
+                        Debug.Log("building data changed");
+
+                    });
+
                     Button edit_btn = new Button(() =>
                     {
                         m_Path.PolyMode = PolyMode.Edit;
@@ -111,6 +124,7 @@ public class BuildingEditor : Editor
                     });
                     edit_btn.text = "Edit Building Path";
 
+                    m_Root.Add(containerField);
                     m_Root.Add(edit_btn);
                     m_Root.Add(new HelpBox("Editing the path will erase changes made to the building", HelpBoxMessageType.Warning));
 
@@ -124,7 +138,7 @@ public class BuildingEditor : Editor
 
                     Foldout roofFoldout = new Foldout() { text = "Roof" };
                     roofFoldout.Add(roofField);
-
+  
                     m_Root.Add(storeysField);
                     m_Root.Add(roofFoldout);
                 }
@@ -199,7 +213,9 @@ public class BuildingEditor : Editor
                         if(m_Path.IsValidPath())
                         {
                             m_Path.CalculateForwards();
-                            m_Building.Initialize(new BuildingData(m_Path)).Build();
+                            m_Building.AddStorey("Ground");
+                            m_Building.InitializeRoof();
+                            m_Building.Build();
                         }
                         
                         

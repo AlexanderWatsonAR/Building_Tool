@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class DoorwayData : OpeningData
+public class DoorwayData : OpeningData, ICloneable
 {
     // Opening
     [SerializeField, Range(-0.999f, 0.999f)] protected float m_PositionOffset;
@@ -42,4 +43,28 @@ public class DoorwayData : OpeningData
     {
 
     }
+
+    /// <summary>
+    /// Returns a deep copy.
+    /// </summary>
+    /// <returns></returns>
+    public new object Clone()
+    {
+        DoorwayData clone = MemberwiseClone() as DoorwayData;
+
+        if (this.Doors == null && this.Frames == null)
+            return clone;
+
+        clone.Doors = new DoorData[m_Doors.Length];
+        clone.Frames = new FrameData[m_Frames.Length];
+
+        for (int i = 0; i < m_Doors.Length; i++)
+        {
+            clone.Doors[i] = m_Doors[i].Clone() as DoorData;
+            clone.Frames[i] = m_Frames[i].Clone() as FrameData;
+        }
+
+        return clone;
+    }
+
 }

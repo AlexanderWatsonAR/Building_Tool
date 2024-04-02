@@ -12,11 +12,45 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 
 public static class Extensions
 {
+    public static Vector3 CalculateRelativePosition(this Polygon3DData polygon, RelativePosition relativePosition)
+    {
+        Vector3 position = Vector3.zero;
+
+        switch (relativePosition)
+        {
+            case RelativePosition.Middle:
+                position = polygon.Position;
+                break;
+            case RelativePosition.Top:
+                position = polygon.Position + (0.5f * polygon.Height * polygon.Up);
+                break;
+            case RelativePosition.Bottom:
+                position = polygon.Position - (0.5f * polygon.Height * polygon.Up);
+                break;
+            case RelativePosition.Left:
+                position = polygon.Position - (0.5f * polygon.Width * polygon.Right);
+                break;
+            case RelativePosition.Right:
+                position = polygon.Position + (0.5f * polygon.Width * polygon.Right);
+                break;
+        }
+
+        return position;
+    }
+
     public static void BuildCollection(this IEnumerable<IBuildable> buildables)
     {
         foreach (IBuildable buildable in buildables)
         {
             buildable.Build();
+        }
+    }
+
+    public static void DemolishCollection(this IEnumerable<IBuildable> buildables)
+    {
+        foreach (IBuildable buildable in buildables)
+        {
+            buildable.Demolish();
         }
     }
 
@@ -253,28 +287,26 @@ public static class Extensions
         return ushortArray;
     }
 
-    public static void MinMax(IEnumerable<Vector3> points, out Vector3 min, out Vector3 max)
+    public static void MinMax(this Vector3[] points, out Vector3 min, out Vector3 max)
     {
-        Vector3[] vectors = points.ToArray();
+        min = points[0];
+        max = points[0];
 
-        min = vectors[0];
-        max = vectors[0];
-
-        for (int i = 1; i < vectors.Length; i++)
+        for (int i = 1; i < points.Length; i++)
         {
-            if (min.x > vectors[i].x)
-                min.x = vectors[i].x;
-            if (min.y > vectors[i].y)
-                min.y = vectors[i].y;
-            if (min.z > vectors[i].z)
-                min.z = vectors[i].z;
+            if (min.x > points[i].x)
+                min.x = points[i].x;
+            if (min.y > points[i].y)
+                min.y = points[i].y;
+            if (min.z > points[i].z)
+                min.z = points[i].z;
 
-            if (max.x < vectors[i].x)
-                max.x = vectors[i].x;
-            if (max.y < vectors[i].y)
-                max.y = vectors[i].y;
-            if (max.z < vectors[i].z)
-                max.z = vectors[i].z;
+            if (max.x < points[i].x)
+                max.x = points[i].x;
+            if (max.y < points[i].y)
+                max.y = points[i].y;
+            if (max.z < points[i].z)
+                max.z = points[i].z;
         }
     }
 
@@ -806,7 +838,7 @@ public static class Extensions
     /// <param name="transformPoint"></param>
     /// <param name="vertices"></param>
     /// <returns></returns>
-    public static Vector3 PointToVector3(this TransformPoint transformPoint, IEnumerable<Vector3> vertices)
+    public static Vector3 PointToVector3(this RelativePosition transformPoint, IEnumerable<Vector3> vertices)
     {
         Vector3 pivotPoint = Vector3.zero;
 
@@ -858,19 +890,19 @@ public static class Extensions
 
         switch (transformPoint)
         {
-            case TransformPoint.Top:
+            case RelativePosition.Top:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(topVertices);
                 break;
-            case TransformPoint.Left:
+            case RelativePosition.Left:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(leftVertices);
                 break;
-            case TransformPoint.Right:
+            case RelativePosition.Right:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(rightVertices);
                 break;
-            case TransformPoint.Middle:
+            case RelativePosition.Middle:
                 pivotPoint = centroid;
                 break;
-            case TransformPoint.Bottom:
+            case RelativePosition.Bottom:
                 pivotPoint = UnityEngine.ProBuilder.Math.Average(bottomVertices);
                 break;
         }

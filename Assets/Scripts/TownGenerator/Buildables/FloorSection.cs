@@ -11,7 +11,7 @@ public class FloorSection : MonoBehaviour, IBuildable
     [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
 
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as FloorSectionData;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();

@@ -19,14 +19,28 @@ public static class ProBuilderExtensions
     /// </summary>
     /// <param name="proBuilderMesh"></param>
     /// <param name="normal"></param>
-    public static void MatchFaceToNormal(this ProBuilderMesh proBuilderMesh, Vector3 normal)
+    public static void AlignPolygonNormals(this ProBuilderMesh proBuilderMesh, Vector3 normal)
     {
+        Vertex[] vertices = proBuilderMesh.GetVertices();
+
+        for(int i = 0; i < vertices.Length; i++)
+        {
+            vertices[i].normal = normal;
+        }
+
         Vector3 aveNormal = ProMaths.Average(proBuilderMesh.GetNormals());
 
         if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
         {
             proBuilderMesh.faces[0].Reverse();
         }
+
+        proBuilderMesh.SetVertices(vertices);
+        proBuilderMesh.ToMesh();
+        proBuilderMesh.Refresh(RefreshMask.Colors);
+        proBuilderMesh.Refresh(RefreshMask.Collisions);
+        proBuilderMesh.Refresh(RefreshMask.Tangents);
+        proBuilderMesh.Refresh(RefreshMask.UV);
     }
 
     /// <summary>
@@ -39,6 +53,7 @@ public static class ProBuilderExtensions
         ProBuilderMesh lid = UnityEngine.Object.Instantiate(polygon);
         lid.faces[0].Reverse();
         polygon.Extrude(polygon.faces, ExtrudeMethod.FaceNormal, extrude);
+        polygon.ToMesh();
         CombineMeshes.Combine(new ProBuilderMesh[] { polygon, lid }, polygon);
         UnityEngine.Object.DestroyImmediate(lid.gameObject);
         polygon.ToMesh();
@@ -57,7 +72,7 @@ public static class ProBuilderExtensions
 
         ActionResult result = ActionResult.NoSelection;
 
-        if (holePoints != null)
+        if (holePoints != null && holePoints.Count > 0)
         {
             result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
         }
@@ -68,9 +83,7 @@ public static class ProBuilderExtensions
 
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
-        proBuilderMesh.MatchFaceToNormal(normal);
-        proBuilderMesh.ToMesh();
-        proBuilderMesh.Refresh();
+        proBuilderMesh.AlignPolygonNormals(normal);
 
         return result;
     }
@@ -196,12 +209,12 @@ public static class ProBuilderExtensions
         ScaleVertices(proBuilderMesh, indices, transformPoint, scale);
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, TransformPoint transformPoint, float scale)
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, RelativePosition transformPoint, float scale)
     {
         ScaleVertices(proBuilderMesh, faces, transformPoint, Vector3.one * scale);
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, TransformPoint transformPoint, Vector3 scale)
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, RelativePosition transformPoint, Vector3 scale)
     {
         List<int> indices = new List<int>();
 
@@ -233,12 +246,12 @@ public static class ProBuilderExtensions
         ScaleVertices(proBuilderMesh, indices, transformPoint, scale);
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, TransformPoint transformPoint, float scale)
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, RelativePosition transformPoint, float scale)
     {
         ScaleVertices(proBuilderMesh, edges, transformPoint, Vector3.one * scale);
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, TransformPoint transformPoint, Vector3 scale)
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, RelativePosition transformPoint, Vector3 scale)
     {
         List<int> indices = new List<int>();
 
@@ -253,7 +266,7 @@ public static class ProBuilderExtensions
         ScaleVertices(proBuilderMesh, indices, transformPoint, scale);
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, float scale)
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, RelativePosition transformPoint, float scale)
     {
         ScaleVertices(proBuilderMesh, indices, transformPoint, Vector3.one * scale);
     }
@@ -291,7 +304,7 @@ public static class ProBuilderExtensions
         proBuilderMesh.ToMesh();
     }
 
-    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, TransformPoint transformPoint, Vector3 scale)
+    public static void ScaleVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> indices, RelativePosition transformPoint, Vector3 scale)
     {
         Vector3[] positions = proBuilderMesh.positions.ToArray();
         List<Vector3> selectedVerts = new();
@@ -354,12 +367,12 @@ public static class ProBuilderExtensions
         RotateVertices(proBuilderMesh, indices, transformPoint, eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, TransformPoint transformPoint, Quaternion rotation)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, RelativePosition transformPoint, Quaternion rotation)
     {
         RotateVertices(proBuilderMesh, edges, transformPoint, rotation.eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, TransformPoint transformPoint, Vector3 eulerAngles)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Edge> edges, RelativePosition transformPoint, Vector3 eulerAngles)
     {
         List<int> indices = new List<int>();
 
@@ -391,12 +404,12 @@ public static class ProBuilderExtensions
         RotateVertices(proBuilderMesh, indices, transformPoint, eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, TransformPoint transformPoint, Quaternion rotation)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, RelativePosition transformPoint, Quaternion rotation)
     {
         RotateVertices(proBuilderMesh, faces, transformPoint, rotation.eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, TransformPoint transformPoint, Vector3 eulerAngles)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<Face> faces, RelativePosition transformPoint, Vector3 eulerAngles)
     {
         List<int> indices = new List<int>();
 
@@ -408,7 +421,7 @@ public static class ProBuilderExtensions
         RotateVertices(proBuilderMesh, indices, transformPoint, eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, TransformPoint transformPoint, Vector3 eulerAngles)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, RelativePosition transformPoint, Vector3 eulerAngles)
     {
         Vector3[] positions = proBuilderMesh.positions.ToArray();
         List<Vector3> selectedVerts = new List<Vector3>();
@@ -423,7 +436,7 @@ public static class ProBuilderExtensions
         RotateVertices(proBuilderMesh, distinctIndices, rotatePoint, eulerAngles);
     }
 
-    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, TransformPoint transformPoint, Quaternion rotation)
+    public static void RotateVertices(this ProBuilderMesh proBuilderMesh, IEnumerable<int> distinctIndices, RelativePosition transformPoint, Quaternion rotation)
     {
         RotateVertices(proBuilderMesh, distinctIndices, transformPoint, rotation.eulerAngles);
     }

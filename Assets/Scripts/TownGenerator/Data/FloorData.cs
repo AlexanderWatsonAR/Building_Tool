@@ -5,7 +5,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 [System.Serializable]
-public class FloorData : IData
+public class FloorData : DirtyData
 {
     [SerializeField, Range(1, 10)] private int m_Columns, m_Rows; 
     [SerializeField, HideInInspector] private ControlPoint[] m_ControlPoints;

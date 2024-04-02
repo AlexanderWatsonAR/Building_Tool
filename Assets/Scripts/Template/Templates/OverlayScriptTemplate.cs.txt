@@ -1,0 +1,50 @@
+using UnityEngine;
+using UnityEditor;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
+using UnityEditor.Overlays;
+
+[Overlay(typeof(SceneView), "#SCRIPTNAME#", true)]
+public class #SCRIPTNAME#Overlay : Overlay, ITransientOverlay
+{
+    [SerializeField] #SCRIPTNAME# m_#SCRIPTNAME#;
+
+    public override VisualElement CreatePanelContent()
+    {
+        if (m_#SCRIPTNAME# == null)
+            return null;
+
+        var root = new VisualElement() { name = "#SCRIPTNAME# Root" };
+
+        SerializedObject serializedObject = new SerializedObject(m_#SCRIPTNAME#);
+
+        SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+        PropertyField dataField = new PropertyField(data);
+        dataField.BindProperty(data);
+
+        root.Add(dataField);
+        
+        return root;
+    }
+
+    public bool visible
+    {
+        get
+        {
+            if (Selection.activeGameObject != null)
+            {
+                bool is#SCRIPTNAME# = Selection.activeGameObject.TryGetComponent(out #SCRIPTNAME# #SCRIPTLOWERCASENAME#);
+
+                if (is#SCRIPTNAME#)
+                {
+                    m_#SCRIPTNAME# = #SCRIPTLOWERCASENAME#;
+
+                }
+                return is#SCRIPTNAME#;
+            }
+            return false;
+        }
+    }
+
+}

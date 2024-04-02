@@ -1,22 +1,24 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-
+using UnityEngine.ProBuilder;
 
 [ExecuteAlways]
 [DisallowMultipleComponent]
 public class Building : MonoBehaviour, IBuildable
 {
-    [SerializeField] private BuildingData m_Data;
+    [SerializeField] BuildingScriptableObject m_Container;
+    [SerializeField] BuildingData m_Data;
 
-    [SerializeField] private bool m_IsPolyPathHandleSelected;
+    [SerializeField] bool m_IsPolyPathHandleSelected;
+
+    [SerializeField] List<Storey> m_Storeys;
+    [SerializeField] Roof m_Roof;
+
     public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
-
     public BuildingData Data => m_Data;
+    public BuildingScriptableObject Container { get { return m_Container; } set { m_Container = value; } }
 
-    private void Reset()
-    {
-        m_Data = new BuildingData();
-    }
     private void OnEnable()
     {
         UnityEditor.EditorApplication.update = Update;
@@ -47,7 +49,7 @@ public class Building : MonoBehaviour, IBuildable
         m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_Data.Path.ControlPointCount + 1 ? true : false;
     }
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as BuildingData;
         return this;
@@ -55,16 +57,16 @@ public class Building : MonoBehaviour, IBuildable
 
     private void Rebuild()
     {
-        m_Data.RoofData = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
+        m_Data.Roof = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
 
-        int count = m_Data.StoreysData.Count;
+        int count = m_Data.Storeys.Count;
 
-        m_Data.StoreysData = new List<StoreyData>(count);
+        m_Data.Storeys = new List<StoreyData>(count);
 
         for(int i = 0; i < count; i++)
         {
             StoreyData storey = new StoreyData() { ControlPoints = m_Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString()};
-            m_Data.StoreysData.Add(storey);
+            m_Data.Storeys.Add(storey);
         }
 
         Build();
@@ -72,18 +74,18 @@ public class Building : MonoBehaviour, IBuildable
 
     public void Build()
     {
-        transform.DeleteChildren();
-        if (!m_Data.Path.IsPathValid/* || !m_HasInitialized*/)
+        Demolish();
+
+        if (!m_Data.Path.IsPathValid)
             return;
 
         Vector3 pos = Vector3.zero;
 
-        for (int i = 0; i < m_Data.StoreysData.Count; i++)
+        for (int i = 0; i < m_Data.Storeys.Count; i++)
         {
-            GameObject next = new GameObject("Storey " + i.ToString());
-            next.transform.SetParent(transform, false);
-            next.transform.localPosition = pos;
-            Storey storey = next.AddComponent<Storey>().Initialize(m_Data.StoreysData[i]) as Storey;
+            Storey storey = CreateStorey(m_Data.Storeys[i]);
+            storey.transform.SetParent(transform, false);
+            storey.transform.localPosition = pos;
             storey.Build();
             pos += (Vector3.up * storey.Data.WallData.Height);
         }
@@ -91,15 +93,39 @@ public class Building : MonoBehaviour, IBuildable
         GameObject roofGO = new GameObject("Roof");
         roofGO.transform.SetParent(transform, false);
         roofGO.transform.localPosition = pos;
-        roofGO.AddComponent<Roof>().Initialize(m_Data.RoofData).Build();
+        roofGO.AddComponent<Roof>().Initialize(m_Data.Roof).Build();
+    }
+
+    private Storey CreateStorey(StoreyData data)
+    {
+        ProBuilderMesh proBuilderMesh = ProBuilderMesh.Create();
+        proBuilderMesh.name = "Storey " + data.ID;
+        Storey storey = proBuilderMesh.AddComponent<Storey>();
+        storey.Initialize(data);
+        return storey;
+    }
+
+    public void AddStorey(string name)
+    {
+        m_Data.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_Data.Path.ControlPoints.ToArray() });
+    }
+
+    public void InitializeRoof()
+    {
+        m_Data.Roof.ControlPoints = m_Data.Path.ControlPoints.ToArray();
+    }
+
+    public void BuildStorey(int index)
+    {
+        m_Storeys[index].Build();
+    }
+
+    public void BuildStoreys()
+    {
+        m_Storeys.BuildCollection();
     }
 
     public void Demolish()
-    {
-
-    }
-
-    public void RevertBuilding()
     {
         transform.DeleteChildren();
     }

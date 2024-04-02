@@ -40,7 +40,7 @@ public enum Axis
     Z, MinusZ, X, MinusX, Y, MinusY
 }
 
-public enum TransformPoint
+public enum RelativePosition
 {
     Middle, Top, Bottom, Left, Right
 }
@@ -74,6 +74,7 @@ public enum OneLineShape
 
 public static class EnumExtensions
 {
+
     public static bool IsElementActive(this WindowElement windowElement, WindowElement comparison)
     {
         return windowElement == WindowElement.Nothing ? false : (windowElement & comparison) != 0;

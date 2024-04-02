@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public abstract class OpeningData
+public abstract class OpeningData : ICloneable
 {
     [SerializeField, Range(0, 0.999f)] protected float m_Height, m_Width;
     [SerializeField, Range(1, 5)] protected int m_Columns, m_Rows;
@@ -29,4 +30,33 @@ public abstract class OpeningData
     {
 
     }
+
+    public object Clone()
+    {
+        return MemberwiseClone();
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not OpeningData)
+            return false;
+
+        OpeningData other = obj as OpeningData;
+
+        if(this.Height == other.Height &&
+           this.Width == other.Width &&
+           this.Columns == other.Columns &&
+           this.Rows == other.Rows)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+
 }

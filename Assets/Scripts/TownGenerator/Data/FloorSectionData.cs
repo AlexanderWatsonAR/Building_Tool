@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class FloorSectionData : IData
+public class FloorSectionData : DirtyData
 {
     [SerializeField] private Vector3[] m_ControlPoints;
     [SerializeField] private float m_Height;

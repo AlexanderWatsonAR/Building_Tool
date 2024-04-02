@@ -8,46 +8,44 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class Storey : MonoBehaviour, IBuildable
 {
     [SerializeReference] private StoreyData m_Data;
 
+    [SerializeField] List<Corner> m_Corners;
+    [SerializeField] List<Wall> m_Walls;
+    [SerializeField] List<Pillar> m_Pillars;
+    [SerializeField] Floor m_Floor;
+
     public StoreyData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as StoreyData;
-
-        if (m_Data.WallData.Material == null)
-        {
-            m_Data.WallData.Material = BuiltinMaterials.defaultMaterial;
-        }
-
-        if (m_Data.PillarData.Material == null)
-        {
-            m_Data.PillarData.Material = BuiltinMaterials.defaultMaterial;
-        }
-
-        if (m_Data.FloorData.Material == null)
-        {
-            m_Data.FloorData.Material = BuiltinMaterials.defaultMaterial;
-        }
+        m_Corners ??= new List<Corner>();
+        m_Walls ??= new List<Wall>();
+        m_Pillars ??= new List<Pillar>();
 
         return this;
     }
 
-    #region Build
     public void Build()
     {
-        transform.DeleteChildren();
+        Demolish();
 
-        BuildPillars();
-        BuildExternalWalls();
+        CreateExternalWalls();
+        CreateCorners();
+        CreatePillars();
+        CreateFloor();
+
+        BuildWalls();
         BuildCorners();
+        BuildPillars();
         BuildFloor();
     }
-    private void BuildPillars()
+    private void CreatePillars()
     {
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Pillars))
             return;
@@ -57,26 +55,25 @@ public class Storey : MonoBehaviour, IBuildable
             m_Data.Pillars = new PillarData[m_Data.ControlPoints.Length];
         }
 
+        m_Pillars = new List<Pillar>();
+
         GameObject pillars = new GameObject("Pillars");
         pillars.transform.SetParent(transform, false);
 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            ProBuilderMesh pillarMesh = ProBuilderMesh.Create();
-            pillarMesh.name = "Pillar " + i.ToString();
-            pillarMesh.AddComponent<Pillar>();
-            pillarMesh.transform.SetParent(pillars.transform, false);
-            pillarMesh.transform.localPosition = m_Data.ControlPoints[i].Position;
-            int index = m_Data.ControlPoints.GetNext(i);
-            pillarMesh.transform.forward = pillarMesh.transform.localPosition.DirectionToTarget(m_Data.ControlPoints[index].Position);
-
-            Pillar pillar = pillarMesh.GetComponent<Pillar>();
             m_Data.Pillars[i] ??= CalculatePillar(i);
 
-            pillar.Initialize(m_Data.Pillars[i]).Build();
+            Pillar pillar = CreatePillar(m_Data.Pillars[i]);
+            pillar.transform.SetParent(pillars.transform, false);
+            pillar.transform.localPosition = m_Data.ControlPoints[i].Position;
+            int index = m_Data.ControlPoints.GetNext(i);
+            pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_Data.ControlPoints[index].Position);
+
+            m_Pillars.Add(pillar);
         }
     }
-    private void BuildCorners()
+    private void CreateCorners()
     {
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
             return;
@@ -91,17 +88,13 @@ public class Storey : MonoBehaviour, IBuildable
 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
-            ProBuilderMesh cornerMesh = ProBuilderMesh.Create();
-            Corner corner = cornerMesh.AddComponent<Corner>();
-            corner.name = "Corner " + i.ToString();
-            corner.transform.SetParent(corners.transform, false);
-            corner.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
-
             m_Data.Corners[i] = CalculateCorner(i);
-            corner.Initialize(m_Data.Corners[i]).Build();
+            Corner corner = CreateCorner(m_Data.Corners[i]);
+            corner.transform.SetParent(corners.transform, false);
+            m_Corners.Add(corner);
         }
     }
-    private void BuildExternalWalls()
+    private void CreateExternalWalls()
     {
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
             return;
@@ -114,44 +107,85 @@ public class Storey : MonoBehaviour, IBuildable
         GameObject walls = new GameObject("Walls");
         walls.transform.SetParent(transform, false);
 
-        //Vector3[] insidePoints = m_Data.InsidePoints;
-
         // Construct the walls 
         for (int i = 0; i < m_Data.ControlPoints.Length; i++)
         {
             m_Data.Walls[i] ??= CalculateWall(i);
 
-            Wall wall = BuildWall(m_Data.Walls[i]);
+            Wall wall = CreateWall(m_Data.Walls[i]);
             wall.transform.SetParent(walls.transform, true);
+
+            m_Walls.Add(wall);
         }
     }
-    private Wall BuildWall(WallData data)
+    private Wall CreateWall(WallData data)
     {
         ProBuilderMesh wallMesh = ProBuilderMesh.Create();
         wallMesh.name = "Wall " + data.ID.ToString();
         Wall wall = wallMesh.AddComponent<Wall>(); 
-        wall.Initialize(data).Build();
+        wall.Initialize(data);
         return wall;
     }
-    private void BuildFloor()
+    private Corner CreateCorner(CornerData data)
+    {
+        ProBuilderMesh cornerMesh = ProBuilderMesh.Create();
+        cornerMesh.name = "Corner " + data.ID.ToString();
+        cornerMesh.GetComponent<Renderer>().sharedMaterial = BuiltinMaterials.defaultMaterial;
+        Corner corner = cornerMesh.AddComponent<Corner>();
+        corner.Initialize(data);
+        return corner;
+    }
+    private Pillar CreatePillar(PillarData data)
+    {
+        int i = data.ID;
+        ProBuilderMesh pillarMesh = ProBuilderMesh.Create();
+        pillarMesh.name = "Pillar " + data.ID.ToString();
+        Pillar pillar = pillarMesh.AddComponent<Pillar>();
+        pillar.Initialize(m_Data.Pillars[i]);
+        return pillar;
+    }
+    private void CreateFloor()
     {
         if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Floor))
             return;
 
-        ProBuilderMesh floor = ProBuilderMesh.Create();
+        ProBuilderMesh floorMesh = ProBuilderMesh.Create();
         
         ControlPoint[] points = new ControlPoint[m_Data.ControlPoints.Length];
         Array.Copy(m_Data.ControlPoints, points, points.Length);
 
-        floor.AddComponent<Floor>().Initialize(new FloorData() { ControlPoints = points }).Build();
+        m_Floor = floorMesh.AddComponent<Floor>().Initialize(new FloorData() { ControlPoints = points }) as Floor;
 
-        floor.transform.SetParent(transform, false);
-        floor.transform.localPosition = Vector3.zero;
+        floorMesh.transform.SetParent(transform, false);
+        floorMesh.transform.localPosition = Vector3.zero;
 
+    }
+
+    #region Build
+    public void BuildCorners()
+    {
+        m_Corners.BuildCollection();
+    }
+    public void BuildPillars()
+    {
+        m_Pillars.BuildCollection();
+    }
+    public void BuildWalls()
+    {
+        m_Walls.BuildCollection();
+    }
+    public void BuildFloor()
+    {
+        m_Floor.Build();
     }
     #endregion
 
     #region Calculate
+    /// <summary>
+    /// Can we migrate all of this to the Corners class?
+    /// </summary>
+    /// <param name="cornerIndex"></param>
+    /// <returns></returns>
     private CornerData CalculateCorner(int cornerIndex)
     {
         bool isConcave = m_Data.ControlPoints.IsConcave(out int[] concavePoints);
@@ -242,7 +276,7 @@ public class Storey : MonoBehaviour, IBuildable
     }
     private PillarData CalculatePillar(int pillarIndex)
     {
-        PillarData data = new PillarData(m_Data.PillarData)
+        PillarData data = new PillarData(m_Data.Pillar)
         {
             ID = pillarIndex
         };
@@ -253,7 +287,13 @@ public class Storey : MonoBehaviour, IBuildable
 
     public void Demolish()
     {
+        transform.DeleteChildren();
 
+        m_Walls?.Clear();
+        m_Corners?.Clear();
+        m_Pillars?.Clear();
+
+        
     }
 
 

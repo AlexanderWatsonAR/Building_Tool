@@ -5,21 +5,21 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class WallData : IData
+public class WallData : DirtyData, ICloneable
 {
     #region Member Variables
-    [SerializeField, HideInInspector] private int m_ID;
-    [SerializeField, HideInInspector] private ControlPoint m_Start, m_End;
-    [SerializeField, HideInInspector] private Vector3 m_Normal;
-    [SerializeField, Range(1, 5)] private int m_Columns, m_Rows;
-    [SerializeField, Range(1, 50)] private float m_Height;
-    [SerializeField, Range(0, 1)] private float m_Depth;
-    [SerializeField, HideInInspector] private bool m_IsTriangle;
-    [SerializeField, HideInInspector] private Material m_Material;
-    [SerializeField] private WallSectionData m_SectionData;
-    [SerializeField] private WallSectionData[] m_Sections; // Sections doesn't seem to be serialized properly (when it was a 2D array)
-    #endregion
+    [SerializeField, HideInInspector] int m_ID;
+    [SerializeField, HideInInspector] ControlPoint m_Start, m_End;
+    [SerializeField, HideInInspector] Vector3 m_Normal;
 
+    [SerializeField, Range(1, 5)] int m_Columns, m_Rows;
+    [SerializeField, Range(1, 50)] float m_Height;
+    [SerializeField, Range(0, 1)] float m_Depth;
+    [SerializeField, HideInInspector] bool m_IsTriangle;
+    [SerializeField, HideInInspector] Material m_Material;
+    [SerializeField] WallSectionData m_SectionData;
+    [SerializeField] WallSectionData[] m_Sections;
+    #endregion
 
     #region Accessors
     public WallSectionData SectionData { get{ return m_SectionData; } set { m_SectionData = value; } }
@@ -76,28 +76,10 @@ public class WallData : IData
         m_IsTriangle = false;
     }
 
-    public Vector3[] BottomPoints()
+    public object Clone()
     {
+        WallData clone = MemberwiseClone() as WallData;
 
-        return null;
-        //int bl = 0;
-        //int tl = 1;
-        //int tr = 2;
-        //int br = 3;
-
-        //Vector3[] bottom = new Vector3[4];
-
-        //bottom[bl] = m_ControlPoints[bl];
-        //bottom[br] = m_ControlPoints[br];
-
-        //Vector3 dir = bottom[bl].DirectionToTarget(bottom[br]);
-        //Vector3 forward = Vector3.Cross(Vector3.up, dir);
-
-        //bottom[tl] = bottom[bl] + (forward * m_Depth);
-        //bottom[tr] = bottom[br] + (forward * m_Depth);
-
-        //return bottom;
-
+        return Clone();
     }
-
 }

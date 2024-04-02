@@ -15,9 +15,6 @@ public class WallOverlay : Overlay, ITransientOverlay
         root.Add(new Slider("Columns") { });
         root.Add(new Slider("Rows"));
         return root;
-
-
-
     }
 
     public bool visible

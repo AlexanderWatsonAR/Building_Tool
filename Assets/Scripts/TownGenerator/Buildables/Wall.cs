@@ -11,7 +11,7 @@ using System;
 public class Wall : MonoBehaviour, IBuildable
 {
     [SerializeReference] WallData m_Data;
-    private List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
+    List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
     private List<Vector3[]> SubPoints
     {
@@ -34,19 +34,20 @@ public class Wall : MonoBehaviour, IBuildable
 
     public WallData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as WallData;
 
-        Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
-        Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
+        //Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
+        //Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
 
         m_Data.SectionData = new WallSectionData
         {
             Depth = m_Data.Depth,
             Window = DefineWindowDefaults(),
-            Door = DefineDoorDefaults(faceNormal),
-            DoorFrame = DefineFrameDefaults(faceNormal),
+            Door = DefineDoorDefaults(),
+            DoorFrame = DefineFrameDefaults(),
+            Normal = m_Data.Normal
         };
 
         return this;
@@ -56,25 +57,32 @@ public class Wall : MonoBehaviour, IBuildable
     {
         FrameData outerFrame = new FrameData()
         {
-            Depth = m_Data.Depth
+            Depth = m_Data.Depth,
+            Normal = m_Data.Normal
+            
         };
         GridFrameData innerFrame = new GridFrameData()
         {
-            Depth = m_Data.Depth * 0.5f
+            Depth = m_Data.Depth * 0.5f,
+            Normal = m_Data.Normal
+            
         };
-        Polygon3DData pane = new Polygon3DData()
+        PaneData pane = new PaneData()
         {
-            Depth = m_Data.Depth * 0.25f
+            Depth = m_Data.Depth * 0.25f,
+            Normal = m_Data.Normal
         };
         DoorData leftShutter = new DoorData()
         {
-            Depth = m_Data.Depth * 0.5f
+            Depth = m_Data.Depth * 0.5f,
+            Normal = m_Data.Normal
+
         };
         DoorData rightShutter = new DoorData()
         {
-            Depth = m_Data.Depth * 0.5f
+            Depth = m_Data.Depth * 0.5f,
+            Normal = m_Data.Normal
         };
-
         WindowData winData = new WindowData()
         {
             OuterFrame = outerFrame,
@@ -83,28 +91,27 @@ public class Wall : MonoBehaviour, IBuildable
             LeftShutter = leftShutter,
             RightShutter = rightShutter
         };
-
         return winData;
     }
-
-    private DoorData DefineDoorDefaults(Vector3 normal)
+    private DoorData DefineDoorDefaults()
     {
         DoorData doorData = new DoorData()
         {
-            Normal = normal,
-            HingePoint = TransformPoint.Left,
+            Normal = m_Data.Normal,
+            Hinge = new TransformData()
+            {
+                RelativePosition = RelativePosition.Left
+            }
         };
         return doorData;
     }
-
-    private FrameData DefineFrameDefaults(Vector3 normal)
+    private FrameData DefineFrameDefaults()
     {
         FrameData frameData = new FrameData()
         {
             Depth = m_Data.Depth * 1.1f,
-            Normal = normal
+            Normal = m_Data.Normal
         };
-
         return frameData;
     }
 
@@ -137,11 +144,14 @@ public class Wall : MonoBehaviour, IBuildable
                 m_Data.Sections[count] ??= new WallSectionData(m_Data.SectionData)
                 {
                     ID = new Vector2Int(x, y),
-                    Polygon = new PolygonData(points),
-                    Depth = m_Data.Depth
+                    Polygon = new PolygonData(points, m_Data.Normal),
+                    Normal = m_Data.Normal,
+                    Depth = m_Data.Depth,
+                    IsDirty = true
                 };
 
                 m_Data.Sections[count].Polygon.ControlPoints = points;
+                m_Data.Sections[count].Polygon.Normal = m_Data.Normal;
                 m_Data.Sections[count].Depth = m_Data.Depth;
 
                 WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_Data.Sections[count]) as WallSection;

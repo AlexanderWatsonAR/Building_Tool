@@ -6,313 +6,198 @@ using UnityEditor.Rendering;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
+using UnityEditor.Build.Reporting;
 
 [CustomPropertyDrawer(typeof(StoreyData))]
-public class StoreyDataDrawer : PropertyDrawer
-{//
+public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
+{
+    StoreyDataSerializedProperties m_Props;
+
+    [SerializeField] StoreyData m_PreviousData;
+    [SerializeField] StoreyData m_CurrentData;
+    [SerializeField] IBuildable m_Buildable;
+
+    VisualElement m_Root;
+    Foldout m_StoreyFoldout, m_WallFoldout, m_CornerFoldout, m_PillarFoldout, m_FloorFoldout;
+    PropertyField m_ActiveElements;
+    PropertyField m_Corner;
+    PropertyField m_CornerType, m_CornerSides;
+    PropertyField m_WallHeight, m_WallDepth;
+    PropertyField m_Pillar;
+    PropertyField m_FloorHeight;
+
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
-        StoreyDataSerializedProperties props = new StoreyDataSerializedProperties(data);
-        StoreyData storeyData = data.GetUnderlyingValue() as StoreyData;
-        IBuildable buildable = data.serializedObject.targetObject as IBuildable; // what if the gameObject has multiple buildable components?
+        Initialize(data);
+        DefineFields();
+        BindFields();
+        RegisterValueChangeCallbacks();
+        AddFieldsToRoot();
 
-        VisualElement container = new VisualElement();
+        return m_Root;
+    }
 
-        if (storeyData.Corners == null || storeyData.Walls == null || storeyData.Pillars == null)
-            return container;
+    public void Initialize(SerializedProperty data)
+    {
+        m_Props = new StoreyDataSerializedProperties(data);
+        m_CurrentData = data.GetUnderlyingValue() as StoreyData;
+        m_PreviousData = new StoreyData(m_CurrentData);
+        m_Buildable = data.serializedObject.targetObject as IBuildable;
+    }
 
-        #region Define Visual Elements
-        Foldout nameFoldout = new Foldout() { text = storeyData.Name };
+    public void DefineFields()
+    {
+        m_Root = new VisualElement() {name = nameof(StoreyData) + "_" + m_Props.Name.stringValue + "_Root" };
+        m_StoreyFoldout = new Foldout() { text = m_Props.Name.stringValue };
+        m_ActiveElements = new PropertyField(m_Props.ActiveElements);
 
-        EnumFlagsField activeStoreyElementsField = new EnumFlagsField("Active Elements", props.ActiveElements.GetEnumValue<StoreyElement>());
-        activeStoreyElementsField.BindProperty(props.ActiveElements);
-        
-        #region Wall
-        Foldout wallFoldout = new Foldout() { text = "Walls" };
+        m_WallFoldout = new Foldout() { text = "Walls" };
+        m_WallHeight = new PropertyField(m_Props.Wall.Height);
+        m_WallHeight.SetEnabled(m_Buildable is Building);
+        m_WallDepth = new PropertyField(m_Props.Wall.Depth);
 
-        PropertyField wallHeightField = new PropertyField(props.Wall.Height);
-        wallHeightField.BindProperty(props.Wall.Height);
-        wallHeightField.SetEnabled(buildable is Building);
+        m_CornerFoldout = new Foldout() { text = "Corners" };
+        m_Corner = new PropertyField(m_Props.Corner.Data);
 
-        PropertyField wallDepthField = new PropertyField(props.Wall.Depth);
-        wallDepthField.BindProperty(props.Wall.Depth);
-        #endregion
+        m_PillarFoldout = new Foldout() { text = "Pillars" };
+        m_Pillar = new PropertyField(m_Props.Pillar.Data);
 
-        #region Corner
+        m_FloorFoldout = new Foldout() { text = "Floor" };
+        m_FloorHeight = new PropertyField(m_Props.Floor.Height);
+    }
 
-        Foldout cornerFoldout = new Foldout() { text = "Corner" };
-        EnumField cornerTypeField = new EnumField(props.Corner.Type.GetEnumValue<CornerType>());
-        cornerTypeField.BindProperty(props.Corner.Type);
+    public void BindFields()
+    {
+        m_ActiveElements.BindProperty(m_Props.ActiveElements);
+        m_WallHeight.BindProperty(m_Props.Wall.Height);
+        m_WallDepth.BindProperty(m_Props.Wall.Depth);
+        m_Corner.BindProperty(m_Props.Corner.Data);
+        m_Pillar.BindProperty(m_Props.Pillar.Data);
+        m_FloorHeight.BindProperty(m_Props.Floor.Height);
+    }
 
-        PropertyField cornerSidesField = new PropertyField(props.Corner.Sides);
-        cornerSidesField.BindProperty(props.Corner.Sides);
-
-        if (props.Corner.Type.GetEnumValue<CornerType>() != CornerType.Round)
+    public void RegisterValueChangeCallbacks()
+    {
+        m_ActiveElements.RegisterValueChangeCallback(evt =>
         {
-            cornerSidesField.SetEnabled(false);
-        }
-        #endregion
+            StoreyElement activeElement = evt.changedProperty.GetEnumValue<StoreyElement>();
 
-        #region Pillar
-        Foldout pillarFoldout = new Foldout() { text = "Pillars"};
-
-        PropertyField pillarHeightField = new PropertyField(props.Pillar.Height);
-        pillarHeightField.BindProperty(props.Pillar.Height);
-
-        PropertyField pillarWidthField = new PropertyField(props.Pillar.Width);
-        pillarWidthField.BindProperty(props.Pillar.Width);
-
-        PropertyField pillarDepthField = new PropertyField(props.Pillar.Depth);
-        pillarDepthField.BindProperty(props.Pillar.Depth);
-
-        PropertyField pillarSidesField = new PropertyField(props.Pillar.Sides);
-        pillarSidesField.BindProperty(props.Pillar.Sides);
-
-        PropertyField pillarIsSmoothField = new PropertyField(props.Pillar.IsSmooth);
-        pillarIsSmoothField.BindProperty(props.Pillar.IsSmooth);
-        #endregion
-
-        #region Floor
-        Foldout floorFoldout = new Foldout() { text = "Floor" };
-
-        PropertyField floorHeightField = new PropertyField(props.Floor.Height);
-        floorHeightField.BindProperty(props.Floor.Height);
-
-        #endregion
-
-        #endregion
-
-        #region Register Value Change Callback
-        activeStoreyElementsField.RegisterValueChangedCallback(evt =>
-        {
-            if (evt.newValue == null)
+            if (activeElement == m_PreviousData.ActiveElements)
                 return;
 
-            if (evt.previousValue == evt.newValue)
-                return;
+            m_PreviousData.ActiveElements = activeElement;
 
-            bool isWallActive = props.ActiveElements.GetEnumValue<StoreyElement>().IsElementActive(StoreyElement.Walls);
-            bool isPillarActive = props.ActiveElements.GetEnumValue<StoreyElement>().IsElementActive(StoreyElement.Pillars);
-            bool isFloorActive = props.ActiveElements.GetEnumValue<StoreyElement>().IsElementActive(StoreyElement.Floor);
+            bool isWallActive = activeElement.IsElementActive(StoreyElement.Walls);
+            bool isPillarActive = activeElement.IsElementActive(StoreyElement.Pillars);
+            bool isFloorActive = activeElement.IsElementActive(StoreyElement.Floor);
 
-            if (isWallActive == wallFoldout.enabledSelf &&
-               isPillarActive == pillarFoldout.enabledSelf &&
-               isFloorActive == floorFoldout.enabledSelf)
-                return;
+            m_WallFoldout.SetEnabled(isWallActive);
+            m_PillarFoldout.SetEnabled(isPillarActive);
+            m_FloorFoldout.SetEnabled(isFloorActive);
 
-            wallFoldout.SetEnabled(isWallActive);
-            pillarFoldout.SetEnabled(isPillarActive);
-            floorFoldout.SetEnabled(isFloorActive);
-
-            buildable.Build();
         });
-
-        #region Wall
-        wallHeightField.RegisterValueChangeCallback(evt =>
+        m_WallHeight.RegisterValueChangeCallback(evt =>
         {
-            if (storeyData.Walls == null)
+            if (m_CurrentData.Walls == null)
                 return;
+
+            float height = evt.changedProperty.floatValue;
+
+            if (height == m_PreviousData.WallData.Height)
+                return;
+
+            m_PreviousData.WallData.Height = height;
 
             bool rebuild = false;
 
-            for (int i = 0; i < storeyData.Walls.Length; i++)
+            for (int i = 0; i < m_CurrentData.Walls.Length; i++)
             {
-                if(storeyData.Walls[i].Height != evt.changedProperty.floatValue)
+                if (m_CurrentData.Walls[i].Height != height)
                     rebuild = true;
 
-                storeyData.Walls[i].Height = evt.changedProperty.floatValue;
+                m_CurrentData.Walls[i].Height = height;
             }
 
-            if(rebuild)
-                buildable.Build();
+            // How do we build via update in this instance?
+            // The height should be the same for each wall, (the only place you can edit the wall height is here)
+            
+
 
         });
-        wallDepthField.RegisterValueChangeCallback(evt =>
+        m_WallDepth.RegisterValueChangeCallback(evt =>
         {
-            if (storeyData.Walls == null)
+            if (m_CurrentData.Walls == null)
                 return;
+
+            float depth = evt.changedProperty.floatValue;
+
+            if (depth == m_PreviousData.WallData.Depth)
+                return;
+
+            m_PreviousData.WallData.Depth = depth;
 
             bool rebuild = false;
 
-            for (int i = 0; i < storeyData.Walls.Length; i++)
+            for (int i = 0; i < m_CurrentData.Walls.Length; i++)
             {
-                if(storeyData.Walls[i].Depth != evt.changedProperty.floatValue)
+                if (m_CurrentData.Walls[i].Depth != depth)
                     rebuild = true;
 
-                storeyData.Walls[i].Depth = evt.changedProperty.floatValue;
+                m_CurrentData.Walls[i].Depth = depth;
             }
-
-            if(rebuild)
-                buildable.Build();
         });
-        #endregion
-
-        #region Corner
-        cornerTypeField.RegisterValueChangedCallback(evt =>
+        m_Corner.RegisterValueChangeCallback(evt =>
         {
-            if (evt.newValue == null)
-                return;
+            CornerData corner = evt.changedProperty.GetUnderlyingValue() as CornerData;
 
-            if (evt.previousValue == evt.newValue)
-                return;
-
-            cornerSidesField.SetEnabled((CornerType)evt.newValue == CornerType.Round);
-            buildable.Build();
-        });
-        cornerSidesField.RegisterValueChangeCallback(evt =>
-        {
-            if (evt == null)
-                return;
-
-            bool rebuild = false;
-
-            for(int i = 0; i < storeyData.Corners.Length; i++)
+            if (m_PreviousData.CornerData.Equals(corner))
             {
-                if (storeyData.Corners[i].Sides != evt.changedProperty.intValue)
-                    rebuild = true;
-
-                storeyData.Corners[i].Sides = evt.changedProperty.intValue;
+                return;
             }
 
-            if(rebuild)
-                buildable.Build();
-        });
-        #endregion
+            m_PreviousData.CornerData.Sides = corner.Sides;
+            m_PreviousData.CornerData.Type = corner.Type;
 
-        #region Pillar
-        pillarHeightField.RegisterValueChangeCallback(evt =>
-        {
-            if (storeyData.Pillars == null)
-                return;
-
-            bool rebuild = false;
-
-            for (int i = 0; i < storeyData.Pillars.Length; i++)
+            for (int i = 0; i < m_CurrentData.Pillars.Length; i++)
             {
-                if (storeyData.Pillars[i].Height != evt.changedProperty.floatValue)
-                    rebuild = true;
-
-                storeyData.Pillars[i].Height = evt.changedProperty.floatValue;
+                m_CurrentData.Corners[i] = new CornerData(corner);
             }
 
-            if(rebuild)
-                buildable.Build();
         });
-        pillarDepthField.RegisterValueChangeCallback(evt =>
+        m_Pillar.RegisterValueChangeCallback(evt =>
         {
-            if (storeyData.Pillars == null)
-                return;
+            PillarData pillar = evt.changedProperty.GetUnderlyingValue() as PillarData;
 
-            bool rebuild = false;
-
-            for (int i = 0; i < storeyData.Pillars.Length; i++)
+            if(m_PreviousData.Pillar.Equals(pillar))
             {
-                if (storeyData.Pillars[i].Depth != evt.changedProperty.floatValue)
-                    rebuild = true;
-
-                storeyData.Pillars[i].Depth = evt.changedProperty.floatValue;
+                return;
             }
 
-            if(rebuild)
-                buildable.Build();
-        });
-        pillarWidthField.RegisterValueChangeCallback(evt =>
-        {
-            if (storeyData.Pillars == null)
-                return;
+            m_PreviousData.Pillar.Height = pillar.Height;
+            m_PreviousData.Pillar.Width = pillar.Width;
+            m_PreviousData.Pillar.Depth = pillar.Depth;
+            m_PreviousData.Pillar.Sides = pillar.Sides;
+            m_PreviousData.Pillar.IsSmooth = pillar.IsSmooth;
 
-            bool rebuild = false;
-
-            for (int i = 0; i < storeyData.Pillars.Length; i++)
+            for(int i = 0; i < m_CurrentData.Pillars.Length; i++)
             {
-                if (storeyData.Pillars[i].Width != evt.changedProperty.floatValue)
-                    rebuild = true;
-
-                storeyData.Pillars[i].Width = evt.changedProperty.floatValue;
+                m_CurrentData.Pillars[i] = new PillarData(pillar);
             }
-
-            if(rebuild)
-                buildable.Build();
         });
-        pillarSidesField.RegisterValueChangeCallback(evt =>
-        {
-            if (storeyData.Pillars == null)
-                return;
+    }
 
-            bool rebuild = false;
-
-            for (int i = 0; i < storeyData.Pillars.Length; i++)
-            {
-                if (storeyData.Pillars[i].Sides != evt.changedProperty.intValue)
-                    rebuild = true;
-
-                storeyData.Pillars[i].Sides = evt.changedProperty.intValue;
-            }
-
-            if(rebuild)
-                buildable.Build();
-        });
-        pillarIsSmoothField.RegisterValueChangeCallback(evt =>
-        {
-            if (storeyData.Pillars == null)
-                return;
-
-            if (evt.changedProperty.GetUnderlyingValue() == null)
-                return;
-
-            bool rebuild = false;
-
-            for (int i = 0; i < storeyData.Pillars.Length; i++)
-            {
-                if (storeyData.Pillars[i].IsSmooth != evt.changedProperty.boolValue)
-                    rebuild = true;
-
-                storeyData.Pillars[i].IsSmooth = evt.changedProperty.boolValue;
-            }
-
-            if(rebuild)
-                buildable.Build();
-        });
-        #endregion
-
-        #region Floor
-        floorHeightField.RegisterValueChangeCallback(evt =>
-        {
-            if (storeyData.FloorData == null)
-                return;
-
-            bool rebuild = false;
-
-            if (storeyData.FloorData.Height != evt.changedProperty.floatValue)
-                rebuild = true;
-
-            storeyData.FloorData.Height = evt.changedProperty.floatValue;
-
-            if(rebuild)
-                buildable.Build();
-        });
-        #endregion
-        #endregion
-
-        #region Add Fields to Container
-        container.Add(nameFoldout);
-        wallFoldout.Add(wallHeightField);
-        wallFoldout.Add(wallDepthField);
-        wallFoldout.Add(cornerFoldout);
-        cornerFoldout.Add(cornerTypeField);
-        cornerFoldout.Add(cornerSidesField);
-        pillarFoldout.Add(pillarHeightField);
-        pillarFoldout.Add(pillarWidthField);
-        pillarFoldout.Add(pillarDepthField);
-        pillarFoldout.Add(pillarSidesField);
-        pillarFoldout.Add(pillarIsSmoothField);
-        floorFoldout.Add(floorHeightField);
-        nameFoldout.Add(activeStoreyElementsField);
-        nameFoldout.Add(wallFoldout);
-        nameFoldout.Add(pillarFoldout);
-        nameFoldout.Add(floorFoldout);
-        #endregion
-
-        return container;
+    public void AddFieldsToRoot()
+    {
+        m_Root.Add(m_StoreyFoldout);
+        m_WallFoldout.Add(m_WallHeight);
+        m_WallFoldout.Add(m_WallDepth);
+        m_WallFoldout.Add(m_CornerFoldout);
+        m_CornerFoldout.Add(m_Corner);
+        m_PillarFoldout.Add(m_Pillar);
+        m_FloorFoldout.Add(m_FloorHeight);
+        m_StoreyFoldout.Add(m_ActiveElements);
+        m_StoreyFoldout.Add(m_WallFoldout);
+        m_StoreyFoldout.Add(m_PillarFoldout);
+        m_StoreyFoldout.Add(m_FloorFoldout);
     }
 }

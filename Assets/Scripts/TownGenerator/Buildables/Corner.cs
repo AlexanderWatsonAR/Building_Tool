@@ -10,11 +10,11 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class Corner : MonoBehaviour, IBuildable
 {
-    [SerializeReference] private CornerData m_Data;
+    [SerializeReference] CornerData m_Data;
 
-    [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
+    [SerializeField] ProBuilderMesh m_ProBuilderMesh;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as CornerData;
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
@@ -63,7 +63,7 @@ public class Corner : MonoBehaviour, IBuildable
 
     public void Demolish()
     {
-
+        DestroyImmediate(gameObject);
     }
 
     private void Rebuild(ProBuilderMesh mesh)

@@ -1,7 +1,7 @@
 
 public interface IBuildable
 {
-    IBuildable Initialize(IData data);
+    IBuildable Initialize(DirtyData data);
     void Build();
     void Demolish();
 

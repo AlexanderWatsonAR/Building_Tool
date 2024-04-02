@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class RoofTileData : IData
+public class RoofTileData : DirtyData
 {
     #region Member Variables
     [SerializeField, HideInInspector] private int m_ID;
