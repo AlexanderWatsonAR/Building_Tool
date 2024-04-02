@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 
 [System.Serializable]
-public class PillarData : IData
+public class PillarData : DirtyData
 {
     [SerializeField, HideInInspector] int m_ID;
     [SerializeField, HideInInspector] Vector3[] m_ControlPoints;

@@ -7,7 +7,7 @@ public class Corners : MonoBehaviour, IBuildable
     [SerializeField] CornersData m_Data;
     [SerializeField] Corner[] m_Corners;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as CornersData;
         m_Corners = new Corner[m_Data.Corners.Length];

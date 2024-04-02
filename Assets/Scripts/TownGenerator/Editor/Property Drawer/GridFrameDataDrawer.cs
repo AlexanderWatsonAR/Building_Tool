@@ -9,10 +9,8 @@ using Unity.VisualScripting;
 [CustomPropertyDrawer(typeof(GridFrameData))]
 public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
 {
-    IBuildable m_Buildable;
-
+    [SerializeField] GridFrameData m_CurrentData;
     [SerializeField] GridFrameData m_PreviousData;
-    //[SerializeField] GridFrameData m_CurrentData;
 
     GridFrameDataSerializedProperties m_Props;
     VisualElement m_Root;
@@ -23,8 +21,8 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         Initialize(data);
         m_Root.name = nameof(GridFrameData) + "_Root";
-        GridFrameData current = data.GetUnderlyingValue() as GridFrameData;
-        m_PreviousData = new GridFrameData(current);
+        m_CurrentData = data.GetUnderlyingValue() as GridFrameData;
+        m_PreviousData = m_CurrentData.Clone() as GridFrameData;
 
         DefineFields();
         BindFields();
@@ -37,7 +35,6 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         m_Root = new VisualElement();
         m_Props = new GridFrameDataSerializedProperties(data);
-        m_Buildable = data.serializedObject.targetObject as IBuildable;
     }
     public void DefineFields()
     {
@@ -66,14 +63,9 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
 
             m_PreviousData.Scale = scale;
 
-            GridFrameData[] frames = GetDataFromBuildable();
+            GridFrame.CalculateHoleData(m_CurrentData);
 
-            foreach(GridFrameData frame in frames)
-            {
-                frame.Scale = scale;
-            }
-
-            Build();
+            m_CurrentData.IsDirty = true;
         });
         m_Depth.RegisterValueChangeCallback(evt =>
         {
@@ -81,8 +73,7 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
                 return;
 
             m_PreviousData.Depth = evt.changedProperty.floatValue;
-
-            Build();
+            m_CurrentData.IsDirty = true;
         });
         m_Columns.RegisterValueChangeCallback(evt => 
         {
@@ -91,8 +82,9 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
 
             m_PreviousData.Columns = evt.changedProperty.intValue;
 
-            Build();
+            GridFrame.CalculateHoleData(m_CurrentData);
 
+            m_CurrentData.IsDirty = true;
         });
         m_Rows.RegisterValueChangeCallback(evt =>
         {
@@ -101,8 +93,9 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
 
             m_PreviousData.Rows = evt.changedProperty.intValue;
 
-            Build();
+            GridFrame.CalculateHoleData(m_CurrentData);
 
+            m_CurrentData.IsDirty = true;
         });
     }
     public void AddFieldsToRoot()
@@ -112,65 +105,6 @@ public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
         m_Root.Add(m_Grid);
         m_Root.Add(m_Scale);
         m_Root.Add(m_Depth);
-    }
-    /// <summary>
-    /// A bit complicated, but this alllows us to modify the grid frame data from multiple objects.
-    /// </summary>
-    /// <returns></returns>
-    private GridFrameData[] GetDataFromBuildable()
-    {
-        GridFrameData[] frameData = null;
-
-        switch(m_Buildable)
-        {
-            case WallSection:
-                WallSection section = m_Buildable as WallSection;
-                switch (section.Data.WallElement)
-                {
-                    case WallElement.Window:
-                        frameData = new GridFrameData[section.Data.WindowOpening.Windows.Length];
-                        for(int i = 0; i < frameData.Length; i++)
-                        {
-                            frameData[i] = section.Data.WindowOpening.Windows[i].InnerFrame;
-                        }
-                        break;
-                }
-           break;
-            case GridFrameData:
-                frameData = new GridFrameData[0];
-                break;
-        }
-
-        return frameData;
-    }
-
-
-    private void Build()
-    {
-        switch (m_Buildable)
-        {
-            case GridFrame:
-                m_Buildable.Build();
-                break;
-            case Window:
-                {
-                    // window innerframe data & gridframedata are the same object.
-                    Window window = m_Buildable as Window;
-                    window.Data.DoesInnerFrameNeedRebuild = true;
-                    window.BuildInnerFrame();
-                }
-                break;
-            case WallSection:
-                // TODO: We want to pass the grid frame data down to the windows collection.
-                WallSection section = m_Buildable as WallSection;
-                switch(section.Data.WallElement)
-                {
-                    case WallElement.Window:
-                        section.BuildWindows(false, true);
-                        break;
-                }
-                break;
-        }
     }
 
 }

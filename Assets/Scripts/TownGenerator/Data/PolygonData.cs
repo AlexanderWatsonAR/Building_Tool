@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class PolygonData
+public class PolygonData: ICloneable
 {
     [SerializeField] Vector3[] m_ControlPoints;
     [SerializeField] Vector3 m_Normal;
@@ -25,6 +26,9 @@ public class PolygonData
     {
 
     }
-
+    public object Clone()
+    {
+        return this.MemberwiseClone();
+    }
 
 }

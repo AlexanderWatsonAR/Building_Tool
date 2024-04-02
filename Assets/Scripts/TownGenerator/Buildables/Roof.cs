@@ -18,7 +18,7 @@ public class Roof : MonoBehaviour, IBuildable
 
     public RoofData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as RoofData;
         m_Data.TileData.Material ??= BuiltinMaterials.defaultMaterial;

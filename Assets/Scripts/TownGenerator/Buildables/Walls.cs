@@ -7,7 +7,7 @@ public class Walls : MonoBehaviour, IBuildable
     [SerializeField] WallsData m_Data;
     [SerializeField] Wall[] m_Walls;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as WallsData;
         m_Walls = new Wall[m_Data.Walls.Length];

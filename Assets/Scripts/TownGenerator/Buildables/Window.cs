@@ -1,14 +1,8 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Unity.VisualScripting;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 using UnityEngine.ProBuilder;
-using UnityEngine.ProBuilder.MeshOperations;
 
 public class Window : MonoBehaviour, IBuildable
 {
@@ -22,7 +16,7 @@ public class Window : MonoBehaviour, IBuildable
 
     public WindowData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as WindowData;
         return this;
@@ -36,6 +30,7 @@ public class Window : MonoBehaviour, IBuildable
         outerFrameMesh.transform.SetParent(transform, false);
         Frame outerFrame = outerFrameMesh.AddComponent<Frame>();
         outerFrame.Initialize(CalculateOuterFrame());
+        outerFrame.Data.IsDirty = true;
         return outerFrame;
     }
     private GridFrame CreateInnerFrame()
@@ -45,6 +40,7 @@ public class Window : MonoBehaviour, IBuildable
         innerFrameMesh.transform.SetParent(transform, false);
         GridFrame innerFrame = innerFrameMesh.AddComponent<GridFrame>();
         innerFrame.Initialize(CalculateInnerFrame());
+        innerFrame.Data.IsDirty = true;
         return innerFrame;
     }
     private Pane CreatePane()
@@ -54,6 +50,7 @@ public class Window : MonoBehaviour, IBuildable
         paneMesh.transform.SetParent(transform, false);
         Pane pane = paneMesh.AddComponent<Pane>();
         pane.Initialize(CalculatePane());
+        pane.Data.IsDirty = true;
         return pane;
     }
     private Door CreateLeftShutter(Vector3[] controlPoints)
@@ -63,9 +60,9 @@ public class Window : MonoBehaviour, IBuildable
         leftShutterMesh.transform.SetParent(transform, false);
         Door leftShutter = leftShutterMesh.AddComponent<Door>();
         DoorData data = m_Data.LeftShutter;
-        data.Polygon.ControlPoints = controlPoints;
-        data.Polygon.Normal = m_Data.Polygon.Normal;
+        data.SetPolygon(controlPoints, m_Data.Polygon.Normal);
         leftShutter.Initialize(data);
+        leftShutter.Data.IsDirty = true;
         return leftShutter;
     }
     private Door CreateRightShutter(Vector3[] controlPoints)
@@ -75,9 +72,9 @@ public class Window : MonoBehaviour, IBuildable
         rightShutterMesh.transform.SetParent(transform, false);
         Door rightShutter = rightShutterMesh.AddComponent<Door>();
         DoorData data = m_Data.RightShutter;
-        data.Polygon.ControlPoints = controlPoints;
-        data.Polygon.Normal = m_Data.Polygon.Normal;
+        data.SetPolygon(controlPoints, m_Data.Polygon.Normal);
         rightShutter.Initialize(data);
+        rightShutter.Data.IsDirty = true;
         return rightShutter;
     }
     #endregion
@@ -86,35 +83,46 @@ public class Window : MonoBehaviour, IBuildable
     private FrameData CalculateOuterFrame()
     {
         FrameData frameData = m_Data.OuterFrame;
-        frameData.Polygon.ControlPoints = m_Data.Polygon.ControlPoints;
-        frameData.Polygon.Normal = m_Data.Polygon.Normal;
+        frameData.SetPolygon(m_Data.Polygon.ControlPoints, m_Data.Polygon.Normal);
         return frameData;
     }
     private GridFrameData CalculateInnerFrame()
     {
         GridFrameData frameData = m_Data.InnerFrame;
-        frameData.Polygon.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
-        frameData.Polygon.Normal = m_Data.Polygon.Normal;
+        Vector3[] controlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+        Vector3 normal = m_Data.Polygon.Normal;
+        frameData.SetPolygon(controlPoints, normal);
+
         return frameData;
     }
     private Polygon3DData CalculatePane()
     {
         Polygon3DData pane = m_Data.Pane;
-        pane.Polygon.ControlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
-        pane.Polygon.Normal = m_Data.Polygon.Normal;
+        Vector3[] controlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+        Vector3 normal = m_Data.Polygon.Normal;
+
+        pane.SetPolygon(controlPoints, normal);
+
         return pane;
     }
     #endregion
 
     #region Build
+
+    #region Rebuild
     public void Rebuild()
     {
+        if (!m_Data.IsDirty)
+            return;
+
         transform.DeleteChildren();
 
         RebuildOuterFrame();
         RebuildInnerFrame();
         RebuildPane();
         RebuildShutters();
+
+        m_Data.IsDirty = false;
     }
     public void RebuildOuterFrame()
     {
@@ -156,36 +164,36 @@ public class Window : MonoBehaviour, IBuildable
 
         BuildShutters();
     }
+    #endregion
+
     public void BuildOuterFrame()
     {
-        if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.DoesOuterFrameNeedRebuild))
+        if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.OuterFrame.IsDirty))
         {
-            m_OuterFrame = m_OuterFrame != null ? m_OuterFrame : CreateOuterFrame();
+            m_OuterFrame = m_OuterFrame != null ? m_OuterFrame : CreateOuterFrame(); // What is we need to recalc the points
             m_OuterFrame.Build();
-            m_Data.DoesOuterFrameNeedRebuild = false;
+            m_OuterFrame.Data.IsDirty = false;
         }
     }
     public void BuildInnerFrame()
     {
-        if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_Data.DoesInnerFrameNeedRebuild))
+        if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_Data.InnerFrame.IsDirty))
         {
             m_InnerFrame = m_InnerFrame != null ? m_InnerFrame : CreateInnerFrame();
             m_InnerFrame.Build();
-            m_Data.DoesInnerFrameNeedRebuild = false;
         }
     }
     public void BuildPane()
     {
-        if (m_Data.IsPaneActive && (m_Pane == null || m_Data.DoesPaneNeedRebuild))
+        if (m_Data.IsPaneActive && (m_Pane == null || m_Data.Pane.IsDirty))
         {
             m_Pane = m_Pane != null ? m_Pane : CreatePane();
             m_Pane.Build();
-            m_Data.DoesPaneNeedRebuild = false;
         }
     }
     public void BuildShutters()
     {
-        if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.DoShuttersNeedRebuild))
+        if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.LeftShutter.IsDirty || m_Data.RightShutter.IsDirty))
         {
             IList<IList<Vector3>> shutterControlPoints;
             Vector3[] points = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
@@ -210,7 +218,6 @@ public class Window : MonoBehaviour, IBuildable
             m_RightShutter = m_RightShutter != null ? m_RightShutter : CreateRightShutter(shutterControlPoints[0].ToArray());
             m_RightShutter.Build();
 
-            m_Data.DoShuttersNeedRebuild = false;
         }
     }
     public void Build()
@@ -220,12 +227,12 @@ public class Window : MonoBehaviour, IBuildable
         if (m_Data.ActiveElements == WindowElement.Nothing)
             return;
 
-        Debug.Log("Window build ", this);
-
         BuildOuterFrame();
         BuildInnerFrame();
         BuildPane();
         BuildShutters();
+
+        Rebuild(); // If window data is dirty rebuild all
 
     }
     #endregion

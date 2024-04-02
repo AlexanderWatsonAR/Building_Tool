@@ -19,12 +19,12 @@ public class FrameData : Polygon3DData
         m_Scale = scale;
     }
 
-    public FrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float height, float width, float depth, Vector3 position, float scale) : base (polygon, holes, normal, up, height, width, depth, position)
+    public FrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth, float scale) : base (polygon, holes, normal, up,  depth)
     {
         m_Scale = scale;
     }
 
-    public FrameData(FrameData data) : this(data.Polygon, data.Holes, data.Normal, data.Up, data.Height, data.Width, data.Depth, data.Position, data.Scale)
+    public FrameData(FrameData data) : this(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth, data.Scale)
     {
 
     }

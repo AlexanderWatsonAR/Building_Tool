@@ -18,7 +18,7 @@ public class Floor : MonoBehaviour, IBuildable
 
     public Vector3[] Split => m_Split;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as FloorData;
         name = "Floor";

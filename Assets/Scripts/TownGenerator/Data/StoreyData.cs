@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
-public class StoreyData : IData
+public class StoreyData : DirtyData
 {
     // Notes of serialization. I may be repeating myself.
     // When creating a new building object a StoreyData object is instantiated and a reference is passed to an instance of Storey class.
@@ -47,22 +47,6 @@ public class StoreyData : IData
     public string Name { get { return m_Name; } set { m_Name = value; } }
     public int ID { get { return m_ID; } set { m_ID = value; } }
     #endregion
-
-    public Vector3[] InsidePoints
-    {
-        get
-        {
-            Vector3[] insidePoints = new Vector3[m_ControlPoints.Length];
-
-            for (int i = 0; i < insidePoints.Length; i++)
-            {
-                float w = Mathf.Lerp(-1, 1, m_Wall.Depth);
-                insidePoints[i] = m_ControlPoints[i].Position + m_ControlPoints[i].Forward + (m_ControlPoints[i].Forward * w);
-            }
-
-            return insidePoints;
-        }
-    }
 
     public StoreyData() : this(0, new ControlPoint[0], new WallPoints[0], StoreyElement.Everything, new WallData(), new PillarData(), new CornerData(), new FloorData(), null, null, null) { }
     public StoreyData(StoreyData data) : this(data.ID, data.ControlPoints, data.WallPoints, data.ActiveElements, data.WallData, data.Pillar, data.CornerData, data.FloorData, data.Walls, data.Pillars, data.Corners) { }

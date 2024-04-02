@@ -10,17 +10,21 @@ public class Frame : Polygon3D
 
     public FrameData Data => m_Data;
 
-    public override IBuildable Initialize(IData data)
+    public override IBuildable Initialize(DirtyData data)
     {
         m_Data = data as FrameData;
         base.Initialize(data);
+
+        m_Data.Holes = new PolygonData[1];
+        m_Data.Holes[0] = new PolygonData(m_Data.Polygon.ControlPoints.ScalePolygon(m_Data.Scale, m_Data.Position), m_Data.Polygon.Normal);
         return this;
     }
 
     public override void Build()
     {
-        m_Data.Holes = new PolygonData[1];
-        m_Data.Holes[0] = new PolygonData(m_Data.Polygon.ControlPoints.ScalePolygon(m_Data.Scale, m_Data.Position), m_Data.Polygon.Normal);
+        if (!m_Data.IsDirty)
+            return;
+
         base.Build();
     }
 }

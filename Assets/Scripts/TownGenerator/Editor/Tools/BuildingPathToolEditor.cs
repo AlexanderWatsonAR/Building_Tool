@@ -44,6 +44,7 @@ public class BuildingToolEditor : EditorTool
             EditorGUIUtility.AddCursorRect(sceneViewRect, m_MouseCursor);
         }
     }
+
     public override void OnActivated()
     {
         Building building = (Building)target;

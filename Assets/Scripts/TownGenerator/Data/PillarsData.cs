@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class PillarsData : IData
+public class PillarsData : DirtyData
 {
     [SerializeField] PillarData m_Pillar;
     [SerializeField] PillarData[] m_Pillars;

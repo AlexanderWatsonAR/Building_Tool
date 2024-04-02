@@ -6,7 +6,7 @@ using UnityEngine;
 /// Control Points Exist on the XZ plane
 /// </summary>
 [System.Serializable]
-public class ControlPoint
+public class ControlPoint // Should this be a struct?
 {
     #region Member Variables
     [SerializeField, HideInInspector] private Vector3 m_Position;

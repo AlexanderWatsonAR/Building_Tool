@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class TransformData 
+public class TransformData : ICloneable
 {
     [SerializeField] RelativePosition m_RelativePosition;
     [SerializeField] Vector3 m_AbsolutePosition;
@@ -17,7 +18,7 @@ public class TransformData
     public Vector3 PositionOffset { get { return m_PositionOffset; } set { m_PositionOffset = value; } }
     public Vector3 AbsolutePosition { get { return m_AbsolutePosition; } set { m_AbsolutePosition = value; } }
 
-    public TransformData() :this (RelativePosition.Middle, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.one)
+    public TransformData() : this (RelativePosition.Middle, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.one)
     {
 
     }
@@ -34,6 +35,34 @@ public class TransformData
     public TransformData(TransformData data) : this (data.RelativePosition, data.AbsolutePosition, data.PositionOffset, data.EulerAngle, data.Scale)
     {
 
+    }
+
+    public object Clone()
+    {
+        return this.MemberwiseClone();
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not TransformData)
+            return false;
+
+        TransformData other = obj as TransformData;
+
+        if(other.RelativePosition == this.RelativePosition &&
+           other.PositionOffset == this.PositionOffset &&
+           other.EulerAngle == this.EulerAngle &&
+           other.Scale == this.Scale)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 
 

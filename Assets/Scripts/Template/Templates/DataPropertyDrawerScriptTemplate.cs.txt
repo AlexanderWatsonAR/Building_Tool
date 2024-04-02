@@ -1,0 +1,54 @@
+using UnityEditor;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
+using Unity.VisualScripting;
+
+[CustomPropertyDrawer(typeof(#SCRIPTNAME#Data))]
+public class #SCRIPTNAME#DataDrawer : PropertyDrawer, IFieldInitializer
+{
+    VisualElement m_Root;
+    #SCRIPTNAME#DataSerializedProperties m_Props;
+    #SCRIPTNAME#Data m_CurrentData;
+
+    public override VisualElement CreatePropertyGUI(SerializedProperty data)
+    {
+	// TODO: Implement #SCRIPTNAME# Drawer.
+	return base.CreatePropertyGUI(data);
+
+        Initialize(data);
+        m_Root.name = nameof(#SCRIPTNAME#Data) + "_Root";
+
+        DefineFields();
+        BindFields();
+        RegisterValueChangeCallbacks();
+        AddFieldsToRoot();
+
+        return m_Root;
+    }
+
+    public void Initialize(SerializedProperty data)
+    {
+        m_Root = new VisualElement();
+        m_Props = new #SCRIPTNAME#DataSerializedProperties(data);
+        m_CurrentData = data.GetUnderlyingValue() as #SCRIPTNAME#Data;
+    }
+    public void DefineFields()
+    {
+	
+    }
+
+    public void BindFields()
+    {
+	
+    }
+
+    public void RegisterValueChangeCallbacks()
+    {
+	
+    }
+
+    public void AddFieldsToRoot()
+    {
+	
+    }
+}

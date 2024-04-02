@@ -1,11 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 [System.Serializable]
-public class WallSectionData : Polygon3DData
+public class WallSectionData : Polygon3DData, ICloneable
 {
     #region Member Variables
     [SerializeField] Vector2Int m_ID;
@@ -41,32 +43,29 @@ public class WallSectionData : Polygon3DData
     // With an empty constructor we can create an empty object and fill the data later.
     // If it were null, checking the data would be simpler.
 
-    // 15.02.2024
-    // Instantiate the windowData, doorData, archDoorData in the constructors.
-
     public WallSectionData()
     {
         m_Window = new WindowData();
         m_Door = new DoorData();
         m_ArchDoor = new DoorData();
         m_DoorFrame = new FrameData();
-
         m_WindowOpening = new WindowOpeningData();
         m_Doorway = new DoorwayData();
         m_Archway = new ArchwayData();
         m_Extension = new ExtensionData();
     }
 
-    public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float height, float width, float depth, Vector3 normal, Vector3 up, Vector3 position,
+    // What is the purpose of this constructor?
+    public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float depth, Vector3 normal, Vector3 up,
         WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData,
-        WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) :base(polygon, holes, normal, up, height, width, depth, position)
+        WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) : base(polygon, holes, normal, up, depth)
     {
         m_WallElement = wallElement;
         m_ID = id;
-        m_WindowOpening = new (windowOpeningData);
-        m_Doorway = new (doorwayData);
-        m_Archway = new (archwayData);
-        m_Extension = new (extensionData);
+        m_WindowOpening = windowOpeningData;
+        m_Doorway = doorwayData;
+        m_Archway = archwayData;
+        m_Extension = extensionData;
         m_Window = windowData;
         m_Door = doorData;
         m_ArchDoor = archDoorData;
@@ -79,12 +78,9 @@ public class WallSectionData : Polygon3DData
         data.Polygon,
         data.Holes,
         data.ID,
-        data.Height,
-        data.Width,
         data.Depth,
         data.Normal,
         data.Up,
-        data.Position,
         data.WindowOpening,
         data.Doorway,
         data.Archway,
@@ -96,4 +92,21 @@ public class WallSectionData : Polygon3DData
     )
     {
     }
+
+    public new object Clone()
+    {
+        WallSectionData clone = base.Clone() as WallSectionData;
+        clone.ID = this.ID;
+        clone.WallElement = this.WallElement;
+        clone.Window = this.Window.Clone() as WindowData;
+        clone.Door = this.Door.Clone() as DoorData;
+        clone.ArchDoor = this.ArchDoor.Clone() as DoorData;
+        clone.DoorFrame = this.DoorFrame.Clone() as FrameData;
+        clone.WindowOpening = this.WindowOpening.Clone() as WindowOpeningData;
+        clone.Doorway = this.Doorway.Clone() as DoorwayData;
+        clone.Archway = this.Archway.Clone() as ArchwayData;
+        clone.Extension = this.Extension.Clone() as ExtensionData;
+        return clone;
+    }
+
 }

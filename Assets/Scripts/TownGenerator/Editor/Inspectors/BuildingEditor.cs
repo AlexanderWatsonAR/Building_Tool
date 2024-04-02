@@ -10,7 +10,6 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Unity.VisualScripting;
 
-
 // Add Poly path stuff
 [CustomEditor(typeof(Building))]
 public class BuildingEditor : Editor

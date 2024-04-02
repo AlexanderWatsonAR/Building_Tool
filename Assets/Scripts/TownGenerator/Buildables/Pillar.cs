@@ -11,7 +11,7 @@ public class Pillar : MonoBehaviour, IBuildable
     [SerializeField] ProBuilderMesh m_ProBuilderMesh;
     [SerializeReference] PillarData m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = new PillarData(data as PillarData);
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();

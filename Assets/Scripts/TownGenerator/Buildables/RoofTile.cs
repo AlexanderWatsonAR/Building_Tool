@@ -27,7 +27,7 @@ public class RoofTile : MonoBehaviour, IBuildable
             return m_SubPoints;
         }
     }
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as RoofTileData;
         name = "Roof Tile";

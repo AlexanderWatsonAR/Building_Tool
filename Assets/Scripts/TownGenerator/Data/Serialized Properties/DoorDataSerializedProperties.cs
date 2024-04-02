@@ -17,7 +17,7 @@ public class DoorDataSerializedProperties : Polygon3DDataSerializedProperties
 
     #region Accessors
     public SerializedProperty ActiveElements => m_Data.FindPropertyRelative(k_ActiveElements);
-    public TransformDataSerializedProperties HingeData => m_HingeData;
+    public TransformDataSerializedProperties Hinge => m_HingeData;
     public SerializedProperty HandlePoint => m_Data.FindPropertyRelative(k_HandlePoint);
     public SerializedProperty HandlePosition => m_Data.FindPropertyRelative(k_HandlePosition);
     public SerializedProperty HandleScale => m_Data.FindPropertyRelative(k_HandleScale);

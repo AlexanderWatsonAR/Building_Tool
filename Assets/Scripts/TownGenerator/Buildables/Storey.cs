@@ -21,7 +21,7 @@ public class Storey : MonoBehaviour, IBuildable
 
     public StoreyData Data => m_Data;
 
-    public IBuildable Initialize(IData data)
+    public IBuildable Initialize(DirtyData data)
     {
         m_Data = data as StoreyData;
         m_Corners ??= new List<Corner>();
