@@ -3,7 +3,6 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
-using static PlasticPipe.Server.MonitorStats;
 
 [CustomPropertyDrawer(typeof(WallSectionData))]
 public class WallSectionDataDrawer : PropertyDrawer

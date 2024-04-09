@@ -12,6 +12,5 @@ using UnityEngine;
 
 public interface IDataChangeEvent
 {
-    event Action<DirtyData> OnDataChange;
-    void OnDataChange_Invoke();
+    void OnDataChange(DirtyData data);
 }
