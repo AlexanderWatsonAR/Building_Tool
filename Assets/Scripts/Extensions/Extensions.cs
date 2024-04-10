@@ -9,6 +9,8 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
+using OnlyInvalid.ProcGenBuilding.Common;
+using OnlyInvalid.ProcGenBuilding.Polygon3D;
 
 public static class Extensions
 {

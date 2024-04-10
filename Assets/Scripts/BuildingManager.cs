@@ -10,34 +10,35 @@ using UnityEngine;
 // which muliple objects can gain access to via the inspector.
 // Could we use a non-hirarchical data structure?
 
-
-public sealed class BuildingManager
+namespace OnlyInvalid.ProcGenBuilding.Building
 {
-    private static BuildingManager m_Instance = null;
-
-    private static BuildingData m_Data;
-
-    private BuildingManager() { }
-
-    public static BuildingManager Instance
+    public sealed class BuildingManager
     {
-        get
+        private static BuildingManager m_Instance = null;
+
+        private static BuildingData m_Data;
+
+        private BuildingManager() { }
+
+        public static BuildingManager Instance
         {
-            if (m_Instance == null)
+            get
             {
-                m_Instance = new BuildingManager();
+                if (m_Instance == null)
+                {
+                    m_Instance = new BuildingManager();
+                }
+
+                return m_Instance;
             }
-
-            return m_Instance;
         }
-    }
 
-    public static BuildingData Data
-    {
-        get
+        public static BuildingData Data
         {
-            return m_Data;
+            get
+            {
+                return m_Data;
+            }
         }
     }
-
 }
