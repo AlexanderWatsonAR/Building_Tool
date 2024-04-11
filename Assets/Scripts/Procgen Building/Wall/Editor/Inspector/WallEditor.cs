@@ -95,17 +95,17 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                 bool rebuild = false;
 
-                if (wall.Data.Sections == null || wall.Data.Sections.Length < 1 || wall.Data.Sections[0] == null || wall.Data.Sections.Length != wall.Data.Columns * wall.Data.Rows)
+                if (wall.WallData.Sections == null || wall.WallData.Sections.Length < 1 || wall.WallData.Sections[0] == null || wall.WallData.Sections.Length != wall.WallData.Columns * wall.WallData.Rows)
                     rebuild = true;
 
                 if (!rebuild)
                     return;
 
                 Debug.Log("Sections have been re-initialized");
-                wall.Data.Sections = new WallSectionData[wall.Data.Columns * wall.Data.Rows];
+                wall.WallData.Sections = new WallSectionData[wall.WallData.Columns * wall.WallData.Rows];
                 wall.Build();
 
-                data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.Data.Sections);
+                data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.WallData.Sections);
 
                 selectableBoxContainer.Clear();
                 AddGridOfSelectableBoxes(selectableBoxContainer, sectionContainer, columns.intValue, rows.intValue);
@@ -122,17 +122,17 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                 bool rebuild = false;
 
-                if (wall.Data.Sections == null || wall.Data.Sections.Length < 1 || wall.Data.Sections[0] == null || wall.Data.Sections.Length != wall.Data.Columns * wall.Data.Rows)
+                if (wall.WallData.Sections == null || wall.WallData.Sections.Length < 1 || wall.WallData.Sections[0] == null || wall.WallData.Sections.Length != wall.WallData.Columns * wall.WallData.Rows)
                     rebuild = true;
 
                 if (!rebuild)
                     return;
 
                 Debug.Log("Sections have been re-initialized");
-                wall.Data.Sections = new WallSectionData[wall.Data.Columns * wall.Data.Rows];
+                wall.WallData.Sections = new WallSectionData[wall.WallData.Columns * wall.WallData.Rows];
                 wall.Build();
 
-                data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.Data.Sections);
+                data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.WallData.Sections);
 
                 selectableBoxContainer.Clear();
                 AddGridOfSelectableBoxes(selectableBoxContainer, sectionContainer, columns.intValue, rows.intValue);
@@ -157,16 +157,16 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             Wall wall = target as Wall;
 
-            if (wall.Data == null)
+            if (wall.WallData == null)
                 return;
 
-            if (wall.Data.Sections == null)
+            if (wall.WallData.Sections == null)
                 return;
 
-            if (wall.Data.Sections.Length == 0)
+            if (wall.WallData.Sections.Length == 0)
                 return;
 
-            foreach (WallSectionData sectionData in wall.Data.Sections)
+            foreach (WallSectionData sectionData in wall.WallData.Sections)
             {
                 if (sectionData == null)
                     return;

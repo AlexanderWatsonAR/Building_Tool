@@ -11,20 +11,21 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Corner
 {
-    public class Corner : MonoBehaviour, IBuildable
+    public class Corner : Buildable
     {
         [SerializeReference] CornerData m_Data;
 
         [SerializeField] ProBuilderMesh m_ProBuilderMesh;
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
+            base.Initialize(data);
             m_Data = data as CornerData;
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
             ProBuilderMesh corner = ProBuilderMesh.Create();
 
@@ -64,7 +65,7 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
             Rebuild(corner);
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
             DestroyImmediate(gameObject);
         }

@@ -29,7 +29,8 @@ public class PolyBuildingEditorWindow : EditorWindow
                 Building building = buildingMesh.GetComponent<Building>();
                 building.Container = ScriptableObject.CreateInstance<BuildingScriptableObject>();
                 building.Initialize(building.Container.Data);
-                building.Data.Path.PolyMode = PolyMode.Draw;
+                BuildingData data = building.Data as BuildingData;
+                data.Path.PolyMode = PolyMode.Draw;
                 Selection.activeGameObject = building.gameObject;
             }
         );

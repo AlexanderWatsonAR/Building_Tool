@@ -12,7 +12,7 @@ using OnlyInvalid.ProcGenBuilding.Floor;
 
 namespace OnlyInvalid.ProcGenBuilding.Storey
 {
-    public class Storey : MonoBehaviour, IBuildable
+    public class Storey : Buildable
     {
         [SerializeReference] StoreyData m_Data;
 
@@ -21,9 +21,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         [SerializeField] List<Pillar.Pillar> m_Pillars;
         [SerializeField] Floor.Floor m_Floor;
 
-        public StoreyData Data => m_Data;
-
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
             m_Data = data as StoreyData;
             m_Corners ??= new List<Corner.Corner>();
@@ -32,7 +30,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
             Demolish();
 
@@ -286,7 +284,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         }
         #endregion
 
-        public void Demolish()
+        public override void Demolish()
         {
             transform.DeleteChildren();
 

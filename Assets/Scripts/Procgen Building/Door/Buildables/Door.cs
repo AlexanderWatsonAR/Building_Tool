@@ -1,48 +1,48 @@
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
-using OnlyInvalid.ProcGenBuilding.Polygon3D;
 
 namespace OnlyInvalid.ProcGenBuilding.Door
 {
     public class Door : Polygon3D.Polygon3D
     {
         //[SerializeField] private ProBuilderMesh m_DoorHandleMesh;
-        [SerializeReference] DoorData m_Data;
+        [SerializeReference] DoorData m_DoorData;
 
-        public new DoorData Data => m_Data;
-
-        public override IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
+            base.Initialize(data);
+            m_DoorData = data as DoorData;
+
+
             //m_DoorHandleMesh = ProBuilderMesh.Create();
             //m_DoorHandleMesh.transform.SetParent(transform, false);
             //m_DoorHandleMesh.GetComponent<Renderer>().material = BuiltinMaterials.defaultMaterial;
             //m_DoorHandleMesh.name = "Handle";
-            m_Data = data as DoorData;
-            base.Initialize(data);
+
             return this;
         }
 
         public override void Build()
         {
-            if (!m_Data.IsDirty)
+            if (!m_DoorData.IsDirty)
                 return;
 
-            if (!m_Data.ActiveElements.IsElementActive(DoorElement.Door))
+            if (!m_DoorData.ActiveElements.IsElementActive(DoorElement.Door))
                 return;
 
             base.Build();
 
             // Scale
-            m_ProBuilderMesh.transform.localScale = m_Data.Hinge.Scale;
+            m_ProBuilderMesh.transform.localScale = m_DoorData.Hinge.Scale;
             m_ProBuilderMesh.LocaliseVertices();
 
             // Rotate
-            m_ProBuilderMesh.transform.localEulerAngles = m_Data.Hinge.EulerAngle;
-            m_Data.Hinge.AbsolutePosition = m_Data.CalculateRelativePosition(m_Data.Hinge.RelativePosition);
-            m_ProBuilderMesh.LocaliseVertices(m_Data.Hinge.AbsolutePosition + m_Data.Hinge.PositionOffset);
+            m_ProBuilderMesh.transform.localEulerAngles = m_DoorData.Hinge.EulerAngle;
+            m_DoorData.Hinge.AbsolutePosition = m_DoorData.CalculateRelativePosition(m_DoorData.Hinge.RelativePosition);
+            m_ProBuilderMesh.LocaliseVertices(m_DoorData.Hinge.AbsolutePosition + m_DoorData.Hinge.PositionOffset);
             m_ProBuilderMesh.Refresh();
 
-            if (!m_Data.ActiveElements.IsElementActive(DoorElement.Handle))
+            if (!m_DoorData.ActiveElements.IsElementActive(DoorElement.Handle))
                 return;
 
             #region Handle

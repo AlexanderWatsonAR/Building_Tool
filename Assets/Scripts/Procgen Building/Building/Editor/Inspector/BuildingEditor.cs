@@ -76,14 +76,15 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                     break;
                 case PolyMode.Edit:
                     {
-                        Button quit_btn = new Button(() => { QuitEdit(); SceneView.RepaintAll(); DisplayMessages(m_Building.Data.Path.PolyMode); });
+                        BuildingData buildingData = m_Building.Data as BuildingData;
+                        Button quit_btn = new Button(() => { QuitEdit(); SceneView.RepaintAll(); DisplayMessages(buildingData.Path.PolyMode); });
                         quit_btn.text = "Quit Edit";
 
                         Button remove_btn = new Button(() =>
                         {
-                            m_Building.Data.Path.RemoveControlPointAt(m_SelectedHandle - 1);
+                            buildingData.Path.RemoveControlPointAt(m_SelectedHandle - 1);
 
-                            if (m_Building.Data.Path.IsValidPath())
+                            if (buildingData.Path.IsValidPath())
                             {
                                 m_Building.Build();
                             }
@@ -252,7 +253,9 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             if (m_Path.PolyMode != PolyMode.Edit || m_Path.ControlPointCount == 0)
                 return;
 
-            Handles.color = m_Building.Data.Path.IsPathValid ? Color.white : m_CP_Invalid;
+            BuildingData buildingData = m_Building.Data as BuildingData;
+
+            Handles.color = buildingData.Path.IsPathValid ? Color.white : m_CP_Invalid;
 
             DrawHandles();
             ConnectTheDots();
@@ -266,7 +269,9 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         private void DrawHandles()
         {
-            Vector3[] controlPoints = m_Building.Data.Path.ControlPoints.GetPositions();
+            BuildingData buildingData = m_Building.Data as BuildingData;
+
+            Vector3[] controlPoints = buildingData.Path.ControlPoints.GetPositions();
             m_GlobalControlPointPositions = m_Building.transform.TransformPoints(controlPoints, 0).ToArray();
 
             Vector3 centre = UnityEngine.ProBuilder.Math.Average(m_GlobalControlPointPositions);
@@ -297,7 +302,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                         Vector3 rayPoint = ray.GetPoint(enter);
                         Vector3 localRay = m_Building.transform.InverseTransformPoint(rayPoint);
 
-                        m_Building.Data.Path.SetPositionAt(i, rayPoint);
+                        buildingData.Path.SetPositionAt(i, rayPoint);
                         // Debug.Log("Handle: " + i + " Position: " + localRay);
                     }
 
@@ -377,7 +382,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         private void OnEnable()
         {
             m_Building = (Building)target;
-            m_Path = m_Building.Data.Path;
+            BuildingData buildingData = m_Building.Data as BuildingData;
+            m_Path = buildingData.Path;
             m_Data = serializedObject.FindProperty("m_Data");
         }
         private void OnDisable()

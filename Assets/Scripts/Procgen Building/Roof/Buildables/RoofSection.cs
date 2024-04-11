@@ -13,10 +13,9 @@ using OnlyInvalid.ProcGenBuilding.Window;
 
 namespace OnlyInvalid.ProcGenBuilding.Roof
 {
-    public class RoofSection : MonoBehaviour, IBuildable
+    public class RoofSection : Buildable
     {
-        [SerializeReference] RoofSectionData m_Data;
-        public RoofSectionData Data => m_Data;
+        [SerializeReference] RoofSectionData m_RoofSectionData;
 
         [SerializeField, HideInInspector] private ProBuilderMesh m_ProBuilderMesh;
 
@@ -24,36 +23,38 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         [SerializeField] WindowData m_WindowData;
         //---------- End of Window Properties -----------
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as RoofSectionData;
+            base.Initialize(data);
+            m_RoofSectionData = data as RoofSectionData;
+
 
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
 
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
             transform.DeleteChildren();
 
-            Vector3[] controlPoints = m_Data.ControlPoints.Clone() as Vector3[];
+            Vector3[] controlPoints = m_RoofSectionData.ControlPoints.Clone() as Vector3[];
 
             if (controlPoints[1] == controlPoints[2])
             {
-                m_Data.ControlPoints = new Vector3[] { m_Data.ControlPoints[0], m_Data.ControlPoints[1], m_Data.ControlPoints[3] };
-                m_Data.TopPoints = new Vector3[] { m_Data.TopPoints[0], m_Data.TopPoints[1], m_Data.TopPoints[3] };
+                m_RoofSectionData.ControlPoints = new Vector3[] { m_RoofSectionData.ControlPoints[0], m_RoofSectionData.ControlPoints[1], m_RoofSectionData.ControlPoints[3] };
+                m_RoofSectionData.TopPoints = new Vector3[] { m_RoofSectionData.TopPoints[0], m_RoofSectionData.TopPoints[1], m_RoofSectionData.TopPoints[3] };
             }
             else if (controlPoints[0] == controlPoints[3])
             {
-                m_Data.ControlPoints = new Vector3[] { m_Data.ControlPoints[0], m_Data.ControlPoints[1], m_Data.ControlPoints[2] };
-                m_Data.TopPoints = new Vector3[] { m_Data.TopPoints[0], m_Data.TopPoints[1], m_Data.TopPoints[2] };
+                m_RoofSectionData.ControlPoints = new Vector3[] { m_RoofSectionData.ControlPoints[0], m_RoofSectionData.ControlPoints[1], m_RoofSectionData.ControlPoints[2] };
+                m_RoofSectionData.TopPoints = new Vector3[] { m_RoofSectionData.TopPoints[0], m_RoofSectionData.TopPoints[1], m_RoofSectionData.TopPoints[2] };
             }
 
-            switch (m_Data.RoofElement)
+            switch (m_RoofSectionData.RoofElement)
             {
                 case RoofElement.Tile:
-                    m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.SectionHeight, false);
+                    m_ProBuilderMesh.CreateShapeFromPolygon(m_RoofSectionData.ControlPoints, m_RoofSectionData.SectionHeight, false);
                     m_ProBuilderMesh.ToMesh();
                     SetCornerPoints();
                     m_ProBuilderMesh.Refresh();
@@ -93,14 +94,14 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         {
             Vertex[] vertices = m_ProBuilderMesh.GetVertices();
 
-            for (int i = 0; i < m_Data.TopPoints.Length; i++)
+            for (int i = 0; i < m_RoofSectionData.TopPoints.Length; i++)
             {
                 // Note: No need to find the points. They are where you left them.
                 List<int> shared = m_ProBuilderMesh.GetCoincidentVertices(new int[] { i });
 
                 for (int j = 0; j < shared.Count; j++)
                 {
-                    vertices[shared[j]].position = m_Data.TopPoints[i];
+                    vertices[shared[j]].position = m_RoofSectionData.TopPoints[i];
                 }
             }
 
@@ -117,7 +118,7 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
             return this;
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
 
         }

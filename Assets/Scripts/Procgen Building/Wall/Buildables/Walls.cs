@@ -5,24 +5,25 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
-    public class Walls : MonoBehaviour, IBuildable
+    public class Walls : Buildable
     {
         [SerializeField] WallsData m_Data;
         [SerializeField] Wall[] m_Walls;
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
+            base.Initialize(data);
             m_Data = data as WallsData;
             m_Walls = new Wall[m_Data.Walls.Length];
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
             m_Walls.BuildCollection();
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
             m_Walls.DemolishCollection();
         }

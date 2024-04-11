@@ -11,8 +11,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         [SerializeField] DirtyData m_Data;
 
+        public DirtyData Data => m_Data;
+
         public virtual Buildable Initialize(DirtyData data)
         {
+            m_Data = data;
             return this;
         }
 

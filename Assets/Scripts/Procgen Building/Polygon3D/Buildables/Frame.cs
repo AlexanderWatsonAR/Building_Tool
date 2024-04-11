@@ -9,23 +9,20 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     public class Frame : Polygon3D
     {
-        [SerializeReference] FrameData m_Data;
+        [SerializeReference] FrameData m_FrameData;
 
-        public new FrameData Data => m_Data;
-
-        public override IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as FrameData;
             base.Initialize(data);
-
-            m_Data.Holes = new PolygonData[1];
-            m_Data.Holes[0] = new PolygonData(m_Data.Polygon.ControlPoints.ScalePolygon(m_Data.Scale, m_Data.Position), m_Data.Polygon.Normal);
+            m_FrameData = data as FrameData;
+            m_FrameData.Holes = new PolygonData[1];
+            m_FrameData.Holes[0] = new PolygonData(m_FrameData.Polygon.ControlPoints.ScalePolygon(m_FrameData.Scale, m_FrameData.Position), m_FrameData.Polygon.Normal);
             return this;
         }
 
         public override void Build()
         {
-            if (!m_Data.IsDirty)
+            if (!m_FrameData.IsDirty)
                 return;
 
             base.Build();

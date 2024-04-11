@@ -5,15 +5,16 @@ using UnityEngine.ProBuilder;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Storey;
 using OnlyInvalid.ProcGenBuilding.Roof;
+using OnlyInvalid.ProcGenBuilding.Wall;
 
 namespace OnlyInvalid.ProcGenBuilding.Building
 {
     [ExecuteAlways]
     [DisallowMultipleComponent]
-    public class Building : MonoBehaviour, IBuildable
+    public class Building : Buildable
     {
         [SerializeField] BuildingScriptableObject m_Container;
-        [SerializeField] BuildingData m_Data;
+        [SerializeField] BuildingData m_BuildingData;
 
         [SerializeField] bool m_IsPolyPathHandleSelected;
 
@@ -21,7 +22,6 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         [SerializeField] Roof.Roof m_Roof;
 
         public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
-        public BuildingData Data => m_Data;
         public BuildingScriptableObject Container { get { return m_Container; } set { m_Container = value; } }
 
         private void OnEnable()
@@ -34,16 +34,16 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         }
         private void Update()
         {
-            if (m_Data == null)
+            if (m_BuildingData == null)
                 return;
 
-            if (m_Data.Path == null)
+            if (m_BuildingData.Path == null)
                 return;
 
-            if (m_Data.Path.ControlPointCount == 0)
+            if (m_BuildingData.Path.ControlPointCount == 0)
                 return;
 
-            if (m_Data.Path.PolyMode == PolyMode.Hide)
+            if (m_BuildingData.Path.PolyMode == PolyMode.Hide)
                 return;
 
             if (GUIUtility.hotControl == 0 && m_IsPolyPathHandleSelected)
@@ -51,54 +51,59 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                 Rebuild();
             }
 
-            m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_Data.Path.ControlPointCount + 1 ? true : false;
+            m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_BuildingData.Path.ControlPointCount + 1 ? true : false;
         }
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as BuildingData;
+            base.Initialize(data);
+            m_BuildingData = data as BuildingData;
+
             return this;
         }
 
         private void Rebuild()
         {
-            m_Data.Roof = new RoofData() { ControlPoints = m_Data.Path.ControlPoints.ToArray() };
+            m_BuildingData.Roof = new RoofData() { ControlPoints = m_BuildingData.Path.ControlPoints.ToArray() };
 
-            int count = m_Data.Storeys.Count;
+            int count = m_BuildingData.Storeys.Count;
 
-            m_Data.Storeys = new List<StoreyData>(count);
+            m_BuildingData.Storeys = new List<StoreyData>(count);
 
             for (int i = 0; i < count; i++)
             {
-                StoreyData storey = new StoreyData() { ControlPoints = m_Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
-                m_Data.Storeys.Add(storey);
+                StoreyData storey = new StoreyData() { ControlPoints = m_BuildingData.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
+                m_BuildingData.Storeys.Add(storey);
             }
 
             Build();
         }
 
-        public void Build()
+        public override void Build()
         {
             Demolish();
 
-            if (!m_Data.Path.IsPathValid)
+            if (!m_BuildingData.Path.IsPathValid)
                 return;
 
             Vector3 pos = Vector3.zero;
 
-            for (int i = 0; i < m_Data.Storeys.Count; i++)
+            for (int i = 0; i < m_BuildingData.Storeys.Count; i++)
             {
-                Storey.Storey storey = CreateStorey(m_Data.Storeys[i]);
+                Storey.Storey storey = CreateStorey(m_BuildingData.Storeys[i]);
                 storey.transform.SetParent(transform, false);
                 storey.transform.localPosition = pos;
                 storey.Build();
-                pos += (Vector3.up * storey.Data.WallData.Height);
+
+                StoreyData storeyData = storey.Data as StoreyData;
+                WallData wallData = storeyData.WallData;
+                pos += (Vector3.up * wallData.Height);
             }
 
             GameObject roofGO = new GameObject("Roof");
             roofGO.transform.SetParent(transform, false);
             roofGO.transform.localPosition = pos;
-            roofGO.AddComponent<Roof.Roof>().Initialize(m_Data.Roof).Build();
+            roofGO.AddComponent<Roof.Roof>().Initialize(m_BuildingData.Roof).Build();
         }
 
         private Storey.Storey CreateStorey(StoreyData data)
@@ -112,12 +117,12 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public void AddStorey(string name)
         {
-            m_Data.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_Data.Path.ControlPoints.ToArray() });
+            m_BuildingData.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_BuildingData.Path.ControlPoints.ToArray() });
         }
 
         public void InitializeRoof()
         {
-            m_Data.Roof.ControlPoints = m_Data.Path.ControlPoints.ToArray();
+            m_BuildingData.Roof.ControlPoints = m_BuildingData.Path.ControlPoints.ToArray();
         }
 
         public void BuildStorey(int index)
@@ -130,7 +135,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             m_Storeys.BuildCollection();
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
             transform.DeleteChildren();
         }

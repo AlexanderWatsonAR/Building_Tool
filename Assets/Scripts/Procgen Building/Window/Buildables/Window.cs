@@ -10,7 +10,7 @@ using OnlyInvalid.ProcGenBuilding.Wall;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
-    public class Window : MonoBehaviour, IBuildable
+    public class Window : Buildable
     {
         [SerializeReference] WindowData m_Data;
 
@@ -20,25 +20,11 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         [SerializeField] Door.Door m_LeftShutter;
         [SerializeField] Door.Door m_RightShutter;
 
-        public WindowData Data => m_Data;
-
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
             m_Data = data as WindowData;
             return this;
         }
-
-        #region Setters
-
-        public void SetOuterFrame(FrameData data)
-        {
-            m_Data.OuterFrame = data;
-            // TODO: call section and pass through window data.
-            WallSection section = transform.parent.GetComponent<WallSection>();
-            section.Data.WindowOpening.Windows[m_Data.ID] = m_Data;
-        }
-
-        #endregion
 
         #region Create
         private OuterFrame CreateOuterFrame()
@@ -107,7 +93,8 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         private GridFrameData CalculateInnerFrame()
         {
             GridFrameData frameData = m_Data.InnerFrame;
-            Vector3[] controlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+            FrameData outerFrameData = m_OuterFrame.Data as FrameData;
+            Vector3[] controlPoints = m_Data.IsOuterFrameActive ? outerFrameData.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
             Vector3 normal = m_Data.Polygon.Normal;
             frameData.SetPolygon(controlPoints, normal);
 
@@ -116,7 +103,8 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         private Polygon3DData CalculatePane()
         {
             Polygon3DData pane = m_Data.Pane;
-            Vector3[] controlPoints = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+            FrameData outerFrameData = m_OuterFrame.Data as FrameData;
+            Vector3[] controlPoints = m_Data.IsOuterFrameActive ? outerFrameData.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
             Vector3 normal = m_Data.Polygon.Normal;
 
             pane.SetPolygon(controlPoints, normal);
@@ -214,12 +202,16 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.LeftShutter.IsDirty || m_Data.RightShutter.IsDirty))
             {
                 IList<IList<Vector3>> shutterControlPoints;
-                Vector3[] points = m_Data.IsOuterFrameActive ? m_OuterFrame.Data.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
 
-                float height = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Height : m_OuterFrame.Data.Height;
-                float width = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Width : m_OuterFrame.Data.Width;
-                float depth = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Depth : m_OuterFrame.Data.Depth;
-                Vector3 position = m_Data.IsOuterFrameActive ? m_InnerFrame.Data.Position : m_OuterFrame.Data.Position;
+                GridFrameData innerFrame = m_InnerFrame.Data as GridFrameData;
+                FrameData outerFrame = m_OuterFrame.Data as FrameData;
+
+                Vector3[] points = m_Data.IsOuterFrameActive ? outerFrame.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+
+                float height = m_Data.IsOuterFrameActive ? innerFrame.Height : outerFrame.Height;
+                float width = m_Data.IsOuterFrameActive ? innerFrame.Width : outerFrame.Width;
+                float depth = m_Data.IsOuterFrameActive ? innerFrame.Depth : outerFrame.Depth;
+                Vector3 position = m_Data.IsOuterFrameActive ? innerFrame.Position : outerFrame.Position;
 
                 for (int i = 0; i < points.Length; i++)
                 {
@@ -238,7 +230,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
             }
         }
-        public void Build()
+        public override void Build()
         {
             Demolish();
 
@@ -257,7 +249,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         /// <summary>
         /// This method removes only the window components that are inactive
         /// </summary>
-        public void Demolish()
+        public override void Demolish()
         {
             if (!m_Data.IsOuterFrameActive && m_OuterFrame != null)
             {

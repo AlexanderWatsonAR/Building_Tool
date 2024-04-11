@@ -10,32 +10,32 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Floor
 {
-    public class Floor : MonoBehaviour, IBuildable
+    public class Floor : Buildable
     {
-        [SerializeReference] private FloorData m_Data;
+        [SerializeReference] FloorData m_FloorData;
 
-        [SerializeField] private Vector3 m_Position;
-        [SerializeField] private float m_Size;
+        [SerializeField] Vector3 m_Position;
+        [SerializeField] float m_Size;
 
-        [SerializeField] private Vector3[] m_Split;
+        [SerializeField] Vector3[] m_Split;
 
         public Vector3[] Split => m_Split;
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as FloorData;
+            m_FloorData = data as FloorData;
             name = "Floor";
             m_Split = new Vector3[0];
             m_Position = Vector3.zero;
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
             transform.DeleteChildren();
 
             Vector3 min, max;
-            Extensions.MinMax(m_Data.ControlPoints.GetPositions(), out min, out max);
+            Extensions.MinMax(m_FloorData.ControlPoints.GetPositions(), out min, out max);
 
             float width = max.x - min.x;
             float height = max.z - min.z;
@@ -44,7 +44,7 @@ namespace OnlyInvalid.ProcGenBuilding.Floor
 
             m_Position = Vector3.Lerp(min, max, 0.5f);
 
-            IList<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_Data.ControlPoints.GetPositions(), m_Size, m_Size, m_Data.Columns, m_Data.Rows, m_Position, Vector3.up);
+            IList<IList<Vector3>> floorSection = MeshMaker.SpiltPolygon(m_FloorData.ControlPoints.GetPositions(), m_Size, m_Size, m_FloorData.Columns, m_FloorData.Rows, m_Position, Vector3.up);
 
             List<Vector3> list = new();
 
@@ -52,7 +52,7 @@ namespace OnlyInvalid.ProcGenBuilding.Floor
             {
                 list.AddRange(polygon);
 
-                FloorSectionData sectionData = new FloorSectionData(polygon, m_Data.Height);
+                FloorSectionData sectionData = new FloorSectionData(polygon, m_FloorData.Height);
                 ProBuilderMesh sectionMesh = ProBuilderMesh.Create();
                 sectionMesh.name = "Floor Section";
                 sectionMesh.transform.SetParent(transform, true);
@@ -71,7 +71,7 @@ namespace OnlyInvalid.ProcGenBuilding.Floor
 
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
 
         }
@@ -89,9 +89,9 @@ namespace OnlyInvalid.ProcGenBuilding.Floor
             //Handles.DrawAAPolyLine(square);
             //Handles.DrawAAPolyLine(square[0], square[3]);
 
-            for (int x = 0; x < m_Data.Columns; x++)
+            for (int x = 0; x < m_FloorData.Columns; x++)
             {
-                for (int y = 0; y < m_Data.Rows; y++)
+                for (int y = 0; y < m_FloorData.Rows; y++)
                 {
 
                 }

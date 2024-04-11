@@ -62,8 +62,10 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             image.sprite = Sprite.Create(texture, new Rect(Vector2.zero, new Vector2(200, 200)), Vector2.zero);
             root.Add(image);
 
+            BuildingData buildingData = m_Building.Data as BuildingData;
+
             Vector3 min, max;
-            Vector3[] polygon = m_Building.Data.Path.ControlPoints.GetPositions();
+            Vector3[] polygon = buildingData.Path.ControlPoints.GetPositions();
             Extensions.MinMax(polygon, out min, out max);
             Vector3 centre = Vector3.Lerp(min, max, 0.5f);
 
@@ -73,7 +75,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             Vector3 offset = new Vector3(50, 50);
 
-            for (int i = 0; i < m_Building.Data.Path.ControlPointCount; i++)
+            for (int i = 0; i < buildingData.Path.ControlPointCount; i++)
             {
                 CircleVisualElement controlPoint = new CircleVisualElement()
                 {

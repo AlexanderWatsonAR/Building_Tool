@@ -10,13 +10,14 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Pillar
 {
-    public class Pillar : MonoBehaviour, IBuildable
+    public class Pillar : Buildable
     {
         [SerializeField] ProBuilderMesh m_ProBuilderMesh;
         [SerializeReference] PillarData m_Data;
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
+            base.Initialize(data);
             m_Data = new PillarData(data as PillarData);
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
             return this;
@@ -52,7 +53,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
             m_Data.ControlPoints = controlPoints;
         }
 
-        public void Build()
+        public override void Build()
         {
             CreateControlPoints();
             m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, 0, false);
@@ -70,7 +71,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
             m_ProBuilderMesh.Refresh();
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
 
         }

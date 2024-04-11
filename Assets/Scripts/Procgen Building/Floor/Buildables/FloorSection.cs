@@ -8,25 +8,25 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Floor
 {
-    public class FloorSection : MonoBehaviour, IBuildable
+    public class FloorSection : Buildable
     {
-        [SerializeField] private FloorSectionData m_Data;
-        [SerializeField] private ProBuilderMesh m_ProBuilderMesh;
+        [SerializeField] FloorSectionData m_FloorSectionData;
+        [SerializeField] ProBuilderMesh m_ProBuilderMesh;
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as FloorSectionData;
+            m_FloorSectionData = data as FloorSectionData;
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
-            m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, m_Data.Height, false);
+            m_ProBuilderMesh.CreateShapeFromPolygon(m_FloorSectionData.ControlPoints, m_FloorSectionData.Height, false);
             m_ProBuilderMesh.ToMesh();
             m_ProBuilderMesh.Refresh();
         }
-        public void Demolish()
+        public override void Demolish()
         {
         }
     }

@@ -8,21 +8,20 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     public class GridFrame : Polygon3D
     {
-        [SerializeReference] GridFrameData m_Data;
+        [SerializeReference] GridFrameData m_GridFrameData;
 
-        public new GridFrameData Data => m_Data;
-
-        public override IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as GridFrameData;
             base.Initialize(data);
-            CalculateHoleData(m_Data);
+            m_GridFrameData = data as GridFrameData;
+
+            CalculateHoleData(m_GridFrameData);
             return this;
         }
 
         public override void Build()
         {
-            if (!m_Data.IsDirty)
+            if (!m_GridFrameData.IsDirty)
                 return;
 
             base.Build();

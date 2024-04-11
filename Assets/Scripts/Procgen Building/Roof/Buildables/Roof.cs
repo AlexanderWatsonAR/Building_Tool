@@ -14,19 +14,17 @@ using OnlyInvalid.ProcGenBuilding.Wall;
 
 namespace OnlyInvalid.ProcGenBuilding.Roof
 {
-    public class Roof : MonoBehaviour, IBuildable
+    public class Roof : Buildable
     {
         [SerializeReference] RoofData m_Data;
 
-        public RoofData Data => m_Data;
-
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
             m_Data = data as RoofData;
             m_Data.TileData.Material ??= BuiltinMaterials.defaultMaterial;
             return this;
         }
-        public void Build()
+        public override void Build()
         {
             transform.DeleteChildren();
 
@@ -276,7 +274,7 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
             return tile;
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
 
         }

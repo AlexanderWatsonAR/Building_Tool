@@ -5,24 +5,25 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Corner
 {
-    public class Corners : MonoBehaviour, IBuildable
+    public class Corners : Buildable
     {
         [SerializeField] CornersData m_Data;
         [SerializeField] Corner[] m_Corners;
 
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
+            base.Initialize(data);
             m_Data = data as CornersData;
             m_Corners = new Corner[m_Data.Corners.Length];
             return this;
         }
 
-        public void Build()
+        public override void Build()
         {
             m_Corners.BuildCollection();
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
             m_Corners.DemolishCollection();
         }

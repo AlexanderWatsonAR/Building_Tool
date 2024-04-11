@@ -12,50 +12,49 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Roof
 {
-    public class RoofTile : MonoBehaviour, IBuildable
+    public class RoofTile : Buildable
     {
-        [SerializeReference] RoofTileData m_Data;
+        [SerializeReference] RoofTileData m_RoofTileData;
         [SerializeField, HideInInspector] List<Vector3[]> m_SubPoints;
-
-        public RoofTileData Data => m_Data;
 
         private List<Vector3[]> SubPoints
         {
             get
             {
-                if (m_Data.Columns <= 0 && m_Data.Rows <= 0) return null;
+                if (m_RoofTileData.Columns <= 0 && m_RoofTileData.Rows <= 0) return null;
 
-                m_SubPoints = MeshMaker.CreateGridFromControlPoints(m_Data.ExtendedPoints, m_Data.Columns, m_Data.Rows);
+                m_SubPoints = MeshMaker.CreateGridFromControlPoints(m_RoofTileData.ExtendedPoints, m_RoofTileData.Columns, m_RoofTileData.Rows);
 
                 return m_SubPoints;
             }
         }
-        public IBuildable Initialize(DirtyData data)
+        public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as RoofTileData;
+            base.Initialize(data);
+            m_RoofTileData = data as RoofTileData;
             name = "Roof Tile";
             return this;
         }
-        public void Build()
+        public override void Build()
         {
             List<Vector3[]> bottomPoints = SubPoints;
 
             transform.DeleteChildren();
 
-            m_Data.Sections ??= new RoofSectionData[m_Data.Columns, m_Data.Rows];
+            m_RoofTileData.Sections ??= new RoofSectionData[m_RoofTileData.Columns, m_RoofTileData.Rows];
 
-            Vector3[] extendedPoints = m_Data.ExtendedPoints;
+            Vector3[] extendedPoints = m_RoofTileData.ExtendedPoints;
 
-            Vector3[] projectedVerts = MeshMaker.ProjectedCubeVertices(extendedPoints, m_Data.Thickness);
+            Vector3[] projectedVerts = MeshMaker.ProjectedCubeVertices(extendedPoints, m_RoofTileData.Thickness);
             Vector3 midPointA = Vector3.Lerp(extendedPoints[0], extendedPoints[1], 0.5f);
             Vector3 midPointB = Vector3.Lerp(projectedVerts[0], projectedVerts[1], 0.5f);
             float distance = Vector3.Distance(midPointA, midPointB);
 
-            List<Vector3[]> topPoints = MeshMaker.CreateGridFromControlPoints(projectedVerts, m_Data.Columns, m_Data.Rows);
+            List<Vector3[]> topPoints = MeshMaker.CreateGridFromControlPoints(projectedVerts, m_RoofTileData.Columns, m_RoofTileData.Rows);
 
-            for (int x = 0; x < m_Data.Columns; x++)
+            for (int x = 0; x < m_RoofTileData.Columns; x++)
             {
-                for (int y = 0; y < m_Data.Rows; y++)
+                for (int y = 0; y < m_RoofTileData.Rows; y++)
                 {
                     Vector3 bl = bottomPoints[y][x];
                     Vector3 tl = bottomPoints[y + 1][x];
@@ -73,27 +72,27 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
 
                     ProBuilderMesh roofSectionMesh = ProBuilderMesh.Create();
                     roofSectionMesh.name = "Roof Section " + y.ToString() + " " + x.ToString();
-                    roofSectionMesh.GetComponent<Renderer>().sharedMaterial = m_Data.Material;
+                    roofSectionMesh.GetComponent<Renderer>().sharedMaterial = m_RoofTileData.Material;
 
                     roofSectionMesh.transform.SetParent(transform, false);
 
-                    m_Data.Sections[x, y] ??= new RoofSectionData(m_Data.SectionData)
+                    m_RoofTileData.Sections[x, y] ??= new RoofSectionData(m_RoofTileData.SectionData)
                     {
                         ID = new Vector2Int(x, y)
                     };
 
-                    m_Data.Sections[x, y].ControlPoints = controlPoints;
-                    m_Data.Sections[x, y].TopPoints = top;
-                    m_Data.Sections[x, y].SectionHeight = distance;
+                    m_RoofTileData.Sections[x, y].ControlPoints = controlPoints;
+                    m_RoofTileData.Sections[x, y].TopPoints = top;
+                    m_RoofTileData.Sections[x, y].SectionHeight = distance;
 
-                    RoofSection roofSection = roofSectionMesh.AddComponent<RoofSection>().Initialize(m_Data.Sections[x, y]) as RoofSection;
+                    RoofSection roofSection = roofSectionMesh.AddComponent<RoofSection>().Initialize(m_RoofTileData.Sections[x, y]) as RoofSection;
                     roofSection.Build();
                 }
             }
 
         }
 
-        public void Demolish()
+        public override void Demolish()
         {
 
         }

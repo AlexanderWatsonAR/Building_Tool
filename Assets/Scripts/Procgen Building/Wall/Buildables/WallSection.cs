@@ -14,7 +14,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 {
     public class WallSection : Polygon3D.Polygon3D
     {
-        [SerializeReference] WallSectionData m_Data;
+        [SerializeReference] WallSectionData m_WallSectionData;
 
         [SerializeField] WallElement m_PreviousElement;
         [SerializeField] List<Window.Window> m_Windows;
@@ -23,18 +23,17 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         public List<Window.Window> Windows => m_Windows;
 
-        public new WallSectionData Data => m_Data;
-
-        public override IBuildable Initialize(DirtyData wallSectionData)
+        public override Buildable Initialize(DirtyData wallSectionData)
         {
-            m_Data = wallSectionData as WallSectionData;
             base.Initialize(wallSectionData);
+            m_WallSectionData = wallSectionData as WallSectionData;
+            
             return this;
         }
 
         public void BuildChildren()
         {
-            switch (m_Data.WallElement)
+            switch (m_WallSectionData.WallElement)
             {
                 case WallElement.Wall:
                     return;
@@ -59,7 +58,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             Demolish();
 
-            if (m_Data.IsDirty)
+            if (m_WallSectionData.IsDirty)
                 CreateWallElement();
 
             BuildChildren();
@@ -67,11 +66,11 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         private void CreateWallElement()
         {
-            switch (m_Data.WallElement)
+            switch (m_WallSectionData.WallElement)
             {
                 case WallElement.Wall:
                     {
-                        m_Data.Holes = null;
+                        m_WallSectionData.Holes = null;
                         base.Build();
                     }
                     break;
@@ -95,9 +94,9 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     break;
                 case WallElement.Extension:
                     {
-                        IList<IList<Vector3>> extensionHole = CalculateExtension(m_Data);
+                        IList<IList<Vector3>> extensionHole = CalculateExtension(m_WallSectionData);
 
-                        m_Data.SetHoles(extensionHole);
+                        m_WallSectionData.SetHoles(extensionHole);
                         base.Build();
 
                         //ControlPoint[] points = new ControlPoint[4];
@@ -150,20 +149,20 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         #region Calculate
         private WindowData CalculateWindow(int index, IEnumerable<Vector3> controlPoints)
         {
-            WindowData data = new WindowData(m_Data.Window)
+            WindowData data = new WindowData(m_WallSectionData.Window)
             {
                 ID = index,
-                Polygon = new PolygonData(controlPoints.ToArray(), m_Data.Normal)
+                Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal)
             };
             return data;
         }
         private DoorData CalculateDoor(int index, IEnumerable<Vector3> controlPoints)
         {
-            DoorData data = new DoorData(m_Data.Door)
+            DoorData data = new DoorData(m_WallSectionData.Door)
             {
                 ID = index,
-                Polygon = new PolygonData(controlPoints.ToArray(), m_Data.Normal),
-                ActiveElements = m_Data.Doorway.ActiveElements.ToDoorElement() // Does this need changing?
+                Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal),
+                ActiveElements = m_WallSectionData.Doorway.ActiveElements.ToDoorElement() // Does this need changing?
             };
             return data;
         }
@@ -171,7 +170,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             FrameData frameData = new FrameData()
             {
-                Polygon = new PolygonData(controlPoints.ToArray(), m_Data.Normal),
+                Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal),
                 Scale = insideScale,
                 Depth = depth
             };
@@ -207,7 +206,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             m_Windows ??= new List<Window.Window>();
 
-            WindowOpeningData windowOpening = m_Data.WindowOpening;
+            WindowOpeningData windowOpening = m_WallSectionData.WindowOpening;
 
             int size = windowOpening.Columns * windowOpening.Rows;
 
@@ -220,7 +219,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
             if (windowOpening.Windows[0] == null || windowOpening.Windows[0].Polygon.ControlPoints == null || windowOpening.Windows[0].Polygon.ControlPoints.Length == 0)
             {
-                holePoints = CalculateWindowOpening(m_Data);
+                holePoints = CalculateWindowOpening(m_WallSectionData);
 
                 for (int i = 0; i < size; i++)
                 {
@@ -244,11 +243,11 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                 }
             }
 
-            m_Data.SetHoles(holePoints);
+            m_WallSectionData.SetHoles(holePoints);
         }
         private void CreateDoors()
         {
-            DoorwayData doorway = m_Data.Doorway;
+            DoorwayData doorway = m_WallSectionData.Doorway;
 
             int size = doorway.Columns * doorway.Rows;
 
@@ -262,7 +261,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
             if (doorway.Doors[0] == null || doorway.Doors[0].Polygon.ControlPoints == null || doorway.Doors[0].Polygon.ControlPoints.Length == 0)
             {
-                holePoints = CalculateDoorway(m_Data);
+                holePoints = CalculateDoorway(m_WallSectionData);
 
 
                 for (int i = 0; i < size; i++)
@@ -270,7 +269,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     if (doorway.Doors[i] == null || doorway.Doors[i].Polygon.ControlPoints == null || doorway.Doors[i].Polygon.ControlPoints.Length == 0)
                     {
                         doorway.Doors[i] = CalculateDoor(i, holePoints[i]);
-                        doorway.Frames[i] = CalculateFrame(holePoints[i], m_Data.DoorFrame.Scale, m_Data.DoorFrame.Depth);
+                        doorway.Frames[i] = CalculateFrame(holePoints[i], m_WallSectionData.DoorFrame.Scale, m_WallSectionData.DoorFrame.Depth);
 
                         if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
                         {
@@ -311,11 +310,11 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                 }
             }
 
-            m_Data.SetHoles(holePoints);
+            m_WallSectionData.SetHoles(holePoints);
         }
         private void CreateArchDoors()
         {
-            ArchwayData archway = m_Data.Archway;
+            ArchwayData archway = m_WallSectionData.Archway;
 
             int size = archway.Columns * archway.Rows;
 
@@ -329,14 +328,14 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
             if (archway.Doors[0] == null || archway.Doors[0].Polygon.ControlPoints == null || archway.Doors[0].Polygon.ControlPoints.Length == 0)
             {
-                holePoints = CalculateArchway(m_Data);
+                holePoints = CalculateArchway(m_WallSectionData);
 
                 for (int i = 0; i < size; i++)
                 {
                     if (archway.Doors[i] == null || archway.Doors[i].Polygon.ControlPoints == null || archway.Doors[i].Polygon.ControlPoints.Length == 0)
                     {
                         archway.Doors[i] = CalculateDoor(i, holePoints[i]);
-                        archway.Frames[i] = CalculateFrame(holePoints[i], m_Data.DoorFrame.Scale, m_Data.DoorFrame.Depth);
+                        archway.Frames[i] = CalculateFrame(holePoints[i], m_WallSectionData.DoorFrame.Scale, m_WallSectionData.DoorFrame.Depth);
 
                         if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
                         {
@@ -376,7 +375,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                 }
             }
 
-            m_Data.SetHoles(holePoints);
+            m_WallSectionData.SetHoles(holePoints);
         }
         private Window.Window CreateWindow(WindowData data)
         {
@@ -408,7 +407,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         public override void Demolish()
         {
-            if (!m_Data.IsDirty)
+            if (!m_WallSectionData.IsDirty)
                 return;
 
             transform.DeleteChildren();
