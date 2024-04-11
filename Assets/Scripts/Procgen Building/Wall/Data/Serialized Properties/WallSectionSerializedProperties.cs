@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using OnlyInvalid.ProcGenBuilding.Window;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {

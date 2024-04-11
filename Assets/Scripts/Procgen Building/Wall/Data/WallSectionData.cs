@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using OnlyInvalid.ProcGenBuilding.Window;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {

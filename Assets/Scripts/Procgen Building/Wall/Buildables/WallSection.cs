@@ -8,6 +8,7 @@ using System.Linq;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Window;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
@@ -17,8 +18,8 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         [SerializeField] WallElement m_PreviousElement;
         [SerializeField] List<Window.Window> m_Windows;
-        [SerializeField] List<Door> m_Doors;
-        [SerializeField] List<Frame> m_Frames;
+        [SerializeField] List<Door.Door> m_Doors;
+        [SerializeField] List<Polygon3D.Frame> m_Frames;
 
         public List<Window.Window> Windows => m_Windows;
 
@@ -273,14 +274,14 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                         if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
                         {
-                            Door door = CreateDoor(doorway.Doors[i]);
+                            Door.Door door = CreateDoor(doorway.Doors[i]);
                             m_Doors.Add(door);
                         }
 
                         if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                             continue;
 
-                        Frame frame = CreateFrame(doorway.Frames[i]);
+                        Polygon3D.Frame frame = CreateFrame(doorway.Frames[i]);
                         m_Frames.Add(frame);
 
                     }
@@ -298,14 +299,14 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                     if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
                     {
-                        Door door = CreateDoor(data);
+                        Door.Door door = CreateDoor(data);
                         m_Doors.Add(door);
                     }
 
                     if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                         continue;
 
-                    Frame frame = CreateFrame(doorway.Frames[i]);
+                    Polygon3D.Frame frame = CreateFrame(doorway.Frames[i]);
                     m_Frames.Add(frame);
                 }
             }
@@ -339,14 +340,14 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                         if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
                         {
-                            Door door = CreateDoor(archway.Doors[i]);
+                            Door.Door door = CreateDoor(archway.Doors[i]);
                             m_Doors.Add(door);
                         }
 
                         if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                             continue;
 
-                        Frame frame = CreateFrame(archway.Frames[i]);
+                        Polygon3D.Frame frame = CreateFrame(archway.Frames[i]);
                         m_Frames.Add(frame);
                     }
                 }
@@ -362,14 +363,14 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                     if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
                     {
-                        Door door = CreateDoor(data);
+                        Door.Door door = CreateDoor(data);
                         m_Doors.Add(door);
                     }
 
                     if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
                         continue;
 
-                    Frame frame = CreateFrame(archway.Frames[i]);
+                    Polygon3D.Frame frame = CreateFrame(archway.Frames[i]);
                     m_Frames.Add(frame);
 
                 }
@@ -386,20 +387,20 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             window.Initialize(data);
             return window;
         }
-        private Door CreateDoor(DoorData data)
+        private Door.Door CreateDoor(DoorData data)
         {
             ProBuilderMesh doorMesh = ProBuilderMesh.Create();
             doorMesh.name = "Door " + data.ID.ToString();
             doorMesh.transform.SetParent(transform, false);
-            Door door = doorMesh.AddComponent<Door>();
+            Door.Door door = doorMesh.AddComponent<Door.Door>();
             door.Initialize(data);
             return door;
         }
-        private Frame CreateFrame(FrameData data)
+        private Polygon3D.Frame CreateFrame(FrameData data)
         {
             ProBuilderMesh frameMesh = ProBuilderMesh.Create();
             frameMesh.transform.SetParent(transform, false);
-            Frame doorFrame = frameMesh.AddComponent<Frame>();
+            Polygon3D.Frame doorFrame = frameMesh.AddComponent<Polygon3D.Frame>();
             doorFrame.Initialize(data);
             return doorFrame;
         }

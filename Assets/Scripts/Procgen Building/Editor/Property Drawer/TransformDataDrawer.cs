@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Unity.VisualScripting;
 using UnityEditor.Rendering;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 [CustomPropertyDrawer(typeof(TransformData))]
 public class TransformDataDrawer : PropertyDrawer, IFieldInitializer

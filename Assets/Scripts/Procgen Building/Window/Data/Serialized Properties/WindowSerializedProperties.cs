@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-
+using OnlyInvalid.ProcGenBuilding.Door;
 public class ArchwayDataSerializedProperties : DoorwayDataSerializedProperties
 {
     #region Constants

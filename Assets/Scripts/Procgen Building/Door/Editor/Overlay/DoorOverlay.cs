@@ -7,47 +7,49 @@ using UnityEditor.UIElements;
 using UnityEditor.Overlays;
 using Unity.VisualScripting;
 
-[Overlay(typeof(SceneView), "Door", true)]
-public class DoorOverlay : Overlay, ITransientOverlay
+namespace OnlyInvalid.ProcGenBuilding.Door
 {
-    [SerializeField] Door m_Door;
-
-    public override VisualElement CreatePanelContent()
+    [Overlay(typeof(SceneView), "Door", true)]
+    public class DoorOverlay : Overlay, ITransientOverlay
     {
-        if (m_Door == null)
-            return null;
+        [SerializeField] Door m_Door;
 
-        var root = new VisualElement() { name = "Door Root" };
-
-        SerializedObject serializedObject = new SerializedObject(m_Door);
-
-        SerializedProperty data = serializedObject.FindProperty("m_Data");
-
-        PropertyField dataField = new PropertyField(data);
-        dataField.BindProperty(data);
-
-        root.Add(dataField);
-        
-        return root;
-    }
-
-    public bool visible
-    {
-        get
+        public override VisualElement CreatePanelContent()
         {
-            if (Selection.activeGameObject != null)
+            if (m_Door == null)
+                return null;
+
+            var root = new VisualElement() { name = "Door Root" };
+
+            SerializedObject serializedObject = new SerializedObject(m_Door);
+
+            SerializedProperty data = serializedObject.FindProperty("m_Data");
+
+            PropertyField dataField = new PropertyField(data);
+            dataField.BindProperty(data);
+
+            root.Add(dataField);
+
+            return root;
+        }
+
+        public bool visible
+        {
+            get
             {
-                bool isDoor = Selection.activeGameObject.TryGetComponent(out Door door);
-
-                if (isDoor)
+                if (Selection.activeGameObject != null)
                 {
-                    m_Door = door;
+                    bool isDoor = Selection.activeGameObject.TryGetComponent(out Door door);
 
+                    if (isDoor)
+                    {
+                        m_Door = door;
+
+                    }
+                    return isDoor;
                 }
-                return isDoor;
+                return false;
             }
-            return false;
         }
     }
-
 }

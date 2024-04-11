@@ -10,6 +10,7 @@ using System;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Window;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {

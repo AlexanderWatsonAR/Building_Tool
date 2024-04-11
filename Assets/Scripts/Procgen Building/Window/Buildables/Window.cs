@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
+using OnlyInvalid.ProcGenBuilding.Wall;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
@@ -15,8 +17,8 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         [SerializeField] OuterFrame m_OuterFrame;
         [SerializeField] InnerFrame m_InnerFrame;
         [SerializeField] Pane m_Pane;
-        [SerializeField] Door m_LeftShutter;
-        [SerializeField] Door m_RightShutter;
+        [SerializeField] Door.Door m_LeftShutter;
+        [SerializeField] Door.Door m_RightShutter;
 
         public WindowData Data => m_Data;
 
@@ -25,6 +27,18 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_Data = data as WindowData;
             return this;
         }
+
+        #region Setters
+
+        public void SetOuterFrame(FrameData data)
+        {
+            m_Data.OuterFrame = data;
+            // TODO: call section and pass through window data.
+            WallSection section = transform.parent.GetComponent<WallSection>();
+            section.Data.WindowOpening.Windows[m_Data.ID] = m_Data;
+        }
+
+        #endregion
 
         #region Create
         private OuterFrame CreateOuterFrame()
@@ -57,24 +71,24 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             pane.Data.IsDirty = true;
             return pane;
         }
-        private Door CreateLeftShutter(Vector3[] controlPoints)
+        private Door.Door CreateLeftShutter(Vector3[] controlPoints)
         {
             ProBuilderMesh leftShutterMesh = ProBuilderMesh.Create();
             leftShutterMesh.name = "Left Shutter";
             leftShutterMesh.transform.SetParent(transform, false);
-            Door leftShutter = leftShutterMesh.AddComponent<Door>();
+            Door.Door leftShutter = leftShutterMesh.AddComponent<Door.Door>();
             DoorData data = m_Data.LeftShutter;
             data.SetPolygon(controlPoints, m_Data.Polygon.Normal);
             leftShutter.Initialize(data);
             leftShutter.Data.IsDirty = true;
             return leftShutter;
         }
-        private Door CreateRightShutter(Vector3[] controlPoints)
+        private Door.Door CreateRightShutter(Vector3[] controlPoints)
         {
             ProBuilderMesh rightShutterMesh = ProBuilderMesh.Create();
             rightShutterMesh.name = "Right Shutter";
             rightShutterMesh.transform.SetParent(transform, false);
-            Door rightShutter = rightShutterMesh.AddComponent<Door>();
+            Door.Door rightShutter = rightShutterMesh.AddComponent<Door.Door>();
             DoorData data = m_Data.RightShutter;
             data.SetPolygon(controlPoints, m_Data.Polygon.Normal);
             rightShutter.Initialize(data);

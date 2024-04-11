@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {

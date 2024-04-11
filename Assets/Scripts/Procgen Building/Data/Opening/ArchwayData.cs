@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 [System.Serializable]
 public class ArchwayData : DoorwayData, ICloneable

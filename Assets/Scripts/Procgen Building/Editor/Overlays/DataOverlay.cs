@@ -13,6 +13,7 @@ using OnlyInvalid.ProcGenBuilding.Pillar;
 using OnlyInvalid.ProcGenBuilding.Floor;
 using OnlyInvalid.ProcGenBuilding.Wall;
 using OnlyInvalid.ProcGenBuilding.Roof;
+using OnlyInvalid.ProcGenBuilding.Door;
 
 public class DataOverlay : Overlay
 {
