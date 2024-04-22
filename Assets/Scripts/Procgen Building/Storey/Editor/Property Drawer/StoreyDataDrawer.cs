@@ -20,7 +20,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
         [SerializeField] StoreyData m_PreviousData;
         [SerializeField] StoreyData m_CurrentData;
-        [SerializeField] IBuildable m_Buildable;
+        [SerializeField] Buildable m_Buildable;
 
         VisualElement m_Root;
         Foldout m_StoreyFoldout, m_WallFoldout, m_CornerFoldout, m_PillarFoldout, m_FloorFoldout;
@@ -47,7 +47,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             m_Props = new StoreyDataSerializedProperties(data);
             m_CurrentData = data.GetUnderlyingValue() as StoreyData;
             m_PreviousData = new StoreyData(m_CurrentData);
-            m_Buildable = data.serializedObject.targetObject as IBuildable;
+            m_Buildable = data.serializedObject.targetObject as Buildable;
         }
 
         public void DefineFields()
@@ -113,21 +113,10 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
                 m_PreviousData.WallData.Height = height;
 
-                bool rebuild = false;
-
                 for (int i = 0; i < m_CurrentData.Walls.Length; i++)
                 {
-                    if (m_CurrentData.Walls[i].Height != height)
-                        rebuild = true;
-
                     m_CurrentData.Walls[i].Height = height;
                 }
-
-                // How do we build via update in this instance?
-                // The height should be the same for each wall, (the only place you can edit the wall height is here)
-
-
-
             });
             m_WallDepth.RegisterValueChangeCallback(evt =>
             {
@@ -141,13 +130,8 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
                 m_PreviousData.WallData.Depth = depth;
 
-                bool rebuild = false;
-
                 for (int i = 0; i < m_CurrentData.Walls.Length; i++)
                 {
-                    if (m_CurrentData.Walls[i].Depth != depth)
-                        rebuild = true;
-
                     m_CurrentData.Walls[i].Depth = depth;
                 }
             });

@@ -4,7 +4,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
-    [CustomEditor(typeof(WallSection))]
+    [CustomEditor(typeof(WallSection), editorForChildClasses:false)]
     public class WallSectionEditor : DataEditor
     {
         public override VisualElement CreateInspectorGUI()

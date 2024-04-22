@@ -7,13 +7,13 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 {
     public class Pillars : Buildable
     {
-        [SerializeField] PillarsData m_Data;
+        [SerializeField] PillarsData m_PillarsData;
         [SerializeField] Pillar[] m_Pillars;
 
         public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as PillarsData;
-            m_Pillars = new Pillar[m_Data.Pillars.Length];
+            m_PillarsData = data as PillarsData;
+            m_Pillars = new Pillar[m_PillarsData.Pillars.Length];
             return this;
         }
         public override void Build()

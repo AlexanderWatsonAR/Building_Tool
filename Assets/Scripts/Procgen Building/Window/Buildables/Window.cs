@@ -12,7 +12,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 {
     public class Window : Buildable
     {
-        [SerializeReference] WindowData m_Data;
+        [SerializeReference] WindowData m_WindowData;
 
         [SerializeField] OuterFrame m_OuterFrame;
         [SerializeField] InnerFrame m_InnerFrame;
@@ -22,7 +22,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
         public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as WindowData;
+            m_WindowData = data as WindowData;
             return this;
         }
 
@@ -63,8 +63,8 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             leftShutterMesh.name = "Left Shutter";
             leftShutterMesh.transform.SetParent(transform, false);
             Door.Door leftShutter = leftShutterMesh.AddComponent<Door.Door>();
-            DoorData data = m_Data.LeftShutter;
-            data.SetPolygon(controlPoints, m_Data.Polygon.Normal);
+            DoorData data = m_WindowData.LeftShutter;
+            data.SetPolygon(controlPoints, m_WindowData.Polygon.Normal);
             leftShutter.Initialize(data);
             leftShutter.Data.IsDirty = true;
             return leftShutter;
@@ -75,8 +75,8 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             rightShutterMesh.name = "Right Shutter";
             rightShutterMesh.transform.SetParent(transform, false);
             Door.Door rightShutter = rightShutterMesh.AddComponent<Door.Door>();
-            DoorData data = m_Data.RightShutter;
-            data.SetPolygon(controlPoints, m_Data.Polygon.Normal);
+            DoorData data = m_WindowData.RightShutter;
+            data.SetPolygon(controlPoints, m_WindowData.Polygon.Normal);
             rightShutter.Initialize(data);
             rightShutter.Data.IsDirty = true;
             return rightShutter;
@@ -84,28 +84,28 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         #endregion
 
         #region Calculate
-        private FrameData CalculateOuterFrame()
+        private OuterFrameData CalculateOuterFrame()
         {
-            FrameData frameData = m_Data.OuterFrame;
-            frameData.SetPolygon(m_Data.Polygon.ControlPoints, m_Data.Polygon.Normal);
+            OuterFrameData frameData = m_WindowData.OuterFrame;
+            frameData.SetPolygon(m_WindowData.Polygon.ControlPoints, m_WindowData.Polygon.Normal);
             return frameData;
         }
-        private GridFrameData CalculateInnerFrame()
+        private InnerFrameData CalculateInnerFrame()
         {
-            GridFrameData frameData = m_Data.InnerFrame;
-            FrameData outerFrameData = m_OuterFrame.Data as FrameData;
-            Vector3[] controlPoints = m_Data.IsOuterFrameActive ? outerFrameData.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
-            Vector3 normal = m_Data.Polygon.Normal;
+            InnerFrameData frameData = m_WindowData.InnerFrame;
+            OuterFrameData outerFrameData = m_OuterFrame.Data as OuterFrameData;
+            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive ? outerFrameData.Holes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
+            Vector3 normal = m_WindowData.Polygon.Normal;
             frameData.SetPolygon(controlPoints, normal);
 
             return frameData;
         }
-        private Polygon3DData CalculatePane()
+        private PaneData CalculatePane()
         {
-            Polygon3DData pane = m_Data.Pane;
-            FrameData outerFrameData = m_OuterFrame.Data as FrameData;
-            Vector3[] controlPoints = m_Data.IsOuterFrameActive ? outerFrameData.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
-            Vector3 normal = m_Data.Polygon.Normal;
+            PaneData pane = m_WindowData.Pane;
+            OuterFrameData outerFrameData = m_OuterFrame.Data as OuterFrameData;
+            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive ? outerFrameData.Holes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
+            Vector3 normal = m_WindowData.Polygon.Normal;
 
             pane.SetPolygon(controlPoints, normal);
 
@@ -118,7 +118,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         #region Rebuild
         public void Rebuild()
         {
-            if (!m_Data.IsDirty)
+            if (!m_WindowData.IsDirty)
                 return;
 
             transform.DeleteChildren();
@@ -128,7 +128,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             RebuildPane();
             RebuildShutters();
 
-            m_Data.IsDirty = false;
+            m_WindowData.IsDirty = false;
         }
         public void RebuildOuterFrame()
         {
@@ -159,11 +159,11 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         }
         public void RebuildShutters()
         {
-            if (!m_Data.AreShuttersActive && m_LeftShutter != null)
+            if (!m_WindowData.AreShuttersActive && m_LeftShutter != null)
             {
                 m_LeftShutter.Demolish();
             }
-            if (!m_Data.AreShuttersActive && m_RightShutter != null)
+            if (!m_WindowData.AreShuttersActive && m_RightShutter != null)
             {
                 m_RightShutter.Demolish();
             }
@@ -174,7 +174,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
         public void BuildOuterFrame()
         {
-            if (m_Data.IsOuterFrameActive && (m_OuterFrame == null || m_Data.OuterFrame.IsDirty))
+            if (m_WindowData.IsOuterFrameActive && (m_OuterFrame == null || m_WindowData.OuterFrame.IsDirty))
             {
                 m_OuterFrame = m_OuterFrame != null ? m_OuterFrame : CreateOuterFrame(); // What is we need to recalc the points
                 m_OuterFrame.Build();
@@ -183,7 +183,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         }
         public void BuildInnerFrame()
         {
-            if (m_Data.IsInnerFrameActive && (m_InnerFrame == null || m_Data.InnerFrame.IsDirty))
+            if (m_WindowData.IsInnerFrameActive && (m_InnerFrame == null || m_WindowData.InnerFrame.IsDirty))
             {
                 m_InnerFrame = m_InnerFrame != null ? m_InnerFrame : CreateInnerFrame();
                 m_InnerFrame.Build();
@@ -191,7 +191,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         }
         public void BuildPane()
         {
-            if (m_Data.IsPaneActive && (m_Pane == null || m_Data.Pane.IsDirty))
+            if (m_WindowData.IsPaneActive && (m_Pane == null || m_WindowData.Pane.IsDirty))
             {
                 m_Pane = m_Pane != null ? m_Pane : CreatePane();
                 m_Pane.Build();
@@ -199,28 +199,28 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         }
         public void BuildShutters()
         {
-            if (m_Data.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_Data.LeftShutter.IsDirty || m_Data.RightShutter.IsDirty))
+            if (m_WindowData.AreShuttersActive && (m_LeftShutter == null || m_RightShutter == null || m_WindowData.LeftShutter.IsDirty || m_WindowData.RightShutter.IsDirty))
             {
                 IList<IList<Vector3>> shutterControlPoints;
 
                 GridFrameData innerFrame = m_InnerFrame.Data as GridFrameData;
                 FrameData outerFrame = m_OuterFrame.Data as FrameData;
 
-                Vector3[] points = m_Data.IsOuterFrameActive ? outerFrame.Holes[0].ControlPoints : m_Data.Polygon.ControlPoints;
+                Vector3[] points = m_WindowData.IsOuterFrameActive ? outerFrame.Holes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
 
-                float height = m_Data.IsOuterFrameActive ? innerFrame.Height : outerFrame.Height;
-                float width = m_Data.IsOuterFrameActive ? innerFrame.Width : outerFrame.Width;
-                float depth = m_Data.IsOuterFrameActive ? innerFrame.Depth : outerFrame.Depth;
-                Vector3 position = m_Data.IsOuterFrameActive ? innerFrame.Position : outerFrame.Position;
+                float height = m_WindowData.IsOuterFrameActive ? innerFrame.Height : outerFrame.Height;
+                float width = m_WindowData.IsOuterFrameActive ? innerFrame.Width : outerFrame.Width;
+                float depth = m_WindowData.IsOuterFrameActive ? innerFrame.Depth : outerFrame.Depth;
+                Vector3 position = m_WindowData.IsOuterFrameActive ? innerFrame.Position : outerFrame.Position;
 
                 for (int i = 0; i < points.Length; i++)
                 {
-                    points[i] += m_Data.Polygon.Normal * depth;
+                    points[i] += m_WindowData.Polygon.Normal * depth;
                 }
 
-                position += m_Data.Polygon.Normal * depth;
+                position += m_WindowData.Polygon.Normal * depth;
 
-                shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_Data.Polygon.Normal);
+                shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_WindowData.Polygon.Normal);
 
                 m_LeftShutter = m_LeftShutter != null ? m_LeftShutter : CreateLeftShutter(shutterControlPoints[1].ToArray());
                 m_LeftShutter.Build();
@@ -234,7 +234,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         {
             Demolish();
 
-            if (m_Data.ActiveElements == WindowElement.Nothing)
+            if (m_WindowData.ActiveElements == WindowElement.Nothing)
                 return;
 
             BuildOuterFrame();
@@ -251,23 +251,23 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         /// </summary>
         public override void Demolish()
         {
-            if (!m_Data.IsOuterFrameActive && m_OuterFrame != null)
+            if (!m_WindowData.IsOuterFrameActive && m_OuterFrame != null)
             {
                 m_OuterFrame.Demolish();
             }
-            if (!m_Data.IsInnerFrameActive && m_InnerFrame != null)
+            if (!m_WindowData.IsInnerFrameActive && m_InnerFrame != null)
             {
                 m_InnerFrame.Demolish();
             }
-            if (!m_Data.IsPaneActive && m_Pane != null)
+            if (!m_WindowData.IsPaneActive && m_Pane != null)
             {
                 m_Pane.Demolish();
             }
-            if (!m_Data.AreShuttersActive && m_LeftShutter != null)
+            if (!m_WindowData.AreShuttersActive && m_LeftShutter != null)
             {
                 m_LeftShutter.Demolish();
             }
-            if (!m_Data.AreShuttersActive && m_RightShutter != null)
+            if (!m_WindowData.AreShuttersActive && m_RightShutter != null)
             {
                 m_RightShutter.Demolish();
             }

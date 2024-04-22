@@ -9,7 +9,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    [CustomPropertyDrawer(typeof(FrameData))]
+    [CustomPropertyDrawer(typeof(FrameData), useForChildren:true)]
     public class FrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         IBuildable m_Buildable;

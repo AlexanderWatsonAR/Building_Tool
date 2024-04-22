@@ -90,7 +90,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
             m_OuterFrame.RegisterValueChangeCallback(evt =>
             {
-                FrameData frameData = evt.changedProperty.GetUnderlyingValue() as FrameData;
+                OuterFrameData frameData = evt.changedProperty.GetUnderlyingValue() as OuterFrameData;
 
                 if (frameData.Equals(m_PreviousData.OuterFrame))
                     return;
@@ -98,7 +98,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
                 if (frameData.Scale != m_PreviousData.OuterFrame.Scale)
                     m_CurrentData.IsDirty = true;
 
-                m_PreviousData.OuterFrame = frameData.Clone() as FrameData;
+                m_PreviousData.OuterFrame = frameData.Clone() as OuterFrameData;
             });
 
         }

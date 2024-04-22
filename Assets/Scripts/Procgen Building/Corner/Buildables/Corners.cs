@@ -7,14 +7,14 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
 {
     public class Corners : Buildable
     {
-        [SerializeField] CornersData m_Data;
+        [SerializeField] CornersData m_CornersData;
         [SerializeField] Corner[] m_Corners;
 
         public override Buildable Initialize(DirtyData data)
         {
             base.Initialize(data);
-            m_Data = data as CornersData;
-            m_Corners = new Corner[m_Data.Corners.Length];
+            m_CornersData = data as CornersData;
+            m_Corners = new Corner[m_CornersData.Corners.Length];
             return this;
         }
 

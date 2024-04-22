@@ -38,6 +38,9 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             SerializedProperty holes = data.FindPropertyRelative(k_Holes);
 
+            if (holes == null)
+                return;
+
             m_Holes = new PolygonDataSerializedProperties[holes.arraySize];
 
             for (int i = 0; i < m_Holes.Length; i++)

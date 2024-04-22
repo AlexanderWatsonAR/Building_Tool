@@ -14,7 +14,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 {
     public class Storey : Buildable
     {
-        [SerializeReference] StoreyData m_Data;
+        [SerializeReference] StoreyData m_StoreyData;
 
         [SerializeField] List<Corner.Corner> m_Corners;
         [SerializeField] List<Wall.Wall> m_Walls;
@@ -23,7 +23,8 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
         public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as StoreyData;
+            base.Initialize(data);
+            m_StoreyData = data as StoreyData;
             m_Corners ??= new List<Corner.Corner>();
             m_Walls ??= new List<Wall.Wall>();
             m_Pillars ??= new List<Pillar.Pillar>();
@@ -46,12 +47,12 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         }
         private void CreatePillars()
         {
-            if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Pillars))
+            if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Pillars))
                 return;
 
-            if (m_Data.Pillars == null || m_Data.Pillars.Length != m_Data.ControlPoints.Length)
+            if (m_StoreyData.Pillars == null || m_StoreyData.Pillars.Length != m_StoreyData.ControlPoints.Length)
             {
-                m_Data.Pillars = new PillarData[m_Data.ControlPoints.Length];
+                m_StoreyData.Pillars = new PillarData[m_StoreyData.ControlPoints.Length];
             }
 
             m_Pillars = new List<Pillar.Pillar>();
@@ -59,59 +60,59 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             GameObject pillars = new GameObject("Pillars");
             pillars.transform.SetParent(transform, false);
 
-            for (int i = 0; i < m_Data.ControlPoints.Length; i++)
+            for (int i = 0; i < m_StoreyData.ControlPoints.Length; i++)
             {
-                m_Data.Pillars[i] ??= CalculatePillar(i);
+                m_StoreyData.Pillars[i] ??= CalculatePillar(i);
 
-                Pillar.Pillar pillar = CreatePillar(m_Data.Pillars[i]);
+                Pillar.Pillar pillar = CreatePillar(m_StoreyData.Pillars[i]);
                 pillar.transform.SetParent(pillars.transform, false);
-                pillar.transform.localPosition = m_Data.ControlPoints[i].Position;
-                int index = m_Data.ControlPoints.GetNext(i);
-                pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_Data.ControlPoints[index].Position);
+                pillar.transform.localPosition = m_StoreyData.ControlPoints[i].Position;
+                int index = m_StoreyData.ControlPoints.GetNext(i);
+                pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_StoreyData.ControlPoints[index].Position);
 
                 m_Pillars.Add(pillar);
             }
         }
         private void CreateCorners()
         {
-            if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
+            if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Walls))
                 return;
 
             GameObject corners = new GameObject("Corners");
             corners.transform.SetParent(transform, false);
 
-            if (m_Data.Corners == null || m_Data.Corners.Length != m_Data.ControlPoints.Length)
+            if (m_StoreyData.Corners == null || m_StoreyData.Corners.Length != m_StoreyData.ControlPoints.Length)
             {
-                m_Data.Corners = new CornerData[m_Data.ControlPoints.Length];
+                m_StoreyData.Corners = new CornerData[m_StoreyData.ControlPoints.Length];
             }
 
-            for (int i = 0; i < m_Data.ControlPoints.Length; i++)
+            for (int i = 0; i < m_StoreyData.ControlPoints.Length; i++)
             {
-                m_Data.Corners[i] = CalculateCorner(i);
-                Corner.Corner corner = CreateCorner(m_Data.Corners[i]);
+                m_StoreyData.Corners[i] = CalculateCorner(i);
+                Corner.Corner corner = CreateCorner(m_StoreyData.Corners[i]);
                 corner.transform.SetParent(corners.transform, false);
                 m_Corners.Add(corner);
             }
         }
         private void CreateExternalWalls()
         {
-            if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Walls))
+            if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Walls))
                 return;
 
-            if (m_Data.Walls == null || m_Data.Walls.Length != m_Data.ControlPoints.Length)
+            if (m_StoreyData.Walls == null || m_StoreyData.Walls.Length != m_StoreyData.ControlPoints.Length)
             {
-                m_Data.Walls = new WallData[m_Data.ControlPoints.Length];
+                m_StoreyData.Walls = new WallData[m_StoreyData.ControlPoints.Length];
             }
 
             GameObject walls = new GameObject("Walls");
             walls.transform.SetParent(transform, false);
 
             // Construct the walls 
-            for (int i = 0; i < m_Data.ControlPoints.Length; i++)
+            for (int i = 0; i < m_StoreyData.ControlPoints.Length; i++)
             {
-                m_Data.Walls[i] ??= CalculateWall(i);
+                m_StoreyData.Walls[i] ??= CalculateWall(i);
 
-                Wall.Wall wall = CreateWall(m_Data.Walls[i]);
+                Wall.Wall wall = CreateWall(m_StoreyData.Walls[i]);
                 wall.transform.SetParent(walls.transform, true);
 
                 m_Walls.Add(wall);
@@ -140,18 +141,18 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             ProBuilderMesh pillarMesh = ProBuilderMesh.Create();
             pillarMesh.name = "Pillar " + data.ID.ToString();
             Pillar.Pillar pillar = pillarMesh.AddComponent<Pillar.Pillar>();
-            pillar.Initialize(m_Data.Pillars[i]);
+            pillar.Initialize(m_StoreyData.Pillars[i]);
             return pillar;
         }
         private void CreateFloor()
         {
-            if (!m_Data.ActiveElements.IsElementActive(StoreyElement.Floor))
+            if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Floor))
                 return;
 
             ProBuilderMesh floorMesh = ProBuilderMesh.Create();
 
-            ControlPoint[] points = new ControlPoint[m_Data.ControlPoints.Length];
-            Array.Copy(m_Data.ControlPoints, points, points.Length);
+            ControlPoint[] points = new ControlPoint[m_StoreyData.ControlPoints.Length];
+            Array.Copy(m_StoreyData.ControlPoints, points, points.Length);
 
             m_Floor = floorMesh.AddComponent<Floor.Floor>().Initialize(new FloorData() { ControlPoints = points }) as Floor.Floor;
 
@@ -187,66 +188,66 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         /// <returns></returns>
         private CornerData CalculateCorner(int cornerIndex)
         {
-            bool isConcave = m_Data.ControlPoints.IsConcave(out int[] concavePoints);
-            WallData wallData = m_Data.WallData;
+            bool isConcave = m_StoreyData.ControlPoints.IsConcave(out int[] concavePoints);
+            WallData wallData = m_StoreyData.WallData;
 
             int current = cornerIndex;
-            int previous = m_Data.ControlPoints.GetPrevious(current);
-            int next = m_Data.ControlPoints.GetNext(current);
+            int previous = m_StoreyData.ControlPoints.GetPrevious(current);
+            int next = m_StoreyData.ControlPoints.GetNext(current);
 
 
-            Vector3 dirA = m_Data.Walls[current].StartPosition.DirectionToTarget(m_Data.Walls[current].EndPosition);
+            Vector3 dirA = m_StoreyData.Walls[current].StartPosition.DirectionToTarget(m_StoreyData.Walls[current].EndPosition);
             Vector3 crossA = Vector3.Cross(dirA, Vector3.up) * wallData.Depth;
 
-            Vector3 dirB = m_Data.Walls[previous].StartPosition.DirectionToTarget(m_Data.Walls[previous].EndPosition);
+            Vector3 dirB = m_StoreyData.Walls[previous].StartPosition.DirectionToTarget(m_StoreyData.Walls[previous].EndPosition);
             Vector3 crossB = Vector3.Cross(dirB, Vector3.up) * wallData.Depth;
 
             Vector3 intersection;
 
-            Extensions.DoLinesIntersect(m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[current].EndPosition + crossA, m_Data.Walls[previous].StartPosition + crossB, m_Data.Walls[previous].EndPosition + crossB, out intersection);
+            Extensions.DoLinesIntersect(m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[current].EndPosition + crossA, m_StoreyData.Walls[previous].StartPosition + crossB, m_StoreyData.Walls[previous].EndPosition + crossB, out intersection);
 
-            int numberOfSamples = m_Data.CornerData.Sides + 1;
+            int numberOfSamples = m_StoreyData.CornerData.Sides + 1;
 
-            Vector3[] cornerPoints = new Vector3[] { m_Data.Walls[current].StartPosition, m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[current].StartPosition + crossB, intersection };
+            Vector3[] cornerPoints = new Vector3[] { m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[current].StartPosition + crossB, intersection };
             Vector3[] flatPoints = new Vector3[] { cornerPoints[0], cornerPoints[1], cornerPoints[2] };
 
             bool isInside = isConcave && concavePoints.Any(b => b == current);
 
             if (isInside)
             {
-                Extensions.DoLinesIntersect(m_Data.Walls[current].StartPosition, m_Data.Walls[current].EndPosition, m_Data.Walls[previous].StartPosition, m_Data.Walls[previous].EndPosition, out intersection);
-                cornerPoints = new Vector3[] { m_Data.Walls[current].StartPosition, m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[previous].EndPosition, intersection };
-                flatPoints = new Vector3[] { m_Data.Walls[current].StartPosition, m_Data.Walls[current].StartPosition + crossA, m_Data.Walls[previous].EndPosition };
+                Extensions.DoLinesIntersect(m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].EndPosition, m_StoreyData.Walls[previous].StartPosition, m_StoreyData.Walls[previous].EndPosition, out intersection);
+                cornerPoints = new Vector3[] { m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[previous].EndPosition, intersection };
+                flatPoints = new Vector3[] { m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[previous].EndPosition };
             }
 
-            CornerData cornerData = new CornerData(m_Data.CornerData)
+            CornerData cornerData = new CornerData(m_StoreyData.CornerData)
             {
                 CornerPoints = cornerPoints,
                 FlatPoints = flatPoints.SortPointsClockwise().ToArray(),
                 ID = current,
                 IsInside = isInside,
-                Height = m_Data.WallData.Height
+                Height = m_StoreyData.WallData.Height
             };
 
             return cornerData;
         }
         private WallData CalculateWall(int wallIndex)
         {
-            WallData wallData = m_Data.WallData;
+            WallData wallData = m_StoreyData.WallData;
             wallData.Sections = new WallSectionData[wallData.Columns * wallData.Rows];
 
-            m_Data.WallPoints = new WallPoints[m_Data.ControlPoints.Length];
+            m_StoreyData.WallPoints = new WallPoints[m_StoreyData.ControlPoints.Length];
 
             int current = wallIndex;
-            int next = m_Data.ControlPoints.GetNext(current);
+            int next = m_StoreyData.ControlPoints.GetNext(current);
 
-            Vector3 nextDir = m_Data.ControlPoints[current].DirectionToTarget(m_Data.ControlPoints[next]);
+            Vector3 nextDir = m_StoreyData.ControlPoints[current].DirectionToTarget(m_StoreyData.ControlPoints[next]);
             Vector3 wallForward = Vector3.Cross(nextDir, Vector3.up) * wallData.Depth;
 
-            ControlPoint start = new ControlPoint(m_Data.ControlPoints[current]);
-            ControlPoint end = new ControlPoint(m_Data.ControlPoints[next]);
+            ControlPoint start = new ControlPoint(m_StoreyData.ControlPoints[current]);
+            ControlPoint end = new ControlPoint(m_StoreyData.ControlPoints[next]);
 
-            bool isConcave = m_Data.ControlPoints.IsConcave(out int[] concavePoints);
+            bool isConcave = m_StoreyData.ControlPoints.IsConcave(out int[] concavePoints);
 
             if (isConcave)
             {
@@ -275,7 +276,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         }
         private PillarData CalculatePillar(int pillarIndex)
         {
-            PillarData data = new PillarData(m_Data.Pillar)
+            PillarData data = new PillarData(m_StoreyData.Pillar)
             {
                 ID = pillarIndex
             };

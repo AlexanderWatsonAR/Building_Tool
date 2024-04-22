@@ -13,13 +13,6 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
     [System.Serializable]
     public class StoreyData : DirtyData
     {
-        // Notes of serialization. I may be repeating myself.
-        // When creating a new building object a StoreyData object is instantiated and a reference is passed to an instance of Storey class.
-        // Upon serialization, that reference is stored as a as copy of the original. So, now inside the storey class is no longer a reference to 
-        // the StoreyData inside Building but a copy of the StoreyData from building. As such, When making changes in the Storey inspector we are altering the copy
-        // and not changing the original StoreyData.
-
-
         #region Member Variables
         [SerializeField, HideInInspector] int m_ID;
         [SerializeField, HideInInspector] string m_Name;

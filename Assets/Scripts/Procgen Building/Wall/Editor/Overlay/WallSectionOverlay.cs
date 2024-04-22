@@ -13,48 +13,29 @@ using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
-    [Overlay(typeof(SceneView), "Wall Section", true)]
-    public class WallSectionOverlay : Overlay, ITransientOverlay
-    {
-        [SerializeField] WallSection m_Section;
+    //public class WallSectionOverlay : DataOverlay, ITransientOverlay
+    //{
+    //    public override VisualElement CreatePanelContent()
+    //    {
+    //        return base.CreatePanelContent();
+    //    }
 
-        public override VisualElement CreatePanelContent()
-        {
-            if (m_Section == null)
-                return new VisualElement();
+    //    //public bool visible
+    //    //{
+    //    //    get
+    //    //    {
+    //    //        if (Selection.activeGameObject != null)
+    //    //        {
+    //    //            bool isSection = Selection.activeGameObject.TryGetComponent(out WallSection section);
 
-            VisualElement container = new VisualElement() { name = "Wall Section Container" };
-
-            SerializedObject serializedObject = new SerializedObject(m_Section);
-
-            SerializedProperty data = serializedObject.FindProperty("m_Data");
-
-            PropertyField dataField = new PropertyField(data);
-            dataField.BindProperty(data);
-
-            container.Add(dataField);
-
-            return container;
-
-        }
-
-        public bool visible
-        {
-            get
-            {
-                if (Selection.activeGameObject != null)
-                {
-                    bool isSection = Selection.activeGameObject.TryGetComponent(out WallSection section);
-
-                    if (isSection)
-                    {
-                        m_Section = section;
-
-                    }
-                    return isSection;
-                }
-                return false;
-            }
-        }
-    }
+    //    //            if (isSection)
+    //    //            {
+    //    //                m_Buildable = section;
+    //    //            }
+    //    //            return isSection;
+    //    //        }
+    //    //        return false;
+    //    //    }
+    //    //}
+    //}
 }

@@ -7,9 +7,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 {
     public class Buildable : MonoBehaviour
     {
-        protected DirtyDataEvent m_OnDataChanged = new DirtyDataEvent();
-
-        [SerializeField] DirtyData m_Data;
+        [SerializeField] protected DirtyData m_Data;
+        [SerializeField] protected DirtyDataEvent m_OnDataChanged = new();
 
         public DirtyData Data => m_Data;
 
@@ -35,6 +34,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         private void OnValidate()
         {
+            Debug.Log("Data changed");
             m_OnDataChanged.Invoke(m_Data);
         }
     }

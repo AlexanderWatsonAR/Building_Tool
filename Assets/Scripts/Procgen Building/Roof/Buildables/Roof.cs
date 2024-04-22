@@ -16,22 +16,23 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
 {
     public class Roof : Buildable
     {
-        [SerializeReference] RoofData m_Data;
+        [SerializeReference] RoofData m_RoofData;
 
         public override Buildable Initialize(DirtyData data)
         {
-            m_Data = data as RoofData;
-            m_Data.TileData.Material ??= BuiltinMaterials.defaultMaterial;
+            base.Initialize(data);
+            m_RoofData = data as RoofData;
+            m_RoofData.TileData.Material ??= BuiltinMaterials.defaultMaterial;
             return this;
         }
         public override void Build()
         {
             transform.DeleteChildren();
 
-            if (!m_Data.IsActive)
+            if (!m_RoofData.IsActive)
                 return;
 
-            switch (m_Data.RoofType)
+            switch (m_RoofData.RoofType)
             {
                 case RoofType.Gable:
                     BuildGable();
@@ -57,21 +58,21 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         #region Calculate
         private RoofTileData CalculatePyramid(int index)
         {
-            Vector3 middle = ProMaths.Average(m_Data.ControlPoints.GetPositions());
+            Vector3 middle = ProMaths.Average(m_RoofData.ControlPoints.GetPositions());
 
-            int next = m_Data.ControlPoints.GetNext(index);
+            int next = m_RoofData.ControlPoints.GetNext(index);
 
-            bool extendHeightEnd = m_Data.RoofType != RoofType.PyramidHip;
+            bool extendHeightEnd = m_RoofData.RoofType != RoofType.PyramidHip;
 
-            LerpPoint bottomLeft = new(m_Data.ControlPoints[index].Position);
+            LerpPoint bottomLeft = new(m_RoofData.ControlPoints[index].Position);
             LerpPoint topLeft = new(middle);
             LerpPoint topRight = new(middle);
-            LerpPoint bottomRight = new(m_Data.ControlPoints[next].Position);
+            LerpPoint bottomRight = new(m_RoofData.ControlPoints[next].Position);
 
-            RoofTileData data = new RoofTileData(m_Data.TileData)
+            RoofTileData data = new RoofTileData(m_RoofData.TileData)
             {
                 ID = index,
-                Height = m_Data.PyramidHeight,
+                Height = m_RoofData.PyramidHeight,
                 ControlPoints = new LerpPoint[] { bottomLeft, topLeft, topRight, bottomRight },
                 ExtendHeightBeginning = false,
                 ExtendHeightEnd = extendHeightEnd,
@@ -84,27 +85,27 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         private RoofTileData CalculateMansard(int index)
         {
             //ControlPoint[] scaledControlPoints = m_Data.ScaledControlPoints;
-            int next = m_Data.ControlPoints.GetNext(index);
+            int next = m_RoofData.ControlPoints.GetNext(index);
 
-            bool isConvex = m_Data.IsConvex;
-            Vector3[] positions = m_Data.ControlPoints.GetPositions();
+            bool isConvex = m_RoofData.IsConvex;
+            Vector3[] positions = m_RoofData.ControlPoints.GetPositions();
             Vector3 middle = ProMaths.Average(positions);
 
-            LerpPoint bottomLeft = new LerpPoint(m_Data.ControlPoints[index].Position);
+            LerpPoint bottomLeft = new LerpPoint(m_RoofData.ControlPoints[index].Position);
 
-            Vector3 tLEnd = isConvex ? middle : m_Data.ControlPoints[index].Position + (m_Data.ControlPoints[index].Forward * 2);
-            Vector3 tREnd = isConvex ? middle : m_Data.ControlPoints[next].Position + (m_Data.ControlPoints[next].Forward * 2);
+            Vector3 tLEnd = isConvex ? middle : m_RoofData.ControlPoints[index].Position + (m_RoofData.ControlPoints[index].Forward * 2);
+            Vector3 tREnd = isConvex ? middle : m_RoofData.ControlPoints[next].Position + (m_RoofData.ControlPoints[next].Forward * 2);
 
-            LerpPoint topLeft = new LerpPoint(m_Data.ControlPoints[index].Position, tLEnd, m_Data.MansardScale);
-            LerpPoint topRight = new LerpPoint(m_Data.ControlPoints[next].Position, tREnd, m_Data.MansardScale);
+            LerpPoint topLeft = new LerpPoint(m_RoofData.ControlPoints[index].Position, tLEnd, m_RoofData.MansardScale);
+            LerpPoint topRight = new LerpPoint(m_RoofData.ControlPoints[next].Position, tREnd, m_RoofData.MansardScale);
 
-            LerpPoint bottomRight = new LerpPoint(m_Data.ControlPoints[next].Position);
+            LerpPoint bottomRight = new LerpPoint(m_RoofData.ControlPoints[next].Position);
 
-            RoofTileData data = new RoofTileData(m_Data.TileData)
+            RoofTileData data = new RoofTileData(m_RoofData.TileData)
             {
                 ID = index,
                 ControlPoints = new LerpPoint[] { bottomLeft, topLeft, topRight, bottomRight },
-                Height = m_Data.MansardHeight,
+                Height = m_RoofData.MansardHeight,
                 ExtendHeightBeginning = false,
                 ExtendHeightEnd = true,
                 ExtendWidthBeginning = false,
@@ -115,36 +116,36 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         }
         private RoofTileData CalculateGableTile(int index)
         {
-            ushort[] roofTileIndices = m_Data.GableData.indices[index];
-            bool[] roofTileExtend = m_Data.GableData.extend[index];
+            ushort[] roofTileIndices = m_RoofData.GableData.indices[index];
+            bool[] roofTileExtend = m_RoofData.GableData.extend[index];
 
-            Vector3[] oneLine = new Vector3[m_Data.OneLine.Length];
-            Array.Copy(m_Data.OneLine, oneLine, oneLine.Length);
+            Vector3[] oneLine = new Vector3[m_RoofData.OneLine.Length];
+            Array.Copy(m_RoofData.OneLine, oneLine, oneLine.Length);
 
             Vector3[] scaledOneLine = new Vector3[oneLine.Length];
             Array.Copy(oneLine, scaledOneLine, oneLine.Length);
 
-            scaledOneLine.ScaleOneLine(m_Data.OneLineShape, 1);
+            scaledOneLine.ScaleOneLine(m_RoofData.OneLineShape, 1);
 
-            int[] relIndices = m_Data.PathPoints.RelativeIndices(m_Data.ShapeIndex);
+            int[] relIndices = m_RoofData.PathPoints.RelativeIndices(m_RoofData.ShapeIndex);
 
-            float gableScale = m_Data.IsOpen ? 1 : m_Data.GableScale;
+            float gableScale = m_RoofData.IsOpen ? 1 : m_RoofData.GableScale;
 
-            LerpPoint bottomLeft = new LerpPoint(m_Data.PathPoints[relIndices[roofTileIndices[0]]].Position);
+            LerpPoint bottomLeft = new LerpPoint(m_RoofData.PathPoints[relIndices[roofTileIndices[0]]].Position);
             LerpPoint topLeft = new LerpPoint(scaledOneLine[roofTileIndices[1]], oneLine[roofTileIndices[1]], gableScale);
             LerpPoint topRight = new LerpPoint(scaledOneLine[roofTileIndices[2]], oneLine[roofTileIndices[2]], gableScale);
-            LerpPoint bottomRight = new LerpPoint(m_Data.PathPoints[relIndices[roofTileIndices[3]]].Position);
+            LerpPoint bottomRight = new LerpPoint(m_RoofData.PathPoints[relIndices[roofTileIndices[3]]].Position);
 
-            bool extendHeightEnd = m_Data.RoofType == RoofType.Dormer ? false : roofTileExtend[1];
+            bool extendHeightEnd = m_RoofData.RoofType == RoofType.Dormer ? false : roofTileExtend[1];
 
             // Question: Is extending the width at the beginning & end always false when is open == false?
-            bool extendWidthBeginning = m_Data.IsOpen && roofTileExtend[2];
-            bool extendWidthEnd = m_Data.IsOpen && roofTileExtend[3];
+            bool extendWidthBeginning = m_RoofData.IsOpen && roofTileExtend[2];
+            bool extendWidthEnd = m_RoofData.IsOpen && roofTileExtend[3];
 
-            RoofTileData data = new RoofTileData(m_Data.TileData)
+            RoofTileData data = new RoofTileData(m_RoofData.TileData)
             {
                 ID = index,
-                Height = m_Data.GableHeight,
+                Height = m_RoofData.GableHeight,
                 ControlPoints = new LerpPoint[] { bottomLeft, topLeft, topRight, bottomRight },
                 ExtendHeightBeginning = roofTileExtend[0],
                 ExtendHeightEnd = extendHeightEnd,
@@ -156,14 +157,14 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         }
         private WallData CalculateGableWall(int index)
         {
-            if (!m_Data.AvailableFrames.Contains((int)RoofType.Gable))
+            if (!m_RoofData.AvailableFrames.Contains((int)RoofType.Gable))
                 return null;
 
-            ushort[] wallIndices = m_Data.GableData.indices[index].Reverse().ToArray();
+            ushort[] wallIndices = m_RoofData.GableData.indices[index].Reverse().ToArray();
 
-            ControlPoint start = new ControlPoint(m_Data.PathPoints[wallIndices[0]]);
+            ControlPoint start = new ControlPoint(m_RoofData.PathPoints[wallIndices[0]]);
             start.SetForward(Vector3.zero);
-            ControlPoint end = new ControlPoint(m_Data.PathPoints[wallIndices[^1]]);
+            ControlPoint end = new ControlPoint(m_RoofData.PathPoints[wallIndices[^1]]);
             end.SetForward(Vector3.zero);
 
             //Vector3 dir = start.DirectionToTarget(end);
@@ -173,7 +174,7 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
             WallData data = new WallData()
             {
                 ID = index,
-                Height = m_Data.GableHeight,
+                Height = m_RoofData.GableHeight,
                 Material = BuiltinMaterials.defaultMaterial,
                 IsTriangle = true,
                 Start = start,
@@ -187,78 +188,78 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
         #region Build
         private void BuildPyramid()
         {
-            if (m_Data.PyramidTiles == null || m_Data.PyramidTiles.Length == 0)
-                m_Data.PyramidTiles = new RoofTileData[m_Data.ControlPoints.Length];
+            if (m_RoofData.PyramidTiles == null || m_RoofData.PyramidTiles.Length == 0)
+                m_RoofData.PyramidTiles = new RoofTileData[m_RoofData.ControlPoints.Length];
 
-            for (int i = 0; i < m_Data.PyramidTiles.Length; i++)
+            for (int i = 0; i < m_RoofData.PyramidTiles.Length; i++)
             {
-                if (m_Data.PyramidTiles[i] == null || m_Data.PyramidTiles[i].ControlPoints == null || m_Data.PyramidTiles[i].ControlPoints.Length == 0)
-                    m_Data.PyramidTiles[i] ??= CalculatePyramid(i);
+                if (m_RoofData.PyramidTiles[i] == null || m_RoofData.PyramidTiles[i].ControlPoints == null || m_RoofData.PyramidTiles[i].ControlPoints.Length == 0)
+                    m_RoofData.PyramidTiles[i] ??= CalculatePyramid(i);
 
-                RoofTile pyramidTile = CreateRoofTile(m_Data.PyramidTiles[i]);
+                RoofTile pyramidTile = CreateRoofTile(m_RoofData.PyramidTiles[i]);
             }
         }
         private void BuildMansard()
         {
-            m_Data.MansardTiles ??= new RoofTileData[m_Data.ControlPoints.Length];
+            m_RoofData.MansardTiles ??= new RoofTileData[m_RoofData.ControlPoints.Length];
 
-            for (int i = 0; i < m_Data.MansardTiles.Length; i++)
+            for (int i = 0; i < m_RoofData.MansardTiles.Length; i++)
             {
-                m_Data.MansardTiles[i] ??= CalculateMansard(i);
+                m_RoofData.MansardTiles[i] ??= CalculateMansard(i);
 
-                RoofTile mansardTile = CreateRoofTile(m_Data.MansardTiles[i]);
+                RoofTile mansardTile = CreateRoofTile(m_RoofData.MansardTiles[i]);
             }
 
-            if (m_Data.RoofType == RoofType.Mansard)
+            if (m_RoofData.RoofType == RoofType.Mansard)
             {
                 ProBuilderMesh top = ProBuilderMesh.Create();
                 top.name = "Lid";
-                List<Vector3> lidPoints = new(m_Data.MansardTiles.Length);
-                foreach (RoofTileData tile in m_Data.MansardTiles)
+                List<Vector3> lidPoints = new(m_RoofData.MansardTiles.Length);
+                foreach (RoofTileData tile in m_RoofData.MansardTiles)
                 {
                     lidPoints.Add(tile.TopLeft);
                 }
-                top.CreateShapeFromPolygon(lidPoints, m_Data.TileData.Thickness, false);
-                top.GetComponent<Renderer>().sharedMaterial = m_Data.TileData.Material;
+                top.CreateShapeFromPolygon(lidPoints, m_RoofData.TileData.Thickness, false);
+                top.GetComponent<Renderer>().sharedMaterial = m_RoofData.TileData.Material;
                 top.transform.SetParent(transform, false);
             }
         }
         private void BuildGable()
         {
-            if (!m_Data.AvailableFrames.Contains((int)RoofType.Gable))
+            if (!m_RoofData.AvailableFrames.Contains((int)RoofType.Gable))
                 return;
 
-            if (m_Data.GableTiles == null || m_Data.GableTiles.Length == 0)
-                m_Data.GableTiles = new RoofTileData[m_Data.PathPoints.Length];
+            if (m_RoofData.GableTiles == null || m_RoofData.GableTiles.Length == 0)
+                m_RoofData.GableTiles = new RoofTileData[m_RoofData.PathPoints.Length];
 
-            for (int i = 0; i < m_Data.GableTiles.Length; i++)
+            for (int i = 0; i < m_RoofData.GableTiles.Length; i++)
             {
-                if (m_Data.GableTiles[i] == null || m_Data.GableTiles[i].ControlPoints == null || m_Data.GableTiles[i].ControlPoints.Length == 0)
-                    m_Data.GableTiles[i] = CalculateGableTile(i);
+                if (m_RoofData.GableTiles[i] == null || m_RoofData.GableTiles[i].ControlPoints == null || m_RoofData.GableTiles[i].ControlPoints.Length == 0)
+                    m_RoofData.GableTiles[i] = CalculateGableTile(i);
             }
 
-            if (m_Data.Walls == null || m_Data.Walls.Length == 0)
-                m_Data.Walls = new WallData[m_Data.GableData.wallIndices.Length];
+            if (m_RoofData.Walls == null || m_RoofData.Walls.Length == 0)
+                m_RoofData.Walls = new WallData[m_RoofData.GableData.wallIndices.Length];
 
-            for (int i = 0; i < m_Data.Walls.Length; i++)
+            for (int i = 0; i < m_RoofData.Walls.Length; i++)
             {
-                m_Data.Walls[i] ??= CalculateGableWall(m_Data.GableData.wallIndices[i]);
+                m_RoofData.Walls[i] ??= CalculateGableWall(m_RoofData.GableData.wallIndices[i]);
             }
 
-            for (int i = 0; i < m_Data.GableTiles.Length; i++)
+            for (int i = 0; i < m_RoofData.GableTiles.Length; i++)
             {
-                bool condition = m_Data.GableData.wallIndices.Any(x => x == i);
+                bool condition = m_RoofData.GableData.wallIndices.Any(x => x == i);
 
-                if (condition && m_Data.IsOpen)
+                if (condition && m_RoofData.IsOpen)
                 {
                     GameObject wallGO = new GameObject("Wall", typeof(Wall.Wall));
                     wallGO.transform.SetParent(transform, false);
                     Wall.Wall wall = wallGO.GetComponent<Wall.Wall>();
-                    wall.Initialize(m_Data.GetWallByID(i)).Build();
+                    wall.Initialize(m_RoofData.GetWallByID(i)).Build();
                     continue;
                 }
 
-                RoofTile gableTile = CreateRoofTile(m_Data.GableTiles[i]);
+                RoofTile gableTile = CreateRoofTile(m_RoofData.GableTiles[i]);
             }
 
         }

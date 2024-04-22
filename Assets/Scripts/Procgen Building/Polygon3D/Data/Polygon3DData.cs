@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
+using Unity.VisualScripting;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
@@ -45,6 +46,18 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             CalcualateInternal();
         }
 
+
+        public Polygon3DData(Polygon3DData data)
+        {
+            m_Polygon = data.Polygon;
+            m_Holes = data.Holes;
+            m_Normal = data.Normal;
+            m_Height = data.Height;
+            m_Width = data.Width;
+            m_Depth = data.Depth;
+            m_Position = data.Position;
+        }
+
         private void CalcualateInternal()
         {
             if (m_Polygon == null || m_Polygon.ControlPoints == null || m_Polygon.ControlPoints.Length == 0)
@@ -65,16 +78,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             CalcualateInternal();
         }
 
-        public Polygon3DData(Polygon3DData data)
-        {
-            m_Polygon = data.Polygon;
-            m_Holes = data.Holes;
-            m_Normal = data.Normal;
-            m_Height = data.Height;
-            m_Width = data.Width;
-            m_Depth = data.Depth;
-            m_Position = data.Position;
-        }
 
         public void SetHoles(IList<IList<Vector3>> holePoints)
         {

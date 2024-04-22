@@ -62,21 +62,22 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         private WindowData DefineWindowDefaults()
         {
-            FrameData outerFrame = new FrameData()
+            OuterFrameData outerFrame = new OuterFrameData()
             {
                 Depth = m_WallData.Depth,
                 Normal = m_WallData.Normal
 
             };
-            GridFrameData innerFrame = new GridFrameData()
+            InnerFrameData innerFrame = new InnerFrameData()
             {
                 Depth = m_WallData.Depth * 0.5f,
                 Normal = m_WallData.Normal
 
             };
-            Polygon3DData pane = new Polygon3DData()
+            PaneData pane = new PaneData()
             {
                 Depth = m_WallData.Depth * 0.25f,
+                Holes = new PolygonData[0],
                 Normal = m_WallData.Normal
             };
             DoorData leftShutter = new DoorData()

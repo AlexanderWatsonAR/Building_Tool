@@ -4,14 +4,17 @@ using UnityEditor.UIElements;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Unity.VisualScripting;
+using OnlyInvalid.ProcGenBuilding.Wall;
+using System;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    [CustomEditor(typeof(IBuildable), true)]
+    [CustomEditor(typeof(Buildable), editorForChildClasses : true)]
     public class DataEditor : Editor
     {
         protected SerializedProperty m_Data;
-        [SerializeField] protected IBuildable m_Buildable;
+        [SerializeField] protected Buildable m_Buildable;
 
         public override VisualElement CreateInspectorGUI()
         {
@@ -19,8 +22,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             serializedObject.Update();
 
-            m_Data = serializedObject.FindProperty("m_Data");
-            m_Buildable = target as IBuildable;
+            m_Buildable = target as Buildable;
+            Type buildableType = target.GetType();
+
+            m_Data = serializedObject.FindProperty("m_" + buildableType.Name + "Data");
 
             PropertyField dataField = new PropertyField(m_Data);
             dataField.BindProperty(m_Data);

@@ -25,10 +25,8 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         public override Buildable Initialize(DirtyData wallSectionData)
         {
-            base.Initialize(wallSectionData);
             m_WallSectionData = wallSectionData as WallSectionData;
-            
-            return this;
+            return base.Initialize(wallSectionData);
         }
 
         public void BuildChildren()

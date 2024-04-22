@@ -199,33 +199,28 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             if (currentEvent.type == EventType.MouseDown && currentEvent.button == 0)
             {
-                if (didHit)
+                if (!didHit)
+                    return;
+
+                if (m_Path.ControlPointCount >= 3)
                 {
-                    if (m_Path.ControlPointCount >= 3)
+                    float dis = Vector3.Distance(hit, m_Path.GetPositionAt(0));
+
+                    if (dis <= 1 && m_Path.IsValidPath())
                     {
-                        float dis = Vector3.Distance(hit, m_Path.GetPositionAt(0));
-
-                        if (dis <= 1)
-                        {
-                            m_Path.PolyMode = PolyMode.Hide;
-                            if (m_Path.IsValidPath())
-                            {
-                                m_Path.CalculateForwards();
-                                m_Building.AddStorey("Ground");
-                                m_Building.InitializeRoof();
-                                m_Building.Build();
-                            }
-
-
-                            return;
-                        }
-                    }
-
-                    if (m_IsValidPoint)
-                    {
-                        m_Path.AddControlPoint(hit);
+                        m_Path.CalculateForwards();
+                        m_Building.AddStorey("Ground");
+                        m_Building.InitializeRoof();
+                        m_Building.Build();
+                        m_Path.PolyMode = PolyMode.Hide;
                     }
                 }
+
+                if (m_IsValidPoint)
+                {
+                    m_Path.AddControlPoint(hit);
+                }
+
             }
 
             if (currentEvent.type == EventType.MouseMove)
@@ -384,7 +379,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             m_Building = (Building)target;
             BuildingData buildingData = m_Building.Data as BuildingData;
             m_Path = buildingData.Path;
-            m_Data = serializedObject.FindProperty("m_Data");
+            m_Data = serializedObject.FindProperty("m_BuildingData");
         }
         private void OnDisable()
         {

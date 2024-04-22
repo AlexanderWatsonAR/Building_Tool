@@ -18,24 +18,24 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         [SerializeField] WindowElement m_ActiveElements;
 
         #region Outer Frame
-        [SerializeField] FrameData m_OuterFrame;
+        [SerializeField] OuterFrameData m_OuterFrame;
 
-        public FrameData OuterFrame { get { return m_OuterFrame; } set { m_OuterFrame = value; } }
+        public OuterFrameData OuterFrame { get { return m_OuterFrame; } set { m_OuterFrame = value; } }
         public bool IsOuterFrameActive => m_ActiveElements.IsElementActive(WindowElement.OuterFrame);
         #endregion
 
         #region Inner Frame
-        [SerializeField] GridFrameData m_InnerFrame;
+        [SerializeField] InnerFrameData m_InnerFrame;
         [SerializeField] Material m_InnerFrameMaterial;
 
-        public GridFrameData InnerFrame { get { return m_InnerFrame; } set { m_InnerFrame = value; } }
+        public InnerFrameData InnerFrame { get { return m_InnerFrame; } set { m_InnerFrame = value; } }
         public bool IsInnerFrameActive => m_ActiveElements.IsElementActive(WindowElement.InnerFrame);
         #endregion
 
         #region Pane
-        [SerializeField] Polygon3DData m_Pane;
+        [SerializeField] PaneData m_Pane;
 
-        public Polygon3DData Pane { get { return m_Pane; } set { m_Pane = value; } }
+        public PaneData Pane { get { return m_Pane; } set { m_Pane = value; } }
         public bool IsPaneActive => m_ActiveElements.IsElementActive(WindowElement.Pane);
         #endregion
 
@@ -72,13 +72,13 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         )
         {
         }
-        public WindowData(WindowElement activeElements, PolygonData opening, FrameData outerFrame, GridFrameData innerFrame, Polygon3DData paneData, DoorData leftShutter, DoorData rightShutter)
+        public WindowData(WindowElement activeElements, PolygonData opening, OuterFrameData outerFrame, InnerFrameData innerFrame, PaneData paneData, DoorData leftShutter, DoorData rightShutter)
         {
             m_ActiveElements = activeElements;
             m_Polygon = new PolygonData(opening);
-            m_OuterFrame = new FrameData(outerFrame);
-            m_InnerFrame = new GridFrameData(innerFrame);
-            m_Pane = new Polygon3DData(paneData);
+            m_OuterFrame = new OuterFrameData(outerFrame);
+            m_InnerFrame = new InnerFrameData(innerFrame);
+            m_Pane = new PaneData(paneData);
             m_LeftShutter = new DoorData(leftShutter);
             m_RightShutter = new DoorData(rightShutter);
         }
@@ -110,9 +110,9 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         {
             WindowData clone = this.MemberwiseClone() as WindowData;
             clone.Polygon = this.Polygon.Clone() as PolygonData;
-            clone.OuterFrame = this.OuterFrame.Clone() as FrameData;
-            clone.InnerFrame = this.InnerFrame.Clone() as GridFrameData;
-            clone.Pane = this.Pane.Clone() as Polygon3DData;
+            clone.OuterFrame = this.OuterFrame.Clone() as OuterFrameData;
+            clone.InnerFrame = this.InnerFrame.Clone() as InnerFrameData;
+            clone.Pane = this.Pane.Clone() as PaneData;
             clone.LeftShutter = this.LeftShutter.Clone() as DoorData;
             clone.RightShutter = this.RightShutter.Clone() as DoorData;
             return clone;

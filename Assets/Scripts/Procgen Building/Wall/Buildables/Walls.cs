@@ -7,14 +7,14 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 {
     public class Walls : Buildable
     {
-        [SerializeField] WallsData m_Data;
+        [SerializeField] WallsData m_WallsData;
         [SerializeField] Wall[] m_Walls;
 
         public override Buildable Initialize(DirtyData data)
         {
             base.Initialize(data);
-            m_Data = data as WallsData;
-            m_Walls = new Wall[m_Data.Walls.Length];
+            m_WallsData = data as WallsData;
+            m_Walls = new Wall[m_WallsData.Walls.Length];
             return this;
         }
 

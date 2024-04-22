@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    [CustomPropertyDrawer(typeof(GridFrameData))]
+    [CustomPropertyDrawer(typeof(GridFrameData), useForChildren:true)]
     public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
     {
         [SerializeField] GridFrameData m_CurrentData;

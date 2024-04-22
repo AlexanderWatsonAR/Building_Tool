@@ -1,15 +1,19 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine.UIElements;
+using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
+using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
-    [CustomEditor(typeof(Pane))]
-    public class PaneEditor : DataEditor
+    [CustomEditor(typeof(InnerFrame))]
+    public class InnerFrameEditor : DataEditor
     {
         public override VisualElement CreateInspectorGUI()
         {
             return base.CreateInspectorGUI();
         }
     }
+
 }

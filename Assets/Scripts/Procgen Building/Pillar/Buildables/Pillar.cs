@@ -13,20 +13,20 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
     public class Pillar : Buildable
     {
         [SerializeField] ProBuilderMesh m_ProBuilderMesh;
-        [SerializeReference] PillarData m_Data;
+        [SerializeReference] PillarData m_PillarData;
 
         public override Buildable Initialize(DirtyData data)
         {
             base.Initialize(data);
-            m_Data = new PillarData(data as PillarData);
+            m_PillarData = new PillarData(data as PillarData);
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
             return this;
         }
 
         private void CreateControlPoints()
         {
-            float halfWidth = m_Data.Width * 0.5f;
-            float halfDepth = m_Data.Depth * 0.5f;
+            float halfWidth = m_PillarData.Width * 0.5f;
+            float halfDepth = m_PillarData.Depth * 0.5f;
 
             Vector3[] controlPoints = new Vector3[]
             {
@@ -38,9 +38,9 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
 
-            if (m_Data.Sides != 4)
+            if (m_PillarData.Sides != 4)
             {
-                controlPoints = MeshMaker.CreateNPolygon(m_Data.Sides, halfWidth, halfDepth);
+                controlPoints = MeshMaker.CreateNPolygon(m_PillarData.Sides, halfWidth, halfDepth);
             }
             // Orientate points to the XZ plane.
             for (int i = 0; i < controlPoints.Length; i++)
@@ -50,24 +50,24 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
                 controlPoints[i] = v;
             }
 
-            m_Data.ControlPoints = controlPoints;
+            m_PillarData.ControlPoints = controlPoints;
         }
 
         public override void Build()
         {
             CreateControlPoints();
-            m_ProBuilderMesh.CreateShapeFromPolygon(m_Data.ControlPoints, 0, false);
+            m_ProBuilderMesh.CreateShapeFromPolygon(m_PillarData.ControlPoints, 0, false);
             m_ProBuilderMesh.ToMesh();
-            Face[] faces = m_ProBuilderMesh.Extrude(m_ProBuilderMesh.faces, ExtrudeMethod.FaceNormal, m_Data.Height);
+            Face[] faces = m_ProBuilderMesh.Extrude(m_ProBuilderMesh.faces, ExtrudeMethod.FaceNormal, m_PillarData.Height);
             m_ProBuilderMesh.ToMesh();
 
-            if (m_Data.IsSmooth)
+            if (m_PillarData.IsSmooth)
             {
-                Smoothing.ApplySmoothingGroups(m_ProBuilderMesh, faces, 360f / m_Data.Sides);
+                Smoothing.ApplySmoothingGroups(m_ProBuilderMesh, faces, 360f / m_PillarData.Sides);
                 m_ProBuilderMesh.ToMesh();
             }
 
-            GetComponent<Renderer>().material = m_Data.Material;
+            GetComponent<Renderer>().material = m_PillarData.Material;
             m_ProBuilderMesh.Refresh();
         }
 
