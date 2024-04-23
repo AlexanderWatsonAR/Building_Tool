@@ -382,6 +382,12 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             windowMesh.transform.SetParent(transform, true);
             Window.Window window = windowMesh.AddComponent<Window.Window>();
             window.Initialize(data);
+            window.AddDataListener(dirtyData =>
+            {
+                WindowData winData = dirtyData as WindowData;
+                m_WallSectionData.WindowOpening.Windows[winData.ID] = winData;
+                m_OnDataChanged.Invoke(m_WallSectionData);
+            });
             return window;
         }
         private Door.Door CreateDoor(DoorData data)

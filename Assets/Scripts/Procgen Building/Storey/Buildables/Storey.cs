@@ -23,22 +23,21 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
         public override Buildable Initialize(DirtyData data)
         {
-            base.Initialize(data);
             m_StoreyData = data as StoreyData;
-            m_Corners ??= new List<Corner.Corner>();
-            m_Walls ??= new List<Wall.Wall>();
-            m_Pillars ??= new List<Pillar.Pillar>();
-            return this;
+            return base.Initialize(data);
         }
 
         public override void Build()
         {
             Demolish();
 
-            CreateExternalWalls();
-            CreateCorners();
-            CreatePillars();
-            CreateFloor();
+            if (m_Data.IsDirty)
+            {
+                CreateExternalWalls();
+                CreateCorners();
+                CreatePillars();
+                CreateFloor();
+            }
 
             BuildWalls();
             BuildCorners();
@@ -49,6 +48,8 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         {
             if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Pillars))
                 return;
+
+            m_Pillars ??= new List<Pillar.Pillar>();
 
             if (m_StoreyData.Pillars == null || m_StoreyData.Pillars.Length != m_StoreyData.ControlPoints.Length)
             {
@@ -78,6 +79,8 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Walls))
                 return;
 
+            m_Corners ??= new List<Corner.Corner>();
+
             GameObject corners = new GameObject("Corners");
             corners.transform.SetParent(transform, false);
 
@@ -99,6 +102,8 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             if (!m_StoreyData.ActiveElements.IsElementActive(StoreyElement.Walls))
                 return;
 
+            m_Walls ??= new List<Wall.Wall>();
+
             if (m_StoreyData.Walls == null || m_StoreyData.Walls.Length != m_StoreyData.ControlPoints.Length)
             {
                 m_StoreyData.Walls = new WallData[m_StoreyData.ControlPoints.Length];
@@ -107,7 +112,6 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             GameObject walls = new GameObject("Walls");
             walls.transform.SetParent(transform, false);
 
-            // Construct the walls 
             for (int i = 0; i < m_StoreyData.ControlPoints.Length; i++)
             {
                 m_StoreyData.Walls[i] ??= CalculateWall(i);
@@ -124,6 +128,14 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             wallMesh.name = "Wall " + data.ID.ToString();
             Wall.Wall wall = wallMesh.AddComponent<Wall.Wall>();
             wall.Initialize(data);
+            wall.Data.IsDirty = true;
+            wall.AddDataListener(dirtyData => 
+            {
+                WallData wallData = dirtyData as WallData;
+                m_StoreyData.Walls[wallData.ID] = wallData;
+                m_OnDataChanged.Invoke(m_StoreyData);
+
+            });
             return wall;
         }
         private Corner.Corner CreateCorner(CornerData data)
@@ -287,13 +299,14 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
         public override void Demolish()
         {
+            if (!m_Data.IsDirty)
+                return;
+
             transform.DeleteChildren();
 
             m_Walls?.Clear();
             m_Corners?.Clear();
             m_Pillars?.Clear();
-
-
         }
     }
 }

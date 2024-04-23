@@ -34,8 +34,12 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         private void OnValidate()
         {
-            Debug.Log("Data changed");
             m_OnDataChanged.Invoke(m_Data);
+        }
+
+        private void OnDestroy()
+        {
+            m_OnDataChanged.RemoveAllListeners();
         }
     }
 }

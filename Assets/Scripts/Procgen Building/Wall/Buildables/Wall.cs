@@ -17,6 +17,9 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
     public class Wall : Buildable
     {
         [SerializeReference] WallData m_WallData;
+
+        [SerializeField] List<WallSection> m_Sections;
+
         List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
         private List<Vector3[]> SubPoints
@@ -125,9 +128,36 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         public override void Build()
         {
-            List<Vector3[]> subPoints = SubPoints;
+            Demolish();
 
-            transform.DeleteChildren();
+            if (m_Data.IsDirty)
+                CreateWallSections();
+
+            m_Sections.BuildCollection();
+        }
+
+        private WallSection CreateWallSection(WallSectionData data)
+        {
+            ProBuilderMesh wallSectionMesh = ProBuilderMesh.Create();
+            wallSectionMesh.name = "Wall Section " + data.ID.ToString();
+            wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_WallData.Material;
+            wallSectionMesh.transform.SetParent(transform, false);
+            WallSection wallSection = wallSectionMesh.AddComponent<WallSection>();
+            wallSection.Initialize(m_WallData.Sections[data.ID]);
+            wallSection.AddDataListener(dirtyData =>
+            {
+                WallSectionData wallSectionData = dirtyData as WallSectionData;
+                m_WallData.Sections[wallSectionData.ID] = wallSectionData;
+                m_OnDataChanged.Invoke(m_WallData);
+            });
+            return wallSection;
+        }
+
+        private void CreateWallSections()
+        {
+            m_Sections ??= new List<WallSection>();
+
+            List<Vector3[]> subPoints = SubPoints;
 
             m_WallData.Sections ??= new WallSectionData[m_WallData.Columns * m_WallData.Rows];
 
@@ -144,14 +174,9 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                     Vector3[] points = new Vector3[] { first, second, third, fourth };
 
-                    ProBuilderMesh wallSectionMesh = ProBuilderMesh.Create();
-                    wallSectionMesh.name = "Wall Section " + x.ToString() + " " + y.ToString();
-                    wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_WallData.Material;
-                    wallSectionMesh.transform.SetParent(transform, false);
-
                     m_WallData.Sections[count] ??= new WallSectionData(m_WallData.SectionData)
                     {
-                        ID = new Vector2Int(x, y),
+                        ID = count,
                         Polygon = new PolygonData(points, m_WallData.Normal),
                         Normal = m_WallData.Normal,
                         Depth = m_WallData.Depth,
@@ -162,16 +187,21 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     m_WallData.Sections[count].Polygon.Normal = m_WallData.Normal;
                     m_WallData.Sections[count].Depth = m_WallData.Depth;
 
-                    WallSection wallSection = wallSectionMesh.AddComponent<WallSection>().Initialize(m_WallData.Sections[count]) as WallSection;
-                    wallSection.Build();
+                    WallSection section = CreateWallSection(m_WallData.Sections[count]);
+                    m_Sections.Add(section);
+
                     count++;
                 }
             }
         }
 
+
         public override void Demolish()
         {
+            if (!m_Data.IsDirty)
+                return;
 
+            transform.DeleteChildren();
         }
     }
 }

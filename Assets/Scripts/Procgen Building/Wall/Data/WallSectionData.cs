@@ -15,7 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
     public class WallSectionData : Polygon3DData, ICloneable
     {
         #region Member Variables
-        [SerializeField] Vector2Int m_ID;
+        [SerializeField] int m_ID;
         [SerializeField] WallElement m_WallElement;
 
         [SerializeField] WindowData m_Window;
@@ -35,7 +35,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         public DoorData Door { get { return m_Door; } set { m_Door = value; } }
         public DoorData ArchDoor { get { return m_ArchDoor; } set { m_ArchDoor = value; } }
         public FrameData DoorFrame { get { return m_DoorFrame; } set { m_DoorFrame = value; } }
-        public Vector2Int ID { get { return m_ID; } set { m_ID = value; } }
+        public int ID { get { return m_ID; } set { m_ID = value; } }
         public WindowOpeningData WindowOpening { get { return m_WindowOpening; } set { m_WindowOpening = value; } }
         public DoorwayData Doorway { get { return m_Doorway; } set { m_Doorway = value; } }
         public ArchwayData Archway { get { return m_Archway; } set { m_Archway = value; } }
@@ -61,7 +61,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         }
 
         // What is the purpose of this constructor?
-        public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, Vector2Int id, float depth, Vector3 normal, Vector3 up,
+        public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, int id, float depth, Vector3 normal, Vector3 up,
             WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData,
             WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) : base(polygon, holes, normal, up, depth)
         {

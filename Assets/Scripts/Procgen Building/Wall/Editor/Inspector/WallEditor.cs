@@ -66,7 +66,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
             Wall wall = (Wall)target;
 
-            SerializedProperty data = serializedObject.FindProperty("m_Data");
+            SerializedProperty data = serializedObject.FindProperty("m_WallData");
 
             SerializedProperty columns = data.FindPropertyRelative("m_Columns");
             SerializedProperty rows = data.FindPropertyRelative("m_Rows");
@@ -185,7 +185,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             gridContainer.style.flexDirection = FlexDirection.Column;
             gridContainer.style.flexWrap = Wrap.Wrap;
 
-            SerializedProperty data = serializedObject.FindProperty("m_Data");
+            SerializedProperty data = serializedObject.FindProperty("m_WallData");
             SerializedProperty sections = data.FindPropertyRelative("m_Sections");
 
             int count = 0;

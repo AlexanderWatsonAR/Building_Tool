@@ -116,7 +116,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             foreach (var section in wall.Sections)
             {
-                Foldout sectionFoldout = new Foldout { text = "Wall Section" + section.ID.vector2IntValue };
+                Foldout sectionFoldout = new Foldout { text = "Wall Section" + section.ID.intValue };
 
                 WallElement activeElement = section.WallElement.GetEnumValue<WallElement>();
 

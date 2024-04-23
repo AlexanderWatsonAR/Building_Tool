@@ -93,6 +93,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                 Storey.Storey storey = CreateStorey(m_BuildingData.Storeys[i]);
                 storey.transform.SetParent(transform, false);
                 storey.transform.localPosition = pos;
+                storey.Data.IsDirty = true;
                 storey.Build();
 
                 StoreyData storeyData = storey.Data as StoreyData;
