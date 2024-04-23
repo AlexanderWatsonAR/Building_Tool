@@ -6,7 +6,7 @@ public class #SCRIPTNAME# : MonoBehaviour, IBuildable
 
 	public #SCRIPTNAME#Data Data => m_Data;
 
-	public IBuildable Initialize (IData data)
+	public IBuildable Initialize (DirtyData data)
 	{
 		m_Data = data as #SCRIPTNAME#Data;
 		return this;

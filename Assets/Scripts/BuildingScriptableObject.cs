@@ -9,15 +9,17 @@ using UnityEngine;
 
 // Could we have a nested serialized object structure that mirrors the buildable object structure?
 
-public class BuildingScriptableObject : ScriptableObject
+namespace OnlyInvalid.ProcGenBuilding.Building
 {
-    [SerializeField] BuildingData m_Data;
-
-    public BuildingData Data { get { return m_Data; } set { m_Data = value; } }
-
-    public BuildingScriptableObject()
+    public class BuildingScriptableObject : ScriptableObject
     {
-        m_Data = new BuildingData();
-    }
+        [SerializeField] BuildingData m_Data;
 
+        public BuildingData Data { get { return m_Data; } set { m_Data = value; } }
+
+        public BuildingScriptableObject()
+        {
+            m_Data = new BuildingData();
+        }
+    }
 }

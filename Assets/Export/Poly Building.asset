@@ -16,37 +16,40 @@ MonoBehaviour:
     m_IsDirty: 0
     m_Path:
       m_ControlPoints:
-      - m_Position: {x: 10.0571785, y: 0, z: -9.893341}
-        m_Forward: {x: 0.49323803, y: 0, z: 0.50244313}
+      - m_Position: {x: 19.877157, y: 0, z: -10.044608}
+        m_Forward: {x: -0.4865603, y: 0, z: 0.50641537}
         m_Weight: 0
-      - m_Position: {x: 9.923128, y: 0, z: 0.026943207}
-        m_Forward: {x: 0.5067454, y: 0, z: -0.5031685}
+      - m_Position: {x: 9.947535, y: 0, z: -9.913628}
+        m_Forward: {x: 0.50018144, y: 0, z: 0.49340507}
         m_Weight: 0
-      - m_Position: {x: 20.057226, y: 0, z: -0.038204193}
-        m_Forward: {x: -0.49979746, y: 0, z: -0.49678573}
+      - m_Position: {x: 9.952101, y: 0, z: 0.23539114}
+        m_Forward: {x: 0.4997317, y: 0, z: -0.49341366}
         m_Weight: 0
-      - m_Position: {x: 20.060995, y: 0, z: -9.843546}
-        m_Forward: {x: -0.50018597, y: 0, z: 0.49751118}
+      - m_Position: {x: 20.156284, y: 0, z: 0.3698182}
+        m_Forward: {x: -0.5133528, y: 0, z: -0.5064068}
+        m_Weight: 0
+      - m_Position: {x: 19.958035, y: 0, z: -10.0200815}
+        m_Forward: {x: 0, y: 0, z: 0}
         m_Weight: 0
       m_IsClosedLoop: 1
       m_PolyMode: 2
       m_IsPathValid: 1
     m_Storeys:
-    - m_IsDirty: 0
+    - m_IsDirty: 1
       m_ID: 0
       m_Name: Ground
       m_ControlPoints:
-      - m_Position: {x: 10.0571785, y: 0, z: -9.893341}
-        m_Forward: {x: 0.49323803, y: 0, z: 0.50244313}
+      - m_Position: {x: 19.877157, y: 0, z: -10.044608}
+        m_Forward: {x: -0.4865603, y: 0, z: 0.50641537}
         m_Weight: 0
-      - m_Position: {x: 9.923128, y: 0, z: 0.026943207}
-        m_Forward: {x: 0.5067454, y: 0, z: -0.5031685}
+      - m_Position: {x: 9.947535, y: 0, z: -9.913628}
+        m_Forward: {x: 0.50018144, y: 0, z: 0.49340507}
         m_Weight: 0
-      - m_Position: {x: 20.057226, y: 0, z: -0.038204193}
-        m_Forward: {x: -0.49979746, y: 0, z: -0.49678573}
+      - m_Position: {x: 9.952101, y: 0, z: 0.23539114}
+        m_Forward: {x: 0.4997317, y: 0, z: -0.49341366}
         m_Weight: 0
-      - m_Position: {x: 20.060995, y: 0, z: -9.843546}
-        m_Forward: {x: -0.50018597, y: 0, z: 0.49751118}
+      - m_Position: {x: 20.156284, y: 0, z: 0.3698182}
+        m_Forward: {x: -0.5133528, y: 0, z: -0.5064068}
         m_Weight: 0
       m_WallPoints:
       - Start: {x: 0, y: 0, z: 0}
@@ -88,7 +91,7 @@ MonoBehaviour:
           m_Height: 0
           m_Width: 0
           m_Position: {x: 0, y: 0, z: 0}
-          m_ID: {x: 0, y: 0}
+          m_ID: 0
           m_WallElement: 0
           m_Window:
             m_IsDirty: 0
@@ -147,8 +150,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -172,8 +175,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -197,8 +200,8 @@ MonoBehaviour:
             m_Normal: {x: 0, y: 0, z: 1}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -222,8 +225,8 @@ MonoBehaviour:
             m_Normal: {x: 0, y: 0, z: 1}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -290,22 +293,28 @@ MonoBehaviour:
         - m_IsDirty: 0
           m_Polygon:
             m_ControlPoints:
-            - {x: 19.810904, y: 0, z: -9.59479}
-            - {x: 19.810904, y: 4, z: -9.59479}
-            - {x: 10.303798, y: 4, z: -9.642119}
-            - {x: 10.303798, y: 0, z: -9.642119}
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-          m_Holes: []
-          m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+            - {x: 19.899607, y: 0, z: 0.11661482}
+            - {x: 19.899607, y: 4, z: 0.11661482}
+            - {x: 19.633877, y: 4, z: -9.791401}
+            - {x: 19.633877, y: 0, z: -9.791401}
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+          m_Holes:
+          - m_ControlPoints:
+            - {x: 19.833176, y: 1, z: -2.3603897}
+            - {x: 19.833176, y: 3, z: -2.3603897}
+            - {x: 19.70031, y: 3, z: -7.314396}
+            - {x: 19.70031, y: 1, z: -7.314396}
+            m_Normal: {x: -0.9996405, y: 0.00000023739342, z: 0.02681025}
+          m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
           m_Up: {x: 0, y: 1, z: 0}
           m_Depth: 0.25
           m_Height: 4
-          m_Width: 9.554435
-          m_Position: {x: 15.05735, y: 2, z: -9.618455}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
+          m_Width: 10.173746
+          m_Position: {x: 19.766743, y: 2, z: -4.837393}
+          m_ID: 0
+          m_WallElement: 3
           m_Window:
-            m_IsDirty: 0
+            m_IsDirty: 1
             m_ID: 0
             m_Polygon:
               m_ControlPoints: []
@@ -314,10 +323,14 @@ MonoBehaviour:
             m_OuterFrame:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
+                m_ControlPoints:
+                - {x: 19.833176, y: 1, z: -2.3603897}
+                - {x: 19.833176, y: 3, z: -2.3603897}
+                - {x: 19.70031, y: 3, z: -7.314396}
+                - {x: 19.70031, y: 1, z: -7.314396}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.25
               m_Height: 0
@@ -327,10 +340,14 @@ MonoBehaviour:
             m_InnerFrame:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
+                m_ControlPoints:
+                - {x: 19.954807, y: 1.05, z: -2.487589}
+                - {x: 19.954807, y: 2.95, z: -2.487589}
+                - {x: 19.828587, y: 2.95, z: -7.193895}
+                - {x: 19.828587, y: 1.05, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.125
               m_Height: 0
@@ -343,10 +360,14 @@ MonoBehaviour:
             m_Pane:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
+                m_ControlPoints:
+                - {x: 19.954807, y: 1.05, z: -2.487589}
+                - {x: 19.954807, y: 2.95, z: -2.487589}
+                - {x: 19.828587, y: 2.95, z: -7.193895}
+                - {x: 19.828587, y: 1.05, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.0625
               m_Height: 0
@@ -355,20 +376,24 @@ MonoBehaviour:
             m_LeftShutter:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
+                m_ControlPoints:
+                - {x: 19.891697, y: 1.0499997, z: -4.840741}
+                - {x: 19.891697, y: 2.9500003, z: -4.840742}
+                - {x: 19.828587, y: 2.949999, z: -7.193895}
+                - {x: 19.828587, y: 1.0500005, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
               m_HingeData:
                 m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_AbsolutePosition: {x: 19.860142, y: 2, z: -6.017318}
                 m_PositionOffset: {x: 0, y: 0, z: 0}
                 m_EulerAngle: {x: 0, y: 0, z: 0}
                 m_Scale: {x: 1, y: 1, z: 1}
@@ -380,20 +405,24 @@ MonoBehaviour:
             m_RightShutter:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
+                m_ControlPoints:
+                - {x: 19.954807, y: 1.0500009, z: -2.487589}
+                - {x: 19.954807, y: 2.9499993, z: -2.4875891}
+                - {x: 19.891697, y: 2.9499984, z: -4.8407416}
+                - {x: 19.891697, y: 1.0500016, z: -4.8407416}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
               m_HingeData:
                 m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_AbsolutePosition: {x: 19.923252, y: 2, z: -3.6641653}
                 m_PositionOffset: {x: 0, y: 0, z: 0}
                 m_EulerAngle: {x: 0, y: 0, z: 0}
                 m_Scale: {x: 1, y: 1, z: 1}
@@ -408,11 +437,11 @@ MonoBehaviour:
               m_ControlPoints: []
               m_Normal: {x: 0, y: 0, z: 0}
             m_Holes: []
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -436,8 +465,8 @@ MonoBehaviour:
             m_Normal: {x: 0, y: 0, z: 1}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -458,7 +487,7 @@ MonoBehaviour:
               m_ControlPoints: []
               m_Normal: {x: 0, y: 0, z: 0}
             m_Holes: []
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
             m_Up: {x: 0, y: 1, z: 0}
             m_Depth: 0.275
             m_Height: 0
@@ -473,7 +502,140 @@ MonoBehaviour:
             m_Sides: 4
             m_Angle: 0
             m_IsSmooth: 0
-            m_Windows: []
+            m_Windows:
+            - m_IsDirty: 0
+              m_ID: 0
+              m_Polygon:
+                m_ControlPoints:
+                - {x: 19.833176, y: 1, z: -2.3603897}
+                - {x: 19.833176, y: 3, z: -2.3603897}
+                - {x: 19.70031, y: 3, z: -7.314396}
+                - {x: 19.70031, y: 1, z: -7.314396}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_ActiveElements: -1
+              m_OuterFrame:
+                m_IsDirty: 0
+                m_Polygon:
+                  m_ControlPoints:
+                  - {x: 19.833176, y: 1, z: -2.3603897}
+                  - {x: 19.833176, y: 3, z: -2.3603897}
+                  - {x: 19.70031, y: 3, z: -7.314396}
+                  - {x: 19.70031, y: 1, z: -7.314396}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Holes:
+                - m_ControlPoints:
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 0, y: 1, z: 0}
+                m_Depth: 0.25
+                m_Height: 2
+                m_Width: 5.086872
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
+                m_Scale: 0.95
+              m_InnerFrame:
+                m_IsDirty: 0
+                m_Polygon:
+                  m_ControlPoints:
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Holes:
+                - m_ControlPoints:
+                  - {x: 19.826698, y: 1.0975, z: -2.6018975}
+                  - {x: 19.826698, y: 2.9025002, z: -2.6018975}
+                  - {x: 19.706787, y: 2.9025002, z: -7.0728884}
+                  - {x: 19.706787, y: 1.0975, z: -7.0728884}
+                  m_Normal: {x: -0.9996405, y: 0.00000043960299, z: 0.026810186}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 0, y: 1, z: 0}
+                m_Depth: 0.125
+                m_Height: 1.9000001
+                m_Width: 4.832527
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
+                m_Scale: 0.95
+                m_Columns: 1
+                m_Rows: 1
+              m_InnerFrameMaterial: {fileID: 0}
+              m_Pane:
+                m_IsDirty: 0
+                m_Polygon:
+                  m_ControlPoints:
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Holes: []
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 0, y: 1, z: 0}
+                m_Depth: 0.0625
+                m_Height: 1.9000001
+                m_Width: 4.832527
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
+              m_LeftShutter:
+                m_IsDirty: 0
+                m_Polygon:
+                  m_ControlPoints:
+                  - {x: 19.891697, y: 1.0499997, z: -4.840741}
+                  - {x: 19.891697, y: 2.9500003, z: -4.840742}
+                  - {x: 19.828587, y: 2.949999, z: -7.193895}
+                  - {x: 19.828587, y: 1.0500005, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Holes: []
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 1, y: 0, z: 0}
+                m_Depth: 0.125
+                m_Height: 1.9000006
+                m_Width: 2.416264
+                m_Position: {x: 19.860142, y: 2, z: -6.017318}
+                m_ID: 0
+                m_ActiveElements: -1
+                m_HingeData:
+                  m_RelativePosition: 0
+                  m_AbsolutePosition: {x: 19.860142, y: 2, z: -6.017318}
+                  m_PositionOffset: {x: 0, y: 0, z: 0}
+                  m_EulerAngle: {x: 0, y: 0, z: 0}
+                  m_Scale: {x: 1, y: 1, z: 1}
+                m_HandleSize: 0
+                m_HandleScale: 0
+                m_HandlePosition: {x: 0, y: 0, z: 0}
+                m_HandlePoint: 0
+                m_Material: {fileID: 0}
+              m_RightShutter:
+                m_IsDirty: 0
+                m_Polygon:
+                  m_ControlPoints:
+                  - {x: 19.954807, y: 1.0500009, z: -2.487589}
+                  - {x: 19.954807, y: 2.9499993, z: -2.4875891}
+                  - {x: 19.891697, y: 2.9499984, z: -4.8407416}
+                  - {x: 19.891697, y: 1.0500016, z: -4.8407416}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Holes: []
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 1, y: 0, z: 0}
+                m_Depth: 0.125
+                m_Height: 1.8999984
+                m_Width: 2.416263
+                m_Position: {x: 19.923252, y: 2, z: -3.6641653}
+                m_ID: 0
+                m_ActiveElements: -1
+                m_HingeData:
+                  m_RelativePosition: 0
+                  m_AbsolutePosition: {x: 19.923252, y: 2, z: -3.6641653}
+                  m_PositionOffset: {x: 0, y: 0, z: 0}
+                  m_EulerAngle: {x: 0, y: 0, z: 0}
+                  m_Scale: {x: 1, y: 1, z: 1}
+                m_HandleSize: 0
+                m_HandleScale: 0
+                m_HandlePosition: {x: 0, y: 0, z: 0}
+                m_HandlePoint: 0
+                m_Material: {fileID: 0}
           m_Doorway:
             m_Height: 0.5
             m_Width: 0.5
@@ -527,17 +689,17 @@ MonoBehaviour:
         m_Height: 0.1
         m_Material: {fileID: 0}
       m_Walls:
-      - m_IsDirty: 0
+      - m_IsDirty: 1
         m_ID: 0
         m_Start:
-          m_Position: {x: 10.0571785, y: 0, z: -9.893341}
-          m_Forward: {x: 0.49323803, y: 0, z: 0.50244313}
+          m_Position: {x: 19.877157, y: 0, z: -10.044608}
+          m_Forward: {x: -0.4865603, y: 0, z: 0.50641537}
           m_Weight: 0
         m_End:
-          m_Position: {x: 9.923128, y: 0, z: 0.026943207}
-          m_Forward: {x: 0.5067454, y: 0, z: -0.5031685}
+          m_Position: {x: 9.947535, y: 0, z: -9.913628}
+          m_Forward: {x: 0.50018144, y: 0, z: 0.49340507}
           m_Weight: 0
-        m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+        m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
         m_Columns: 1
         m_Rows: 1
         m_Height: 4
@@ -550,16 +712,16 @@ MonoBehaviour:
             m_ControlPoints: []
             m_Normal: {x: 0, y: 0, z: 0}
           m_Holes: []
-          m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+          m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
           m_Up: {x: 0, y: 1, z: 0}
           m_Depth: 0.25
           m_Height: 0
           m_Width: 0
           m_Position: {x: 0, y: 0, z: 0}
-          m_ID: {x: 0, y: 0}
+          m_ID: 0
           m_WallElement: 0
           m_Window:
-            m_IsDirty: 1
+            m_IsDirty: 0
             m_ID: 0
             m_Polygon:
               m_ControlPoints: []
@@ -568,14 +730,10 @@ MonoBehaviour:
             m_OuterFrame:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints:
-                - {x: 10.271972, y: 1, z: -7.2877502}
-                - {x: 10.271972, y: 3, z: -7.2877502}
-                - {x: 10.208325, y: 3, z: -2.579011}
-                - {x: 10.208325, y: 1, z: -2.579011}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.25
               m_Height: 0
@@ -585,14 +743,10 @@ MonoBehaviour:
             m_InnerFrame:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints:
-                - {x: 10.145392, y: 1.05, z: -7.1717205}
-                - {x: 10.145392, y: 2.95, z: -7.1717205}
-                - {x: 10.084928, y: 2.95, z: -2.6984184}
-                - {x: 10.084928, y: 1.05, z: -2.6984184}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.125
               m_Height: 0
@@ -605,14 +759,10 @@ MonoBehaviour:
             m_Pane:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints:
-                - {x: 10.145392, y: 1.05, z: -7.1717205}
-                - {x: 10.145392, y: 2.95, z: -7.1717205}
-                - {x: 10.084928, y: 2.95, z: -2.6984184}
-                - {x: 10.084928, y: 1.05, z: -2.6984184}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.0625
               m_Height: 0
@@ -621,24 +771,20 @@ MonoBehaviour:
             m_LeftShutter:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints:
-                - {x: 10.084937, y: 2.949999, z: -2.6984184}
-                - {x: 10.084937, y: 1.05, z: -2.6984181}
-                - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
               m_HingeData:
                 m_RelativePosition: 0
-                m_AbsolutePosition: {x: 10.100048, y: 1.9999998, z: -3.8167439}
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
                 m_PositionOffset: {x: 0, y: 0, z: 0}
                 m_EulerAngle: {x: 0, y: 0, z: 0}
                 m_Scale: {x: 1, y: 1, z: 1}
@@ -650,24 +796,20 @@ MonoBehaviour:
             m_RightShutter:
               m_IsDirty: 0
               m_Polygon:
-                m_ControlPoints:
-                - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                - {x: 10.145384, y: 1.0500009, z: -7.1717205}
-                - {x: 10.145383, y: 2.95, z: -7.171721}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
               m_HingeData:
                 m_RelativePosition: 0
-                m_AbsolutePosition: {x: 10.130272, y: 2.0000002, z: -6.0533953}
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
                 m_PositionOffset: {x: 0, y: 0, z: 0}
                 m_EulerAngle: {x: 0, y: 0, z: 0}
                 m_Scale: {x: 1, y: 1, z: 1}
@@ -682,11 +824,11 @@ MonoBehaviour:
               m_ControlPoints: []
               m_Normal: {x: 0, y: 0, z: 0}
             m_Holes: []
-            m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+            m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -710,8 +852,8 @@ MonoBehaviour:
             m_Normal: {x: 0, y: 0, z: 1}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -732,7 +874,1350 @@ MonoBehaviour:
               m_ControlPoints: []
               m_Normal: {x: 0, y: 0, z: 0}
             m_Holes: []
-            m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+            m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+            m_Up: {x: 0, y: 1, z: 0}
+            m_Depth: 0.275
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_Scale: 0.95
+          m_WindowOpening:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Sides: 4
+            m_Angle: 0
+            m_IsSmooth: 0
+            m_Windows: []
+          m_Doorway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+          m_Archway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+            m_ArchHeight: 1
+            m_ArchSides: 4
+          m_Extension:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Distance: 4
+        m_Sections:
+        - m_IsDirty: 0
+          m_Polygon:
+            m_ControlPoints:
+            - {x: 19.633877, y: 0, z: -9.791401}
+            - {x: 19.633877, y: 4, z: -9.791401}
+            - {x: 10.197625, y: 4, z: -9.666924}
+            - {x: 10.197625, y: 0, z: -9.666924}
+            m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+          m_Holes: []
+          m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+          m_Up: {x: 0, y: 1, z: 0}
+          m_Depth: 0.25
+          m_Height: 4
+          m_Width: 9.560728
+          m_Position: {x: 14.9157505, y: 2, z: -9.729162}
+          m_ID: 0
+          m_WallElement: 0
+          m_Window:
+            m_IsDirty: 0
+            m_ID: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_ActiveElements: -1
+            m_OuterFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.25
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+            m_InnerFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+              m_Columns: 1
+              m_Rows: 1
+            m_InnerFrameMaterial: {fileID: 0}
+            m_Pane:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.0625
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+            m_LeftShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+            m_RightShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+          m_Door:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 3
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_ArchDoor:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0, y: 0, z: 1}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 0
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_DoorFrame:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.013189737, y: 0, z: -0.99991304}
+            m_Up: {x: 0, y: 1, z: 0}
+            m_Depth: 0.275
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_Scale: 0.95
+          m_WindowOpening:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Sides: 4
+            m_Angle: 0
+            m_IsSmooth: 0
+            m_Windows: []
+          m_Doorway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+          m_Archway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+            m_ArchHeight: 1
+            m_ArchSides: 4
+          m_Extension:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Distance: 4
+      - m_IsDirty: 1
+        m_ID: 1
+        m_Start:
+          m_Position: {x: 9.947535, y: 0, z: -9.913628}
+          m_Forward: {x: 0.50018144, y: 0, z: 0.49340507}
+          m_Weight: 0
+        m_End:
+          m_Position: {x: 9.952101, y: 0, z: 0.23539114}
+          m_Forward: {x: 0.4997317, y: 0, z: -0.49341366}
+          m_Weight: 0
+        m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+        m_Columns: 1
+        m_Rows: 1
+        m_Height: 4
+        m_Depth: 0.25
+        m_IsTriangle: 0
+        m_Material: {fileID: 0}
+        m_SectionData:
+          m_IsDirty: 0
+          m_Polygon:
+            m_ControlPoints: []
+            m_Normal: {x: 0, y: 0, z: 0}
+          m_Holes: []
+          m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+          m_Up: {x: 0, y: 1, z: 0}
+          m_Depth: 0.25
+          m_Height: 0
+          m_Width: 0
+          m_Position: {x: 0, y: 0, z: 0}
+          m_ID: 0
+          m_WallElement: 0
+          m_Window:
+            m_IsDirty: 0
+            m_ID: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_ActiveElements: -1
+            m_OuterFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.25
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+            m_InnerFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+              m_Columns: 1
+              m_Rows: 1
+            m_InnerFrameMaterial: {fileID: 0}
+            m_Pane:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.0625
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+            m_LeftShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+            m_RightShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+          m_Door:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 3
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_ArchDoor:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0, y: 0, z: 1}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 0
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_DoorFrame:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+            m_Up: {x: 0, y: 1, z: 0}
+            m_Depth: 0.275
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_Scale: 0.95
+          m_WindowOpening:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Sides: 4
+            m_Angle: 0
+            m_IsSmooth: 0
+            m_Windows: []
+          m_Doorway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+          m_Archway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+            m_ArchHeight: 1
+            m_ArchSides: 4
+          m_Extension:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Distance: 4
+        m_Sections:
+        - m_IsDirty: 0
+          m_Polygon:
+            m_ControlPoints:
+            - {x: 10.197625, y: 0, z: -9.666924}
+            - {x: 10.197625, y: 4, z: -9.666924}
+            - {x: 10.201967, y: 4, z: -0.0113156885}
+            - {x: 10.201967, y: 0, z: -0.0113156885}
+            m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+          m_Holes: []
+          m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+          m_Up: {x: 0, y: 1, z: 0}
+          m_Depth: 0.25
+          m_Height: 4
+          m_Width: 9.659951
+          m_Position: {x: 10.199797, y: 2, z: -4.83912}
+          m_ID: 0
+          m_WallElement: 0
+          m_Window:
+            m_IsDirty: 0
+            m_ID: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_ActiveElements: -1
+            m_OuterFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.25
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+            m_InnerFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+              m_Columns: 1
+              m_Rows: 1
+            m_InnerFrameMaterial: {fileID: 0}
+            m_Pane:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.0625
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+            m_LeftShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+            m_RightShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+          m_Door:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 3
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_ArchDoor:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0, y: 0, z: 1}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 0
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_DoorFrame:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.9999999, y: 0, z: 0.00044991463}
+            m_Up: {x: 0, y: 1, z: 0}
+            m_Depth: 0.275
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_Scale: 0.95
+          m_WindowOpening:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Sides: 4
+            m_Angle: 0
+            m_IsSmooth: 0
+            m_Windows: []
+          m_Doorway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+          m_Archway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+            m_ArchHeight: 1
+            m_ArchSides: 4
+          m_Extension:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Distance: 4
+      - m_IsDirty: 1
+        m_ID: 2
+        m_Start:
+          m_Position: {x: 9.952101, y: 0, z: 0.23539114}
+          m_Forward: {x: 0.4997317, y: 0, z: -0.49341366}
+          m_Weight: 0
+        m_End:
+          m_Position: {x: 20.156284, y: 0, z: 0.3698182}
+          m_Forward: {x: -0.5133528, y: 0, z: -0.5064068}
+          m_Weight: 0
+        m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+        m_Columns: 1
+        m_Rows: 1
+        m_Height: 4
+        m_Depth: 0.25
+        m_IsTriangle: 0
+        m_Material: {fileID: 0}
+        m_SectionData:
+          m_IsDirty: 0
+          m_Polygon:
+            m_ControlPoints: []
+            m_Normal: {x: 0, y: 0, z: 0}
+          m_Holes: []
+          m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+          m_Up: {x: 0, y: 1, z: 0}
+          m_Depth: 0.25
+          m_Height: 0
+          m_Width: 0
+          m_Position: {x: 0, y: 0, z: 0}
+          m_ID: 0
+          m_WallElement: 0
+          m_Window:
+            m_IsDirty: 0
+            m_ID: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_ActiveElements: -1
+            m_OuterFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.25
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+            m_InnerFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+              m_Columns: 1
+              m_Rows: 1
+            m_InnerFrameMaterial: {fileID: 0}
+            m_Pane:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.0625
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+            m_LeftShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+            m_RightShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+          m_Door:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 3
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_ArchDoor:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0, y: 0, z: 1}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 0
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_DoorFrame:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+            m_Up: {x: 0, y: 1, z: 0}
+            m_Depth: 0.275
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_Scale: 0.95
+          m_WindowOpening:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Sides: 4
+            m_Angle: 0
+            m_IsSmooth: 0
+            m_Windows: []
+          m_Doorway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+          m_Archway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+            m_ArchHeight: 1
+            m_ArchSides: 4
+          m_Extension:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Distance: 4
+        m_Sections:
+        - m_IsDirty: 0
+          m_Polygon:
+            m_ControlPoints:
+            - {x: 10.201967, y: 0, z: -0.0113156885}
+            - {x: 10.201967, y: 4, z: -0.0113156885}
+            - {x: 19.899607, y: 4, z: 0.11661482}
+            - {x: 19.899607, y: 0, z: 0.11661482}
+            m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+          m_Holes: []
+          m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+          m_Up: {x: 0, y: 1, z: 0}
+          m_Depth: 0.25
+          m_Height: 4
+          m_Width: 9.82557
+          m_Position: {x: 15.050787, y: 2, z: 0.052649565}
+          m_ID: 0
+          m_WallElement: 0
+          m_Window:
+            m_IsDirty: 0
+            m_ID: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_ActiveElements: -1
+            m_OuterFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.25
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+            m_InnerFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+              m_Columns: 1
+              m_Rows: 1
+            m_InnerFrameMaterial: {fileID: 0}
+            m_Pane:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.0625
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+            m_LeftShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+            m_RightShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints: []
+                m_Normal: {x: 0, y: 0, z: 0}
+              m_Holes: []
+              m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 0, y: 0, z: 0}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+          m_Door:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 3
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_ArchDoor:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0, y: 0, z: 1}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 0
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_DoorFrame:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: -0.013172579, y: 0, z: 0.9999133}
+            m_Up: {x: 0, y: 1, z: 0}
+            m_Depth: 0.275
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_Scale: 0.95
+          m_WindowOpening:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Sides: 4
+            m_Angle: 0
+            m_IsSmooth: 0
+            m_Windows: []
+          m_Doorway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+          m_Archway:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_PositionOffset: 0
+            m_ActiveElements: -1
+            m_Frames: []
+            m_Doors: []
+            m_ArchHeight: 1
+            m_ArchSides: 4
+          m_Extension:
+            m_Height: 0.5
+            m_Width: 0.5
+            m_Columns: 1
+            m_Rows: 1
+            m_Distance: 4
+      - m_IsDirty: 1
+        m_ID: 3
+        m_Start:
+          m_Position: {x: 20.156284, y: 0, z: 0.3698182}
+          m_Forward: {x: -0.5133528, y: 0, z: -0.5064068}
+          m_Weight: 0
+        m_End:
+          m_Position: {x: 19.877157, y: 0, z: -10.044608}
+          m_Forward: {x: -0.4865603, y: 0, z: 0.50641537}
+          m_Weight: 0
+        m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+        m_Columns: 1
+        m_Rows: 1
+        m_Height: 4
+        m_Depth: 0.25
+        m_IsTriangle: 0
+        m_Material: {fileID: 0}
+        m_SectionData:
+          m_IsDirty: 0
+          m_Polygon:
+            m_ControlPoints: []
+            m_Normal: {x: 0, y: 0, z: 0}
+          m_Holes: []
+          m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+          m_Up: {x: 0, y: 1, z: 0}
+          m_Depth: 0.25
+          m_Height: 0
+          m_Width: 0
+          m_Position: {x: 0, y: 0, z: 0}
+          m_ID: 0
+          m_WallElement: 0
+          m_Window:
+            m_IsDirty: 1
+            m_ID: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_ActiveElements: -1
+            m_OuterFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints:
+                - {x: 19.833176, y: 1, z: -2.3603897}
+                - {x: 19.833176, y: 3, z: -2.3603897}
+                - {x: 19.70031, y: 3, z: -7.314396}
+                - {x: 19.70031, y: 1, z: -7.314396}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Holes: []
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.25
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+            m_InnerFrame:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints:
+                - {x: 19.954807, y: 1.05, z: -2.487589}
+                - {x: 19.954807, y: 2.95, z: -2.487589}
+                - {x: 19.828587, y: 2.95, z: -7.193895}
+                - {x: 19.828587, y: 1.05, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Holes: []
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_Scale: 0.95
+              m_Columns: 1
+              m_Rows: 1
+            m_InnerFrameMaterial: {fileID: 0}
+            m_Pane:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints:
+                - {x: 19.954807, y: 1.05, z: -2.487589}
+                - {x: 19.954807, y: 2.95, z: -2.487589}
+                - {x: 19.828587, y: 2.95, z: -7.193895}
+                - {x: 19.828587, y: 1.05, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Holes: []
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Up: {x: 0, y: 1, z: 0}
+              m_Depth: 0.0625
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+            m_LeftShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints:
+                - {x: 19.891697, y: 1.0499997, z: -4.840741}
+                - {x: 19.891697, y: 2.9500003, z: -4.840742}
+                - {x: 19.828587, y: 2.949999, z: -7.193895}
+                - {x: 19.828587, y: 1.0500005, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Holes: []
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 19.860142, y: 2, z: -6.017318}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+            m_RightShutter:
+              m_IsDirty: 0
+              m_Polygon:
+                m_ControlPoints:
+                - {x: 19.954807, y: 1.0500009, z: -2.487589}
+                - {x: 19.954807, y: 2.9499993, z: -2.4875891}
+                - {x: 19.891697, y: 2.9499984, z: -4.8407416}
+                - {x: 19.891697, y: 1.0500016, z: -4.8407416}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Holes: []
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+              m_Up: {x: 1, y: 0, z: 0}
+              m_Depth: 0.125
+              m_Height: 0
+              m_Width: 0
+              m_Position: {x: 0, y: 0, z: 0}
+              m_ID: 0
+              m_ActiveElements: -1
+              m_HingeData:
+                m_RelativePosition: 0
+                m_AbsolutePosition: {x: 19.923252, y: 2, z: -3.6641653}
+                m_PositionOffset: {x: 0, y: 0, z: 0}
+                m_EulerAngle: {x: 0, y: 0, z: 0}
+                m_Scale: {x: 1, y: 1, z: 1}
+              m_HandleSize: 0
+              m_HandleScale: 0
+              m_HandlePosition: {x: 0, y: 0, z: 0}
+              m_HandlePoint: 0
+              m_Material: {fileID: 0}
+          m_Door:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 3
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_ArchDoor:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0, y: 0, z: 1}
+            m_Up: {x: 1, y: 0, z: 0}
+            m_Depth: 1
+            m_Height: 0
+            m_Width: 0
+            m_Position: {x: 0, y: 0, z: 0}
+            m_ID: 0
+            m_ActiveElements: -1
+            m_HingeData:
+              m_RelativePosition: 0
+              m_AbsolutePosition: {x: 0, y: 0, z: 0}
+              m_PositionOffset: {x: 0, y: 0, z: 0}
+              m_EulerAngle: {x: 0, y: 0, z: 0}
+              m_Scale: {x: 1, y: 1, z: 1}
+            m_HandleSize: 0
+            m_HandleScale: 0
+            m_HandlePosition: {x: 0, y: 0, z: 0}
+            m_HandlePoint: 0
+            m_Material: {fileID: 0}
+          m_DoorFrame:
+            m_IsDirty: 0
+            m_Polygon:
+              m_ControlPoints: []
+              m_Normal: {x: 0, y: 0, z: 0}
+            m_Holes: []
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
             m_Up: {x: 0, y: 1, z: 0}
             m_Depth: 0.275
             m_Height: 0
@@ -752,57 +2237,57 @@ MonoBehaviour:
               m_ID: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.271972, y: 1, z: -7.2877502}
-                - {x: 10.271972, y: 3, z: -7.2877502}
-                - {x: 10.208325, y: 3, z: -2.579011}
-                - {x: 10.208325, y: 1, z: -2.579011}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.833176, y: 1, z: -2.3603897}
+                - {x: 19.833176, y: 3, z: -2.3603897}
+                - {x: 19.70031, y: 3, z: -7.314396}
+                - {x: 19.70031, y: 1, z: -7.314396}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_ActiveElements: -1
               m_OuterFrame:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.271972, y: 1, z: -7.2877502}
-                  - {x: 10.271972, y: 3, z: -7.2877502}
-                  - {x: 10.208325, y: 3, z: -2.579011}
-                  - {x: 10.208325, y: 1, z: -2.579011}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.833176, y: 1, z: -2.3603897}
+                  - {x: 19.833176, y: 3, z: -2.3603897}
+                  - {x: 19.70031, y: 3, z: -7.314396}
+                  - {x: 19.70031, y: 1, z: -7.314396}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes:
                 - m_ControlPoints:
-                  - {x: 10.145392, y: 1.05, z: -7.1717205}
-                  - {x: 10.145392, y: 2.95, z: -7.1717205}
-                  - {x: 10.084928, y: 2.95, z: -2.6984184}
-                  - {x: 10.084928, y: 1.05, z: -2.6984184}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 0, y: 1, z: 0}
                 m_Depth: 0.25
                 m_Height: 2
-                m_Width: 4.7723856
-                m_Position: {x: 10.240149, y: 2, z: -4.9333806}
+                m_Width: 5.086872
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
                 m_Scale: 0.95
               m_InnerFrame:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.145392, y: 1.05, z: -7.1717205}
-                  - {x: 10.145392, y: 2.95, z: -7.1717205}
-                  - {x: 10.084928, y: 2.95, z: -2.6984184}
-                  - {x: 10.084928, y: 1.05, z: -2.6984184}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes:
                 - m_ControlPoints:
-                  - {x: 10.268869, y: 1.0975, z: -7.058199}
-                  - {x: 10.268869, y: 2.9025002, z: -7.058199}
-                  - {x: 10.211428, y: 2.9025002, z: -2.808562}
-                  - {x: 10.211428, y: 1.0975, z: -2.808562}
-                  m_Normal: {x: 0.9999087, y: -0.00000017858896, z: 0.013515618}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.826698, y: 1.0975, z: -2.6018975}
+                  - {x: 19.826698, y: 2.9025002, z: -2.6018975}
+                  - {x: 19.706787, y: 2.9025002, z: -7.0728884}
+                  - {x: 19.706787, y: 1.0975, z: -7.0728884}
+                  m_Normal: {x: -0.9996405, y: 0.00000043960299, z: 0.026810186}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 0, y: 1, z: 0}
                 m_Depth: 0.125
                 m_Height: 1.9000001
-                m_Width: 4.5337667
-                m_Position: {x: 10.240149, y: 2, z: -4.9333806}
+                m_Width: 4.832527
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
                 m_Scale: 0.95
                 m_Columns: 1
                 m_Rows: 1
@@ -811,39 +2296,39 @@ MonoBehaviour:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.145392, y: 1.05, z: -7.1717205}
-                  - {x: 10.145392, y: 2.95, z: -7.1717205}
-                  - {x: 10.084928, y: 2.95, z: -2.6984184}
-                  - {x: 10.084928, y: 1.05, z: -2.6984184}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes: []
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
-                m_Up: {x: 0, y: 0, z: 0}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 0, y: 1, z: 0}
                 m_Depth: 0.0625
                 m_Height: 1.9000001
-                m_Width: 4.5337667
-                m_Position: {x: 10.240149, y: 2, z: -4.9333806}
+                m_Width: 4.832527
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
               m_LeftShutter:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.084937, y: 2.949999, z: -2.6984184}
-                  - {x: 10.084937, y: 1.05, z: -2.6984181}
-                  - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                  - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.891697, y: 1.0499997, z: -4.840741}
+                  - {x: 19.891697, y: 2.9500003, z: -4.840742}
+                  - {x: 19.828587, y: 2.949999, z: -7.193895}
+                  - {x: 19.828587, y: 1.0500005, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes: []
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 1, y: 0, z: 0}
                 m_Depth: 0.125
-                m_Height: 1.8999996
-                m_Width: 2.2668743
-                m_Position: {x: 10.100048, y: 1.9999998, z: -3.8167439}
+                m_Height: 1.9000006
+                m_Width: 2.416264
+                m_Position: {x: 19.860142, y: 2, z: -6.017318}
                 m_ID: 0
                 m_ActiveElements: -1
                 m_HingeData:
                   m_RelativePosition: 0
-                  m_AbsolutePosition: {x: 10.100048, y: 1.9999998, z: -3.8167439}
+                  m_AbsolutePosition: {x: 19.860142, y: 2, z: -6.017318}
                   m_PositionOffset: {x: 0, y: 0, z: 0}
                   m_EulerAngle: {x: 0, y: 0, z: 0}
                   m_Scale: {x: 1, y: 1, z: 1}
@@ -856,23 +2341,23 @@ MonoBehaviour:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                  - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                  - {x: 10.145384, y: 1.0500009, z: -7.1717205}
-                  - {x: 10.145383, y: 2.95, z: -7.171721}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.0500009, z: -2.487589}
+                  - {x: 19.954807, y: 2.9499993, z: -2.4875891}
+                  - {x: 19.891697, y: 2.9499984, z: -4.8407416}
+                  - {x: 19.891697, y: 1.0500016, z: -4.8407416}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes: []
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 1, y: 0, z: 0}
                 m_Depth: 0.125
-                m_Height: 1.8999996
-                m_Width: 2.2668753
-                m_Position: {x: 10.130272, y: 2.0000002, z: -6.0533953}
+                m_Height: 1.8999984
+                m_Width: 2.416263
+                m_Position: {x: 19.923252, y: 2, z: -3.6641653}
                 m_ID: 0
                 m_ActiveElements: -1
                 m_HingeData:
                   m_RelativePosition: 0
-                  m_AbsolutePosition: {x: 10.130272, y: 2.0000002, z: -6.0533953}
+                  m_AbsolutePosition: {x: 19.923252, y: 2, z: -3.6641653}
                   m_PositionOffset: {x: 0, y: 0, z: 0}
                   m_EulerAngle: {x: 0, y: 0, z: 0}
                   m_Scale: {x: 1, y: 1, z: 1}
@@ -911,25 +2396,25 @@ MonoBehaviour:
         - m_IsDirty: 0
           m_Polygon:
             m_ControlPoints:
-            - {x: 10.303798, y: 0, z: -9.642119}
-            - {x: 10.303798, y: 4, z: -9.642119}
-            - {x: 10.1765, y: 4, z: -0.22464105}
-            - {x: 10.1765, y: 0, z: -0.22464105}
-            m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+            - {x: 19.899607, y: 0, z: 0.11661482}
+            - {x: 19.899607, y: 4, z: 0.11661482}
+            - {x: 19.633877, y: 4, z: -9.791401}
+            - {x: 19.633877, y: 0, z: -9.791401}
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
           m_Holes:
           - m_ControlPoints:
-            - {x: 10.271972, y: 1, z: -7.2877502}
-            - {x: 10.271972, y: 3, z: -7.2877502}
-            - {x: 10.208325, y: 3, z: -2.579011}
-            - {x: 10.208325, y: 1, z: -2.579011}
-            m_Normal: {x: 0.9999087, y: 0.00000004791797, z: 0.013515402}
-          m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+            - {x: 19.833176, y: 1, z: -2.3603897}
+            - {x: 19.833176, y: 3, z: -2.3603897}
+            - {x: 19.70031, y: 3, z: -7.314396}
+            - {x: 19.70031, y: 1, z: -7.314396}
+            m_Normal: {x: -0.9996405, y: 0.00000023739342, z: 0.02681025}
+          m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
           m_Up: {x: 0, y: 1, z: 0}
           m_Depth: 0.25
           m_Height: 4
-          m_Width: 9.544776
-          m_Position: {x: 10.240149, y: 2, z: -4.93338}
-          m_ID: {x: 0, y: 0}
+          m_Width: 10.173746
+          m_Position: {x: 19.766743, y: 2, z: -4.837393}
+          m_ID: 0
           m_WallElement: 3
           m_Window:
             m_IsDirty: 1
@@ -942,13 +2427,13 @@ MonoBehaviour:
               m_IsDirty: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.271972, y: 1, z: -7.2877502}
-                - {x: 10.271972, y: 3, z: -7.2877502}
-                - {x: 10.208325, y: 3, z: -2.579011}
-                - {x: 10.208325, y: 1, z: -2.579011}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.833176, y: 1, z: -2.3603897}
+                - {x: 19.833176, y: 3, z: -2.3603897}
+                - {x: 19.70031, y: 3, z: -7.314396}
+                - {x: 19.70031, y: 1, z: -7.314396}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.25
               m_Height: 0
@@ -959,13 +2444,13 @@ MonoBehaviour:
               m_IsDirty: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.145392, y: 1.05, z: -7.1717205}
-                - {x: 10.145392, y: 2.95, z: -7.1717205}
-                - {x: 10.084928, y: 2.95, z: -2.6984184}
-                - {x: 10.084928, y: 1.05, z: -2.6984184}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.954807, y: 1.05, z: -2.487589}
+                - {x: 19.954807, y: 2.95, z: -2.487589}
+                - {x: 19.828587, y: 2.95, z: -7.193895}
+                - {x: 19.828587, y: 1.05, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.125
               m_Height: 0
@@ -979,13 +2464,13 @@ MonoBehaviour:
               m_IsDirty: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.145392, y: 1.05, z: -7.1717205}
-                - {x: 10.145392, y: 2.95, z: -7.1717205}
-                - {x: 10.084928, y: 2.95, z: -2.6984184}
-                - {x: 10.084928, y: 1.05, z: -2.6984184}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.954807, y: 1.05, z: -2.487589}
+                - {x: 19.954807, y: 2.95, z: -2.487589}
+                - {x: 19.828587, y: 2.95, z: -7.193895}
+                - {x: 19.828587, y: 1.05, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 0, y: 1, z: 0}
               m_Depth: 0.0625
               m_Height: 0
@@ -995,23 +2480,23 @@ MonoBehaviour:
               m_IsDirty: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.084937, y: 2.949999, z: -2.6984184}
-                - {x: 10.084937, y: 1.05, z: -2.6984181}
-                - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.891697, y: 1.0499997, z: -4.840741}
+                - {x: 19.891697, y: 2.9500003, z: -4.840742}
+                - {x: 19.828587, y: 2.949999, z: -7.193895}
+                - {x: 19.828587, y: 1.0500005, z: -7.193895}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
               m_HingeData:
                 m_RelativePosition: 0
-                m_AbsolutePosition: {x: 10.100048, y: 1.9999998, z: -3.8167439}
+                m_AbsolutePosition: {x: 19.860142, y: 2, z: -6.017318}
                 m_PositionOffset: {x: 0, y: 0, z: 0}
                 m_EulerAngle: {x: 0, y: 0, z: 0}
                 m_Scale: {x: 1, y: 1, z: 1}
@@ -1024,23 +2509,23 @@ MonoBehaviour:
               m_IsDirty: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                - {x: 10.145384, y: 1.0500009, z: -7.1717205}
-                - {x: 10.145383, y: 2.95, z: -7.171721}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.954807, y: 1.0500009, z: -2.487589}
+                - {x: 19.954807, y: 2.9499993, z: -2.4875891}
+                - {x: 19.891697, y: 2.9499984, z: -4.8407416}
+                - {x: 19.891697, y: 1.0500016, z: -4.8407416}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Holes: []
-              m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+              m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
               m_HingeData:
                 m_RelativePosition: 0
-                m_AbsolutePosition: {x: 10.130272, y: 2.0000002, z: -6.0533953}
+                m_AbsolutePosition: {x: 19.923252, y: 2, z: -3.6641653}
                 m_PositionOffset: {x: 0, y: 0, z: 0}
                 m_EulerAngle: {x: 0, y: 0, z: 0}
                 m_Scale: {x: 1, y: 1, z: 1}
@@ -1055,11 +2540,11 @@ MonoBehaviour:
               m_ControlPoints: []
               m_Normal: {x: 0, y: 0, z: 0}
             m_Holes: []
-            m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -1083,8 +2568,8 @@ MonoBehaviour:
             m_Normal: {x: 0, y: 0, z: 1}
             m_Up: {x: 1, y: 0, z: 0}
             m_Depth: 1
-            m_Height: 1
-            m_Width: 1
+            m_Height: 0
+            m_Width: 0
             m_Position: {x: 0, y: 0, z: 0}
             m_ID: 0
             m_ActiveElements: -1
@@ -1105,7 +2590,7 @@ MonoBehaviour:
               m_ControlPoints: []
               m_Normal: {x: 0, y: 0, z: 0}
             m_Holes: []
-            m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+            m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
             m_Up: {x: 0, y: 1, z: 0}
             m_Depth: 0.275
             m_Height: 0
@@ -1125,57 +2610,57 @@ MonoBehaviour:
               m_ID: 0
               m_Polygon:
                 m_ControlPoints:
-                - {x: 10.271972, y: 1, z: -7.2877502}
-                - {x: 10.271972, y: 3, z: -7.2877502}
-                - {x: 10.208325, y: 3, z: -2.579011}
-                - {x: 10.208325, y: 1, z: -2.579011}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                - {x: 19.833176, y: 1, z: -2.3603897}
+                - {x: 19.833176, y: 3, z: -2.3603897}
+                - {x: 19.70031, y: 3, z: -7.314396}
+                - {x: 19.70031, y: 1, z: -7.314396}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
               m_ActiveElements: -1
               m_OuterFrame:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.271972, y: 1, z: -7.2877502}
-                  - {x: 10.271972, y: 3, z: -7.2877502}
-                  - {x: 10.208325, y: 3, z: -2.579011}
-                  - {x: 10.208325, y: 1, z: -2.579011}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.833176, y: 1, z: -2.3603897}
+                  - {x: 19.833176, y: 3, z: -2.3603897}
+                  - {x: 19.70031, y: 3, z: -7.314396}
+                  - {x: 19.70031, y: 1, z: -7.314396}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes:
                 - m_ControlPoints:
-                  - {x: 10.145392, y: 1.05, z: -7.1717205}
-                  - {x: 10.145392, y: 2.95, z: -7.1717205}
-                  - {x: 10.084928, y: 2.95, z: -2.6984184}
-                  - {x: 10.084928, y: 1.05, z: -2.6984184}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 0, y: 1, z: 0}
                 m_Depth: 0.25
                 m_Height: 2
-                m_Width: 4.7723856
-                m_Position: {x: 10.240149, y: 2, z: -4.9333806}
+                m_Width: 5.086872
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
                 m_Scale: 0.95
               m_InnerFrame:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.145392, y: 1.05, z: -7.1717205}
-                  - {x: 10.145392, y: 2.95, z: -7.1717205}
-                  - {x: 10.084928, y: 2.95, z: -2.6984184}
-                  - {x: 10.084928, y: 1.05, z: -2.6984184}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes:
                 - m_ControlPoints:
-                  - {x: 10.268869, y: 1.0975, z: -7.058199}
-                  - {x: 10.268869, y: 2.9025002, z: -7.058199}
-                  - {x: 10.211428, y: 2.9025002, z: -2.808562}
-                  - {x: 10.211428, y: 1.0975, z: -2.808562}
-                  m_Normal: {x: 0.9999087, y: -0.00000017858896, z: 0.013515618}
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.826698, y: 1.0975, z: -2.6018975}
+                  - {x: 19.826698, y: 2.9025002, z: -2.6018975}
+                  - {x: 19.706787, y: 2.9025002, z: -7.0728884}
+                  - {x: 19.706787, y: 1.0975, z: -7.0728884}
+                  m_Normal: {x: -0.9996405, y: 0.00000043960299, z: 0.026810186}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 0, y: 1, z: 0}
                 m_Depth: 0.125
                 m_Height: 1.9000001
-                m_Width: 4.5337667
-                m_Position: {x: 10.240149, y: 2, z: -4.9333806}
+                m_Width: 4.832527
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
                 m_Scale: 0.95
                 m_Columns: 1
                 m_Rows: 1
@@ -1184,39 +2669,39 @@ MonoBehaviour:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.145392, y: 1.05, z: -7.1717205}
-                  - {x: 10.145392, y: 2.95, z: -7.1717205}
-                  - {x: 10.084928, y: 2.95, z: -2.6984184}
-                  - {x: 10.084928, y: 1.05, z: -2.6984184}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.05, z: -2.487589}
+                  - {x: 19.954807, y: 2.95, z: -2.487589}
+                  - {x: 19.828587, y: 2.95, z: -7.193895}
+                  - {x: 19.828587, y: 1.05, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes: []
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
-                m_Up: {x: 0, y: 0, z: 0}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
+                m_Up: {x: 0, y: 1, z: 0}
                 m_Depth: 0.0625
                 m_Height: 1.9000001
-                m_Width: 4.5337667
-                m_Position: {x: 10.240149, y: 2, z: -4.9333806}
+                m_Width: 4.832527
+                m_Position: {x: 19.766743, y: 2, z: -4.837393}
               m_LeftShutter:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.084937, y: 2.949999, z: -2.6984184}
-                  - {x: 10.084937, y: 1.05, z: -2.6984181}
-                  - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                  - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.891697, y: 1.0499997, z: -4.840741}
+                  - {x: 19.891697, y: 2.9500003, z: -4.840742}
+                  - {x: 19.828587, y: 2.949999, z: -7.193895}
+                  - {x: 19.828587, y: 1.0500005, z: -7.193895}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes: []
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 1, y: 0, z: 0}
                 m_Depth: 0.125
-                m_Height: 1.8999996
-                m_Width: 2.2668743
-                m_Position: {x: 10.100048, y: 1.9999998, z: -3.8167439}
+                m_Height: 1.9000006
+                m_Width: 2.416264
+                m_Position: {x: 19.860142, y: 2, z: -6.017318}
                 m_ID: 0
                 m_ActiveElements: -1
                 m_HingeData:
                   m_RelativePosition: 0
-                  m_AbsolutePosition: {x: 10.100048, y: 1.9999998, z: -3.8167439}
+                  m_AbsolutePosition: {x: 19.860142, y: 2, z: -6.017318}
                   m_PositionOffset: {x: 0, y: 0, z: 0}
                   m_EulerAngle: {x: 0, y: 0, z: 0}
                   m_Scale: {x: 1, y: 1, z: 1}
@@ -1229,23 +2714,23 @@ MonoBehaviour:
                 m_IsDirty: 0
                 m_Polygon:
                   m_ControlPoints:
-                  - {x: 10.11516, y: 2.9499996, z: -4.9350696}
-                  - {x: 10.11516, y: 1.0500004, z: -4.9350696}
-                  - {x: 10.145384, y: 1.0500009, z: -7.1717205}
-                  - {x: 10.145383, y: 2.95, z: -7.171721}
-                  m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                  - {x: 19.954807, y: 1.0500009, z: -2.487589}
+                  - {x: 19.954807, y: 2.9499993, z: -2.4875891}
+                  - {x: 19.891697, y: 2.9499984, z: -4.8407416}
+                  - {x: 19.891697, y: 1.0500016, z: -4.8407416}
+                  m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Holes: []
-                m_Normal: {x: -0.9999087, y: 0, z: -0.013511521}
+                m_Normal: {x: 0.999641, y: 0, z: -0.026792344}
                 m_Up: {x: 1, y: 0, z: 0}
                 m_Depth: 0.125
-                m_Height: 1.8999996
-                m_Width: 2.2668753
-                m_Position: {x: 10.130272, y: 2.0000002, z: -6.0533953}
+                m_Height: 1.8999984
+                m_Width: 2.416263
+                m_Position: {x: 19.923252, y: 2, z: -3.6641653}
                 m_ID: 0
                 m_ActiveElements: -1
                 m_HingeData:
                   m_RelativePosition: 0
-                  m_AbsolutePosition: {x: 10.130272, y: 2.0000002, z: -6.0533953}
+                  m_AbsolutePosition: {x: 19.923252, y: 2, z: -3.6641653}
                   m_PositionOffset: {x: 0, y: 0, z: 0}
                   m_EulerAngle: {x: 0, y: 0, z: 0}
                   m_Scale: {x: 1, y: 1, z: 1}
@@ -1254,1329 +2739,6 @@ MonoBehaviour:
                 m_HandlePosition: {x: 0, y: 0, z: 0}
                 m_HandlePoint: 0
                 m_Material: {fileID: 0}
-          m_Doorway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-          m_Archway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-            m_ArchHeight: 1
-            m_ArchSides: 4
-          m_Extension:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Distance: 4
-      - m_IsDirty: 0
-        m_ID: 1
-        m_Start:
-          m_Position: {x: 9.923128, y: 0, z: 0.026943207}
-          m_Forward: {x: 0.5067454, y: 0, z: -0.5031685}
-          m_Weight: 0
-        m_End:
-          m_Position: {x: 20.057226, y: 0, z: -0.038204193}
-          m_Forward: {x: -0.49979746, y: 0, z: -0.49678573}
-          m_Weight: 0
-        m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-        m_Columns: 1
-        m_Rows: 1
-        m_Height: 4
-        m_Depth: 0.25
-        m_IsTriangle: 0
-        m_Material: {fileID: 0}
-        m_SectionData:
-          m_IsDirty: 0
-          m_Polygon:
-            m_ControlPoints: []
-            m_Normal: {x: 0, y: 0, z: 0}
-          m_Holes: []
-          m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-          m_Up: {x: 0, y: 1, z: 0}
-          m_Depth: 0.25
-          m_Height: 0
-          m_Width: 0
-          m_Position: {x: 0, y: 0, z: 0}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
-          m_Window:
-            m_IsDirty: 0
-            m_ID: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_ActiveElements: -1
-            m_OuterFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.25
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-            m_InnerFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.125
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-              m_Columns: 1
-              m_Rows: 1
-            m_InnerFrameMaterial: {fileID: 0}
-            m_Pane:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.0625
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-            m_LeftShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-            m_RightShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-          m_Door:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 3
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_ArchDoor:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0, y: 0, z: 1}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 0
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_DoorFrame:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-            m_Up: {x: 0, y: 1, z: 0}
-            m_Depth: 0.275
-            m_Height: 0
-            m_Width: 0
-            m_Position: {x: 0, y: 0, z: 0}
-            m_Scale: 0.95
-          m_WindowOpening:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Sides: 4
-            m_Angle: 0
-            m_IsSmooth: 0
-            m_Windows: []
-          m_Doorway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-          m_Archway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-            m_ArchHeight: 1
-            m_ArchSides: 4
-          m_Extension:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Distance: 4
-        m_Sections:
-        - m_IsDirty: 0
-          m_Polygon:
-            m_ControlPoints:
-            - {x: 10.1765, y: 0, z: -0.22464105}
-            - {x: 10.1765, y: 4, z: -0.22464105}
-            - {x: 19.807327, y: 4, z: -0.28659707}
-            - {x: 19.807327, y: 0, z: -0.28659707}
-            m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-          m_Holes: []
-          m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-          m_Up: {x: 0, y: 1, z: 0}
-          m_Depth: 0.25
-          m_Height: 4
-          m_Width: 9.692783
-          m_Position: {x: 14.991914, y: 2, z: -0.25561905}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
-          m_Window:
-            m_IsDirty: 0
-            m_ID: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_ActiveElements: -1
-            m_OuterFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.25
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-            m_InnerFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.125
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-              m_Columns: 1
-              m_Rows: 1
-            m_InnerFrameMaterial: {fileID: 0}
-            m_Pane:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.0625
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-            m_LeftShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-            m_RightShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-          m_Door:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 3
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_ArchDoor:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0, y: 0, z: 1}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 0
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_DoorFrame:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0064284015, y: -0, z: 0.9999793}
-            m_Up: {x: 0, y: 1, z: 0}
-            m_Depth: 0.275
-            m_Height: 0
-            m_Width: 0
-            m_Position: {x: 0, y: 0, z: 0}
-            m_Scale: 0.95
-          m_WindowOpening:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Sides: 4
-            m_Angle: 0
-            m_IsSmooth: 0
-            m_Windows: []
-          m_Doorway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-          m_Archway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-            m_ArchHeight: 1
-            m_ArchSides: 4
-          m_Extension:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Distance: 4
-      - m_IsDirty: 0
-        m_ID: 2
-        m_Start:
-          m_Position: {x: 20.057226, y: 0, z: -0.038204193}
-          m_Forward: {x: -0.49979746, y: 0, z: -0.49678573}
-          m_Weight: 0
-        m_End:
-          m_Position: {x: 20.060995, y: 0, z: -9.843546}
-          m_Forward: {x: -0.50018597, y: 0, z: 0.49751118}
-          m_Weight: 0
-        m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-        m_Columns: 1
-        m_Rows: 1
-        m_Height: 4
-        m_Depth: 0.25
-        m_IsTriangle: 0
-        m_Material: {fileID: 0}
-        m_SectionData:
-          m_IsDirty: 0
-          m_Polygon:
-            m_ControlPoints: []
-            m_Normal: {x: 0, y: 0, z: 0}
-          m_Holes: []
-          m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-          m_Up: {x: 0, y: 1, z: 0}
-          m_Depth: 0.25
-          m_Height: 0
-          m_Width: 0
-          m_Position: {x: 0, y: 0, z: 0}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
-          m_Window:
-            m_IsDirty: 0
-            m_ID: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_ActiveElements: -1
-            m_OuterFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.25
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-            m_InnerFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.125
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-              m_Columns: 1
-              m_Rows: 1
-            m_InnerFrameMaterial: {fileID: 0}
-            m_Pane:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.0625
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-            m_LeftShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-            m_RightShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-          m_Door:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 3
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_ArchDoor:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0, y: 0, z: 1}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 0
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_DoorFrame:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-            m_Up: {x: 0, y: 1, z: 0}
-            m_Depth: 0.275
-            m_Height: 0
-            m_Width: 0
-            m_Position: {x: 0, y: 0, z: 0}
-            m_Scale: 0.95
-          m_WindowOpening:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Sides: 4
-            m_Angle: 0
-            m_IsSmooth: 0
-            m_Windows: []
-          m_Doorway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-          m_Archway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-            m_ArchHeight: 1
-            m_ArchSides: 4
-          m_Extension:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Distance: 4
-        m_Sections:
-        - m_IsDirty: 0
-          m_Polygon:
-            m_ControlPoints:
-            - {x: 19.807327, y: 0, z: -0.28659707}
-            - {x: 19.807327, y: 4, z: -0.28659707}
-            - {x: 19.810904, y: 4, z: -9.59479}
-            - {x: 19.810904, y: 0, z: -9.59479}
-            m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-          m_Holes: []
-          m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-          m_Up: {x: 0, y: 1, z: 0}
-          m_Depth: 0.25
-          m_Height: 4
-          m_Width: 9.3117695
-          m_Position: {x: 19.809116, y: 2, z: -4.940694}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
-          m_Window:
-            m_IsDirty: 0
-            m_ID: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_ActiveElements: -1
-            m_OuterFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.25
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-            m_InnerFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.125
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-              m_Columns: 1
-              m_Rows: 1
-            m_InnerFrameMaterial: {fileID: 0}
-            m_Pane:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.0625
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-            m_LeftShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-            m_RightShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-          m_Door:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 3
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_ArchDoor:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0, y: 0, z: 1}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 0
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_DoorFrame:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.99999994, y: -0, z: 0.00038437423}
-            m_Up: {x: 0, y: 1, z: 0}
-            m_Depth: 0.275
-            m_Height: 0
-            m_Width: 0
-            m_Position: {x: 0, y: 0, z: 0}
-            m_Scale: 0.95
-          m_WindowOpening:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Sides: 4
-            m_Angle: 0
-            m_IsSmooth: 0
-            m_Windows: []
-          m_Doorway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-          m_Archway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-            m_ArchHeight: 1
-            m_ArchSides: 4
-          m_Extension:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Distance: 4
-      - m_IsDirty: 0
-        m_ID: 3
-        m_Start:
-          m_Position: {x: 20.060995, y: 0, z: -9.843546}
-          m_Forward: {x: -0.50018597, y: 0, z: 0.49751118}
-          m_Weight: 0
-        m_End:
-          m_Position: {x: 10.0571785, y: 0, z: -9.893341}
-          m_Forward: {x: 0.49323803, y: 0, z: 0.50244313}
-          m_Weight: 0
-        m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-        m_Columns: 1
-        m_Rows: 1
-        m_Height: 4
-        m_Depth: 0.25
-        m_IsTriangle: 0
-        m_Material: {fileID: 0}
-        m_SectionData:
-          m_IsDirty: 0
-          m_Polygon:
-            m_ControlPoints: []
-            m_Normal: {x: 0, y: 0, z: 0}
-          m_Holes: []
-          m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-          m_Up: {x: 0, y: 1, z: 0}
-          m_Depth: 0.25
-          m_Height: 0
-          m_Width: 0
-          m_Position: {x: 0, y: 0, z: 0}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
-          m_Window:
-            m_IsDirty: 0
-            m_ID: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_ActiveElements: -1
-            m_OuterFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.25
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-            m_InnerFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.125
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-              m_Columns: 1
-              m_Rows: 1
-            m_InnerFrameMaterial: {fileID: 0}
-            m_Pane:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.0625
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-            m_LeftShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-            m_RightShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-          m_Door:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 3
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_ArchDoor:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0, y: 0, z: 1}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 0
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_DoorFrame:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-            m_Up: {x: 0, y: 1, z: 0}
-            m_Depth: 0.275
-            m_Height: 0
-            m_Width: 0
-            m_Position: {x: 0, y: 0, z: 0}
-            m_Scale: 0.95
-          m_WindowOpening:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Sides: 4
-            m_Angle: 0
-            m_IsSmooth: 0
-            m_Windows: []
-          m_Doorway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-          m_Archway:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_PositionOffset: 0
-            m_ActiveElements: -1
-            m_Frames: []
-            m_Doors: []
-            m_ArchHeight: 1
-            m_ArchSides: 4
-          m_Extension:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Distance: 4
-        m_Sections:
-        - m_IsDirty: 0
-          m_Polygon:
-            m_ControlPoints:
-            - {x: 19.810904, y: 0, z: -9.59479}
-            - {x: 19.810904, y: 4, z: -9.59479}
-            - {x: 10.303798, y: 4, z: -9.642119}
-            - {x: 10.303798, y: 0, z: -9.642119}
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-          m_Holes: []
-          m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-          m_Up: {x: 0, y: 1, z: 0}
-          m_Depth: 0.25
-          m_Height: 4
-          m_Width: 9.554435
-          m_Position: {x: 15.05735, y: 2, z: -9.618455}
-          m_ID: {x: 0, y: 0}
-          m_WallElement: 0
-          m_Window:
-            m_IsDirty: 0
-            m_ID: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_ActiveElements: -1
-            m_OuterFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.25
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-            m_InnerFrame:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.125
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-              m_Scale: 0.95
-              m_Columns: 1
-              m_Rows: 1
-            m_InnerFrameMaterial: {fileID: 0}
-            m_Pane:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 0, y: 1, z: 0}
-              m_Depth: 0.0625
-              m_Height: 0
-              m_Width: 0
-              m_Position: {x: 0, y: 0, z: 0}
-            m_LeftShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-            m_RightShutter:
-              m_IsDirty: 0
-              m_Polygon:
-                m_ControlPoints: []
-                m_Normal: {x: 0, y: 0, z: 0}
-              m_Holes: []
-              m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-              m_Up: {x: 1, y: 0, z: 0}
-              m_Depth: 0.125
-              m_Height: 1
-              m_Width: 1
-              m_Position: {x: 0, y: 0, z: 0}
-              m_ID: 0
-              m_ActiveElements: -1
-              m_HingeData:
-                m_RelativePosition: 0
-                m_AbsolutePosition: {x: 0, y: 0, z: 0}
-                m_PositionOffset: {x: 0, y: 0, z: 0}
-                m_EulerAngle: {x: 0, y: 0, z: 0}
-                m_Scale: {x: 1, y: 1, z: 1}
-              m_HandleSize: 0
-              m_HandleScale: 0
-              m_HandlePosition: {x: 0, y: 0, z: 0}
-              m_HandlePoint: 0
-              m_Material: {fileID: 0}
-          m_Door:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 3
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_ArchDoor:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0, y: 0, z: 1}
-            m_Up: {x: 1, y: 0, z: 0}
-            m_Depth: 1
-            m_Height: 1
-            m_Width: 1
-            m_Position: {x: 0, y: 0, z: 0}
-            m_ID: 0
-            m_ActiveElements: -1
-            m_HingeData:
-              m_RelativePosition: 0
-              m_AbsolutePosition: {x: 0, y: 0, z: 0}
-              m_PositionOffset: {x: 0, y: 0, z: 0}
-              m_EulerAngle: {x: 0, y: 0, z: 0}
-              m_Scale: {x: 1, y: 1, z: 1}
-            m_HandleSize: 0
-            m_HandleScale: 0
-            m_HandlePosition: {x: 0, y: 0, z: 0}
-            m_HandlePoint: 0
-            m_Material: {fileID: 0}
-          m_DoorFrame:
-            m_IsDirty: 0
-            m_Polygon:
-              m_ControlPoints: []
-              m_Normal: {x: 0, y: 0, z: 0}
-            m_Holes: []
-            m_Normal: {x: 0.0049775536, y: 0, z: -0.9999876}
-            m_Up: {x: 0, y: 1, z: 0}
-            m_Depth: 0.275
-            m_Height: 0
-            m_Width: 0
-            m_Position: {x: 0, y: 0, z: 0}
-            m_Scale: 0.95
-          m_WindowOpening:
-            m_Height: 0.5
-            m_Width: 0.5
-            m_Columns: 1
-            m_Rows: 1
-            m_Sides: 4
-            m_Angle: 0
-            m_IsSmooth: 0
-            m_Windows: []
           m_Doorway:
             m_Height: 0.5
             m_Width: 0.5
@@ -2644,14 +2806,14 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 0
         m_CornerPoints:
-        - {x: 10.303798, y: 0, z: -9.642119}
-        - {x: 10.053821, y: 0, z: -9.645498}
-        - {x: 10.305042, y: 0, z: -9.892117}
-        - {x: 10.057171, y: 0, z: -9.893351}
+        - {x: 19.633877, y: 0, z: -9.791401}
+        - {x: 19.630579, y: 0, z: -10.041379}
+        - {x: 19.883787, y: 0, z: -9.798103}
+        - {x: 19.877176, y: 0, z: -10.044632}
         m_FlatPoints:
-        - {x: 10.303798, y: 0, z: -9.642119}
-        - {x: 10.053821, y: 0, z: -9.645498}
-        - {x: 10.305042, y: 0, z: -9.892117}
+        - {x: 19.883787, y: 0, z: -9.798103}
+        - {x: 19.633877, y: 0, z: -9.791401}
+        - {x: 19.630579, y: 0, z: -10.041379}
         m_Height: 4
         m_IsInside: 0
         m_Type: 0
@@ -2659,14 +2821,14 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 1
         m_CornerPoints:
-        - {x: 10.1765, y: 0, z: -0.22464105}
-        - {x: 10.178108, y: 0, z: 0.025353774}
-        - {x: 9.926523, y: 0, z: -0.22802003}
-        - {x: 9.923076, y: 0, z: 0.02699442}
+        - {x: 10.197625, y: 0, z: -9.666924}
+        - {x: 9.947625, y: 0, z: -9.666812}
+        - {x: 10.194327, y: 0, z: -9.916903}
+        - {x: 9.947515, y: 0, z: -9.913647}
         m_FlatPoints:
-        - {x: 10.178108, y: 0, z: 0.025353774}
-        - {x: 9.926523, y: 0, z: -0.22802003}
-        - {x: 10.1765, y: 0, z: -0.22464105}
+        - {x: 10.197625, y: 0, z: -9.666924}
+        - {x: 9.947625, y: 0, z: -9.666812}
+        - {x: 10.194327, y: 0, z: -9.916903}
         m_Height: 4
         m_IsInside: 0
         m_Type: 0
@@ -2674,14 +2836,14 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 2
         m_CornerPoints:
-        - {x: 19.807327, y: 0, z: -0.28659707}
-        - {x: 20.057327, y: 0, z: -0.28650102}
-        - {x: 19.808935, y: 0, z: -0.036602244}
-        - {x: 20.057232, y: 0, z: -0.03819957}
+        - {x: 10.201967, y: 0, z: -0.0113156885}
+        - {x: 10.198669, y: 0, z: 0.23866256}
+        - {x: 9.951967, y: 0, z: -0.011203265}
+        - {x: 9.952078, y: 0, z: 0.23540954}
         m_FlatPoints:
-        - {x: 19.808935, y: 0, z: -0.036602244}
-        - {x: 19.807327, y: 0, z: -0.28659707}
-        - {x: 20.057327, y: 0, z: -0.28650102}
+        - {x: 10.198669, y: 0, z: 0.23866256}
+        - {x: 9.951967, y: 0, z: -0.011203265}
+        - {x: 10.201967, y: 0, z: -0.0113156885}
         m_Height: 4
         m_IsInside: 0
         m_Type: 0
@@ -2689,14 +2851,14 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 3
         m_CornerPoints:
-        - {x: 19.810904, y: 0, z: -9.59479}
-        - {x: 19.81215, y: 0, z: -9.844788}
-        - {x: 20.060904, y: 0, z: -9.594694}
-        - {x: 20.060999, y: 0, z: -9.843549}
+        - {x: 19.899607, y: 0, z: 0.11661482}
+        - {x: 20.149517, y: 0, z: 0.109912306}
+        - {x: 19.896309, y: 0, z: 0.36659306}
+        - {x: 20.156494, y: 0, z: 0.3700254}
         m_FlatPoints:
-        - {x: 20.060904, y: 0, z: -9.594694}
-        - {x: 19.810904, y: 0, z: -9.59479}
-        - {x: 19.81215, y: 0, z: -9.844788}
+        - {x: 19.896309, y: 0, z: 0.36659306}
+        - {x: 19.899607, y: 0, z: 0.11661482}
+        - {x: 20.149517, y: 0, z: 0.109912306}
         m_Height: 4
         m_IsInside: 0
         m_Type: 0
@@ -2704,17 +2866,17 @@ MonoBehaviour:
     m_Roof:
       m_IsDirty: 0
       m_ControlPoints:
-      - m_Position: {x: 10.0571785, y: 0, z: -9.893341}
-        m_Forward: {x: 0.49323803, y: 0, z: 0.50244313}
+      - m_Position: {x: 19.877157, y: 0, z: -10.044608}
+        m_Forward: {x: -0.4865603, y: 0, z: 0.50641537}
         m_Weight: 0
-      - m_Position: {x: 9.923128, y: 0, z: 0.026943207}
-        m_Forward: {x: 0.5067454, y: 0, z: -0.5031685}
+      - m_Position: {x: 9.947535, y: 0, z: -9.913628}
+        m_Forward: {x: 0.50018144, y: 0, z: 0.49340507}
         m_Weight: 0
-      - m_Position: {x: 20.057226, y: 0, z: -0.038204193}
-        m_Forward: {x: -0.49979746, y: 0, z: -0.49678573}
+      - m_Position: {x: 9.952101, y: 0, z: 0.23539114}
+        m_Forward: {x: 0.4997317, y: 0, z: -0.49341366}
         m_Weight: 0
-      - m_Position: {x: 20.060995, y: 0, z: -9.843546}
-        m_Forward: {x: -0.50018597, y: 0, z: 0.49751118}
+      - m_Position: {x: 20.156284, y: 0, z: 0.3698182}
+        m_Forward: {x: -0.5133528, y: 0, z: -0.5064068}
         m_Weight: 0
       m_IsActive: 1
       m_RoofType: 1
@@ -2802,8 +2964,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -2827,8 +2989,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -2861,16 +3023,16 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 0
         m_ControlPoints:
-        - Start: {x: 10.0571785, y: 0, z: -9.893341}
+        - Start: {x: 19.877157, y: 0, z: -10.044608}
           End: {x: 0, y: 0, z: 0}
           T: 0
-        - Start: {x: 10.0571785, y: 0, z: -9.893341}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 19.877157, y: 0, z: -10.044608}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 9.923128, y: 0, z: 0.026943207}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 9.947535, y: 0, z: -9.913628}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 9.923128, y: 0, z: 0.026943207}
+        - Start: {x: 9.947535, y: 0, z: -9.913628}
           End: {x: 0, y: 0, z: 0}
           T: 0
         m_IsInside: 1
@@ -2953,8 +3115,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -2978,8 +3140,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -2997,16 +3159,16 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 1
         m_ControlPoints:
-        - Start: {x: 9.923128, y: 0, z: 0.026943207}
+        - Start: {x: 9.947535, y: 0, z: -9.913628}
           End: {x: 0, y: 0, z: 0}
           T: 0
-        - Start: {x: 9.923128, y: 0, z: 0.026943207}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 9.947535, y: 0, z: -9.913628}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 20.057226, y: 0, z: -0.038204193}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 9.952101, y: 0, z: 0.23539114}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 20.057226, y: 0, z: -0.038204193}
+        - Start: {x: 9.952101, y: 0, z: 0.23539114}
           End: {x: 0, y: 0, z: 0}
           T: 0
         m_IsInside: 1
@@ -3089,8 +3251,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -3114,8 +3276,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -3133,16 +3295,16 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 2
         m_ControlPoints:
-        - Start: {x: 20.057226, y: 0, z: -0.038204193}
+        - Start: {x: 9.952101, y: 0, z: 0.23539114}
           End: {x: 0, y: 0, z: 0}
           T: 0
-        - Start: {x: 20.057226, y: 0, z: -0.038204193}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 9.952101, y: 0, z: 0.23539114}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 20.060995, y: 0, z: -9.843546}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 20.156284, y: 0, z: 0.3698182}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 20.060995, y: 0, z: -9.843546}
+        - Start: {x: 20.156284, y: 0, z: 0.3698182}
           End: {x: 0, y: 0, z: 0}
           T: 0
         m_IsInside: 1
@@ -3225,8 +3387,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -3250,8 +3412,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -3269,16 +3431,16 @@ MonoBehaviour:
       - m_IsDirty: 0
         m_ID: 3
         m_ControlPoints:
-        - Start: {x: 20.060995, y: 0, z: -9.843546}
+        - Start: {x: 20.156284, y: 0, z: 0.3698182}
           End: {x: 0, y: 0, z: 0}
           T: 0
-        - Start: {x: 20.060995, y: 0, z: -9.843546}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 20.156284, y: 0, z: 0.3698182}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 10.0571785, y: 0, z: -9.893341}
-          End: {x: 15.0246315, y: 0, z: -4.937037}
+        - Start: {x: 19.877157, y: 0, z: -10.044608}
+          End: {x: 14.98327, y: 0, z: -4.838257}
           T: 0.2
-        - Start: {x: 10.0571785, y: 0, z: -9.893341}
+        - Start: {x: 19.877157, y: 0, z: -10.044608}
           End: {x: 0, y: 0, z: 0}
           T: 0
         m_IsInside: 1
@@ -3361,8 +3523,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -3386,8 +3548,8 @@ MonoBehaviour:
               m_Normal: {x: 0, y: 0, z: 1}
               m_Up: {x: 1, y: 0, z: 0}
               m_Depth: 1
-              m_Height: 1
-              m_Width: 1
+              m_Height: 0
+              m_Width: 0
               m_Position: {x: 0, y: 0, z: 0}
               m_ID: 0
               m_ActiveElements: -1
@@ -3413,20 +3575,20 @@ MonoBehaviour:
       m_OneLineShape: 4
       m_ShapeIndex: 0
       m_OneLine:
-      - {x: 9.990153, y: 0, z: -4.933199}
-      - {x: 20.05911, y: 0, z: -4.940875}
+      - {x: 14.912346, y: 0, z: -9.979118}
+      - {x: 15.054193, y: 0, z: 0.30260468}
       m_PathPoints:
-      - m_Position: {x: 10.0571785, y: 0, z: -9.893341}
-        m_Forward: {x: 0.49323803, y: 0, z: 0.50244313}
+      - m_Position: {x: 19.877157, y: 0, z: -10.044608}
+        m_Forward: {x: -0.4865603, y: 0, z: 0.50641537}
         m_Weight: 0
-      - m_Position: {x: 9.923128, y: 0, z: 0.026943207}
-        m_Forward: {x: 0.5067454, y: 0, z: -0.5031685}
+      - m_Position: {x: 9.947535, y: 0, z: -9.913628}
+        m_Forward: {x: 0.50018144, y: 0, z: 0.49340507}
         m_Weight: 0
-      - m_Position: {x: 20.057226, y: 0, z: -0.038204193}
-        m_Forward: {x: -0.49979746, y: 0, z: -0.49678573}
+      - m_Position: {x: 9.952101, y: 0, z: 0.23539114}
+        m_Forward: {x: 0.4997317, y: 0, z: -0.49341366}
         m_Weight: 0
-      - m_Position: {x: 20.060995, y: 0, z: -9.843546}
-        m_Forward: {x: -0.50018597, y: 0, z: 0.49751118}
+      - m_Position: {x: 20.156284, y: 0, z: 0.3698182}
+        m_Forward: {x: -0.5133528, y: 0, z: -0.5064068}
         m_Weight: 0
       m_GableData:
         wallIndices: 02000300

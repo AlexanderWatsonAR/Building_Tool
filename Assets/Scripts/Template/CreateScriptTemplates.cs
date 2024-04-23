@@ -9,7 +9,7 @@ using UnityEngine.Rendering.LookDev;
 public static class CreateScriptTemplates
 {
 
-    [MenuItem("Assets/Create/Code/MonoBehaviour", priority = 40)]
+    [MenuItem("Assets/Create/Code/Buildable Set", priority = 40)]
     public static void CreateMonoBehaviourMenuItem()
     {
         CreateEditorScriptEndNameEditAction create = ScriptableObject.CreateInstance<CreateEditorScriptEndNameEditAction>();
@@ -57,7 +57,7 @@ public static class CreateScriptTemplates
             WriteScriptFromTemplate(k_BuildableTemplatePath, k_BuildablesPath, name, "");
             WriteScriptFromTemplate(k_DataScriptablePropertiesPath, k_SerializedPropertiesPath, name, "DataSerializedProperties");
 
-            WriteScriptFromTemplate(k_DataPropDrawerTemplatePath, k_DrawerPath, name, "DataPropertyDrawer");
+            WriteScriptFromTemplate(k_DataPropDrawerTemplatePath, k_DrawerPath, name, "DataDrawer");
             WriteScriptFromTemplate(k_OverlayTemplatePath, k_OverlayPath, name, "Overlay");
             WriteScriptFromTemplate(k_EditorPropertiesPath, k_EditorPath, name, "Editor");
 

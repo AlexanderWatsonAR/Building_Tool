@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [System.Serializable]
-public class #SCRIPTNAME#Data : IData
+public class #SCRIPTNAME#Data : DirtyData
 {
 
 }

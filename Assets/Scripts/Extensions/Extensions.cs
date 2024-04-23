@@ -9,6 +9,8 @@ using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
+using OnlyInvalid.ProcGenBuilding.Common;
+using OnlyInvalid.ProcGenBuilding.Polygon3D;
 
 public static class Extensions
 {
@@ -38,17 +40,17 @@ public static class Extensions
         return position;
     }
 
-    public static void BuildCollection(this IEnumerable<IBuildable> buildables)
+    public static void BuildCollection(this IEnumerable<Buildable> buildables)
     {
-        foreach (IBuildable buildable in buildables)
+        foreach (Buildable buildable in buildables)
         {
             buildable.Build();
         }
     }
 
-    public static void DemolishCollection(this IEnumerable<IBuildable> buildables)
+    public static void DemolishCollection(this IEnumerable<Buildable> buildables)
     {
-        foreach (IBuildable buildable in buildables)
+        foreach (Buildable buildable in buildables)
         {
             buildable.Demolish();
         }
