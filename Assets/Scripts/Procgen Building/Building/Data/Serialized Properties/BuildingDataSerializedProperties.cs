@@ -24,6 +24,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public BuildingDataSerializedProperties(SerializedProperty buildingData) : base(buildingData)
         {
+
             m_Roof = new RoofDataSerializedProperties(m_Data.FindPropertyRelative(k_Roof));
 
             SerializedProperty storeys = m_Data.FindPropertyRelative(k_Storeys);

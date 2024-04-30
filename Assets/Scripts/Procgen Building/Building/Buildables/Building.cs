@@ -13,84 +13,84 @@ namespace OnlyInvalid.ProcGenBuilding.Building
     [DisallowMultipleComponent]
     public class Building : Buildable
     {
-        [SerializeField] BuildingScriptableObject m_Container;
-        [SerializeField] BuildingData m_BuildingData;
+        [SerializeField] BuildingScriptableObject m_DataContainer;
 
         [SerializeField] bool m_IsPolyPathHandleSelected;
 
         [SerializeField] List<Storey.Storey> m_Storeys;
         [SerializeField] Roof.Roof m_Roof;
 
-        public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
-        public BuildingScriptableObject Container { get { return m_Container; } set { m_Container = value; } }
+        //public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
+        public BuildingScriptableObject Container { get { return m_DataContainer; } set { m_DataContainer = value; } }
+        public BuildingData BuildingData => m_DataContainer.Data;
 
-        private void OnEnable()
-        {
-            UnityEditor.EditorApplication.update = Update;
-        }
-        private void OnDisable()
-        {
-            UnityEditor.EditorApplication.update = null;
-        }
-        private void Update()
-        {
-            if (m_BuildingData == null)
-                return;
+        //private void OnEnable()
+        //{
+        //    UnityEditor.EditorApplication.update = Update;
+        //}
+        //private void OnDisable()
+        //{
+        //    UnityEditor.EditorApplication.update = null;
+        //}
+        //private void Update()
+        //{
+        //    if (m_DataContainer.Data == null)
+        //        return;
 
-            if (m_BuildingData.Path == null)
-                return;
+        //    if (m_DataContainer.Data.Path == null)
+        //        return;
 
-            if (m_BuildingData.Path.ControlPointCount == 0)
-                return;
+        //    if (m_DataContainer.Data.Path.ControlPointCount == 0)
+        //        return;
 
-            if (m_BuildingData.Path.PolyMode == PolyMode.Hide)
-                return;
+        //    if (m_DataContainer.Data.Path.PolyMode == PolyMode.Hide)
+        //        return;
 
-            if (GUIUtility.hotControl == 0 && m_IsPolyPathHandleSelected)
-            {
-                Rebuild();
-            }
+        //    if (GUIUtility.hotControl == 0 && m_IsPolyPathHandleSelected)
+        //    {
+        //        Rebuild();
+        //    }
 
-            m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_BuildingData.Path.ControlPointCount + 1 ? true : false;
-        }
+        //    m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_DataContainer.Data.Path.ControlPointCount + 1 ? true : false;
+        //}
 
         public override Buildable Initialize(DirtyData data)
         {
             base.Initialize(data);
-            m_BuildingData = data as BuildingData;
+            m_DataContainer.Data = data as BuildingData;
 
             return this;
         }
 
-        private void Rebuild()
-        {
-            m_BuildingData.Roof = new RoofData() { ControlPoints = m_BuildingData.Path.ControlPoints.ToArray() };
+        //private void Rebuild()
+        //{
+        //    m_DataContainer.Data.Roof = new RoofData() { ControlPoints = m_DataContainer.Data.Path.ControlPoints.ToArray() };
 
-            int count = m_BuildingData.Storeys.Count;
+        //    int count = m_DataContainer.Data.Storeys.Count;
 
-            m_BuildingData.Storeys = new List<StoreyData>(count);
+        //    m_DataContainer.Data.Storeys = new List<StoreyData>(count);
 
-            for (int i = 0; i < count; i++)
-            {
-                StoreyData storey = new StoreyData() { ControlPoints = m_BuildingData.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
-                m_BuildingData.Storeys.Add(storey);
-            }
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        StoreyData storey = new StoreyData() { ControlPoints = m_DataContainer.Data.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
+        //        m_DataContainer.Data.Storeys.Add(storey);
+        //    }
 
-            Build();
-        }
+        //    Build();
+        //}
 
         public override void Build()
         {
             Demolish();
 
-            if (!m_BuildingData.Path.IsPathValid)
+            if (!m_DataContainer.Data.Path.IsPathValid)
                 return;
 
             Vector3 pos = Vector3.zero;
 
-            for (int i = 0; i < m_BuildingData.Storeys.Count; i++)
+            for (int i = 0; i < m_DataContainer.Data.Storeys.Count; i++)
             {
-                Storey.Storey storey = CreateStorey(m_BuildingData.Storeys[i]);
+                Storey.Storey storey = CreateStorey(m_DataContainer.Data.Storeys[i]);
                 storey.transform.SetParent(transform, false);
                 storey.transform.localPosition = pos;
                 storey.Data.IsDirty = true;
@@ -104,7 +104,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             GameObject roofGO = new GameObject("Roof");
             roofGO.transform.SetParent(transform, false);
             roofGO.transform.localPosition = pos;
-            roofGO.AddComponent<Roof.Roof>().Initialize(m_BuildingData.Roof).Build();
+            roofGO.AddComponent<Roof.Roof>().Initialize(m_DataContainer.Data.Roof).Build();
         }
 
         private Storey.Storey CreateStorey(StoreyData data)
@@ -118,12 +118,12 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public void AddStorey(string name)
         {
-            m_BuildingData.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_BuildingData.Path.ControlPoints.ToArray() });
+            m_DataContainer.Data.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_DataContainer.Data.Path.ControlPoints.ToArray() });
         }
 
         public void InitializeRoof()
         {
-            m_BuildingData.Roof.ControlPoints = m_BuildingData.Path.ControlPoints.ToArray();
+            m_DataContainer.Data.Roof.ControlPoints = m_DataContainer.Data.Path.ControlPoints.ToArray();
         }
 
         public void BuildStorey(int index)

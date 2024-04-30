@@ -13,13 +13,13 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 {
     public class BuildingScriptableObject : ScriptableObject
     {
-        [SerializeField] BuildingData m_Data;
+        [SerializeField] BuildingData m_BuildingData;
 
-        public BuildingData Data { get { return m_Data; } set { m_Data = value; } }
+        public BuildingData Data { get { return m_BuildingData; } set { m_BuildingData = value; } }
 
         public BuildingScriptableObject()
         {
-            m_Data = new BuildingData();
+            m_BuildingData = new BuildingData();
         }
     }
 }

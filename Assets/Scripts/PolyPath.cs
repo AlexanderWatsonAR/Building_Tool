@@ -8,6 +8,7 @@ using UnityEngine.ProBuilder;
 using System;
 using UnityEngine.Rendering;
 using System.Drawing;
+using UnityEngine.Events;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -23,8 +24,8 @@ public class PolyPath
 
     public bool IsPathValid => m_IsPathValid;
 
-    public event Action<List<ControlPoint>> OnControlPointsChanged;
-    public event Action<PolyMode> OnPolyModeChanged;
+    public UnityEvent<List<ControlPoint>> OnControlPointsChanged = new UnityEvent<List<ControlPoint>>();
+    public UnityEvent<PolyMode> OnPolyModeChanged = new UnityEvent<PolyMode>();
 
     public PolyPath(bool isClosedLoop = true)
     {
