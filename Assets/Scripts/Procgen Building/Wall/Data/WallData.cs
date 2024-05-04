@@ -58,7 +58,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         public WallSectionData[] Sections { get { return m_Sections; } set { m_Sections = value; } }
         #endregion
 
-        public WallData() : this(null, null, Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1], null)
+        public WallData() : this(new ControlPoint(), new ControlPoint(), Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1], null)
         {
 
         }
@@ -84,7 +84,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             WallData clone = MemberwiseClone() as WallData;
 
-            return Clone();
+            return clone;
         }
     }
 }

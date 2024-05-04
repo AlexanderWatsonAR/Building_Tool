@@ -6,44 +6,79 @@ using UnityEditor.EditorTools;
 using HandleUtil = UnityEditor.HandleUtility;
 using OnlyInvalid.ProcGenBuilding.Building;
 using System.Linq;
-
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using System;
 
 [EditorTool("Draw Path", typeof(IDrawable))]
 [Icon("Packages/com.unity.probuilder/Content/Icons/Tools/PolyShape/CreatePolyShape.png")]
+[ExecuteAlways]
 public class DrawTool : EditorTool
 {
-    public static DrawState DrawState;
-
+    static DrawState m_DrawState;
     static MouseCursor m_Cursor;
     static IDrawable m_Drawable;
+    static bool m_IsHandleHeld;
+    static int m_SelectedHandle = -1;
+    static Vector3 m_StartPos, m_EndPos;
 
     Vector3 m_MousePosition;
     Color m_Valid = Color.green;
     Color m_Invalid = Color.red;
-    // Vector3[] m_GlobalControlPointPositions;
 
-    //[SerializeField] bool m_IsValidPolygon;
-    //[SerializeField] bool m_IsAHandleSelected;
-    //[SerializeField] int m_SelectedHandle = -1;
+    #region Events
+    public static UnityEvent<DrawState> OnStateChange = new UnityEvent<DrawState>();
+    public static UnityEvent<Vector3> OnHeldStart = new UnityEvent<Vector3>();
+    public static UnityEvent<Vector3> OnHeld = new UnityEvent<Vector3>();
+    public static UnityEvent<Vector3> OnHeldEnd = new UnityEvent<Vector3>();
+    public static UnityEvent OnDragged = new UnityEvent();
+    public static UnityEvent<int> OnHandleSelected = new UnityEvent<int>();
+    #endregion
 
-    public static void Activate(DrawState drawState)
-    {
-        if (Selection.activeGameObject.TryGetComponent(out IDrawable drawable))
-        {
-            ToolManager.SetActiveTool<DrawTool>();
-            DrawState = drawState;
-            m_Drawable = drawable;
-        }
-    }
+    #region Accessors
+    public static DrawState DrawState { set { m_DrawState = value; OnStateChange.Invoke(m_DrawState); } }
+    public static int SelectedHandle => m_SelectedHandle - 1;
+    #endregion
 
     public override void OnActivated()
     {
+        OnHeldStart.AddListener((startPos) => { m_StartPos = startPos; });
+        OnHeldEnd.AddListener((endPos) =>
+        {
+            m_EndPos = endPos;
+
+            if (m_StartPos != m_EndPos)
+                OnDragged.Invoke();
+        
+        });
+        //OnStateChange.AddListener(m_DrawState => BuildingEditor.DisplayMessages(m_DrawState));
+
         m_Cursor = MouseCursor.ArrowPlus;
+        m_Drawable = target as IDrawable;
+        m_IsHandleHeld = false;
+        m_SelectedHandle = -1;
+
+        switch(m_DrawState)
+        {
+            case DrawState.Hide:
+                DrawState = DrawState.Edit;
+                break;
+        }
     }
 
     public override void OnWillBeDeactivated()
     {
         m_Cursor = MouseCursor.Arrow;
+        m_Drawable = null;
+        DrawState = DrawState.Hide;
+        m_IsHandleHeld = false;
+        m_SelectedHandle = -1;
+
+        OnHeldStart.RemoveAllListeners();
+        OnHeld.RemoveAllListeners();
+        OnHeldEnd.RemoveAllListeners();
+        OnDragged.RemoveAllListeners();
+        OnStateChange.RemoveAllListeners();
     }
 
     public override void OnToolGUI(EditorWindow window)
@@ -62,12 +97,11 @@ public class DrawTool : EditorTool
         Input();
         Draw();
         Edit();
-
     }
 
     void Input()
     {
-        if (DrawState != DrawState.Draw)
+        if (m_DrawState != DrawState.Draw)
             return;
 
         Event currentEvent = Event.current;
@@ -116,16 +150,18 @@ public class DrawTool : EditorTool
         if (currentEvent.type == EventType.MouseMove)
             SceneView.RepaintAll();
     }
-
     void Draw()
     {
-        if (m_Drawable.Path.PathPointsCount == 0 || DrawState != DrawState.Draw)
+        if (m_Drawable == null)
+            return;
+
+        if (m_Drawable.Path.PathPointsCount == 0 || m_DrawState != DrawState.Draw)
             return;
 
         DrawHandles();
         ConnectTheDots();
 
-        if (DrawState == DrawState.Draw)
+        if (m_DrawState == DrawState.Draw)
         {
             Vector3[] globalPositions = m_Drawable.Path.Positions;
             Handles.color = m_Drawable.Path.IsPathValid ? m_Valid : m_Invalid;
@@ -133,10 +169,12 @@ public class DrawTool : EditorTool
             Handles.color = Color.white;
         }
     }
-
     void Edit()
     {
-        if (DrawState != DrawState.Edit || m_Drawable.Path.PathPointsCount == 0)
+        if (m_Drawable == null)
+            return;
+
+        if (m_DrawState != DrawState.Edit || m_Drawable.Path.PathPointsCount == 0)
             return;
 
         Handles.color = m_Drawable.Path.IsPathValid ? Color.white : m_Invalid;
@@ -144,15 +182,14 @@ public class DrawTool : EditorTool
         DrawHandles();
         ConnectTheDots();
 
-        if (m_Drawable.Path.PathPointsCount >= 3 && DrawState != DrawState.Draw)
+        if (m_Drawable.Path.PathPointsCount >= 3 && m_DrawState != DrawState.Draw)
         {
             Vector3[] globalPositions = m_Drawable.Path.Positions;
             Handles.DrawAAPolyLine(globalPositions[0], globalPositions[^1]);
         }
 
     }
-
-    private void DrawHandles()
+    void DrawHandles()
     {
         Vector3[] globalPositions = m_Drawable.Path.Positions;
 
@@ -160,7 +197,12 @@ public class DrawTool : EditorTool
         {
             float size = HandleUtil.GetHandleSize(m_Drawable.Path.GetPositionAt(i)) * 0.05f;
 
-            Vector3 globalPoint = Handles.FreeMoveHandle(i + 1, globalPositions[i], size, Vector3.up, BuildingHandles.SolidCircleHandleCap);
+            Color handleColour = Handles.color;
+            Handles.color = m_SelectedHandle == i + 1 ? Color.yellow : handleColour;
+
+            Vector3 globalPoint = Handles.FreeMoveHandle(i + 1, globalPositions[i], size, m_Drawable.Path.Normal, BuildingHandles.SolidCircleHandleCap);
+
+            Handles.color = handleColour;
 
             // How we detect if the control point has changed.
             if (globalPoint != m_Drawable.Path.GetPositionAt(i))
@@ -175,35 +217,55 @@ public class DrawTool : EditorTool
                 }
 
             }
-
-            //// Highlight the first control point. The first point is important for shape recognition.
-            //if (i == 0)
-            //{
-            //    handleColour = Handles.color;
-            //    Handles.color = Color.blue;
-            //    Handles.DrawWireDisc(globalPoint, Vector3.up, size * 1.5f, 5f);
-            //    Handles.color = handleColour;
-            //}
         }
-
-        //if (GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_GlobalControlPointPositions.Length + 1)
-        //{
-        //    m_SelectedHandle = GUIUtility.hotControl;
-        //}
-
     }
-    private void ConnectTheDots()
+    void ConnectTheDots()
     {
         Handles.DrawAAPolyLine(m_Drawable.Path.Positions);
     }
-
     void OnEnable()
     {
+        EditorApplication.update += CheckHandlesHeld;
     }
-
     void OnDisable()
     {
-        m_Drawable = null;
+        EditorApplication.update -= CheckHandlesHeld;
     }
+    void CheckHandlesHeld()
+    {
+        if (m_DrawState != DrawState.Edit)
+            return;
 
+        if (m_Drawable == null)
+            return;
+
+        Vector3[] globalPositions = m_Drawable.Path.Positions;
+
+        if (GUIUtility.hotControl == 0 && m_IsHandleHeld)
+        {
+            Vector3 selectedHandlePos = globalPositions[m_SelectedHandle - 1];
+            OnHeldEnd.Invoke(selectedHandlePos);
+        }
+
+        if (GUIUtility.hotControl > 0 && GUIUtility.hotControl < globalPositions.Length + 1)
+        {
+            if (!m_IsHandleHeld)
+            { 
+                OnHeldStart.Invoke(globalPositions[GUIUtility.hotControl - 1]);
+                m_IsHandleHeld = true;
+            }
+
+            m_SelectedHandle = GUIUtility.hotControl;
+            OnHeld.Invoke(globalPositions[m_SelectedHandle-1]);
+        }
+        else
+        {
+            m_IsHandleHeld = false;
+        }
+
+        //if (GUIUtility.hotControl != m_SelectedHandle && m_IsHandleHeld)
+        //{
+        //    OnHandleSelected.Invoke(m_SelectedHandle-1);
+        //}
+    }
 }

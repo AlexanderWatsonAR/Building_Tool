@@ -7,18 +7,26 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using HandleUtil = UnityEditor.HandleUtility;
 using UnityEngine.Events;
+using System.Linq;
 
 [System.Serializable]
 public class PlanarPath
 {
+    #region Members
     // The stored positions should use global coords.
-    [SerializeField] protected List<ControlPosition> m_ControlPoints;
+    [SerializeField] protected List<ControlPoint> m_ControlPoints;
     [SerializeField] protected Plane m_Plane;
     [SerializeField] protected float m_MinPointDistance;
     [SerializeField] protected bool m_IsPathValid;
+    #endregion
 
+    #region Events
     public UnityEvent OnPointAdded = new UnityEvent();
+    public UnityEvent OnPointRemoved = new UnityEvent();
+    public UnityEvent OnPointMoved = new UnityEvent();
+    #endregion
 
+    #region Accessors
     public Plane Plane => m_Plane;
     public bool IsPathValid => m_IsPathValid;
     public int PathPointsCount => m_ControlPoints.Count;
@@ -27,7 +35,7 @@ public class PlanarPath
         get
         {
             Vector3 centroid = Vector3.zero;
-            foreach (ControlPosition pos in m_ControlPoints)
+            foreach (ControlPoint pos in m_ControlPoints)
             {
                 centroid += pos.Position;
             }
@@ -47,23 +55,31 @@ public class PlanarPath
             return positions;
         }
     }
+    public ControlPoint[] ControlPoints => m_ControlPoints.ToArray();
     public Vector3 Normal => m_Plane.normal;
     public float MinimumPointDistance => m_MinPointDistance;
+    #endregion
 
+    #region Constructors
+    public PlanarPath(Vector3 planeNormal, float minimumPointDistance = 1) : this (new Plane(planeNormal, 0), minimumPointDistance)
+    {
+
+    }
     public PlanarPath(Plane plane, float minimumPointDistance = 1)
     {
         m_Plane = plane;
-        m_ControlPoints = new List<ControlPosition>();
+        m_ControlPoints = new List<ControlPoint>();
         m_MinPointDistance = minimumPointDistance;
         m_IsPathValid = true;
     }
-    public PlanarPath(List<ControlPosition> controlPoints, Plane plane, float minimumPointDistance = 1)
+    public PlanarPath(List<ControlPoint> controlPoints, Plane plane, float minimumPointDistance = 1)
     {
         m_ControlPoints = controlPoints;
         m_Plane = plane;
         m_MinPointDistance = minimumPointDistance;
         m_IsPathValid = true;
     }
+    #endregion
 
     /// <summary>
     /// Will return false if the point is invalid
@@ -75,7 +91,7 @@ public class PlanarPath
         if (!CanPointBeAdded(point))
             return false;
 
-        m_ControlPoints.Add(new ControlPosition(point));
+        m_ControlPoints.Add(new ControlPoint(point));
         OnPointAdded.Invoke();
         return true;
     }
@@ -90,20 +106,18 @@ public class PlanarPath
         if (!CanPointBeInserted(point, index))
             return false;
 
-        m_ControlPoints.Insert(index, new ControlPosition(point));
+        m_ControlPoints.Insert(index, new ControlPoint(point));
         return true;
     }
-
     public void RemovePointAt(int index)
     {
         m_ControlPoints.RemoveAt(index);
+        OnPointRemoved.Invoke();
     }
-
     public void RemoveLastPoint()
     {
-        m_ControlPoints.RemoveAt(PathPointsCount - 1);
+        RemovePointAt(PathPointsCount - 1);
     }
-
     public virtual bool CanPointBeAdded(Vector3 point)
     {
         if (!IsPointOnPlane(point))
@@ -126,7 +140,6 @@ public class PlanarPath
 
         return true;
     }
-
     public virtual bool CanPointBeInserted(Vector3 point, int index)
     {
         if (index < 0 || index > m_ControlPoints.Count)
@@ -149,7 +162,6 @@ public class PlanarPath
 
         return true;
     }
-
     public virtual bool CanPointBeUpdated(Vector3 point, int index)
     {
         int count = PathPointsCount;
@@ -165,6 +177,9 @@ public class PlanarPath
 
         for (int i = 0; i < count; i++)
         {
+            if (i == index)
+                continue;
+
             float dis = Vector3.Distance(point, GetPositionAt(i));
 
             if (dis < m_MinPointDistance)
@@ -175,24 +190,24 @@ public class PlanarPath
 
         return true;
     }
-
     public bool IsPointOnPlane(Vector3 point)
     {
         float dotProduct = Vector3.Dot(m_Plane.normal, point);
         return Mathf.Approximately(dotProduct + m_Plane.distance, 0);
     }
-
     public void SetPositionAt(Vector3 position, int index, bool ignoreValidity = true)
     {
-        bool isPointValid = CanPointBeUpdated(position, index);
+        m_IsPathValid = CanPointBeUpdated(position, index);
 
-        if (!isPointValid && !ignoreValidity)
+        if (!m_IsPathValid && !ignoreValidity)
             return;
 
         if (ignoreValidity)
-            m_ControlPoints[index] = new ControlPosition(position);
+        {
+            m_ControlPoints[index] = new ControlPoint(position);
+            OnPointMoved.Invoke();
+        }
     }
-
     public Vector3 GetPositionAt(int index)
     {
         return m_ControlPoints[index].Position;
@@ -205,7 +220,6 @@ public class PlanarPath
     {
         return m_ControlPoints[0].Position;
     }
-
 }
 
 [System.Serializable]
@@ -214,7 +228,7 @@ public class LinePath : PlanarPath
     public LinePath(Plane plane, float minimumPointDistance) : base(plane, minimumPointDistance)
     {
     }
-    public LinePath(List<ControlPosition> controlPoints, Plane plane, float minimumPointDistance) : base(controlPoints, plane, minimumPointDistance)
+    public LinePath(List<ControlPoint> controlPoints, Plane plane, float minimumPointDistance) : base(controlPoints, plane, minimumPointDistance)
     {
 
     }
@@ -232,16 +246,30 @@ public class LinePath : PlanarPath
 [System.Serializable]
 public class PolygonPath : PlanarPath
 {
+    public PolygonPath(Vector3 normal, float minimumPointDistance = 1) : base (new Plane(normal, 0), minimumPointDistance) 
+    {
+
+    }
     public PolygonPath(Plane plane, float minimumPointDistance = 1) : base(plane, minimumPointDistance)
     {
 
     }
-
-    public PolygonPath(List<ControlPosition> controlPoints, Plane plane, float minimumPointDistance = 1) : base(controlPoints, plane, minimumPointDistance)
+    public PolygonPath(List<ControlPoint> controlPoints, Plane plane, float minimumPointDistance = 1) : base(controlPoints, plane, minimumPointDistance)
     {
 
     }
 
+}
+
+public class XZPolygonPath : PolygonPath
+{
+    public XZPolygonPath(float minimumPointDistance = 1) : base(Vector3.up, minimumPointDistance)
+    {
+    }
+    public XZPolygonPath(List<ControlPoint> controlPoints, float minimumPointDistance = 1) : base(controlPoints, new Plane(Vector3.up, 0), minimumPointDistance)
+    {
+
+    }
     public override bool CanPointBeAdded(Vector3 point)
     {
         int count = PathPointsCount;
@@ -281,8 +309,8 @@ public class PolygonPath : PlanarPath
         {
             int next = (i + 1) % count;
 
-            if (Extensions.DoLinesIntersect(line1Start : GetLastPosition(),
-                line1End : point, line2Start : GetPositionAt(i),
+            if (Extensions.DoLinesIntersect(line1Start: GetLastPosition(),
+                line1End: point, line2Start: GetPositionAt(i),
                 line2End: GetPositionAt(next),
                 out Vector3 intersection, false))
             {
@@ -295,11 +323,11 @@ public class PolygonPath : PlanarPath
 
         return true;
     }
-
     public override bool CanPointBeUpdated(Vector3 point, int index)
     {
         if (!base.CanPointBeUpdated(point, index))
             return false;
+
 
         int count = PathPointsCount;
 
@@ -334,6 +362,8 @@ public class PolygonPath : PlanarPath
             // I.E. it can only be between 2 other/different points.
             Vector3 intersection;
 
+            // Here we are assuming the intersection is happening on the XZ plane.
+
             if (Extensions.DoLinesIntersect(GetPositionAt(previousIndex), GetPositionAt(index), GetPositionAt(i), GetPositionAt(next), out intersection, false))
             {
                 if (intersection != GetPositionAt(previousIndex) && intersection != point)
@@ -349,7 +379,6 @@ public class PolygonPath : PlanarPath
 
         return true;
     }
-
     public bool CheckPath()
     {
         int count = PathPointsCount;
@@ -359,11 +388,10 @@ public class PolygonPath : PlanarPath
 
         if (count < 3) // Minimum number of points to form a polygon is 3.
         {
-            m_IsPathValid = false;
-            return m_IsPathValid;
+            return false;
         }
 
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             if (!IsPointOnPlane(GetPositionAt(i)))
                 return false;
@@ -378,8 +406,7 @@ public class PolygonPath : PlanarPath
 
                 if (Vector3.Distance(GetPositionAt(i), GetPositionAt(j)) <= m_MinPointDistance)
                 {
-                    m_IsPathValid = false;
-                    return m_IsPathValid;
+                    return false;
                 }
             }
         }
@@ -398,10 +425,9 @@ public class PolygonPath : PlanarPath
 
                 float distanceFromLine = HandleUtil.DistancePointLine(GetPositionAt(i), GetPositionAt(j), GetPositionAt(next));
 
-                if (distanceFromLine <= 1)
+                if (distanceFromLine <= m_MinPointDistance)
                 {
-                    m_IsPathValid = false;
-                    return m_IsPathValid;
+                    return false;
                 }
 
             }
@@ -412,7 +438,7 @@ public class PolygonPath : PlanarPath
             for (int j = 0; j < count; j++)
             {
                 int previous = i == 0 ? count - 1 : i - 1;
-                int next = (i + 1) & count;
+                int next = (i + 1) % count;
 
                 Vector3 line1Start = GetPositionAt(previous);
                 Vector3 line1End = GetPositionAt(i);
@@ -431,54 +457,42 @@ public class PolygonPath : PlanarPath
                         continue;
                     }
 
-                    m_IsPathValid = false;
-                    return m_IsPathValid;
+                    return false;
                 }
 
             }
         }
 
-        return m_IsPathValid;
+        return true;
     }
-
-    bool IsClockwise() //This may not work if there are self-intersecting points
+    public bool IsClockwise()
     {
-        Vector3 centre = Average;
-        Vector3 normal = Normal;
         Vector3[] points = Positions;
+        int length = points.Length;
 
-        // Calculate signed area
-        float signedArea = 0f;
-        for (int i = 0; i < points.Length; i++)
+        float sum = 0f;
+
+        for (int i = 0; i < length; i++)
         {
             Vector3 current = points[i];
-            Vector3 next = points[(i + 1) % points.Length];
-            Vector3 currentToCentroid = centre - current;
-            Vector3 nextToCentroid = centre - next;
+            Vector3 next = points[(i + 1) % length]; // To handle the wrap-around for the last vertex
+            Vector3 previous = points[(i - 1 + length) % length]; // To handle the wrap-around for the first vertex
 
-            Vector3 cross = Vector3.Cross(currentToCentroid, nextToCentroid);
-            float dot = Vector3.Dot(cross, normal);
-            signedArea += dot;
+            Vector3 edge1 = next - current;
+            Vector3 edge2 = previous - current;
+
+            sum += Vector3.Cross(edge1, edge2).y; // We use .y since we're on the XZ plane
         }
 
-        return signedArea < 0;
+        return sum > 0f;
     }
-
+    public bool IsPointInside(Vector3 point)
+    {
+        return Positions.IsPointInsidePolygon(point);
+    }
 }
 
 public enum DrawState
 {
     Hide, Draw, Edit
-}
-
-public struct ControlPosition
-{
-    Vector3 m_Position;
-
-    public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
-
-    public ControlPosition(Vector3 position)
-    {
-        m_Position = position;
-    }
 }

@@ -75,7 +75,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             Vector3 offset = new Vector3(50, 50);
 
-            for (int i = 0; i < buildingData.Path.ControlPointCount; i++)
+            for (int i = 0; i < buildingData.Path.PathPointsCount; i++)
             {
                 CircleVisualElement controlPoint = new CircleVisualElement()
                 {

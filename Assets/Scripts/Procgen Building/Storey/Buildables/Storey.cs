@@ -268,11 +268,11 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
                 if (conditionA)
                 {
-                    end.SetForward(-wallForward);
+                    end.Forward = (-wallForward);
                 }
                 if (conditionB)
                 {
-                    start.SetForward(-wallForward);
+                    start.Forward = (-wallForward);
                 }
             }
 

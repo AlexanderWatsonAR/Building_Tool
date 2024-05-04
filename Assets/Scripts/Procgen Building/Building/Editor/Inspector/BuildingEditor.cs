@@ -5,17 +5,18 @@ using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Unity.VisualScripting;
+using UnityEditor.EditorTools;
 
 namespace OnlyInvalid.ProcGenBuilding.Building
 {
     [CustomEditor(typeof(Building))]
     public class BuildingEditor : Editor
     {
-        Building m_Building;
-        BuildingDataSerializedProperties m_Props;
+        static Building m_Building;
+        static BuildingDataSerializedProperties m_Props;
+        static VisualElement m_Root;
 
-        VisualElement m_Root;
-        [SerializeField] int m_SelectedHandle = -1;
+        SerializedProperty m_Container, m_Data;
 
         public override VisualElement CreateInspectorGUI()
         {
@@ -47,32 +48,33 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             return m_Root;
         }
 
-        private void DisplayMessages(PolyMode polyMode)
+        public static void DisplayMessages(DrawState state)
         {
             m_Root.Clear();
 
-            switch (polyMode)
+            switch (state)
             {
-                case PolyMode.Draw:
+                case DrawState.Draw:
                     {
                         m_Root.Add(new HelpBox("Click to draw points", HelpBoxMessageType.Info));
                     }
                     break;
-                case PolyMode.Edit:
+                case DrawState.Edit:
                     {
                         BuildingData buildingData = m_Building.Data as BuildingData;
                         Button quit_btn = new Button(() =>
                         {
                             SceneView.RepaintAll();
-                            DisplayMessages(buildingData.Path.PolyMode);
+                            ToolManager.RestorePreviousPersistentTool();
+                            DisplayMessages(DrawState.Hide);
                         });
                         quit_btn.text = "Quit Edit";
 
                         Button remove_btn = new Button(() =>
                         {
-                            buildingData.Path.RemoveControlPointAt(m_SelectedHandle - 1);
+                            buildingData.Path.RemovePointAt(DrawTool.SelectedHandle);
 
-                            if (buildingData.Path.IsValidPath())
+                            if (buildingData.Path.CheckPath())
                             {
                                 m_Building.Build();
                             }
@@ -80,14 +82,14 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                             SceneView.RepaintAll();
                         });
                         remove_btn.text = "Remove Point";
-                        remove_btn.SetEnabled(m_SelectedHandle == -1);
+                        remove_btn.SetEnabled(DrawTool.SelectedHandle < 0);
 
                         m_Root.Add(quit_btn);
                         m_Root.Add(remove_btn);
                         m_Root.Add(new HelpBox("Move points to update the building's shape", HelpBoxMessageType.Info));
                     }
                     break;
-                case PolyMode.Hide:
+                case DrawState.Hide:
                     {
                         //SerializedProperty container = serializedObject.FindProperty("m_Container");
                         //PropertyField containerField = new PropertyField(container);
@@ -105,7 +107,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
                         Button edit_btn = new Button(() =>
                         {
-                            //m_Path.PolyMode = PolyMode.Edit;
+                            ToolManager.SetActiveTool<DrawTool>();
+                            DrawTool.OnStateChange.AddListener((drawState) => DisplayMessages(drawState));
                             SceneView.RepaintAll();
                         });
                         edit_btn.text = "Edit Building Path";
@@ -133,14 +136,12 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         {
             m_Building = target as Building;
 
-            SerializedProperty container = serializedObject.FindProperty("m_DataContainer");
-            SerializedProperty data = container.FindPropertyRelative("m_BuildingData");
-            m_Props = new BuildingDataSerializedProperties(data);
-            m_Building.BuildingData.Path.OnPolyModeChanged.AddListener(DisplayMessages);
+            m_Container = serializedObject.FindProperty("m_DataContainer");
+            m_Data = m_Container.FindPropertyRelative("m_BuildingData");
+            m_Props = new BuildingDataSerializedProperties(m_Data);
         }
         private void OnDisable()
         {
-            m_Building.BuildingData.Path.OnPolyModeChanged.RemoveListener(DisplayMessages);
         }
 
     }
