@@ -59,6 +59,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public override VisualElement CreateInspectorGUI()
         {
+            return base.CreateInspectorGUI();
+
             VisualElement root = new VisualElement();
 
             serializedObject.Update();
@@ -67,11 +69,11 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             m_Props = new BuildingDataSerializedProperties(data);
 
-            Label numberOfStoreys = new Label("Storey Count: " + m_Props.Storeys.Count);
+            Label numberOfStoreys = new Label("Storey Count: " + m_Props.Storeys.Storeys.Count);
 
             root.Add(numberOfStoreys);
 
-            foreach (var storey in m_Props.Storeys)
+            foreach (var storey in m_Props.Storeys.Storeys)
             {
                 Foldout storeyFoldout = new Foldout() { text = "Storey " + storey.ID.intValue };
                 storeyFoldout.Add(new Label("Name: " + storey.Name.stringValue));

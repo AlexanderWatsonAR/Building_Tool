@@ -29,6 +29,7 @@ public class PolyBuildingEditorWindow : EditorWindow
                 buildingMesh.AddComponent<Building>();
                 Building building = buildingMesh.GetComponent<Building>();
                 building.Initialize(new BuildingData());
+                building.AddStorey("Ground");
                 Selection.activeGameObject = building.gameObject;
 
                 EditorApplication.delayCall += () =>

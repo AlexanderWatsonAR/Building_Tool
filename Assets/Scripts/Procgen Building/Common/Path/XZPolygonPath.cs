@@ -5,6 +5,7 @@ using HandleUtil = UnityEditor.HandleUtility;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
+    [System.Serializable]
     public class XZPolygonPath : PolygonPath
     {
         public XZPolygonPath(float minimumPointDistance = 1) : base(Vector3.up, minimumPointDistance)
@@ -14,6 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
 
         }
+
         public override bool CanPointBeAdded(Vector3 point)
         {
             int count = PathPointsCount;
@@ -105,8 +107,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 // the indexed point can be intersecting a line of which it is a part of.
                 // I.E. it can only be between 2 other/different points.
                 Vector3 intersection;
-
-                // Here we are assuming the intersection is happening on the XZ plane.
 
                 if (Extensions.DoLinesIntersect(GetPositionAt(previousIndex), GetPositionAt(index), GetPositionAt(i), GetPositionAt(next), out intersection, false))
                 {
@@ -233,6 +233,34 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public bool IsPointInside(Vector3 point)
         {
             return Positions.IsPointInsidePolygon(point);
+        }
+
+        public void CalculateForwards()
+        {
+            m_IsPathValid = CheckPath();
+
+            Vector3[] points = Positions;
+
+            for (int i = 0; i < m_ControlPoints.Count; i++)
+            {
+                int previousPoint = points.GetPreviousControlPoint(i);
+                int nextPoint = points.GetNextControlPoint(i);
+
+                Vector3 nextForward = Vector3Extensions.DirectionToTarget(points[i], points[nextPoint]);
+                Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i], points[previousPoint]);
+                Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
+
+                Vector3 v = points[i] + inbetweenForward;
+
+                if (!points.IsPointInsidePolygon(v))
+                {
+                    inbetweenForward = -inbetweenForward;
+                }
+
+                ControlPoint a = m_ControlPoints[i];
+                a.Forward = inbetweenForward;
+                m_ControlPoints[i] = a;
+            }
         }
     }
 }

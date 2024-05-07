@@ -5,7 +5,8 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
     [Overlay(typeof(SceneView), nameof(Wall), true)]
-    public class WallOverlay : DataOverlay
+    public class WallsOverlay : DataOverlay
     {
     }
 }
+
