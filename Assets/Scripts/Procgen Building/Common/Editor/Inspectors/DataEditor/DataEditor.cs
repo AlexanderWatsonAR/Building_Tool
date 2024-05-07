@@ -37,12 +37,12 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         private void OnEnable()
         {
-            EditorApplication.update = Build;
+            EditorApplication.update += Build;
         }
 
         private void OnDisable()
         {
-            EditorApplication.update = null;
+            EditorApplication.update -= Build;
         }
 
         private void Build()

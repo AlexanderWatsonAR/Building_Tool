@@ -78,13 +78,13 @@ namespace OnlyInvalid.ProcGenBuilding.Floor
                 controlPoints[i] = new ControlPoint(m_Floor.Split[indices[i] - 1]);
             }
 
-            controlPoints[^1].SetForward(Vector3.Cross(controlPoints[^2].DirectionToTarget(controlPoints[^1]), Vector3.up));
+            controlPoints[^1].Forward = (Vector3.Cross(controlPoints[^2].DirectionToTarget(controlPoints[^1]), Vector3.up));
 
             for (int i = 0; i < controlPoints.Length - 1; i++)
             {
                 int next = i + 1;
 
-                controlPoints[i].SetForward(Vector3.Cross(controlPoints[i].DirectionToTarget(controlPoints[next]), Vector3.up));
+                controlPoints[i].Forward = (Vector3.Cross(controlPoints[i].DirectionToTarget(controlPoints[next]), Vector3.up));
             }
 
             return controlPoints;
@@ -409,7 +409,7 @@ namespace OnlyInvalid.ProcGenBuilding.Floor
                 //Quaternion handleRot = Quaternion.LookRotation(polygon[i].DirectionToTarget(sceneCamPos));
                 //BuildingHandles.TestSolidCircleHandleCap(controlID, polygon[i], handleRot, size, Event.current.type);
 
-                var fmh_409_71_638399062391782764 = Quaternion.identity; Vector3 handle = Handles.FreeMoveHandle(controlID, point, size, Vector3.up, BuildingHandles.TestSolidCircleHandleCap);
+                var fmh_409_71_638399062391782764 = Quaternion.identity; Vector3 handle = Handles.FreeMoveHandle(controlID, point, size, Vector3.up, BuildingHandles.SolidCircleHandleCap);
 
                 Handles.color = handleColour;
                 controlID++;

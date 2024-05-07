@@ -4,12 +4,13 @@ using UnityEngine.ProBuilder;
 using Unity.VisualScripting;
 using UnityEngine.UIElements;
 using OnlyInvalid.ProcGenBuilding.Building;
-
+using OnlyInvalid.ProcGenBuilding.Common;
+using ToolManager = UnityEditor.EditorTools.ToolManager;
 
 public class PolyBuildingEditorWindow : EditorWindow
 {
     Building m_ActiveBuilding;
-    private bool m_IsActiveGameObjectABuilding;
+    bool m_IsActiveGameObjectABuilding;
 
     [MenuItem("Tools/PolyBuilding Window")]
     public static void ShowWindow()
@@ -27,28 +28,30 @@ public class PolyBuildingEditorWindow : EditorWindow
                 buildingMesh.name = "Poly Building";
                 buildingMesh.AddComponent<Building>();
                 Building building = buildingMesh.GetComponent<Building>();
-                building.Container = ScriptableObject.CreateInstance<BuildingScriptableObject>();
-                building.Initialize(building.Container.Data);
-                BuildingData data = building.Data as BuildingData;
-                data.Path.PolyMode = PolyMode.Draw;
+                building.Initialize(new BuildingData());
                 Selection.activeGameObject = building.gameObject;
+
+                EditorApplication.delayCall += () =>
+                {
+                    ToolManager.SetActiveTool<PolygonDrawTool>();
+                    DrawTool.DrawState = DrawState.Draw;
+                };
             }
         );
 
-       newPolyBuilding_btn.text = "New Poly Building";
+        newPolyBuilding_btn.text = "New Poly Building";
 
         Button save_btn = new Button
         (
             () =>
             {
-                AssetDatabase.CreateAsset(m_ActiveBuilding.Container, "Assets/Export/" + m_ActiveBuilding.name + ".asset");
+                AssetDatabase.CreateAsset(m_ActiveBuilding.DataAccessor, "Assets/Export/" + m_ActiveBuilding.name + ".asset");
             }
-        )
-        { text = "Save Building"};
-       
+        ){ text = "Save Building"};
 
-       rootVisualElement.Add(newPolyBuilding_btn);
-       rootVisualElement.Add(save_btn);
+
+        rootVisualElement.Add(newPolyBuilding_btn);
+        rootVisualElement.Add(save_btn);
     }
 
     private void OnSelectionChange()

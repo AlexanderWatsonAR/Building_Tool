@@ -163,9 +163,9 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
             ushort[] wallIndices = m_RoofData.GableData.indices[index].Reverse().ToArray();
 
             ControlPoint start = new ControlPoint(m_RoofData.PathPoints[wallIndices[0]]);
-            start.SetForward(Vector3.zero);
+            start.Forward = Vector3.zero;
             ControlPoint end = new ControlPoint(m_RoofData.PathPoints[wallIndices[^1]]);
-            end.SetForward(Vector3.zero);
+            end.Forward = Vector3.zero;
 
             //Vector3 dir = start.DirectionToTarget(end);
             //start += dir * 0.5f;

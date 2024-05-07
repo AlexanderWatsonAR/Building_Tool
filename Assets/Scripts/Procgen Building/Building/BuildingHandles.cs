@@ -32,7 +32,7 @@ public static class BuildingHandles
         }
     }
 
-    public static void TestSolidCircleHandleCap(int controlID, Vector3 position, Quaternion rotation, float size, EventType eventType)
+    public static void SolidCircleHandleCap(int controlID, Vector3 position, Quaternion rotation, float size, EventType eventType)
     {
         switch (eventType)
         {

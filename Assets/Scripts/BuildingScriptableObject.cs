@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 // I'm trying to think of building data as largely non game object specific.
 // I like the idea of just draw and dropping a serialized object (storing the building data)
 // onto a building and it constructing a building from that data.
@@ -13,13 +14,21 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 {
     public class BuildingScriptableObject : ScriptableObject
     {
-        [SerializeField] BuildingData m_Data;
+        [SerializeField] BuildingData m_BuildingData;
 
-        public BuildingData Data { get { return m_Data; } set { m_Data = value; } }
+        public BuildingData Data { get { return m_BuildingData; } set { m_BuildingData = value; } }
 
         public BuildingScriptableObject()
         {
-            m_Data = new BuildingData();
+            m_BuildingData = new BuildingData();
+        }
+
+        public static BuildingScriptableObject Create(BuildingData data)
+        {
+            BuildingScriptableObject buildingScriptableObject = CreateInstance<BuildingScriptableObject>();
+            buildingScriptableObject.Data = data;
+
+            return buildingScriptableObject;
         }
     }
 }

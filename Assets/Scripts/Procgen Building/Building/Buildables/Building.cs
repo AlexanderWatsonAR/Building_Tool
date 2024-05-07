@@ -9,88 +9,39 @@ using OnlyInvalid.ProcGenBuilding.Wall;
 
 namespace OnlyInvalid.ProcGenBuilding.Building
 {
-    [ExecuteAlways]
     [DisallowMultipleComponent]
-    public class Building : Buildable
+    public class Building : Buildable, IPolygon
     {
-        [SerializeField] BuildingScriptableObject m_Container;
+        [SerializeField] BuildingScriptableObject m_DataAccessor;
         [SerializeField] BuildingData m_BuildingData;
-
-        [SerializeField] bool m_IsPolyPathHandleSelected;
 
         [SerializeField] List<Storey.Storey> m_Storeys;
         [SerializeField] Roof.Roof m_Roof;
 
-        public bool IsPolyPathHandleSelected => m_IsPolyPathHandleSelected;
-        public BuildingScriptableObject Container { get { return m_Container; } set { m_Container = value; } }
-
-        private void OnEnable()
-        {
-            UnityEditor.EditorApplication.update = Update;
-        }
-        private void OnDisable()
-        {
-            UnityEditor.EditorApplication.update = null;
-        }
-        private void Update()
-        {
-            if (m_BuildingData == null)
-                return;
-
-            if (m_BuildingData.Path == null)
-                return;
-
-            if (m_BuildingData.Path.ControlPointCount == 0)
-                return;
-
-            if (m_BuildingData.Path.PolyMode == PolyMode.Hide)
-                return;
-
-            if (GUIUtility.hotControl == 0 && m_IsPolyPathHandleSelected)
-            {
-                Rebuild();
-            }
-
-            m_IsPolyPathHandleSelected = GUIUtility.hotControl > 0 && GUIUtility.hotControl < m_BuildingData.Path.ControlPointCount + 1 ? true : false;
-        }
+        public BuildingScriptableObject DataAccessor => m_DataAccessor;
+        public BuildingData BuildingData { get { return m_DataAccessor.Data; } set { m_BuildingData = value; m_DataAccessor.Data = value; } }
+        public PlanarPath Path => BuildingData.Path;
 
         public override Buildable Initialize(DirtyData data)
         {
             base.Initialize(data);
             m_BuildingData = data as BuildingData;
-
+            m_DataAccessor = BuildingScriptableObject.Create(m_BuildingData);
             return this;
-        }
-
-        private void Rebuild()
-        {
-            m_BuildingData.Roof = new RoofData() { ControlPoints = m_BuildingData.Path.ControlPoints.ToArray() };
-
-            int count = m_BuildingData.Storeys.Count;
-
-            m_BuildingData.Storeys = new List<StoreyData>(count);
-
-            for (int i = 0; i < count; i++)
-            {
-                StoreyData storey = new StoreyData() { ControlPoints = m_BuildingData.Path.ControlPoints.ToArray(), Name = "Storey " + i.ToString() };
-                m_BuildingData.Storeys.Add(storey);
-            }
-
-            Build();
         }
 
         public override void Build()
         {
             Demolish();
 
-            if (!m_BuildingData.Path.IsPathValid)
+            if (!m_DataAccessor.Data.Path.IsPathValid)
                 return;
 
             Vector3 pos = Vector3.zero;
 
-            for (int i = 0; i < m_BuildingData.Storeys.Count; i++)
+            for (int i = 0; i < m_DataAccessor.Data.Storeys.Count; i++)
             {
-                Storey.Storey storey = CreateStorey(m_BuildingData.Storeys[i]);
+                Storey.Storey storey = CreateStorey(m_DataAccessor.Data.Storeys[i]);
                 storey.transform.SetParent(transform, false);
                 storey.transform.localPosition = pos;
                 storey.Data.IsDirty = true;
@@ -98,13 +49,13 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
                 StoreyData storeyData = storey.Data as StoreyData;
                 WallData wallData = storeyData.WallData;
-                pos += (Vector3.up * wallData.Height);
+                pos += Vector3.up * wallData.Height;
             }
 
             GameObject roofGO = new GameObject("Roof");
             roofGO.transform.SetParent(transform, false);
             roofGO.transform.localPosition = pos;
-            roofGO.AddComponent<Roof.Roof>().Initialize(m_BuildingData.Roof).Build();
+            roofGO.AddComponent<Roof.Roof>().Initialize(m_DataAccessor.Data.Roof).Build();
         }
 
         private Storey.Storey CreateStorey(StoreyData data)
@@ -118,12 +69,12 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public void AddStorey(string name)
         {
-            m_BuildingData.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_BuildingData.Path.ControlPoints.ToArray() });
+            m_DataAccessor.Data.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_DataAccessor.Data.Path.ControlPoints });
         }
 
         public void InitializeRoof()
         {
-            m_BuildingData.Roof.ControlPoints = m_BuildingData.Path.ControlPoints.ToArray();
+            m_DataAccessor.Data.Roof.ControlPoints = m_DataAccessor.Data.Path.ControlPoints;
         }
 
         public void BuildStorey(int index)
