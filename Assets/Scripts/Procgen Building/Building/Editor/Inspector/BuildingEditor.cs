@@ -1,26 +1,28 @@
 using UnityEngine;
 using UnityEditor;
-
 using System.Linq;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Unity.VisualScripting;
 using UnityEditor.EditorTools;
+using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Building
 {
     [CustomEditor(typeof(Building))]
     public class BuildingEditor : Editor
     {
-        static Building m_Building;
-        static BuildingDataSerializedProperties m_Props;
-        static VisualElement m_Root;
+        Building m_Building;
+        BuildingDataSerializedProperties m_Props;
+        VisualElement m_Root;
 
         SerializedProperty m_Container, m_Data;
 
         public override VisualElement CreateInspectorGUI()
         {
-            m_Root = new VisualElement();
+            m_Root = new VisualElement() { name = nameof(Building) + "_Inspector"};
+
+            DisplayMessages(DrawState.Hide);
 
             VisualElement horizontalWrapper = new VisualElement()
             {
@@ -47,8 +49,26 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             return m_Root;
         }
-
-        public static void DisplayMessages(DrawState state)
+        private void ToolManager_activeToolChanged()
+        {
+            if(ToolManager.activeToolType == typeof(PolygonDrawTool))
+            {
+                DisplayMessages(DrawTool.DrawState);
+                DrawTool.OnStateChange.AddListener(DisplayMessages);
+                PolygonDrawTool.OnPolygonComplete.AddListener(Build);
+            }
+            else
+            {
+                m_Building.Path.OnPointAdded.RemoveListener(Build);
+            }
+        }
+        public void Build()
+        {
+            m_Building.AddStorey("Ground");
+            m_Building.InitializeRoof();
+            m_Building.Build();
+        }
+        private void DisplayMessages(DrawState state)
         {
             m_Root.Clear();
 
@@ -91,19 +111,16 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                     break;
                 case DrawState.Hide:
                     {
-                        //SerializedProperty container = serializedObject.FindProperty("m_Container");
-                        //PropertyField containerField = new PropertyField(container);
-                        //containerField.RegisterValueChangeCallback(evt =>
-                        //{
-                        //    BuildingScriptableObject so = evt.changedProperty.GetUnderlyingValue() as BuildingScriptableObject;
+                        PropertyField container = new PropertyField(m_Container);
+                        container.RegisterValueChangeCallback(evt =>
+                        {
+                            BuildingScriptableObject so = evt.changedProperty.GetUnderlyingValue() as BuildingScriptableObject;
 
-                        //    if (so == null)
-                        //        return;
+                            if (so == null)
+                                return;
 
-                        //    m_Data.SetUnderlyingValue(so.Data);
-                        //    Debug.Log("building data changed");
-
-                        //});
+                            m_Data.SetUnderlyingValue(so.Data);
+                        });
 
                         Button edit_btn = new Button(() =>
                         {
@@ -125,23 +142,25 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                         Foldout roofFoldout = new Foldout() { text = "Roof" };
                         roofFoldout.Add(roof);
 
+                        m_Root.Add(container);
                         m_Root.Add(storeys);
                         m_Root.Add(roofFoldout);
                     }
                     break;
             }
         }
-
         private void OnEnable()
         {
-            m_Building = target as Building;
+            ToolManager.activeToolChanged += ToolManager_activeToolChanged;
 
-            m_Container = serializedObject.FindProperty("m_DataContainer");
-            m_Data = m_Container.FindPropertyRelative("m_BuildingData");
+            m_Building = target as Building;
+            m_Container = serializedObject.FindProperty("m_DataAccessor");
+            m_Data = serializedObject.FindProperty("m_BuildingData");
             m_Props = new BuildingDataSerializedProperties(m_Data);
         }
         private void OnDisable()
         {
+            ToolManager.activeToolChanged -= ToolManager_activeToolChanged;
         }
 
     }

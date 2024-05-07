@@ -1,15 +1,26 @@
 //using System.Collections;
 //using System.Collections.Generic;
-//using UnityEngine;
+using UnityEngine;
 //using UnityEngine.ProBuilder;
 //using UnityEngine.ProBuilder.MeshOperations;
 //using UnityEditor.ProBuilder;
-//using UnityEditor;
-//using UnityEditor.EditorTools;
+using UnityEditor;
+using UnityEditor.EditorTools;
 //using System.Linq;
 //using HandleUtil = UnityEditor.HandleUtility;
 //using ToolManager = UnityEditor.EditorTools.ToolManager;
 //using Unity.VisualScripting;
+
+namespace OnlyInvalid.ProcGenBuilding.Building
+{
+
+    //[EditorTool("Edit Building Path", typeof(Building))]
+    //public class BuildingPathToolEditor
+    //{
+
+    //    // TODO: Come up with a series of attainable goals for completing this project & releasing it to the Unity asset store.
+    //}
+}
 
 //namespace OnlyInvalid.ProcGenBuilding.Building
 //{

@@ -7,10 +7,9 @@ using UnityEditor.UIElements;
 using UnityEditor.Overlays;
 using OnlyInvalid.ProcGenBuilding.Common;
 using System;
-using OnlyInvalid.ProcGenBuilding.Wall;
 
-[Overlay(typeof(SceneView), displayName : "Data Overlay", defaultDisplay: true)]
-public class DataOverlay : Overlay, ITransientOverlay
+//[Overlay(typeof(SceneView), displayName : "Data Overlay", defaultDisplay: true)]
+public abstract class DataOverlay : Overlay, ITransientOverlay
 {
     protected VisualElement m_Root;
     protected SerializedObject m_SerializedObject;

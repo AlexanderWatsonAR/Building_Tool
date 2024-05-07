@@ -66,7 +66,10 @@ public enum CornerType
 {
     Point, Round, Flat
 }
-
+public enum DrawState
+{
+    Hide, Draw, Edit
+}
 public enum OneLineShape
 {
     Unknown, Antenna, Arrow, Asterisk, Square, Crenel, E, F, H, InterlockY, K, L, M, N, SimpleM, SimpleN, T, U, Y, X, ZigZag 

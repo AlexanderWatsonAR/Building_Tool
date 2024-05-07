@@ -9,8 +9,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 {
     public class BuildingDataSerializedProperties : SerializedPropertyGroup
     {
-        [SerializeField] List<StoreyDataSerializedProperties> m_Storeys;
-        [SerializeField] RoofDataSerializedProperties m_Roof;
+        readonly List<StoreyDataSerializedProperties> m_Storeys;
+        readonly RoofDataSerializedProperties m_Roof;
 
         #region Constants
         const string k_Roof = "m_Roof";
@@ -24,7 +24,6 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public BuildingDataSerializedProperties(SerializedProperty buildingData) : base(buildingData)
         {
-
             m_Roof = new RoofDataSerializedProperties(m_Data.FindPropertyRelative(k_Roof));
 
             SerializedProperty storeys = m_Data.FindPropertyRelative(k_Storeys);
