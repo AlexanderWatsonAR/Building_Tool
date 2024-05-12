@@ -11,18 +11,17 @@ using Unity.VisualScripting;
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
     [CustomPropertyDrawer(typeof(WindowOpeningData))]
-    public class WindowOpeningDataDrawer : PropertyDrawer, IFieldInitializer
+    public class WindowOpeningDataDrawer : DataDrawer
     {
         [SerializeField] WindowOpeningData m_CurrentData;
         [SerializeField] WindowOpeningData m_PreviousData;
 
         WindowOpeningDataSerializedProperties m_Props;
 
-        VisualElement m_Root;
         Foldout m_GridFoldout, m_ShapeFoldout;
         PropertyField m_Columns, m_Rows, m_Sides, m_Height, m_Width, m_Angle, m_Window;
 
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_GridFoldout.Add(m_Columns);
             m_GridFoldout.Add(m_Rows);
@@ -33,8 +32,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_Root.Add(m_GridFoldout);
             m_Root.Add(m_ShapeFoldout);
         }
-
-        public void BindFields()
+        protected override void BindFields()
         {
             m_Columns.BindProperty(m_Props.Columns);
             m_Rows.BindProperty(m_Props.Rows);
@@ -43,21 +41,8 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_Width.BindProperty(m_Props.Width);
             m_Angle.BindProperty(m_Props.Angle);
         }
-
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
+        protected override void DefineFields()
         {
-            Initialize(data);
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-            return m_Root;
-
-        }
-
-        public void DefineFields()
-        {
-            m_Root = new VisualElement() { name = nameof(WindowOpeningData) + "_Root" };
             m_GridFoldout = new Foldout() { text = "Grid" };
             m_Columns = new PropertyField(m_Props.Columns) { label = "Columns" };
             m_Rows = new PropertyField(m_Props.Rows) { label = "Rows" };
@@ -67,15 +52,13 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_Width = new PropertyField(m_Props.Width) { label = "Width" };
             m_Angle = new PropertyField(m_Props.Angle) { label = "Angle" };
         }
-
-        public void Initialize(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
             m_Props = new WindowOpeningDataSerializedProperties(data);
             m_CurrentData = data.GetUnderlyingValue() as WindowOpeningData;
             m_PreviousData = m_CurrentData.Clone() as WindowOpeningData;
         }
-
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_Columns.RegisterValueChangeCallback(evt =>
             {

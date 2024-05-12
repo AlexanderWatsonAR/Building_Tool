@@ -14,8 +14,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         {
             base.Initialize(data);
             m_GridFrameData = data as GridFrameData;
-
-            CalculateHoleData(m_GridFrameData);
+            CalculateHole();
             return this;
         }
 
@@ -24,18 +23,23 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             if (!m_GridFrameData.IsDirty)
                 return;
 
+            if (m_GridFrameData.IsHoleDirty)
+                CalculateHole();
+
             base.Build();
         }
 
-        public static void CalculateHoleData(GridFrameData data)
+        private void CalculateHole()
         {
-            Vector3[][] holePoints = MeshMaker.SpiltPolygon(data.Polygon.ControlPoints, data.Width, data.Height, data.Columns, data.Rows, data.Position, data.Normal).Select(list => list.ToArray()).ToArray();
-            data.Holes = new PolygonData[holePoints.Length];
+            Vector3[][] holePoints = MeshMaker.SpiltPolygon(m_GridFrameData.Polygon.ControlPoints, m_GridFrameData.Width, m_GridFrameData.Height, m_GridFrameData.Columns, m_GridFrameData.Rows, m_GridFrameData.Position, m_GridFrameData.Normal).Select(list => list.ToArray()).ToArray();
+            m_GridFrameData.Holes = new PolygonData[holePoints.Length];
 
             for (int i = 0; i < holePoints.Length; i++)
             {
-                data.Holes[i] = new PolygonData(holePoints[i].ScalePolygon(data.Scale).ToArray());
+                m_GridFrameData.Holes[i] = new PolygonData(holePoints[i].ScalePolygon(m_GridFrameData.Scale).ToArray());
             }
+
+            m_GridFrameData.IsHoleDirty = false;
         }
     }
 }

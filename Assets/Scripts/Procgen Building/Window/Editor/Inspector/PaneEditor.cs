@@ -5,7 +5,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
     [CustomEditor(typeof(Pane))]
-    public class PaneEditor : DataEditor
+    public class PaneEditor : BuildableEditor
     {
         public override VisualElement CreateInspectorGUI()
         {

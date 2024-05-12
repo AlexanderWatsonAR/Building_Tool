@@ -11,7 +11,7 @@ using System;
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
     [CustomEditor(typeof(Buildable), editorForChildClasses : true)]
-    public class DataEditor : Editor
+    public class BuildableEditor : Editor
     {
         protected SerializedProperty m_Data;
         [SerializeField] protected Buildable m_Buildable;

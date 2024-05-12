@@ -20,7 +20,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public BuildingScriptableObject DataAccessor => m_DataAccessor;
         public BuildingData BuildingData { get { return m_DataAccessor.Data; } set { m_BuildingData = value; m_DataAccessor.Data = value; } }
-        public PlanarPath Path => BuildingData.Path;
+        public Path Path => BuildingData.Path;
 
         public override Buildable Initialize(DirtyData data)
         {

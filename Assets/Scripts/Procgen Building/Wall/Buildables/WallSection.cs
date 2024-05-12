@@ -28,7 +28,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             m_WallSectionData = wallSectionData as WallSectionData;
             return base.Initialize(wallSectionData);
         }
-
         public void BuildChildren()
         {
             switch (m_WallSectionData.WallElement)
@@ -60,10 +59,13 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                 CreateWallElement();
 
             BuildChildren();
+
+            m_PreviousElement = m_WallSectionData.WallElement;
         }
 
         private void CreateWallElement()
         {
+
             switch (m_WallSectionData.WallElement)
             {
                 case WallElement.Wall:
@@ -147,11 +149,10 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         #region Calculate
         private WindowData CalculateWindow(int index, IEnumerable<Vector3> controlPoints)
         {
-            WindowData data = new WindowData(m_WallSectionData.Window)
-            {
-                ID = index,
-                Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal)
-            };
+            WindowData data = m_WallSectionData.Window.Clone() as WindowData;
+            data.ID = index;
+            data.Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal);
+            data.IsDirty = true;
             return data;
         }
         private DoorData CalculateDoor(int index, IEnumerable<Vector3> controlPoints)
@@ -205,39 +206,43 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             m_Windows ??= new List<Window.Window>();
 
             WindowOpeningData windowOpening = m_WallSectionData.WindowOpening;
-
             int size = windowOpening.Columns * windowOpening.Rows;
-
-            if (windowOpening.Windows == null || windowOpening.Windows.Length == 0 || windowOpening.Windows.Length != size)
-            {
-                windowOpening.Windows = new WindowData[size];
-            }
-
+            windowOpening.Windows = windowOpening.Windows == null || windowOpening.Windows.Length != size ? new WindowData[size] : windowOpening.Windows;
+            
             IList<IList<Vector3>> holePoints;
 
-            if (windowOpening.Windows[0] == null || windowOpening.Windows[0].Polygon.ControlPoints == null || windowOpening.Windows[0].Polygon.ControlPoints.Length == 0)
+            if (m_Windows.Count != 0 && m_Windows.Count == size)
             {
                 holePoints = CalculateWindowOpening(m_WallSectionData);
 
-                for (int i = 0; i < size; i++)
+                for (int i = 0; i < m_Windows.Count; i++)
                 {
-                    if (windowOpening.Windows[i] == null || windowOpening.Windows[i].Polygon.ControlPoints == null || windowOpening.Windows[i].Polygon.ControlPoints.Length == 0)
+                    m_Windows[i].Initialize(CalculateWindow(i, holePoints[i]));
+                }
+            }
+            else
+            {
+                // Calculate window data if it doesn't 
+                if (windowOpening.IsEmpty)
+                {
+                    holePoints = CalculateWindowOpening(m_WallSectionData);
+
+                    for (int i = 0; i < size; i++)
                     {
                         windowOpening.Windows[i] = CalculateWindow(i, holePoints[i]);
                         Window.Window win = CreateWindow(windowOpening.Windows[i]);
                         m_Windows.Add(win);
                     }
                 }
-            }
-            else
-            {
-                holePoints = new List<IList<Vector3>>();
-                foreach (WindowData window in windowOpening.Windows)
+                else
                 {
-                    holePoints.Add(window.Polygon.ControlPoints.ToList());
-
-                    Window.Window win = CreateWindow(window);
-                    m_Windows.Add(win);
+                    holePoints = new List<IList<Vector3>>();
+                    foreach (WindowData window in windowOpening.Windows)
+                    {
+                        holePoints.Add(window.Polygon.ControlPoints.ToList());
+                        Window.Window win = CreateWindow(window);
+                        m_Windows.Add(win);
+                    }
                 }
             }
 
@@ -381,6 +386,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             windowMesh.name = "Window " + data.ID.ToString();
             windowMesh.transform.SetParent(transform, true);
             Window.Window window = windowMesh.AddComponent<Window.Window>();
+            data.IsDirty = true;
             window.Initialize(data);
             window.AddDataListener(dirtyData =>
             {
@@ -408,10 +414,12 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             return doorFrame;
         }
         #endregion
-
         public override void Demolish()
         {
             if (!m_WallSectionData.IsDirty)
+                return;
+
+            if (m_PreviousElement != m_WallSectionData.WallElement)
                 return;
 
             transform.DeleteChildren();

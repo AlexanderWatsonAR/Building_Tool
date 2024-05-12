@@ -5,7 +5,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Roof
 {
     [CustomEditor(typeof(Roof))]
-    public class RoofEditor : DataEditor
+    public class RoofEditor : BuildableEditor
     {
         public override VisualElement CreateInspectorGUI()
         {

@@ -10,35 +10,21 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Pillar
 {
     [CustomPropertyDrawer(typeof(PillarData))]
-    public class PillarDataDrawer : PropertyDrawer, IFieldInitializer
+    public class PillarDataDrawer : DataDrawer
     {
-        VisualElement m_Root;
         PillarDataSerializedProperties m_Props;
         PillarData m_PreviousData;
-        IBuildable m_Buildable;
 
         PropertyField m_Height, m_Width, m_Depth, m_Sides, m_IsSmooth;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
-            Initialize(data);
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-
-            return m_Root;
-        }
-
-        public void Initialize(SerializedProperty data)
-        {
-            m_Root = new VisualElement() { name = nameof(PillarData) + "_Root" };
+            m_Root.name = nameof(PillarData) + "_Root" ;
             m_Props = new PillarDataSerializedProperties(data);
-            m_Buildable = data.serializedObject.targetObject as IBuildable;
             m_PreviousData = new PillarData(data.GetUnderlyingValue() as PillarData);
         }
 
-        public void DefineFields()
+        protected override void DefineFields()
         {
             m_Height = new PropertyField(m_Props.Height);
             m_Width = new PropertyField(m_Props.Width);
@@ -46,7 +32,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
             m_Sides = new PropertyField(m_Props.Sides);
             m_IsSmooth = new PropertyField(m_Props.IsSmooth);
         }
-        public void BindFields()
+        protected override void BindFields()
         {
             m_Height.BindProperty(m_Props.Height);
             m_Width.BindProperty(m_Props.Width);
@@ -55,7 +41,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
             m_IsSmooth.BindProperty(m_Props.IsSmooth);
         }
 
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_Height.RegisterValueChangeCallback(evt =>
             {
@@ -104,7 +90,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
             });
         }
 
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_Height);
             m_Root.Add(m_Width);

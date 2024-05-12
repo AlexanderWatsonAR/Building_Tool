@@ -8,6 +8,17 @@ using UnityEngine.ProBuilder;
 public static class Vector3Extensions
 {
 
+    public static Vector3 Average(this IEnumerable<Vector3> collection)
+    {
+        Vector3 average = Vector3.zero;
+        foreach (Vector3 vector in collection)
+        {
+            average += vector;
+        }
+        average /= collection.Count();
+        return average;
+    }
+
     public static bool Approximately(Vector3 vector1, Vector3 vector2, float tolerance = 0.001f)
     {
         float sqrMagnitudeDifference = (vector1 - vector2).sqrMagnitude;

@@ -15,6 +15,8 @@ public class WindowOpeningData : OpeningData, ICloneable
     public bool Smooth { get { return m_IsSmooth; } set { m_IsSmooth = value; } }
     public WindowData[] Windows { get { return m_Windows; } set { m_Windows = value; } }
 
+    public bool IsEmpty { get { return m_Windows[0] == null || m_Windows[0].Polygon.ControlPoints == null || m_Windows[0].Polygon.ControlPoints.Length == 0; } }
+
     public WindowOpeningData() : this(4, 0, false, null)
     {
     }
