@@ -74,7 +74,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             if (!base.CanPointBeUpdated(point, index))
                 return false;
 
-
             int count = PathPointsCount;
 
             for (int i = 0; i < count - 1; i++)
@@ -92,34 +91,37 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 }
             }
 
-            int previousIndex = index == 0 ? count - 1 : index - 1;
-            int nextIndex = (index + 1) % count;
+            // The commented out section is supposed to resolve line intersection.
+            // At one time this worked perfectly but now it does not.
 
-            for (int i = 0; i < count; i++)
-            {
-                if (i == index)
-                    continue;
+            //int previousIndex = index == 0 ? count - 1 : index - 1;
+            //int nextIndex = (index + 1) % count;
 
-                int previous = i == 0 ? count - 1 : i - 1;
-                int next = (i + 1) % count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    if (i == index)
+            //        continue;
 
-                // Notes on intersection:
-                // the indexed point can be intersecting a line of which it is a part of.
-                // I.E. it can only be between 2 other/different points.
-                Vector3 intersection;
+            //    int previous = i == 0 ? count - 1 : i - 1;
+            //    int next = (i + 1) % count;
 
-                if (Extensions.DoLinesIntersect(GetPositionAt(previousIndex), GetPositionAt(index), GetPositionAt(i), GetPositionAt(next), out intersection, false))
-                {
-                    if (intersection != GetPositionAt(previousIndex) && intersection != point)
-                        return false;
-                }
+            //    // Notes on intersection:
+            //    // the indexed point can be intersecting a line of which it is a part of.
+            //    // I.E. it can only be between 2 other/different points.
+            //    Vector3 intersection;
 
-                if (Extensions.DoLinesIntersect(GetPositionAt(index), GetPositionAt(nextIndex), GetPositionAt(i), GetPositionAt(next), out intersection, false))
-                {
-                    if (intersection != GetPositionAt(nextIndex) && intersection != point && point != GetPositionAt(previous))
-                        return false;
-                }
-            }
+            //    if (Extensions.DoLinesIntersect(GetPositionAt(previousIndex), GetPositionAt(index), GetPositionAt(i), GetPositionAt(next), out intersection, false))
+            //    {
+            //        if (intersection != GetPositionAt(previousIndex) && intersection != point)
+            //            return false;
+            //    }
+
+            //    if (Extensions.DoLinesIntersect(GetPositionAt(index), GetPositionAt(nextIndex), GetPositionAt(i), GetPositionAt(next), out intersection, false))
+            //    {
+            //        if (intersection != GetPositionAt(nextIndex) && intersection != point && point != GetPositionAt(previous))
+            //            return false;
+            //    }
+            //}
 
             return true;
         }
@@ -193,10 +195,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                     {
                         float mag = intersection.magnitude;
 
-                        if (Extensions.ApproximatelyEqual(mag, line1Start.magnitude) ||
-                           Extensions.ApproximatelyEqual(mag, line1End.magnitude) ||
-                           Extensions.ApproximatelyEqual(mag, line2Start.magnitude) ||
-                           Extensions.ApproximatelyEqual(mag, line2End.magnitude))
+                        if (Mathf.Approximately(mag, line1Start.magnitude) ||
+                            Mathf.Approximately(mag, line1End.magnitude) ||
+                            Mathf.Approximately(mag, line2Start.magnitude) ||
+                            Mathf.Approximately(mag, line2End.magnitude))
                         {
                             continue;
                         }

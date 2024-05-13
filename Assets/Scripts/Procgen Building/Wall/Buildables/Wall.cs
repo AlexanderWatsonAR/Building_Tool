@@ -144,7 +144,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             wallSectionMesh.transform.SetParent(transform, false);
             WallSection wallSection = wallSectionMesh.AddComponent<WallSection>();
             wallSection.Initialize(m_WallData.Sections[data.ID]);
-            wallSection.AddDataListener(dirtyData =>
+            wallSection.AddListener(dirtyData =>
             {
                 WallSectionData wallSectionData = dirtyData as WallSectionData;
                 m_WallData.Sections[wallSectionData.ID] = wallSectionData;

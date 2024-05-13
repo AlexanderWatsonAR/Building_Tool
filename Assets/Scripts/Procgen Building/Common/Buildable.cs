@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEditor.Events;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
@@ -22,24 +23,24 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         public virtual void Demolish() { }
 
-        public void AddDataListener(UnityAction<DirtyData> call)
+        public void AddListener(UnityAction<DirtyData> call)
         {
-            m_OnDataChanged.AddListener(call);
+            UnityEventTools.AddPersistentListener(m_OnDataChanged, call);
+
+            for(int i = 0; i < m_OnDataChanged.GetPersistentEventCount(); i++)
+            {
+                m_OnDataChanged.SetPersistentListenerState(i, UnityEventCallState.EditorAndRuntime);
+            }
         }
 
-        public void RemoveDataListener(UnityAction<DirtyData> call)
+        public void RemoveListener(UnityAction<DirtyData> call)
         {
-            m_OnDataChanged.RemoveListener(call);
+            UnityEventTools.RemovePersistentListener(m_OnDataChanged, call);
         }
 
-        private void OnValidate()
+        public bool HasListener()
         {
-            m_OnDataChanged.Invoke(m_Data);
-        }
-
-        private void OnDestroy()
-        {
-            m_OnDataChanged.RemoveAllListeners();
+            return m_OnDataChanged.GetPersistentEventCount() > 0;
         }
     }
 }

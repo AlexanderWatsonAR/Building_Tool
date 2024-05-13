@@ -31,12 +31,13 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         {
             Demolish();
 
-            if (m_Data.IsDirty)
+            if (m_StoreyData.IsDirty)
             {
                 CreateExternalWalls();
                 CreateCorners();
                 CreatePillars();
                 CreateFloor();
+                m_StoreyData.IsDirty = false;
             }
 
             BuildWalls();
@@ -129,7 +130,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             Wall.Wall wall = wallMesh.AddComponent<Wall.Wall>();
             wall.Initialize(data);
             wall.Data.IsDirty = true;
-            wall.AddDataListener(dirtyData => 
+            wall.AddListener(dirtyData => 
             {
                 WallData wallData = dirtyData as WallData;
                 m_StoreyData.Walls[wallData.ID] = wallData;
@@ -299,11 +300,10 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
         public override void Demolish()
         {
-            if (!m_Data.IsDirty)
+            if (!m_StoreyData.IsDirty)
                 return;
 
             transform.DeleteChildren();
-
             m_Walls?.Clear();
             m_Corners?.Clear();
             m_Pillars?.Clear();

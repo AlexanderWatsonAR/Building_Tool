@@ -16,5 +16,10 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_InnerFrameData = data as InnerFrameData;
             return this;
         }
+
+        private void OnValidate()
+        {
+            m_OnDataChanged.Invoke(m_InnerFrameData);
+        }
     }
 }

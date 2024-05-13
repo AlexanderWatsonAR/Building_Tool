@@ -35,7 +35,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             OuterFrame outerFrame = outerFrameMesh.AddComponent<OuterFrame>();
             outerFrame.Initialize(CalculateOuterFrame());
             outerFrame.Data.IsDirty = true;
-            outerFrame.AddDataListener(data =>
+            outerFrame.AddListener(data =>
             {
                 m_WindowData.OuterFrame = data as OuterFrameData;
                 m_OnDataChanged.Invoke(m_WindowData);
@@ -50,7 +50,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             InnerFrame innerFrame = innerFrameMesh.AddComponent<InnerFrame>();
             innerFrame.Initialize(CalculateInnerFrame());
             innerFrame.Data.IsDirty = true;
-            innerFrame.AddDataListener(data =>
+            innerFrame.AddListener(data =>
             {
                 m_WindowData.InnerFrame = data as InnerFrameData;
                 m_OnDataChanged.Invoke(m_WindowData);
@@ -65,7 +65,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             Pane pane = paneMesh.AddComponent<Pane>();
             pane.Initialize(CalculatePane());
             pane.Data.IsDirty = true;
-            pane.AddDataListener(data =>
+            pane.AddListener(data =>
             {
                 m_WindowData.Pane = data as PaneData;
                 m_OnDataChanged.Invoke(m_WindowData);
@@ -82,7 +82,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             data.SetPolygon(controlPoints, m_WindowData.Polygon.Normal);
             leftShutter.Initialize(data);
             leftShutter.Data.IsDirty = true;
-            leftShutter.AddDataListener(data =>
+            leftShutter.AddListener(data =>
             {
                 m_WindowData.LeftShutter = data as DoorData;
                 m_OnDataChanged.Invoke(m_WindowData);
@@ -96,7 +96,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             rightShutterMesh.transform.SetParent(transform, false);
             Door.Door rightShutter = rightShutterMesh.AddComponent<Door.Door>();
             rightShutter.Initialize(CalculateShutter(controlPoints));
-            rightShutter.AddDataListener(data =>
+            rightShutter.AddListener(data =>
             {
                 m_WindowData.RightShutter = data as DoorData;
                 m_OnDataChanged.Invoke(m_WindowData);
@@ -251,6 +251,9 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         }
         public override void Build()
         {
+            if (m_WindowData == null)
+                return;
+
             Demolish();
 
             if (m_WindowData.ActiveElements == WindowElement.Nothing)
@@ -268,11 +271,18 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
         }
         #endregion
+
+        private void OnValidate()
+        {
+            m_OnDataChanged.Invoke(m_WindowData);
+        }
+
         /// <summary>
         /// This method removes only the window components that are inactive
         /// </summary>
         public override void Demolish()
         {
+
             if (!m_WindowData.IsOuterFrameActive && m_OuterFrame != null)
             {
                 m_OuterFrame.Demolish();

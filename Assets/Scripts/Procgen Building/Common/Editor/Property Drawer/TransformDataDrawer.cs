@@ -9,39 +9,28 @@ using UnityEditor.Rendering;
 using OnlyInvalid.ProcGenBuilding.Door;
 
 [CustomPropertyDrawer(typeof(TransformData))]
-public class TransformDataDrawer : PropertyDrawer, IFieldInitializer
+public class TransformDataDrawer : DataDrawer
 {
     [SerializeField] TransformData m_PreviousData;
     TransformDataSerializedProperties m_Props;
 
-    VisualElement m_Root;
     PropertyField m_RelativePosition, m_Offset, m_EulerAngle;
 
-    public override VisualElement CreatePropertyGUI(SerializedProperty data)
-    {
-        Initialize(data);
-        DefineFields();
-        BindFields();
-        RegisterValueChangeCallbacks();
-        AddFieldsToRoot();
-        return m_Root;
-    }
-
-    public void AddFieldsToRoot()
+    protected override void AddFieldsToRoot()
     {
         m_Root.Add(m_RelativePosition);
         m_Root.Add(m_Offset);
         m_Root.Add(m_EulerAngle);
     }
 
-    public void BindFields()
+    protected override void BindFields()
     {
         m_RelativePosition.BindProperty(m_Props.RelativePosition);
         m_Offset.BindProperty(m_Props.PositionOffset);
         m_EulerAngle.BindProperty(m_Props.EulerAngle);
     }
 
-    public void DefineFields()
+    protected override void DefineFields()
     {
         m_Root = new VisualElement() { name = nameof(DoorData) + "_Root" };
         m_RelativePosition = new PropertyField(m_Props.RelativePosition) { label = "Position" };
@@ -49,14 +38,14 @@ public class TransformDataDrawer : PropertyDrawer, IFieldInitializer
         m_EulerAngle = new PropertyField(m_Props.EulerAngle) { label = "Euler Angle" };
     }
 
-    public void Initialize(SerializedProperty data)
+    protected override void Initialize(SerializedProperty data)
     {
         m_Props = new TransformDataSerializedProperties(data);
         TransformData current = data.GetUnderlyingValue() as TransformData;
         m_PreviousData = current.Clone() as TransformData;
     }
 
-    public void RegisterValueChangeCallbacks()
+    protected override void RegisterValueChangeCallbacks()
     {
         m_RelativePosition.RegisterValueChangeCallback(evt =>
         {

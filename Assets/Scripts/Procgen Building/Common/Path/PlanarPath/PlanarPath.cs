@@ -25,7 +25,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         #endregion
 
         #region Constructors
-        public PlanarPath(Vector3 planeNormal, float minimumPointDistance = 1) : this (new Plane(planeNormal, 0), minimumPointDistance)
+        public PlanarPath(Vector3 planeNormal, float minimumPointDistance = 1) : this(new Plane(planeNormal, 0), minimumPointDistance)
         {
 
         }
@@ -55,7 +55,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         }
         public override bool CanPointBeUpdated(Vector3 point, int index)
         {
-            if(!base.CanPointBeUpdated(point, index))
+            if (!base.CanPointBeUpdated(point, index))
                 return false;
 
             return IsPointOnPlane(point);
@@ -63,7 +63,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public override bool Raycast(Ray ray, out Vector3 impactPoint)
         {
             impactPoint = Vector3.zero;
-            if(m_Plane.Raycast(ray, out float enter))
+            if (m_Plane.Raycast(ray, out float enter))
             {
                 impactPoint = ray.GetPoint(enter);
                 return true;
@@ -74,12 +74,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public bool IsPointOnPlane(Vector3 point)
         {
             float dotProduct = Vector3.Dot(m_Plane.normal, point);
-            return Mathf.Approximately(dotProduct + m_Plane.distance, 0);
+            return Mathf.Abs(dotProduct) < Mathf.Epsilon;
         }
-
-
-
-
     }
 }
 

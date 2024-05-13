@@ -31,8 +31,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         PropertyField m_WindowOpening, m_Window;
         Foldout m_WindowFoldout;
 
-        Toolbar m_TestToolbar;
-
         protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_WallElement);
@@ -59,8 +57,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             m_WindowContainer.Add(m_WindowFoldout);
             m_WindowFoldout.Add(m_Window);
             #endregion
-
-            m_Root.Add(m_TestToolbar);
         }
         protected override void BindFields()
         {
@@ -126,8 +122,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             m_WindowFoldout = new Foldout() { text = "Windows"};
             m_Window = new PropertyField();
             #endregion
-
-            m_TestToolbar = new Toolbar();
         }
         protected override void Initialize(SerializedProperty data)
         {
