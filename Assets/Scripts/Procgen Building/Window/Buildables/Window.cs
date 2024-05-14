@@ -15,7 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         [SerializeReference] WindowData m_WindowData;
 
         [SerializeField] OuterFrame m_OuterFrame;
-        [SerializeField] InnerFrame m_InnerFrame;
+        [SerializeField] InnerFrame m_InnerFrame; // Thought: This is a grid. Could we have different inner frame types? Pyramid Frame?
         [SerializeField] Pane m_Pane;
         [SerializeField] Door.Door m_LeftShutter;
         [SerializeField] Door.Door m_RightShutter;

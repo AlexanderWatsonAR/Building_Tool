@@ -12,7 +12,7 @@ using OnlyInvalid.ProcGenBuilding.Door;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
-    public class WallSection : Polygon3D.Polygon3D, IPolygon
+    public class WallSection : Polygon3D.Polygon3D
     {
         [SerializeReference] WallSectionData m_WallSectionData;
 
@@ -21,26 +21,11 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         [SerializeField] List<Door.Door> m_Doors;
         [SerializeField] List<Polygon3D.Frame> m_Frames;
 
-        [SerializeField] Path m_PolygonPath;
-
         public List<Window.Window> Windows => m_Windows;
-
-        public Path Path => m_PolygonPath;
 
         public override Buildable Initialize(DirtyData wallSectionData)
         {
             m_WallSectionData = wallSectionData as WallSectionData;
-
-            IList<IList<Vector3>> holePoints = CalculateWindowOpening(m_WallSectionData);
-
-            List<ControlPoint> points = new List<ControlPoint>();
-
-            for (int i = 0; i < holePoints[0].Count; i++)
-            {
-                points.Add(new ControlPoint(holePoints[0][i], m_WallSectionData.Normal, m_WallSectionData.Up, 0));
-            }
-
-            m_PolygonPath = new Path(points, 0);
 
             return base.Initialize(wallSectionData);
         }
@@ -134,7 +119,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         #endregion
 
         #region Create
-
         private void CreateWallElement()
         {
             switch (m_WallSectionData.WallElement)
@@ -216,7 +200,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     break;
             }
         }
-
         private void CreateWindows()
         {
             m_Windows ??= new List<Window.Window>();
@@ -437,7 +420,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             if (!m_WallSectionData.IsDirty)
                 return;
 
-            if (m_PreviousElement != m_WallSectionData.WallElement)
+            if (m_PreviousElement == m_WallSectionData.WallElement)
                 return;
 
             transform.DeleteChildren();

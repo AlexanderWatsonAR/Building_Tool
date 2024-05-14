@@ -42,12 +42,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         public ExtensionData Extension { get { return m_Extension; } set { m_Extension = value; } }
         #endregion
 
-        // Food for thought
-        // Should we have an empty constructor?
-        // We could give it some dummy data, but the data would need re-defining anyway.
-        // With an empty constructor we can create an empty object and fill the data later.
-        // If it were null, checking the data would be simpler.
-
         public WallSectionData()
         {
             m_Window = new WindowData();
@@ -60,7 +54,6 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             m_Extension = new ExtensionData();
         }
 
-        // What is the purpose of this constructor?
         public WallSectionData(WallElement wallElement, PolygonData polygon, PolygonData[] holes, int id, float depth, Vector3 normal, Vector3 up,
             WindowOpeningData windowOpeningData, DoorwayData doorwayData, ArchwayData archwayData, ExtensionData extensionData,
             WindowData windowData, DoorData doorData, DoorData archDoorData, FrameData doorFrameData) : base(polygon, holes, normal, up, depth)
