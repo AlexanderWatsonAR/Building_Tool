@@ -8,7 +8,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     [CustomEditor(typeof(GridFrame))]
-    public class GridFrameEditor : DataEditor
+    public class GridFrameEditor : BuildableEditor
     {
         public override VisualElement CreateInspectorGUI()
         {

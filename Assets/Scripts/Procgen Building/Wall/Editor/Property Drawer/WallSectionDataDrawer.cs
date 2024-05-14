@@ -6,321 +6,302 @@ using Unity.VisualScripting;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using OnlyInvalid.ProcGenBuilding.Window;
 using OnlyInvalid.ProcGenBuilding.Door;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using UnityEngine.ProBuilder.Shapes;
+using UnityEditor.PackageManager.UI;
+using static PlasticPipe.Server.MonitorStats;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
     [CustomPropertyDrawer(typeof(WallSectionData))]
-    public class WallSectionDataDrawer : PropertyDrawer
+    public class WallSectionDataDrawer : DataDrawer
     {
-        [SerializeField] WallSectionData m_PreviousData; // This is a copy of data, used to determine if data values actually change.
+        WallSectionDataSerializedProperties m_Props;
+        WallSectionData m_CurrentData, m_PreviousData;
 
-        [SerializeField] WallElement m_PreviousElement;
+        WallElement m_PreviousElement;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
+        VisualElement m_OpeningContainer, m_DoorwayContainer, m_ArchwayContainer, m_WindowContainer;
+
+        PropertyField m_WallElement;
+        PropertyField m_Doorway, m_ActiveDoorwayElements, m_Door, m_DoorFrame;
+        Foldout m_DoorFoldout;
+        PropertyField m_Archway, m_ActiveArchwayElements, m_ArchDoor, m_ArchDoorFrame;
+        Foldout m_ArchDoorFoldout;
+        PropertyField m_WindowOpening, m_Window;
+        Foldout m_WindowFoldout;
+
+        protected override void AddFieldsToRoot()
         {
-            VisualElement root = new VisualElement();
+            m_Root.Add(m_WallElement);
+            m_Root.Add(m_OpeningContainer);
 
-            WallSectionDataSerializedProperties props = new WallSectionDataSerializedProperties(data);
+            #region Doorway
+            m_DoorwayContainer.Add(m_Doorway);
+            m_DoorwayContainer.Add(m_DoorFoldout);
+            m_DoorFoldout.Add(m_ActiveDoorwayElements);
+            m_DoorFoldout.Add(m_Door);
+            m_DoorFoldout.Add(m_DoorFrame);
+            #endregion
 
-            WallSectionData currentData = data.GetUnderlyingValue() as WallSectionData;
-            m_PreviousData = currentData.Clone() as WallSectionData;
+            #region Archway
+            m_ArchwayContainer.Add(m_Archway);
+            m_ArchwayContainer.Add(m_ArchDoorFoldout);
+            m_DoorFoldout.Add(m_ActiveArchwayElements);
+            m_DoorFoldout.Add(m_ArchDoor);
+            m_DoorFoldout.Add(m_ArchDoorFrame);
+            #endregion
 
-            m_PreviousElement = currentData.WallElement;
+            #region Window
+            m_WindowContainer.Add(m_WindowOpening);
+            m_WindowContainer.Add(m_WindowFoldout);
+            m_WindowFoldout.Add(m_Window);
+            #endregion
+        }
+        protected override void BindFields()
+        {
+            m_WallElement.BindProperty(m_Props.WallElement);
 
-            PropertyField wallElementField = new PropertyField(props.WallElement) { label = "Wall Element" };
-            wallElementField.BindProperty(props.WallElement);
-            root.Add(wallElementField);
+            #region Doorway
+            var doorway = m_Props.Doorway;
+            var door = m_Props.Door;
+            var doorFrame = m_Props.Frame;
 
-            VisualElement wallElementContainer = new VisualElement();
+            m_Doorway.BindProperty(doorway.Data);
+            m_ActiveDoorwayElements.BindProperty(doorway.ActiveElements);
+            m_Door.BindProperty(door.Data);
+            m_DoorFrame.BindProperty(doorFrame.Data);
+            #endregion
 
-            wallElementField.RegisterValueChangeCallback(evt =>
+            #region Archway
+            var archway = m_Props.Archway;
+            var archDoor = m_Props.ArchDoor;
+            var archDoorFrame = m_Props.Frame;
+
+            m_Archway.BindProperty(archway.Data);
+            m_ArchDoor.BindProperty(archDoor.Data);
+            m_ArchDoorFrame.BindProperty(archDoorFrame.Data);
+            m_ActiveArchwayElements.BindProperty(archway.ActiveElements);
+            #endregion
+
+            #region Window
+            var opening = m_Props.WindowOpening;
+            var window = m_Props.Window;
+
+            m_WindowOpening.BindProperty(opening.Data);
+            m_Window.BindProperty(window.Data);
+            #endregion
+
+        }
+        protected override void DefineFields()
+        {
+            m_WallElement = new PropertyField() { label = "Wall Element" };
+            m_OpeningContainer = new VisualElement();
+            m_DoorwayContainer = new VisualElement();
+            m_ArchwayContainer = new VisualElement();
+            m_WindowContainer = new VisualElement();
+
+            #region Doorway
+            m_Doorway = new PropertyField();
+            m_ActiveDoorwayElements = new PropertyField() { label = "Active Elements" };
+            m_DoorFoldout = new Foldout() { text = "Door" };
+            m_Door = new PropertyField();
+            m_DoorFrame = new PropertyField();
+            #endregion
+
+            #region Archway
+            m_Archway = new PropertyField();
+            m_ActiveArchwayElements = new PropertyField(){ label = "Active Elements" };
+            m_ArchDoorFoldout = new Foldout() { text = "Door" };
+            m_ArchDoor = new PropertyField();
+            m_ArchDoorFrame= new PropertyField();
+            #endregion
+
+            #region Window
+            m_WindowOpening = new PropertyField();
+            m_WindowFoldout = new Foldout() { text = "Windows"};
+            m_Window = new PropertyField();
+            #endregion
+        }
+        protected override void Initialize(SerializedProperty data)
+        {
+            m_Props = new WallSectionDataSerializedProperties(data);
+            m_CurrentData = data.GetUnderlyingValue() as WallSectionData;
+            m_PreviousData = m_CurrentData.Clone() as WallSectionData;
+            m_PreviousElement = m_CurrentData.WallElement;
+        }
+        protected override void RegisterValueChangeCallbacks()
+        {
+            m_WallElement.RegisterValueChangeCallback(evt =>
             {
-                if ((currentData.WallElement == m_PreviousElement) && wallElementContainer.childCount > 0)
+                if ((m_CurrentData.WallElement == m_PreviousElement) && m_OpeningContainer.childCount > 0)
                     return;
 
-                if (currentData.WallElement != m_PreviousElement)
+                if (m_CurrentData.WallElement != m_PreviousElement)
                 {
-                    currentData.IsDirty = true;
-                    m_PreviousElement = currentData.WallElement;
+                    m_CurrentData.IsDirty = true;
+                    m_PreviousElement = m_CurrentData.WallElement;
                 }
 
-                wallElementContainer.Clear();
+                m_OpeningContainer.Clear();
 
-                switch (currentData.WallElement)
+                switch(m_CurrentData.WallElement)
                 {
                     case WallElement.Wall:
                         break;
                     case WallElement.Doorway:
-                        {
-                            var doorway = props.Doorway;
-                            var door = props.Door;
-                            var frame = props.Frame;
-
-                            #region Fields
-                            PropertyField doorwayField = new PropertyField(doorway.Data);
-                            PropertyField activeElements = new PropertyField(doorway.ActiveElements, "Active Elements") { label = "Active Elements" };
-                            Foldout doorFoldout = new Foldout() { text = "Door" };
-                            PropertyField doorDataField = new PropertyField(door.Data);
-                            PropertyField doorFrameField = new PropertyField(frame.Data);
-                            #endregion
-
-                            #region Bind
-                            doorwayField.BindProperty(doorway.Data);
-                            activeElements.BindProperty(doorway.ActiveElements);
-                            doorDataField.BindProperty(door.Data);
-                            doorFrameField.BindProperty(frame.Data);
-                            #endregion
-
-                            #region Register Value Change Callbacks
-                            doorwayField.RegisterValueChangeCallback(evt =>
-                            {
-                                DoorwayData doorwayData = evt.changedProperty.GetUnderlyingValue() as DoorwayData;
-
-                                if (doorwayData.Equals(m_PreviousData.Doorway))
-                                    return;
-
-                                currentData.IsDirty = true;
-
-                            });
-                            activeElements.RegisterValueChangeCallback(evt =>
-                            {
-                                bool isDoorActive = currentData.Doorway.ActiveElements.IsElementActive(DoorwayElement.Door);
-                                bool isFrameActive = currentData.Doorway.ActiveElements.IsElementActive(DoorwayElement.Frame);
-
-                                doorDataField.SetEnabled(isDoorActive);
-                                doorFrameField.SetEnabled(isFrameActive);
-
-                                if (currentData.Doorway.ActiveElements == m_PreviousData.Doorway.ActiveElements)
-                                    return;
-
-                                m_PreviousData.Doorway.ActiveElements = currentData.Doorway.ActiveElements;
-
-                                foreach (DoorData door in currentData.Doorway.Doors)
-                                {
-                                    door.ActiveElements = currentData.Doorway.ActiveElements.ToDoorElement();
-                                }
-
-                            });
-                            doorFrameField.RegisterValueChangeCallback(evt =>
-                            {
-                                FrameData frameData = evt.changedProperty.GetUnderlyingValue() as FrameData;
-
-                                if (frameData.Equals(frame))
-                                    return;
-
-                                currentData.IsDirty = true;
-                            });
-                            #endregion
-
-                            #region Add Fields to Container
-                            wallElementContainer.Add(doorwayField);
-                            wallElementContainer.Add(doorFoldout);
-                            doorFoldout.Add(activeElements);
-                            doorFoldout.Add(doorDataField);
-                            doorFoldout.Add(doorFrameField);
-                            #endregion
-                        }
+                        m_OpeningContainer.Add(m_DoorwayContainer);
                         break;
                     case WallElement.Archway:
-                        {
-                            var archway = props.Archway;
-                            var archDoor = props.ArchDoor;
-                            var frame = props.Frame;
-
-                            #region Fields
-                            PropertyField archwayField = new PropertyField(archway.Data);
-                            PropertyField activeElements = new PropertyField(archway.ActiveElements) { label = "Active Elements" };
-                            Foldout doorFoldout = new Foldout() { text = "Door" };
-                            PropertyField archDataField = new PropertyField(archDoor.Data);
-                            PropertyField archFrameField = new PropertyField(frame.Data);
-                            #endregion
-
-                            #region Bind
-                            archwayField.BindProperty(archway.Data);
-                            archDataField.BindProperty(archDoor.Data);
-                            archFrameField.BindProperty(frame.Data);
-                            activeElements.BindProperty(archway.ActiveElements);
-                            #endregion
-
-                            #region Register Value Change Callback
-                            archwayField.RegisterValueChangeCallback(evt =>
-                            {
-                                ArchwayData archwayData = evt.changedProperty.GetUnderlyingValue() as ArchwayData;
-
-                                if (archwayData.Equals(m_PreviousData.Archway))
-                                    return;
-
-                                currentData.IsDirty = true;
-                            });
-                            activeElements.RegisterValueChangeCallback(evt =>
-                            {
-                                bool isDoorActive = currentData.Archway.ActiveElements.IsElementActive(DoorwayElement.Door);
-                                bool isFrameActive = currentData.Archway.ActiveElements.IsElementActive(DoorwayElement.Frame);
-
-                                archDataField.SetEnabled(isDoorActive);
-                                archFrameField.SetEnabled(isFrameActive);
-
-                                if (currentData.Archway.ActiveElements == m_PreviousData.Archway.ActiveElements)
-                                    return;
-
-                                m_PreviousData.Archway.ActiveElements = currentData.Archway.ActiveElements;
-
-                                foreach (DoorData archDoor in currentData.Archway.Doors)
-                                {
-                                    archDoor.ActiveElements = currentData.Archway.ActiveElements.ToDoorElement();
-                                }
-                            });
-                            archFrameField.RegisterValueChangeCallback(evt =>
-                            {
-                                FrameData frameData = evt.changedProperty.GetUnderlyingValue() as FrameData;
-
-                                if (frameData.Equals(m_PreviousData.DoorFrame))
-                                    return;
-
-                                currentData.IsDirty = true;
-                            });
-                            #endregion
-
-                            #region Add Fields to Container
-                            wallElementContainer.Add(archwayField);
-                            wallElementContainer.Add(doorFoldout);
-                            doorFoldout.Add(activeElements);
-                            doorFoldout.Add(archDataField);
-                            doorFoldout.Add(archFrameField);
-                            #endregion
-                        }
+                        m_OpeningContainer.Add(m_ArchwayContainer);
                         break;
                     case WallElement.Window:
-                        {
-                            var opening = props.WindowOpening;
-                            var window = props.Window;
-
-                            #region Fields
-                            PropertyField windowOpening = new PropertyField(opening.Data);
-                            Foldout windowFoldout = new Foldout() { text = "Windows", tooltip = "Altering this data will impact every window in the grid." };
-                            PropertyField windowDataField = new PropertyField(window.Data);
-                            #endregion
-
-                            #region Bind
-                            windowOpening.BindProperty(opening.Data);
-                            windowDataField.BindProperty(window.Data);
-                            #endregion
-
-                            #region Register Value Change Callbacks
-                            windowOpening.RegisterValueChangeCallback(evt =>
-                            {
-                                WindowOpeningData openingData = evt.changedProperty.GetUnderlyingValue() as WindowOpeningData;
-
-                                if (m_PreviousData.WindowOpening.Equals(openingData))
-                                    return;
-
-                                m_PreviousData.WindowOpening = openingData.Clone() as WindowOpeningData;
-
-                                openingData.Windows = null;
-                                currentData.IsDirty = true;
-
-                            });
-                            windowDataField.RegisterValueChangeCallback(evt =>
-                            {
-                                WindowData wallSectionWindow = evt.changedProperty.GetUnderlyingValue() as WindowData;
-
-                                if (m_PreviousData.Window.Equals(wallSectionWindow))
-                                    return;
-
-                                m_PreviousData.Window = wallSectionWindow.Clone() as WindowData;
-
-                                WindowData[] windows = currentData.WindowOpening.Windows;
-
-                                for (int i = 0; i < windows.Length; i++)
-                                {
-                                    WindowData window = windows[i];
-
-                                    window.ActiveElements = wallSectionWindow.ActiveElements;
-
-                                    if (wallSectionWindow.OuterFrame.IsDirty)
-                                    {
-                                        window.OuterFrame.Scale = wallSectionWindow.OuterFrame.Scale;
-                                        window.OuterFrame.Depth = wallSectionWindow.OuterFrame.Depth;
-                                        window.OuterFrame.Holes = wallSectionWindow.OuterFrame.Holes;
-                                        window.OuterFrame.IsDirty = wallSectionWindow.OuterFrame.IsDirty;
-                                    }
-
-                                    //if(wallSectionWindow.InnerFrame.IsDirty)
-                                    //{
-                                    //    window.InnerFrame.Scale = wallSectionWindow.InnerFrame.Scale;
-                                    //    window.InnerFrame.Depth = wallSectionWindow.InnerFrame.Depth;
-                                    //    window.InnerFrame.Columns = wallSectionWindow.InnerFrame.Columns;
-                                    //    window.InnerFrame.Rows = wallSectionWindow.InnerFrame.Rows;
-                                    //    window.InnerFrame.IsDirty = wallSectionWindow.InnerFrame.IsDirty;
-                                    //}
-
-                                    //if(wallSectionWindow.Pane.IsDirty)
-                                    //{
-                                    //    window.Pane.Depth = wallSectionWindow.Pane.Depth;
-                                    //    window.Pane.IsDirty = wallSectionWindow.Pane.IsDirty;
-                                    //}
-
-                                    //window.OuterFrame = wallSectionWindow.OuterFrame.IsDirty ? wallSectionWindow.OuterFrame.Clone() as FrameData : window.OuterFrame;
-                                    //window.InnerFrame = wallSectionWindow.InnerFrame.IsDirty ? wallSectionWindow.InnerFrame.Clone() as GridFrameData : window.InnerFrame;
-                                    //window.Pane = wallSectionWindow.Pane.IsDirty ? wallSectionWindow.Clone() as PaneData : window.Pane;
-                                    //window.LeftShutter = wallSectionWindow.LeftShutter.IsDirty ? wallSectionWindow.LeftShutter.Clone() as DoorData : window.LeftShutter;
-                                    //window.RightShutter = wallSectionWindow.RightShutter.IsDirty ? wallSectionWindow.RightShutter.Clone() as DoorData : window.RightShutter;
-                                }
-
-                            });
-                            #endregion
-
-                            #region Add Fields to Container
-                            wallElementContainer.Add(windowOpening);
-                            wallElementContainer.Add(windowFoldout);
-                            windowFoldout.Add(windowDataField);
-                            #endregion
-                        }
-                        break;
-                    case WallElement.Extension:
-                        {
-                            var extension = props.Extension;
-
-                            Foldout extensionFoldout = new Foldout() { text = "Extension" };
-                            PropertyField extensionDistance = new PropertyField(extension.Distance);
-                            extensionDistance.BindProperty(extension.Distance);
-                            //extensionDistance.RegisterValueChangeCallback(evt => buildable.Build());
-
-                            PropertyField extensionHeight = new PropertyField(extension.Height);
-                            extensionHeight.BindProperty(extension.Height);
-                            //extensionHeight.RegisterValueChangeCallback(evt => buildable.Build());
-
-                            PropertyField extensionWidth = new PropertyField(extension.Width);
-                            extensionWidth.BindProperty(extension.Width);
-                            //extensionWidth.RegisterValueChangeCallback(evt => buildable.Build());
-
-                            Foldout storeyFoldout = new Foldout() { text = "Storey" };
-
-                            //PropertyField extensionStoreyData = new PropertyField();
-                            //extensionStoreyData.BindProperty(props.ExtensionStorey);
-
-                            //Foldout roofFoldout = new Foldout() { text = "Roof" };
-                            //PropertyField extensionRoofData = new PropertyField();
-                            //extensionRoofData.BindProperty(props.ExtensionRoof);
-
-                            wallElementContainer.Add(extensionFoldout);
-                            extensionFoldout.Add(extensionDistance);
-                            extensionFoldout.Add(extensionHeight);
-                            extensionFoldout.Add(extensionWidth);
-                            extensionFoldout.Add(storeyFoldout);
-                            //storeyFoldout.Add(extensionStoreyData);
-                            //extensionFoldout.Add(roofFoldout);
-                            //roofFoldout.Add(extensionRoofData);
-                        }
-                        break;
-                    case WallElement.Empty:
+                        m_OpeningContainer.Add(m_WindowContainer);
                         break;
                 }
+
+
             });
 
-            root.Add(wallElementContainer);
+            #region Doorway
+            m_Doorway.RegisterValueChangeCallback(evt =>
+            {
+                DoorwayData doorwayData = evt.changedProperty.GetUnderlyingValue() as DoorwayData;
 
-            return root;
+                if (doorwayData.Equals(m_PreviousData.Doorway))
+                    return;
+
+                m_CurrentData.IsDirty = true;
+
+            });
+            m_ActiveDoorwayElements.RegisterValueChangeCallback(evt =>
+            {
+                bool isDoorActive = m_CurrentData.Doorway.ActiveElements.IsElementActive(DoorwayElement.Door);
+                bool isFrameActive = m_CurrentData.Doorway.ActiveElements.IsElementActive(DoorwayElement.Frame);
+
+                m_Door.SetEnabled(isDoorActive);
+                m_DoorFrame.SetEnabled(isFrameActive);
+
+                if (m_CurrentData.Doorway.ActiveElements == m_PreviousData.Doorway.ActiveElements)
+                    return;
+
+                m_PreviousData.Doorway.ActiveElements = m_CurrentData.Doorway.ActiveElements;
+
+                foreach (DoorData door in m_CurrentData.Doorway.Doors)
+                {
+                    door.ActiveElements = m_CurrentData.Doorway.ActiveElements.ToDoorElement();
+                }
+
+            });
+            m_DoorFrame.RegisterValueChangeCallback(evt =>
+            {
+                FrameData frameData = evt.changedProperty.GetUnderlyingValue() as FrameData;
+
+                if (frameData.Equals(m_PreviousData.DoorFrame))
+                    return;
+
+                m_CurrentData.IsDirty = true;
+            });
+            #endregion
+
+            #region Archway
+            m_Archway.RegisterValueChangeCallback(evt =>
+            {
+                ArchwayData archwayData = evt.changedProperty.GetUnderlyingValue() as ArchwayData;
+
+                if (archwayData.Equals(m_PreviousData.Archway))
+                    return;
+
+                m_CurrentData.IsDirty = true;
+            });
+            m_ActiveArchwayElements.RegisterValueChangeCallback(evt =>
+            {
+                bool isDoorActive = m_CurrentData.Archway.ActiveElements.IsElementActive(DoorwayElement.Door);
+                bool isFrameActive = m_CurrentData.Archway.ActiveElements.IsElementActive(DoorwayElement.Frame);
+
+                m_ArchDoor.SetEnabled(isDoorActive);
+                m_ArchDoorFrame.SetEnabled(isFrameActive);
+
+                if (m_CurrentData.Archway.ActiveElements == m_PreviousData.Archway.ActiveElements)
+                    return;
+
+                m_PreviousData.Archway.ActiveElements = m_CurrentData.Archway.ActiveElements;
+
+                foreach (DoorData archDoor in m_CurrentData.Archway.Doors)
+                {
+                    archDoor.ActiveElements = m_CurrentData.Archway.ActiveElements.ToDoorElement();
+                }
+            });
+            m_ArchDoorFrame.RegisterValueChangeCallback(evt =>
+            {
+                FrameData frameData = evt.changedProperty.GetUnderlyingValue() as FrameData;
+
+                if (frameData.Equals(m_PreviousData.DoorFrame))
+                    return;
+
+                m_CurrentData.IsDirty = true;
+            });
+            #endregion
+
+            #region Window
+            m_WindowOpening.RegisterValueChangeCallback(evt =>
+            {
+                WindowOpeningData openingData = evt.changedProperty.GetUnderlyingValue() as WindowOpeningData;
+
+                if (m_PreviousData.WindowOpening.Equals(openingData))
+                    return;
+
+                m_PreviousData.WindowOpening = openingData.Clone() as WindowOpeningData;
+
+                openingData.Windows = null;
+                m_CurrentData.IsDirty = true;
+
+            });
+            m_Window.RegisterValueChangeCallback(evt =>
+            {
+                WindowData wallSectionWindow = evt.changedProperty.GetUnderlyingValue() as WindowData;
+
+                if (m_PreviousData.Window.Equals(wallSectionWindow))
+                    return;
+
+                m_PreviousData.Window = wallSectionWindow.Clone() as WindowData;
+
+                WindowData[] windows = m_CurrentData.WindowOpening.Windows;
+
+                for (int i = 0; i < windows.Length; i++)
+                {
+                    WindowData window = windows[i];
+
+                    window.ActiveElements = wallSectionWindow.ActiveElements;
+
+                    if (wallSectionWindow.OuterFrame.IsDirty)
+                    {
+                        window.OuterFrame.Scale = wallSectionWindow.OuterFrame.Scale;
+                        window.OuterFrame.Depth = wallSectionWindow.OuterFrame.Depth;
+                        window.OuterFrame.IsHoleDirty = wallSectionWindow.OuterFrame.IsHoleDirty;
+                        window.OuterFrame.IsDirty = wallSectionWindow.OuterFrame.IsDirty;
+                    }
+
+                    if (wallSectionWindow.InnerFrame.IsDirty)
+                    {
+                        window.InnerFrame.Scale = wallSectionWindow.InnerFrame.Scale;
+                        window.InnerFrame.Depth = wallSectionWindow.InnerFrame.Depth;
+                        window.InnerFrame.Columns = wallSectionWindow.InnerFrame.Columns;
+                        window.InnerFrame.Rows = wallSectionWindow.InnerFrame.Rows;
+                        window.InnerFrame.IsHoleDirty = wallSectionWindow.InnerFrame.IsHoleDirty;
+                        window.InnerFrame.IsDirty = wallSectionWindow.InnerFrame.IsDirty;
+                    }
+
+                    if (wallSectionWindow.Pane.IsDirty)
+                    {
+                        window.Pane.Depth = wallSectionWindow.Pane.Depth;
+                        window.Pane.IsDirty = wallSectionWindow.Pane.IsDirty;
+                    }
+                }
+
+            });
+            #endregion
+
         }
     }
 }

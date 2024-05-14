@@ -17,5 +17,10 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_OuterFrameData = data as OuterFrameData;
             return this;
         }
+
+        private void OnValidate()
+        {
+            m_OnDataChanged.Invoke(m_OuterFrameData);
+        }
     }
 }

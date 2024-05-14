@@ -9,36 +9,22 @@ using Unity.VisualScripting;
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     [CustomPropertyDrawer(typeof(GridFrameData), useForChildren:true)]
-    public class GridFrameDataDrawer : PropertyDrawer, IFieldInitializer
+    public class GridFrameDataDrawer : DataDrawer
     {
         [SerializeField] GridFrameData m_CurrentData;
         [SerializeField] GridFrameData m_PreviousData;
 
         GridFrameDataSerializedProperties m_Props;
-        VisualElement m_Root;
         Foldout m_Grid;
         PropertyField m_Depth, m_Scale, m_Columns, m_Rows;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
-            Initialize(data);
-            m_Root.name = nameof(GridFrameData) + "_Root";
+            m_Props = new GridFrameDataSerializedProperties(data);
             m_CurrentData = data.GetUnderlyingValue() as GridFrameData;
             m_PreviousData = m_CurrentData.Clone() as GridFrameData;
-
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-
-            return m_Root;
         }
-        public void Initialize(SerializedProperty data)
-        {
-            m_Root = new VisualElement();
-            m_Props = new GridFrameDataSerializedProperties(data);
-        }
-        public void DefineFields()
+        protected override void DefineFields()
         {
             m_Grid = new Foldout() { text = "Grid" };
             m_Scale = new PropertyField(m_Props.Scale, "Scale");
@@ -46,7 +32,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Columns = new PropertyField(m_Props.Columns, "Columns");
             m_Rows = new PropertyField(m_Props.Rows, "Rows");
         }
-        public void BindFields()
+        protected override void BindFields()
         {
             m_Scale.BindProperty(m_Props.Scale);
             m_Depth.BindProperty(m_Props.Depth);
@@ -54,7 +40,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Rows.BindProperty(m_Props.Rows);
         }
 
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_Scale.RegisterValueChangeCallback(evt =>
             {
@@ -65,8 +51,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
                 m_PreviousData.Scale = scale;
 
-                GridFrame.CalculateHoleData(m_CurrentData);
-
+                m_CurrentData.IsHoleDirty = true;
                 m_CurrentData.IsDirty = true;
             });
             m_Depth.RegisterValueChangeCallback(evt =>
@@ -84,8 +69,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
                 m_PreviousData.Columns = evt.changedProperty.intValue;
 
-                GridFrame.CalculateHoleData(m_CurrentData);
-
+                m_CurrentData.IsHoleDirty = true;
                 m_CurrentData.IsDirty = true;
             });
             m_Rows.RegisterValueChangeCallback(evt =>
@@ -95,12 +79,11 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
                 m_PreviousData.Rows = evt.changedProperty.intValue;
 
-                GridFrame.CalculateHoleData(m_CurrentData);
-
+                m_CurrentData.IsHoleDirty = true;
                 m_CurrentData.IsDirty = true;
             });
         }
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_Grid.Add(m_Columns);
             m_Grid.Add(m_Rows);

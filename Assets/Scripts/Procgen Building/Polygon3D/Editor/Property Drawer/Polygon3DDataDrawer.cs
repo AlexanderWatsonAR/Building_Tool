@@ -12,7 +12,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
 
     [CustomPropertyDrawer(typeof(Polygon3DData), useForChildren:true)]
-    public class Polygon3DDataDrawer : PropertyDrawer, IFieldInitializer
+    public class Polygon3DDataDrawer : DataDrawer
     {
         Buildable m_Buildable;
 
@@ -20,39 +20,25 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         [SerializeField] Polygon3DData m_PreviousData;
 
         Polygon3DDataSerializedProperties m_Props;
-        VisualElement m_Root;
         PropertyField m_Depth;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
-            Initialize(data);
+            m_Props = new Polygon3DDataSerializedProperties(data);
+            m_Buildable = data.serializedObject.targetObject as Buildable;
             m_Root.name = nameof(FrameData) + "_Root";
             m_CurrentData = data.GetUnderlyingValue() as Polygon3DData;
             m_PreviousData = m_CurrentData.Clone() as Polygon3DData;
-
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-
-            return m_Root;
         }
-
-        public void Initialize(SerializedProperty data)
-        {
-            m_Root = new VisualElement();
-            m_Props = new Polygon3DDataSerializedProperties(data);
-            m_Buildable = data.serializedObject.targetObject as Buildable;
-        }
-        public void DefineFields()
+        protected override void DefineFields()
         {
             m_Depth = new PropertyField(m_Props.Depth, "Depth");
         }
-        public void BindFields()
+        protected override void BindFields()
         {
             m_Depth.BindProperty(m_Props.Depth);
         }
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_Depth.RegisterValueChangeCallback(evt =>
             {
@@ -66,7 +52,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 m_CurrentData.IsDirty = true;
             });
         }
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_Depth);
         }

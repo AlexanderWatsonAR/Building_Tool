@@ -18,7 +18,7 @@ public struct ControlPoint
 
     #region Accessors
     public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
-    public Vector3 Forward { get { return m_Forward; } set { m_Position = value; } }
+    public Vector3 Forward { get { return m_Forward; } set { m_Forward = value; } }
     public Vector3 Backward { get { return -Forward; } }
     public Vector3 Up { get{ return m_Up; } set { m_Up = value; } }
     public Vector3 Down => Vector3.down;

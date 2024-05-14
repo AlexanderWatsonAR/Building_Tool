@@ -7,41 +7,28 @@ using Unity.VisualScripting;
 namespace OnlyInvalid.ProcGenBuilding.Door
 {
     [CustomPropertyDrawer(typeof(DoorData))]
-    public class DoorDataDrawer : PropertyDrawer, IFieldInitializer
+    public class DoorDataDrawer : DataDrawer
     {
-        [SerializeField] DoorData m_CurrentData;
-        [SerializeField] DoorData m_PreviousData;
+        DoorData m_PreviousData, m_CurrentData;
         DoorDataSerializedProperties m_Props;
 
-        VisualElement m_Root;
         PropertyField m_Scale;
         Foldout m_HingeFoldout;
         PropertyField m_Hinge;
 
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_Scale);
             m_Root.Add(m_HingeFoldout);
             m_HingeFoldout.Add(m_Hinge);
         }
 
-        public void BindFields()
+        protected override void BindFields()
         {
             m_Scale.BindProperty(m_Props.Hinge.Scale);
             m_Hinge.BindProperty(m_Props.Hinge.Data);
         }
-
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
-        {
-            Initialize(data);
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-            return m_Root;
-        }
-
-        public void DefineFields()
+        protected override void DefineFields()
         {
             m_Root = new VisualElement() { name = nameof(DoorData) + "_Root" };
             m_Scale = new PropertyField(m_Props.Hinge.Scale); // this probably shouldn't be in hinge data.
@@ -49,14 +36,14 @@ namespace OnlyInvalid.ProcGenBuilding.Door
             m_Hinge = new PropertyField(m_Props.Hinge.Data);
         }
 
-        public void Initialize(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
             m_Props = new DoorDataSerializedProperties(data);
             m_CurrentData = data.GetUnderlyingValue() as DoorData;
             m_PreviousData = m_CurrentData.Clone() as DoorData;
         }
 
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_Scale.RegisterValueChangeCallback(evt =>
             {

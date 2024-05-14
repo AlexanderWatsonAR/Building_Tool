@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
 
@@ -17,6 +15,8 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
             m_Corners = new Corner[m_CornersData.Corners.Length];
             return this;
         }
+
+
 
         public override void Build()
         {

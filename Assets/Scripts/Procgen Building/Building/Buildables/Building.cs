@@ -20,13 +20,15 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public BuildingScriptableObject DataAccessor => m_DataAccessor;
         public BuildingData BuildingData { get { return m_DataAccessor.Data; } set { m_BuildingData = value; m_DataAccessor.Data = value; } }
-        public PlanarPath Path => BuildingData.Path;
+        public Path Path => BuildingData.Path;
 
         public override Buildable Initialize(DirtyData data)
         {
             base.Initialize(data);
             m_BuildingData = data as BuildingData;
             m_DataAccessor = BuildingScriptableObject.Create(m_BuildingData);
+
+
             return this;
         }
 
@@ -34,14 +36,14 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         {
             Demolish();
 
-            if (!m_DataAccessor.Data.Path.IsPathValid)
+            if (!Path.IsPathValid)
                 return;
 
             Vector3 pos = Vector3.zero;
 
-            for (int i = 0; i < m_DataAccessor.Data.Storeys.Count; i++)
+            for (int i = 0; i < m_BuildingData.Storeys.Count; i++)
             {
-                Storey.Storey storey = CreateStorey(m_DataAccessor.Data.Storeys[i]);
+                Storey.Storey storey = CreateStorey(m_BuildingData.Storeys[i]);
                 storey.transform.SetParent(transform, false);
                 storey.transform.localPosition = pos;
                 storey.Data.IsDirty = true;
@@ -55,7 +57,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             GameObject roofGO = new GameObject("Roof");
             roofGO.transform.SetParent(transform, false);
             roofGO.transform.localPosition = pos;
-            roofGO.AddComponent<Roof.Roof>().Initialize(m_DataAccessor.Data.Roof).Build();
+            roofGO.AddComponent<Roof.Roof>().Initialize(m_BuildingData.Roof).Build();
         }
 
         private Storey.Storey CreateStorey(StoreyData data)
@@ -69,12 +71,12 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public void AddStorey(string name)
         {
-            m_DataAccessor.Data.Storeys.Add(new StoreyData() { Name = name, ControlPoints = m_DataAccessor.Data.Path.ControlPoints });
+            m_BuildingData.Storeys.Add(new StoreyData() { Name = name, ControlPoints = Path.ControlPoints });
         }
 
         public void InitializeRoof()
         {
-            m_DataAccessor.Data.Roof.ControlPoints = m_DataAccessor.Data.Path.ControlPoints;
+            m_BuildingData.Roof.ControlPoints = Path.ControlPoints;
         }
 
         public void BuildStorey(int index)

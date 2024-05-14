@@ -14,7 +14,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Storey
 {
     [CustomPropertyDrawer(typeof(StoreyData))]
-    public class StoreyDataDrawer : PropertyDrawer, IFieldInitializer
+    public class StoreyDataDrawer : DataDrawer
     {
         StoreyDataSerializedProperties m_Props;
 
@@ -22,7 +22,6 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         [SerializeField] StoreyData m_CurrentData;
         [SerializeField] Buildable m_Buildable;
 
-        VisualElement m_Root;
         Foldout m_StoreyFoldout, m_WallFoldout, m_CornerFoldout, m_PillarFoldout, m_FloorFoldout;
         PropertyField m_ActiveElements;
         PropertyField m_Corner;
@@ -31,26 +30,14 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         PropertyField m_Pillar;
         PropertyField m_FloorHeight;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
-        {
-            Initialize(data);
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-
-            return m_Root;
-        }
-
-        public void Initialize(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
             m_Props = new StoreyDataSerializedProperties(data);
             m_CurrentData = data.GetUnderlyingValue() as StoreyData;
             m_PreviousData = new StoreyData(m_CurrentData);
             m_Buildable = data.serializedObject.targetObject as Buildable;
         }
-
-        public void DefineFields()
+        protected override void DefineFields()
         {
             m_Root = new VisualElement() { name = nameof(StoreyData) + "_" + m_Props.Name.stringValue + "_Root" };
             m_StoreyFoldout = new Foldout() { text = m_Props.Name.stringValue };
@@ -70,8 +57,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             m_FloorFoldout = new Foldout() { text = "Floor" };
             m_FloorHeight = new PropertyField(m_Props.Floor.Height);
         }
-
-        public void BindFields()
+        protected override void BindFields()
         {
             m_ActiveElements.BindProperty(m_Props.ActiveElements);
             m_WallHeight.BindProperty(m_Props.Wall.Height);
@@ -80,8 +66,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             m_Pillar.BindProperty(m_Props.Pillar.Data);
             m_FloorHeight.BindProperty(m_Props.Floor.Height);
         }
-
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_ActiveElements.RegisterValueChangeCallback(evt =>
             {
@@ -174,8 +159,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
                 }
             });
         }
-
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_StoreyFoldout);
             m_WallFoldout.Add(m_WallHeight);

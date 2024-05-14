@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
     [CustomEditor(typeof(OuterFrame))]
-    public class OuterFrameEditor : DataEditor
+    public class OuterFrameEditor : BuildableEditor
     {
         public override VisualElement CreateInspectorGUI()
         {

@@ -10,35 +10,28 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Roof
 {
     [CustomPropertyDrawer(typeof(RoofSectionData))]
-    public class RoofSectionDataDrawer : PropertyDrawer, IFieldInitializer
+    public class RoofSectionDataDrawer : DataDrawer
     {
-        VisualElement m_Root;
         RoofSectionData m_PreviousData;
         PropertyField m_Columns, m_Rows;
-        IBuildable m_Buildable;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
-        {
-            return base.CreatePropertyGUI(data);
-        }
-
-        public void Initialize(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
             throw new System.NotImplementedException();
         }
-        public void DefineFields()
+        protected override void DefineFields()
         {
             throw new System.NotImplementedException();
         }
-        public void BindFields()
+        protected override void BindFields()
         {
             throw new System.NotImplementedException();
         }
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             throw new System.NotImplementedException();
         }
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             throw new System.NotImplementedException();
         }

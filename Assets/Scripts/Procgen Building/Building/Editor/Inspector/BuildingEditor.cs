@@ -6,6 +6,7 @@ using UnityEditor.UIElements;
 using Unity.VisualScripting;
 using UnityEditor.EditorTools;
 using OnlyInvalid.ProcGenBuilding.Common;
+using OnlyInvalid.ProcGenBuilding.Storey;
 
 namespace OnlyInvalid.ProcGenBuilding.Building
 {
@@ -17,6 +18,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         VisualElement m_Root;
 
         SerializedProperty m_Container, m_Data;
+        Foldout m_RoofFoldout;
+        PropertyField m_Storeys, m_Roof;
 
         public override VisualElement CreateInspectorGUI()
         {
@@ -64,8 +67,15 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         }
         public void Build()
         {
-            m_Building.AddStorey("Ground");
-            m_Building.InitializeRoof();
+            m_Building.BuildingData.Path.CalculateForwards();
+
+            foreach (StoreyData data in m_Building.BuildingData.Storeys)
+            {
+                data.ControlPoints = m_Building.Path.ControlPoints;
+            }
+
+            m_Building.BuildingData.Roof.ControlPoints = m_Building.Path.ControlPoints;
+
             m_Building.Build();
         }
         private void DisplayMessages(DrawState state)
@@ -124,27 +134,28 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
                         Button edit_btn = new Button(() =>
                         {
-                            ToolManager.SetActiveTool<DrawTool>();
-                            DrawTool.OnStateChange.AddListener((drawState) => DisplayMessages(drawState));
+                            ToolManager.SetActiveTool<PolygonDrawTool>();
+                            PolygonDrawTool.OnStateChange.AddListener((drawState) => DisplayMessages(drawState));
+                            PolygonDrawTool.DrawState = DrawState.Edit;
                             SceneView.RepaintAll();
                         });
                         edit_btn.text = "Edit Building Path";
 
-                        //m_Root.Add(containerField);
                         m_Root.Add(edit_btn);
                         m_Root.Add(new HelpBox("Editing the path will erase changes made to the building", HelpBoxMessageType.Warning));
 
-                        ListView storeys = new ListView(m_Building.BuildingData.Storeys);
+                        m_Storeys = new PropertyField(m_Props.Storeys.Data);
+                        m_Storeys.BindProperty(m_Props.Storeys.Data);
 
-                        PropertyField roof = new PropertyField(m_Props.Roof.Data);
-                        roof.BindProperty(m_Props.Roof.Data);
+                        m_Roof = new PropertyField(m_Props.Roof.Data);
+                        m_Roof.BindProperty(m_Props.Roof.Data);
 
-                        Foldout roofFoldout = new Foldout() { text = "Roof" };
-                        roofFoldout.Add(roof);
+                        m_RoofFoldout = new Foldout() { text = "Roof" };
+                        m_RoofFoldout.Add(m_Roof);
 
                         m_Root.Add(container);
-                        m_Root.Add(storeys);
-                        m_Root.Add(roofFoldout);
+                        m_Root.Add(m_Storeys);
+                        m_Root.Add(m_RoofFoldout);
                     }
                     break;
             }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
+using OnlyInvalid.ProcGenBuilding.Polygon3D;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
@@ -13,6 +14,11 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         {
             m_PaneData = data as PaneData;
             return base.Initialize(data);
+        }
+
+        private void OnValidate()
+        {
+            m_OnDataChanged.Invoke(m_PaneData);
         }
 
     }

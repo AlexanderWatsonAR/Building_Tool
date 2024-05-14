@@ -9,7 +9,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Door
 {
     [CustomEditor(typeof(Door))]
-    public class DoorEditor : DataEditor
+    public class DoorEditor : BuildableEditor
     {
         DoorDataSerializedProperties m_Props;
         Vector3 m_HingePosition;

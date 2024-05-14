@@ -101,8 +101,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             Ray ray = HandleUtil.GUIPointToWorldRay(currentEvent.mousePosition);
             float size = HandleUtil.GetHandleSize(ray.GetPoint(1)) * 0.05f;
 
-            bool didHit = m_Drawable.Path.Plane.Raycast(ray, out float enter);
-            Vector3 hit = ray.GetPoint(enter);
+            bool didHit = m_Drawable.Path.Raycast(ray, out Vector3 hit);
 
             if (didHit)
             {
@@ -186,7 +185,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 Color handleColour = Handles.color;
                 Handles.color = m_SelectedHandle == i + 1 ? Color.yellow : handleColour;
 
-                Vector3 globalPoint = Handles.FreeMoveHandle(i + 1, globalPositions[i], size, m_Drawable.Path.Normal, BuildingHandles.SolidCircleHandleCap);
+                Vector3 globalPoint = Handles.FreeMoveHandle(i + 1, globalPositions[i], size, m_Drawable.Path.ControlPoints[i].Up, BuildingHandles.SolidCircleHandleCap);
 
                 Handles.color = handleColour;
 
@@ -195,11 +194,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 {
                     Ray ray = HandleUtil.GUIPointToWorldRay(Event.current.mousePosition);
 
-                    if (m_Drawable.Path.Plane.Raycast(ray, out float enter))
-                    {
-                        Vector3 rayPoint = ray.GetPoint(enter);
+                    Plane plane = new Plane(Vector3.up, Vector3.zero);
 
-                        m_Drawable.Path.SetPositionAt(rayPoint, i);
+                    if (m_Drawable.Path.Raycast(ray, out Vector3 impactPoint))
+                    {
+                        m_Drawable.Path.SetPositionAt(impactPoint, i);
                     }
 
                 }

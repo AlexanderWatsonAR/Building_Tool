@@ -32,7 +32,6 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                 this.Add(m_Size);
             }
         }
-
         internal class SizeVisualElement : HorizontalVisualElement
         {
             Label m_Height, m_Width;
@@ -46,7 +45,6 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                 this.Add(m_Width);
             }
         }
-
         internal class HorizontalVisualElement : VisualElement
         {
             public HorizontalVisualElement() : base()
@@ -59,19 +57,21 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public override VisualElement CreateInspectorGUI()
         {
+            //return base.CreateInspectorGUI();
+
             VisualElement root = new VisualElement();
 
             serializedObject.Update();
 
-            SerializedProperty data = serializedObject.FindProperty("m_Data");
+            SerializedProperty data = serializedObject.FindProperty("m_BuildingData");
 
             m_Props = new BuildingDataSerializedProperties(data);
 
-            Label numberOfStoreys = new Label("Storey Count: " + m_Props.Storeys.Count);
+            Label numberOfStoreys = new Label("Storey Count: " + m_Props.Storeys.Storeys.Count);
 
             root.Add(numberOfStoreys);
 
-            foreach (var storey in m_Props.Storeys)
+            foreach (var storey in m_Props.Storeys.Storeys)
             {
                 Foldout storeyFoldout = new Foldout() { text = "Storey " + storey.ID.intValue };
                 storeyFoldout.Add(new Label("Name: " + storey.Name.stringValue));
@@ -89,6 +89,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
             wallsFoldout.Add(new Label("Height: " + storey.Wall.Height.floatValue));
             wallsFoldout.Add(new Label("Depth: " + storey.Wall.Depth.floatValue));
+            wallsFoldout.Add(new Label("Number of Walls: " + storey.Walls.Length));
 
             foreach (var wall in storey.Walls)
             {
@@ -96,12 +97,6 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
                 GridVisualElement grid = new GridVisualElement(wall.Columns.intValue, wall.Rows.intValue);
 
-                //horizontalContainer.Add(new Label("Grid Size: " + wall.Columns.intValue * wall.Rows.intValue));
-                //horizontalContainer.Add(new Label("Columns: " + wall.Columns.intValue));
-                //horizontalContainer.Add(new Label("Rows: " + wall.Rows.intValue));
-
-
-                //wallFoldout.Add(horizontalContainer);
                 wallFoldout.Add(grid);
                 wallFoldout.Add(DefineWallSectionsFields(wall));
                 wallsFoldout.Add(wallFoldout);

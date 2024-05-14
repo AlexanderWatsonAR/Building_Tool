@@ -8,12 +8,8 @@ using UnityEngine.UIElements;
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
     [CustomEditor(typeof(InnerFrame))]
-    public class InnerFrameEditor : DataEditor
+    public class InnerFrameEditor : BuildableEditor
     {
-        public override VisualElement CreateInspectorGUI()
-        {
-            return base.CreateInspectorGUI();
-        }
     }
 
 }

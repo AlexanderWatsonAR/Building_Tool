@@ -11,44 +11,32 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Corner
 {
     [CustomPropertyDrawer(typeof(CornerData))]
-    public class CornerDataDrawer : PropertyDrawer, IFieldInitializer
+    public class CornerDataDrawer : DataDrawer
     {
         CornerDataSerializedProperties m_Props;
 
         [SerializeField] CornerData m_PreviousData;
-        [SerializeField] IBuildable m_Buildable;
+        [SerializeField] Buildable m_Buildable;
 
-        VisualElement m_Root;
         PropertyField m_Type, m_Sides;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
-        {
-            Initialize(data);
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-
-            return m_Root;
-        }
-        public void Initialize(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
             m_Props = new CornerDataSerializedProperties(data);
-            m_Buildable = data.serializedObject.targetObject as IBuildable;
+            m_Buildable = data.serializedObject.targetObject as Buildable;
             m_PreviousData = new CornerData(data.GetUnderlyingValue() as CornerData);
         }
-        public void DefineFields()
+        protected override void DefineFields()
         {
-            m_Root = new VisualElement() { name = nameof(CornerData) + "_Root" };
             m_Type = new PropertyField(m_Props.Type);
             m_Sides = new PropertyField(m_Props.Sides);
         }
-        public void BindFields()
+        protected override void BindFields()
         {
             m_Type.BindProperty(m_Props.Type);
             m_Sides.BindProperty(m_Props.Sides);
         }
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_Type.RegisterValueChangeCallback(evt =>
             {
@@ -70,7 +58,7 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
             });
 
         }
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_Type);
             m_Root.Add(m_Sides);

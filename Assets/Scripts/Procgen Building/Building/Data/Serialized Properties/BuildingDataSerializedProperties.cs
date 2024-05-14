@@ -9,7 +9,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 {
     public class BuildingDataSerializedProperties : SerializedPropertyGroup
     {
-        readonly List<StoreyDataSerializedProperties> m_Storeys;
+        readonly StoreysDataSerializedProperties m_Storeys;
         readonly RoofDataSerializedProperties m_Roof;
 
         #region Constants
@@ -18,22 +18,14 @@ namespace OnlyInvalid.ProcGenBuilding.Building
         #endregion
 
         #region Accessor
-        public List<StoreyDataSerializedProperties> Storeys => m_Storeys;
+        public StoreysDataSerializedProperties Storeys => m_Storeys;
         public RoofDataSerializedProperties Roof => m_Roof;
         #endregion
 
         public BuildingDataSerializedProperties(SerializedProperty buildingData) : base(buildingData)
         {
             m_Roof = new RoofDataSerializedProperties(m_Data.FindPropertyRelative(k_Roof));
-
-            SerializedProperty storeys = m_Data.FindPropertyRelative(k_Storeys);
-
-            m_Storeys = new List<StoreyDataSerializedProperties>(storeys.arraySize);
-
-            for (int i = 0; i < storeys.arraySize; i++)
-            {
-                m_Storeys.Add(new StoreyDataSerializedProperties(storeys.GetArrayElementAtIndex(i)));
-            }
+            m_Storeys = new StoreysDataSerializedProperties(m_Data.FindPropertyRelative(k_Storeys));
         }
     }
 }

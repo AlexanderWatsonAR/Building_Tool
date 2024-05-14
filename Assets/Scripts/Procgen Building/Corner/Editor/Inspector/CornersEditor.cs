@@ -8,11 +8,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Corner
 {
     [CustomEditor(typeof(Corners))]
-    public class CornersEditor : DataEditor
+    public class CornersEditor : BuildableEditor
     {
-        public override VisualElement CreateInspectorGUI()
-        {
-            return base.CreateInspectorGUI();
-        }
     }
 }

@@ -9,14 +9,14 @@ using System.Linq;
 using Unity.VisualScripting;
 using static PlasticPipe.Server.MonitorStats;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using System;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
 
     [CustomPropertyDrawer(typeof(WindowData))]
-    public class WindowDataDrawer : PropertyDrawer, IFieldInitializer
+    public class WindowDataDrawer : DataDrawer
     {
-        VisualElement m_Root;
         WindowDataSerializedProperties m_Props;
         WindowData m_CurrentData;
         WindowData m_PreviousData;
@@ -24,27 +24,13 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         Foldout m_OuterFrameFoldout, m_InnerFrameFoldout, m_PaneFoldout, m_ShuttersFoldout;
         PropertyField m_ActiveElements, m_OuterFrame, m_InnerFrame, m_Pane, m_LeftShutter, m_RightShutter;
 
-        public override VisualElement CreatePropertyGUI(SerializedProperty data)
+        protected override void Initialize(SerializedProperty data)
         {
-            Initialize(data);
-            m_Root.name = nameof(WindowData) + "_Root";
-
-            DefineFields();
-            BindFields();
-            RegisterValueChangeCallbacks();
-            AddFieldsToRoot();
-
-            return m_Root;
-        }
-
-        public void Initialize(SerializedProperty data)
-        {
-            m_Root = new VisualElement();
             m_Props = new WindowDataSerializedProperties(data);
             m_CurrentData = data.GetUnderlyingValue() as WindowData;
             m_PreviousData = m_CurrentData.Clone() as WindowData;
         }
-        public void DefineFields()
+        protected override void DefineFields()
         {
             m_ActiveElements = new PropertyField(m_Props.ActiveElements);
             m_OuterFrameFoldout = new Foldout() { text = "Outer Frame" };
@@ -59,7 +45,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_RightShutter = new PropertyField(m_Props.RightShutter.Data);
         }
 
-        public void BindFields()
+        protected override void BindFields()
         {
             m_ActiveElements.BindProperty(m_Props.ActiveElements);
             m_OuterFrame.BindProperty(m_Props.OuterFrame.Data);
@@ -69,7 +55,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_RightShutter.BindProperty(m_Props.RightShutter.Data);
         }
 
-        public void RegisterValueChangeCallbacks()
+        protected override void RegisterValueChangeCallbacks()
         {
             m_ActiveElements.RegisterValueChangeCallback(evt =>
             {
@@ -85,7 +71,9 @@ namespace OnlyInvalid.ProcGenBuilding.Window
                 m_PaneFoldout.SetEnabled(isPaneActive);
                 m_ShuttersFoldout.SetEnabled(areShuttersActive);
 
-                m_CurrentData.IsDirty = true;
+                if(m_PreviousData.ActiveElements != currentlyActive)
+                    m_CurrentData.IsDirty = true;
+
             });
 
             m_OuterFrame.RegisterValueChangeCallback(evt =>
@@ -96,14 +84,36 @@ namespace OnlyInvalid.ProcGenBuilding.Window
                     return;
 
                 if (frameData.Scale != m_PreviousData.OuterFrame.Scale)
+                {
                     m_CurrentData.IsDirty = true;
-
+                }
+                    
                 m_PreviousData.OuterFrame = frameData.Clone() as OuterFrameData;
+            });
+            m_InnerFrame.RegisterValueChangeCallback(evt => 
+            {
+                InnerFrameData frameData = evt.changedProperty.GetUnderlyingValue() as InnerFrameData;
+
+                if (frameData.Equals(m_PreviousData.InnerFrame))
+                    return;
+
+                m_CurrentData.InnerFrame.IsDirty = true;
+                m_PreviousData.InnerFrame = frameData.Clone() as InnerFrameData;
+            });
+            m_Pane.RegisterValueChangeCallback(evt => 
+            {
+                PaneData paneData = evt.changedProperty.GetUnderlyingValue() as PaneData;
+
+                if (paneData.Equals(m_PreviousData.Pane))
+                    return;
+
+                m_CurrentData.Pane.IsDirty = true;
+                m_PreviousData.Pane = paneData.Clone() as PaneData;
             });
 
         }
 
-        public void AddFieldsToRoot()
+        protected override void AddFieldsToRoot()
         {
             m_OuterFrameFoldout.Add(m_OuterFrame);
             m_InnerFrameFoldout.Add(m_InnerFrame);
