@@ -75,6 +75,11 @@ public enum OneLineShape
     Unknown, Antenna, Arrow, Asterisk, Square, Crenel, E, F, H, InterlockY, K, L, M, N, SimpleM, SimpleN, T, U, Y, X, ZigZag 
 }
 
+public enum ShapeType
+{
+    Polygon, Arch, Custom
+}
+
 public static class EnumExtensions
 {
 

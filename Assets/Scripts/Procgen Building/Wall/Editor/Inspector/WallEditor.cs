@@ -15,7 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
     {
         [SerializeField] private SerializedProperty m_ActiveSection;
 
-        class Section : VisualElement
+        internal class Section : VisualElement
         {
             private SerializedProperty m_WallSection;
             public SerializedProperty WallSection => m_WallSection;

@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using OnlyInvalid.ProcGenBuilding.Common;
 
-[CustomPropertyDrawer(typeof(DirtyData), useForChildren:true)]
+[CustomPropertyDrawer(typeof(DirtyData))]
 public abstract class DataDrawer : PropertyDrawer
 {
     protected VisualElement m_Root;
