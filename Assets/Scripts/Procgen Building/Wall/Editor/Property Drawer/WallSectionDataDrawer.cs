@@ -10,6 +10,7 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEditor.PackageManager.UI;
 using static PlasticPipe.Server.MonitorStats;
+using OnlyInvalid.CustomVisualElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
@@ -29,7 +30,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         PropertyField m_Archway, m_ActiveArchwayElements, m_ArchDoor, m_ArchDoorFrame;
         Foldout m_ArchDoorFoldout;
         PropertyField m_WindowOpening, m_Window;
-        Foldout m_WindowFoldout;
+        HeaderFoldout m_WindowFoldout;
 
         protected override void AddFieldsToRoot()
         {
@@ -55,7 +56,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             #region Window
             m_WindowContainer.Add(m_WindowOpening);
             m_WindowContainer.Add(m_WindowFoldout);
-            m_WindowFoldout.Add(m_Window);
+            m_WindowFoldout.AddItem(m_Window);
             #endregion
         }
         protected override void BindFields()
@@ -119,7 +120,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
             #region Window
             m_WindowOpening = new PropertyField();
-            m_WindowFoldout = new Foldout() { text = "Windows"};
+            m_WindowFoldout = new HeaderFoldout("Windows");
             m_Window = new PropertyField();
             #endregion
         }

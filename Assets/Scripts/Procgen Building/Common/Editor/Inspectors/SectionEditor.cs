@@ -27,14 +27,24 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             SerializedProperty firstOpening = openings.GetArrayElementAtIndex(0);
 
-            HeaderFoldout foldout = new HeaderFoldout("Foldout");
+            HeaderFoldout foldout = new HeaderFoldout("My Foldout");
             foldout.AddItem(new Label("Item 0"));
             foldout.AddItem(new Label("Item 1"));
             foldout.AddItem(new Label("Item 2"));
             foldout.AddItem(new Label("Item 3"));
 
-            root.Add(foldout);
             
+
+            Foldout f = new Foldout();
+
+            f.text = "Unity Foldout";
+            f.Add(new Label("Item 0"));
+            f.Add(new Label("Item 1"));
+            f.Add(new Label("Item 2"));
+            f.Add(new Label("Item 3"));
+
+            root.Add(foldout);
+            root.Add(f);
 
             return root;
         }
