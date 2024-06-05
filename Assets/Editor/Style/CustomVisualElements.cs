@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting.Antlr3.Runtime;
+using System.Web;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,9 +7,9 @@ namespace OnlyInvalid.CustomVisualElements
 {
     public class HorizontalContainer : VisualElement
     {
-        public HorizontalContainer() : base()
+        public HorizontalContainer(bool reverse = false) : base()
         {
-            this.style.flexDirection = FlexDirection.Row;
+            this.style.flexDirection = reverse ? FlexDirection.RowReverse : FlexDirection.Row;
         }
     }
 
@@ -35,6 +33,31 @@ namespace OnlyInvalid.CustomVisualElements
         }
     }
 
+    public class ContextElement : VisualElement
+    {
+        GenericDropdownMenu m_ContextMenu;
+
+        public GenericDropdownMenu menu => m_ContextMenu;
+
+        public ContextElement() : base()
+        {
+            this.style.backgroundImage = new StyleBackground(EditorGUIUtility.IconContent("d_more").image as Texture2D);
+
+            this.m_ContextMenu = new GenericDropdownMenu();
+            this.AddManipulator(new Clickable(() => DisplayContextMenu()));
+        }
+        public ContextElement(GenericDropdownMenu contextMenu)
+        {
+            this.m_ContextMenu = contextMenu;
+            this.AddManipulator(new Clickable(() => DisplayContextMenu()));
+        }
+
+        private void DisplayContextMenu()
+        {
+            m_ContextMenu.DropDown(this.worldBound, this);
+        }
+    }
+
     public class HeaderFoldout : BindableElement, INotifyValueChanged<bool>
     {
         #region UXML
@@ -43,7 +66,7 @@ namespace OnlyInvalid.CustomVisualElements
         }
         public new class UxmlTraits : BindableElement.UxmlTraits
         {
-            UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription { name = "text"};
+            UxmlStringAttributeDescription m_Text = new UxmlStringAttributeDescription { name = "text" };
             UxmlBoolAttributeDescription m_Value = new UxmlBoolAttributeDescription { name = "value", defaultValue = true };
             UxmlBoolAttributeDescription m_Toggle = new UxmlBoolAttributeDescription { name = "active", defaultValue = true };
 
@@ -66,15 +89,19 @@ namespace OnlyInvalid.CustomVisualElements
         public static readonly string arrowUssClassName = ussClassName + "__arrow";
         public static readonly string toggleUssClassName = ussClassName + "__toggle";
         public static readonly string labelUssClassName = ussClassName + "__label";
-        public static string headerUssClassName = ussClassName + "__header";
+        public static readonly string headerUssClassName = ussClassName + "__header";
+        public static readonly string leftHeaderUssClassName = ussClassName + "__left-header";
+        public static readonly string rightHeaderUssClassName = ussClassName + "__right-header";
         public static readonly string contentUssClassName = ussClassName + "__content";
+        public static readonly string contextMenuUssClassName = ussClassName + "__context-menu";
         #endregion
 
         #region Members
         VisualElement m_Arrow;
         Toggle m_Toggle;
         Label m_Label;
-        HorizontalContainer m_HeaderContainer;
+        ContextElement m_ContextElement;
+        HorizontalContainer m_HeaderContainer, m_LeftHeader, m_RightHeader;
         VerticalContainer m_ContentContainer;
         [SerializeField] bool m_Value;
         #endregion
@@ -90,7 +117,7 @@ namespace OnlyInvalid.CustomVisualElements
             }
             set
             {
-                if(m_Value != value)
+                if (m_Value != value)
                 {
                     using ChangeEvent<bool> changeEvent = ChangeEvent<bool>.GetPooled(m_Value, value);
                     changeEvent.target = this;
@@ -99,6 +126,7 @@ namespace OnlyInvalid.CustomVisualElements
                 }
             }
         }
+        public GenericDropdownMenu contextMenu => m_ContextElement.menu;
         #endregion
 
         public HeaderFoldout()
@@ -110,7 +138,6 @@ namespace OnlyInvalid.CustomVisualElements
             {
                 styleSheets.Add(styleSheet);
             }
-
             DefineFields();
             SetDefaults();
             AddToClassList();
@@ -129,6 +156,8 @@ namespace OnlyInvalid.CustomVisualElements
         private void DefineFields()
         {
             m_HeaderContainer = new HorizontalContainer();
+            m_LeftHeader = new HorizontalContainer();
+            m_RightHeader = new HorizontalContainer(true);
             m_Arrow = new VisualElement()
             {
                 name = "__arrow",
@@ -144,12 +173,18 @@ namespace OnlyInvalid.CustomVisualElements
             {
                 name = "__label",
             };
-            m_ContentContainer = new VerticalContainer() { name = "__content"};
+            m_ContextElement = new ContextElement();
+            m_ContentContainer = new VerticalContainer() { name = "__content" };
         }
         private void SetDefaults()
         {
             value = true;
             active = true;
+            m_HeaderContainer.name = "__header";
+            m_LeftHeader.name = "__left-header";
+            m_LeftHeader.style.flexGrow = 1;
+            m_RightHeader.name = "__right-header";
+            m_RightHeader.style.flexGrow = 1;
         }
         private void AddToClassList()
         {
@@ -157,12 +192,15 @@ namespace OnlyInvalid.CustomVisualElements
             m_Arrow.AddToClassList(arrowUssClassName);
             m_Toggle.AddToClassList(toggleUssClassName);
             m_Label.AddToClassList(labelUssClassName);
+            m_ContextElement.AddToClassList(contextMenuUssClassName);
             m_ContentContainer.AddToClassList(contentUssClassName);
             m_HeaderContainer.AddToClassList(headerUssClassName);
+            m_LeftHeader.AddToClassList(leftHeaderUssClassName);
+            m_RightHeader.AddToClassList(rightHeaderUssClassName);
         }
         private void RegisterValueChangedCallbacks()
         {
-            m_Toggle.RegisterValueChangedCallback(evt => 
+            m_Toggle.RegisterValueChangedCallback(evt =>
             {
                 bool value = evt.newValue;
 
@@ -172,9 +210,12 @@ namespace OnlyInvalid.CustomVisualElements
         private void AddFieldsToRoot()
         {
             this.Add(m_HeaderContainer);
-            m_HeaderContainer.Add(m_Arrow);
-            m_HeaderContainer.Add(m_Toggle);
-            m_HeaderContainer.Add(m_Label);
+            m_HeaderContainer.Add(m_LeftHeader);
+            m_HeaderContainer.Add(m_RightHeader);
+            m_LeftHeader.Add(m_Arrow);
+            m_LeftHeader.Add(m_Toggle);
+            m_LeftHeader.Add(m_Label);
+            m_RightHeader.Add(m_ContextElement);
             this.Add(m_ContentContainer);
         }
         public void AddItem(VisualElement element)
@@ -185,7 +226,7 @@ namespace OnlyInvalid.CustomVisualElements
         {
             m_Value = newValue;
 
-            if(m_Value)
+            if (m_Value)
             {
                 m_ContentContainer.style.display = DisplayStyle.Flex;
                 m_Arrow.style.rotate = new StyleRotate(new Rotate(90));

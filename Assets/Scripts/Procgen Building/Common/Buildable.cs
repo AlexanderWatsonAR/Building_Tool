@@ -6,9 +6,9 @@ using UnityEditor.Events;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    public class Buildable : MonoBehaviour
+    public abstract class Buildable : MonoBehaviour
     {
-        [SerializeField] protected DirtyData m_Data;
+        [SerializeReference] protected DirtyData m_Data;
         [SerializeField] protected DirtyDataEvent m_OnDataChanged = new();
 
         public DirtyData Data => m_Data;

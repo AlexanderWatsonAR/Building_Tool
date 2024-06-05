@@ -1,13 +1,13 @@
 .only-invalid-header-foldout {
     left: auto;
     right: auto;
-    margin-bottom: 5px;
-    margin-top: 5px;
+    margin-bottom: 0;
+    margin-top: -1px;
     -unity-text-align: middle-left;
 }
 
 .only-invalid-header-foldout__arrow {
-    background-image: url('project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=-4521532143779581420&guid=f1d04844eaf32ab43b3ec51cd6fe2bc8&type=3#arrow-right');
+    background-image: url('project://database/Assets/UnityDefaultRuntimeTheme.tss?fileID=-4521532143779581420&guid=352e693650962c342a0ae6d4c11ff68b&type=3#arrow-right');
     min-width: 20px;
     min-height: 20px;
     -unity-background-image-tint-color: rgba(255, 255, 255, 0.5);
@@ -15,14 +15,14 @@
 }
 
 .only-invalid-header-foldout__toggle {
-}
-
-.only-invalid-header-foldout__label {
     font-size: 12px;
     -unity-font-style: bold;
-    -unity-text-align: upper-center;
-    top: auto;
-    bottom: 2px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    -unity-text-outline-width: 0;
+    -unity-text-align: upper-left;
+    word-spacing: 0;
+    margin-right: 0;
+    margin-left: 0;
 }
 
 .only-invalid-header-foldout__header {
@@ -62,4 +62,26 @@
     padding-bottom: 10px;
     padding-left: 15px;
     background-color: rgba(255, 255, 255, 0.02);
+}
+
+.only-invalid-header-foldout__content:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.only-invalid-header-foldout__content:disabled {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.only-invalid-header-foldout__context-menu {
+    -unity-font-style: normal;
+    font-size: 12px;
+    -unity-text-align: middle-right;
+    width: 20px;
+    height: 20px;
+}
+
+.only-invalid-header-foldout-__left-header {
+}
+
+.only-invalid-header-foldout-__right-header {
 }
