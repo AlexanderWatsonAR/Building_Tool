@@ -674,7 +674,7 @@ public static class MeshMaker
                 }
                 else
                 {
-                    holeVerts = CreateNPolygon(sides, hWidth, hHeight);
+                    holeVerts = CalculateNPolygon(sides, hWidth, hHeight);
                 }
                 
                 for (int k = 0; k < holeVerts.Length; k++)
@@ -720,7 +720,7 @@ public static class MeshMaker
     /// <param name="sides"></param>
     /// <param name="radius"></param>
     /// <returns></returns>
-    public static Vector3[] CreateNPolygon(int sides, float width, float height)
+    public static Vector3[] CalculateNPolygon(int sides, float width, float height)
     {
         float angle = 360f / sides;
 

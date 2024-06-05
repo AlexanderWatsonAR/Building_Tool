@@ -17,7 +17,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             m_SectionData = data as SectionData;
             m_SectionData.IsDirty = false;
-            m_SectionData.Openings.Add(new Opening(new Arch(), ShapeType.Arch));
             return base.Initialize(data);
         }
         public override void Build()

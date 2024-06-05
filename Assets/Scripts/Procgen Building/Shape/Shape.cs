@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -11,36 +13,8 @@ using UnityEngine;
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
 
-    [System.Serializable]
-    public class Shape
+    public abstract class Shape : ScriptableObject
     {
-        // Do we want columns & rows?
-
-        [SerializeField] float m_Height, m_Width;
-        [SerializeField] float m_Angle;
-        [SerializeField] Vector2 m_Position;
-
-        public float Height { get { return m_Height; } set { m_Height = value; } }
-        public float Width { get { return m_Width; } set { m_Width = value; } }
-        public Vector2 Position { get { return m_Position; } set { m_Position = value; } }
-
-        public Shape() : this(0.5f)
-        {
-
-        }
-
-        public Shape(float size)
-        {
-            m_Height = size;
-            m_Width = size;
-            m_Position = Vector2.zero;
-        }
-
-        public Shape(float height, float width)
-        {
-            m_Height = height;
-            m_Width = width;
-            m_Position = Vector2.zero;
-        }
+        public abstract Vector3[] ControlPoints();
     }
 }

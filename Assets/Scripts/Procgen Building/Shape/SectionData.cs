@@ -16,5 +16,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             m_Openings = new List<Opening>();
         }
+
+        public void AddOpening(Opening opening)
+        {
+            m_Openings.Add(opening);
+        }
     }
 }

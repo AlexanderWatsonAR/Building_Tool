@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    [System.Serializable]
+    [CreateAssetMenu(fileName = "NPolygon", menuName = "Shape/NPolygon")]
     public class NPolygon : Shape
     {
         [SerializeField] int m_Sides;
@@ -20,5 +20,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             m_Sides = sides;
         }
+
+        public override Vector3[] ControlPoints()
+        {
+            return MeshMaker.CalculateNPolygon(m_Sides, 1, 1);
+        }
+
     }
 }
