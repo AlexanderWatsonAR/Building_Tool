@@ -549,7 +549,7 @@ public static class MeshMaker
                     quadVerts[k] = v;
                 }
 
-                holeVerts = ConstrainPolygonToQuad(quadVerts, holeVerts.ToArray()).ToList();
+                holeVerts = ClampToQuad(quadVerts, holeVerts.ToArray()).ToList();
                 holePoints.Add(holeVerts.ToList());
             }
         }
@@ -706,7 +706,7 @@ public static class MeshMaker
                     quadVerts[k] = v;
                 }
 
-                holeVerts = ConstrainPolygonToQuad(quadVerts, holeVerts);
+                holeVerts = ClampToQuad(quadVerts, holeVerts);
                 holePoints.Add(holeVerts.ToList());
             }
         }
@@ -743,7 +743,7 @@ public static class MeshMaker
     /// <param name="quad"></param>
     /// <param name="polygon"></param>
     /// <returns></returns>
-    private static Vector3[] ConstrainPolygonToQuad(Vector3[] quad, Vector3[] polygon)
+    public static Vector3[] ClampToQuad(Vector3[] quad, Vector3[] polygon)
     {
         Vector3 min, max;
 

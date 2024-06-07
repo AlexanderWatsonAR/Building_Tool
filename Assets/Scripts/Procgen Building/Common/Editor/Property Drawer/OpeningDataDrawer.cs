@@ -5,79 +5,93 @@ using UnityEditor;
 using UnityEngine;
 using Unity.VisualScripting;
 
-[CustomPropertyDrawer(typeof(OpeningData), useForChildren: true)]
-public abstract class OpeningDataDrawer : DataDrawer
+namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    protected PropertyField m_Columns, m_Rows, m_Height, m_Width;
-
-    OpeningDataSerializedProperties m_Props;
-    OpeningData m_PreviousData;
-
-    protected override void AddFieldsToRoot()
+    [CustomPropertyDrawer(typeof(OpeningData), useForChildren: true)]
+    public class OpeningDataDrawer : DataDrawer
     {
-    }
+        protected PropertyField /*m_Columns, m_Rows,*/ m_Shape, m_Height, m_Width, m_Angle, m_Position;
 
-    protected override void BindFields()
-    {
-        m_Columns.BindProperty(m_Props.Columns);
-        m_Rows.BindProperty(m_Props.Rows);
-        m_Height.BindProperty(m_Props.Height);
-        m_Width.BindProperty(m_Props.Width);
-    }
+        OpeningDataSerializedProperties m_Props;
+        //OpeningData m_PreviousData;
 
-    protected override void DefineFields()
-    {
-        m_Columns = new PropertyField();
-        m_Rows = new PropertyField();
-        m_Height = new PropertyField();
-        m_Width = new PropertyField();
-    }
-
-    protected override void Initialize(SerializedProperty data)
-    {
-        m_Props = new OpeningDataSerializedProperties(data);
-        OpeningData currentData = data.GetUnderlyingValue() as OpeningData;
-        m_PreviousData = currentData.Clone() as OpeningData;
-    }
-
-    protected override void RegisterValueChangeCallbacks()
-    {
-        m_Columns.RegisterValueChangeCallback(evt =>
+        protected override void AddFieldsToRoot()
         {
-            int columns = evt.changedProperty.intValue;
+            m_Root.Add(m_Shape);
+            m_Root.Add(m_Height);
+            m_Root.Add(m_Width);
+            m_Root.Add(m_Angle);
+            m_Root.Add(m_Position);
+        }
 
-            if (columns == m_PreviousData.Columns)
-                return;
-
-            m_PreviousData.Columns = columns;
-        });
-        m_Rows.RegisterValueChangeCallback(evt =>
+        protected override void BindFields()
         {
-            int rows = evt.changedProperty.intValue;
+            //m_Columns.BindProperty(m_Props.Columns);
+            //m_Rows.BindProperty(m_Props.Rows);
+            m_Shape.BindProperty(m_Props.Shape);
+            m_Height.BindProperty(m_Props.Height);
+            m_Width.BindProperty(m_Props.Width);
+            m_Angle.BindProperty(m_Props.Angle);
+            m_Position.BindProperty(m_Props.Position);
+        }
 
-            if (rows == m_PreviousData.Rows)
-                return;
-
-            m_PreviousData.Rows = rows;
-        });
-        m_Height.RegisterValueChangeCallback(evt =>
+        protected override void DefineFields()
         {
-            float height = evt.changedProperty.floatValue;
+            //m_Columns = new PropertyField();
+            //m_Rows = new PropertyField();
+            m_Shape = new PropertyField();
+            m_Height = new PropertyField();
+            m_Width = new PropertyField();
+            m_Angle = new PropertyField();
+            m_Position = new PropertyField();
+        }
 
-            if (height == m_PreviousData.Height)
-                return;
-
-            m_PreviousData.Height = height;
-
-        });
-        m_Width.RegisterValueChangeCallback(evt =>
+        protected override void Initialize(SerializedProperty data)
         {
-            float width = evt.changedProperty.floatValue;
+            m_Props = new OpeningDataSerializedProperties(data);
+            //OpeningData currentData = data.GetUnderlyingValue() as OpeningData;
+            //m_PreviousData = currentData.Clone() as OpeningData;
+        }
 
-            if (width == m_PreviousData.Width)
-                return;
+        protected override void RegisterValueChangeCallbacks()
+        {
+            //m_Columns.RegisterValueChangeCallback(evt =>
+            //{
+            //    int columns = evt.changedProperty.intValue;
 
-            m_PreviousData.Width = width;
-        });
+            //    if (columns == m_PreviousData.Columns)
+            //        return;
+
+            //    m_PreviousData.Columns = columns;
+            //});
+            //m_Rows.RegisterValueChangeCallback(evt =>
+            //{
+            //    int rows = evt.changedProperty.intValue;
+
+            //    if (rows == m_PreviousData.Rows)
+            //        return;
+
+            //    m_PreviousData.Rows = rows;
+            //});
+            //m_Height.RegisterValueChangeCallback(evt =>
+            //{
+            //    float height = evt.changedProperty.floatValue;
+
+            //    if (height == m_PreviousData.Height)
+            //        return;
+
+            //    m_PreviousData.Height = height;
+
+            //});
+            //m_Width.RegisterValueChangeCallback(evt =>
+            //{
+            //    float width = evt.changedProperty.floatValue;
+
+            //    if (width == m_PreviousData.Width)
+            //        return;
+
+            //    m_PreviousData.Width = width;
+            //});
+        }
     }
 }

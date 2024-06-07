@@ -79,7 +79,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             {
                 ID = index,
                 Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal),
-                ActiveElements = m_WallSectionData.Doorway.ActiveElements.ToDoorElement() // Does this need changing?
+                //ActiveElements = m_WallSectionData.Doorway.ActiveElements.ToDoorElement() // Does this need changing?
             };
             return data;
         }
@@ -95,26 +95,30 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         }
         private IList<IList<Vector3>> CalculateDoorway(WallSectionData data)
         {
-            DoorwayData doorway = data.Doorway;
-            Vector3 doorScale = new Vector3(doorway.Width, doorway.Height);
-            return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, doorScale, doorway.Columns, doorway.Rows, 4, 0, Vector3.right * doorway.PositionOffset, new Vector3(0, -0.999f));
+            return null;
+            //DoorwayData doorway = data.Doorway;
+            //Vector3 doorScale = new Vector3(doorway.Width, doorway.Height);
+            //return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, doorScale, doorway.Columns, doorway.Rows, 4, 0, Vector3.right * doorway.PositionOffset, new Vector3(0, -0.999f));
         }
         private IList<IList<Vector3>> CalculateWindowOpening(WallSectionData data)
         {
-            WindowOpeningData windowOpening = data.WindowOpening;
-            Vector3 winScale = new Vector3(windowOpening.Width, windowOpening.Height);
-            return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, winScale, windowOpening.Columns, windowOpening.Rows, windowOpening.Sides, windowOpening.Angle);
+            return null;
+            //WindowOpeningData windowOpening = data.WindowOpening;
+            //Vector3 winScale = new Vector3(windowOpening.Width, windowOpening.Height);
+            //return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, winScale, windowOpening.Columns, windowOpening.Rows, windowOpening.Sides, windowOpening.Angle);
         }
         private IList<IList<Vector3>> CalculateArchway(WallSectionData data)
         {
-            ArchwayData archway = data.Archway;
-            return MeshMaker.ArchedDoorHoleGrid(data.Polygon.ControlPoints, archway.Width, archway.Columns, archway.Rows, archway.Height, archway.ArchHeight, archway.ArchSides, Vector3.right * archway.PositionOffset);
+            return null;
+            //ArchwayData archway = data.Archway;
+            //return MeshMaker.ArchedDoorHoleGrid(data.Polygon.ControlPoints, archway.Width, archway.Columns, archway.Rows, archway.Height, archway.ArchHeight, archway.ArchSides, Vector3.right * archway.PositionOffset);
         }
         private IList<IList<Vector3>> CalculateExtension(WallSectionData data)
         {
-            ExtensionData extension = data.Extension;
-            Vector3 scale = new Vector3(extension.Width, extension.Height);
-            return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, scale, 1, 1, 4, 0, null, new Vector3(0, -0.999f)); // Outside
+            return null;
+            //ExtensionData extension = data.Extension;
+            //Vector3 scale = new Vector3(extension.Width, extension.Height);
+            //return MeshMaker.NPolyHoleGrid(data.Polygon.ControlPoints, scale, 1, 1, 4, 0, null, new Vector3(0, -0.999f)); // Outside
         }
         #endregion
 
@@ -202,182 +206,182 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         }
         private void CreateWindows()
         {
-            m_Windows ??= new List<Window.Window>();
+            //m_Windows ??= new List<Window.Window>();
 
-            WindowOpeningData windowOpening = m_WallSectionData.WindowOpening;
-            int size = windowOpening.Columns * windowOpening.Rows;
-            windowOpening.Windows = windowOpening.Windows == null || windowOpening.Windows.Length != size ? new WindowData[size] : windowOpening.Windows;
+            //WindowOpeningData windowOpening = m_WallSectionData.WindowOpening;
+            //int size = windowOpening.Columns * windowOpening.Rows;
+            //windowOpening.Windows = windowOpening.Windows == null || windowOpening.Windows.Length != size ? new WindowData[size] : windowOpening.Windows;
 
-            IList<IList<Vector3>> holePoints;
+            //IList<IList<Vector3>> holePoints;
 
-            if (m_Windows.Count != 0 && m_Windows.Count == size)
-            {
-                holePoints = CalculateWindowOpening(m_WallSectionData);
+            //if (m_Windows.Count != 0 && m_Windows.Count == size)
+            //{
+            //    holePoints = CalculateWindowOpening(m_WallSectionData);
 
-                for (int i = 0; i < m_Windows.Count; i++)
-                {
-                    m_Windows[i].Initialize(CalculateWindow(i, holePoints[i]));
-                }
-            }
-            else
-            {
-                // Calculate window data if it doesn't 
-                if (windowOpening.IsEmpty)
-                {
-                    holePoints = CalculateWindowOpening(m_WallSectionData);
+            //    for (int i = 0; i < m_Windows.Count; i++)
+            //    {
+            //        m_Windows[i].Initialize(CalculateWindow(i, holePoints[i]));
+            //    }
+            //}
+            //else
+            //{
+            //    // Calculate window data if it doesn't 
+            //    if (windowOpening.IsEmpty)
+            //    {
+            //        holePoints = CalculateWindowOpening(m_WallSectionData);
 
-                    for (int i = 0; i < size; i++)
-                    {
-                        windowOpening.Windows[i] = CalculateWindow(i, holePoints[i]);
-                        Window.Window win = CreateWindow(windowOpening.Windows[i]);
-                        m_Windows.Add(win);
-                    }
-                }
-                else
-                {
-                    holePoints = new List<IList<Vector3>>();
-                    foreach (WindowData window in windowOpening.Windows)
-                    {
-                        holePoints.Add(window.Polygon.ControlPoints.ToList());
-                        Window.Window win = CreateWindow(window);
-                        m_Windows.Add(win);
-                    }
-                }
-            }
+            //        for (int i = 0; i < size; i++)
+            //        {
+            //            windowOpening.Windows[i] = CalculateWindow(i, holePoints[i]);
+            //            Window.Window win = CreateWindow(windowOpening.Windows[i]);
+            //            m_Windows.Add(win);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        holePoints = new List<IList<Vector3>>();
+            //        foreach (WindowData window in windowOpening.Windows)
+            //        {
+            //            holePoints.Add(window.Polygon.ControlPoints.ToList());
+            //            Window.Window win = CreateWindow(window);
+            //            m_Windows.Add(win);
+            //        }
+            //    }
+            //}
 
-            m_WallSectionData.SetHoles(holePoints);
+            //m_WallSectionData.SetHoles(holePoints);
         }
         private void CreateDoors()
         {
-            DoorwayData doorway = m_WallSectionData.Doorway;
+            //DoorwayData doorway = m_WallSectionData.Doorway;
 
-            int size = doorway.Columns * doorway.Rows;
+            //int size = doorway.Columns * doorway.Rows;
 
-            if (doorway.Doors == null || doorway.Doors.Length == 0 || doorway.Doors.Length != size)
-            {
-                doorway.Doors = new DoorData[size];
-                doorway.Frames = new FrameData[size];
-            }
+            //if (doorway.Doors == null || doorway.Doors.Length == 0 || doorway.Doors.Length != size)
+            //{
+            //    doorway.Doors = new DoorData[size];
+            //    doorway.Frames = new FrameData[size];
+            //}
 
-            IList<IList<Vector3>> holePoints;
+            //IList<IList<Vector3>> holePoints;
 
-            if (doorway.Doors[0] == null || doorway.Doors[0].Polygon.ControlPoints == null || doorway.Doors[0].Polygon.ControlPoints.Length == 0)
-            {
-                holePoints = CalculateDoorway(m_WallSectionData);
+            //if (doorway.Doors[0] == null || doorway.Doors[0].Polygon.ControlPoints == null || doorway.Doors[0].Polygon.ControlPoints.Length == 0)
+            //{
+            //    holePoints = CalculateDoorway(m_WallSectionData);
 
 
-                for (int i = 0; i < size; i++)
-                {
-                    if (doorway.Doors[i] == null || doorway.Doors[i].Polygon.ControlPoints == null || doorway.Doors[i].Polygon.ControlPoints.Length == 0)
-                    {
-                        doorway.Doors[i] = CalculateDoor(i, holePoints[i]);
-                        doorway.Frames[i] = CalculateFrame(holePoints[i], m_WallSectionData.DoorFrame.Scale, m_WallSectionData.DoorFrame.Depth);
+            //    for (int i = 0; i < size; i++)
+            //    {
+            //        if (doorway.Doors[i] == null || doorway.Doors[i].Polygon.ControlPoints == null || doorway.Doors[i].Polygon.ControlPoints.Length == 0)
+            //        {
+            //            doorway.Doors[i] = CalculateDoor(i, holePoints[i]);
+            //            doorway.Frames[i] = CalculateFrame(holePoints[i], m_WallSectionData.DoorFrame.Scale, m_WallSectionData.DoorFrame.Depth);
 
-                        if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
-                        {
-                            Door.Door door = CreateDoor(doorway.Doors[i]);
-                            m_Doors.Add(door);
-                        }
+            //            if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
+            //            {
+            //                Door.Door door = CreateDoor(doorway.Doors[i]);
+            //                m_Doors.Add(door);
+            //            }
 
-                        if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
-                            continue;
+            //            if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
+            //                continue;
 
-                        Polygon3D.Frame frame = CreateFrame(doorway.Frames[i]);
-                        m_Frames.Add(frame);
+            //            Polygon3D.Frame frame = CreateFrame(doorway.Frames[i]);
+            //            m_Frames.Add(frame);
 
-                    }
-                }
-            }
-            else
-            {
-                holePoints = new List<IList<Vector3>>();
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    holePoints = new List<IList<Vector3>>();
 
-                for (int i = 0; i < doorway.Doors.Length; i++)
-                {
-                    DoorData data = doorway.Doors[i];
+            //    for (int i = 0; i < doorway.Doors.Length; i++)
+            //    {
+            //        DoorData data = doorway.Doors[i];
 
-                    holePoints.Add(data.Polygon.ControlPoints.ToList());
+            //        holePoints.Add(data.Polygon.ControlPoints.ToList());
 
-                    if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
-                    {
-                        Door.Door door = CreateDoor(data);
-                        m_Doors.Add(door);
-                    }
+            //        if (doorway.ActiveElements.IsElementActive(DoorwayElement.Door))
+            //        {
+            //            Door.Door door = CreateDoor(data);
+            //            m_Doors.Add(door);
+            //        }
 
-                    if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
-                        continue;
+            //        if (!doorway.ActiveElements.IsElementActive(DoorwayElement.Frame))
+            //            continue;
 
-                    Polygon3D.Frame frame = CreateFrame(doorway.Frames[i]);
-                    m_Frames.Add(frame);
-                }
-            }
+            //        Polygon3D.Frame frame = CreateFrame(doorway.Frames[i]);
+            //        m_Frames.Add(frame);
+            //    }
+            //}
 
-            m_WallSectionData.SetHoles(holePoints);
+            //m_WallSectionData.SetHoles(holePoints);
         }
         private void CreateArchDoors()
         {
-            ArchwayData archway = m_WallSectionData.Archway;
+            //ArchwayData archway = m_WallSectionData.Archway;
 
-            int size = archway.Columns * archway.Rows;
+            //int size = archway.Columns * archway.Rows;
 
-            if (archway.Doors == null || archway.Doors.Length == 0 || archway.Doors.Length != size)
-            {
-                archway.Doors = new DoorData[size];
-                archway.Frames = new FrameData[size];
-            }
+            //if (archway.Doors == null || archway.Doors.Length == 0 || archway.Doors.Length != size)
+            //{
+            //    archway.Doors = new DoorData[size];
+            //    archway.Frames = new FrameData[size];
+            //}
 
-            IList<IList<Vector3>> holePoints;
+            //IList<IList<Vector3>> holePoints;
 
-            if (archway.Doors[0] == null || archway.Doors[0].Polygon.ControlPoints == null || archway.Doors[0].Polygon.ControlPoints.Length == 0)
-            {
-                holePoints = CalculateArchway(m_WallSectionData);
+            //if (archway.Doors[0] == null || archway.Doors[0].Polygon.ControlPoints == null || archway.Doors[0].Polygon.ControlPoints.Length == 0)
+            //{
+            //    holePoints = CalculateArchway(m_WallSectionData);
 
-                for (int i = 0; i < size; i++)
-                {
-                    if (archway.Doors[i] == null || archway.Doors[i].Polygon.ControlPoints == null || archway.Doors[i].Polygon.ControlPoints.Length == 0)
-                    {
-                        archway.Doors[i] = CalculateDoor(i, holePoints[i]);
-                        archway.Frames[i] = CalculateFrame(holePoints[i], m_WallSectionData.DoorFrame.Scale, m_WallSectionData.DoorFrame.Depth);
+            //    for (int i = 0; i < size; i++)
+            //    {
+            //        if (archway.Doors[i] == null || archway.Doors[i].Polygon.ControlPoints == null || archway.Doors[i].Polygon.ControlPoints.Length == 0)
+            //        {
+            //            archway.Doors[i] = CalculateDoor(i, holePoints[i]);
+            //            archway.Frames[i] = CalculateFrame(holePoints[i], m_WallSectionData.DoorFrame.Scale, m_WallSectionData.DoorFrame.Depth);
 
-                        if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
-                        {
-                            Door.Door door = CreateDoor(archway.Doors[i]);
-                            m_Doors.Add(door);
-                        }
+            //            if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
+            //            {
+            //                Door.Door door = CreateDoor(archway.Doors[i]);
+            //                m_Doors.Add(door);
+            //            }
 
-                        if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
-                            continue;
+            //            if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
+            //                continue;
 
-                        Polygon3D.Frame frame = CreateFrame(archway.Frames[i]);
-                        m_Frames.Add(frame);
-                    }
-                }
-            }
-            else
-            {
-                holePoints = new List<IList<Vector3>>();
-                for (int i = 0; i < archway.Doors.Length; i++)
-                {
-                    DoorData data = archway.Doors[i];
+            //            Polygon3D.Frame frame = CreateFrame(archway.Frames[i]);
+            //            m_Frames.Add(frame);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    holePoints = new List<IList<Vector3>>();
+            //    for (int i = 0; i < archway.Doors.Length; i++)
+            //    {
+            //        DoorData data = archway.Doors[i];
 
-                    holePoints.Add(data.Polygon.ControlPoints.ToList());
+            //        holePoints.Add(data.Polygon.ControlPoints.ToList());
 
-                    if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
-                    {
-                        Door.Door door = CreateDoor(data);
-                        m_Doors.Add(door);
-                    }
+            //        if (archway.ActiveElements.IsElementActive(DoorwayElement.Door))
+            //        {
+            //            Door.Door door = CreateDoor(data);
+            //            m_Doors.Add(door);
+            //        }
 
-                    if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
-                        continue;
+            //        if (!archway.ActiveElements.IsElementActive(DoorwayElement.Frame))
+            //            continue;
 
-                    Polygon3D.Frame frame = CreateFrame(archway.Frames[i]);
-                    m_Frames.Add(frame);
+            //        Polygon3D.Frame frame = CreateFrame(archway.Frames[i]);
+            //        m_Frames.Add(frame);
 
-                }
-            }
+            //    }
+            //}
 
-            m_WallSectionData.SetHoles(holePoints);
+            //m_WallSectionData.SetHoles(holePoints);
         }
         private Window.Window CreateWindow(WindowData data)
         {
@@ -391,7 +395,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             {
                 //
                 WindowData winData = dirtyData as WindowData;
-                m_WallSectionData.WindowOpening.Windows[winData.ID] = winData;
+                //m_WallSectionData.WindowOpening.Windows[winData.ID] = winData;
                 m_OnDataChanged.Invoke(m_WallSectionData);
                 Debug.Log("Wall Section Invoke");
             });

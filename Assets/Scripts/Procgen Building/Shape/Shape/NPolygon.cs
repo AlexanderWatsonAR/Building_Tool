@@ -6,7 +6,7 @@ using UnityEngine;
 [System.Serializable]
 public class NPolygon : CalculatedShape
 {
-    [SerializeField] int m_Sides;
+    [SerializeField, Range(3, 18)] int m_Sides;
 
     public int Sides { get { return m_Sides; } set { m_Sides = value; } }
 

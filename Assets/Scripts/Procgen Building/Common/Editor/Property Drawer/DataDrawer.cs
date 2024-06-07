@@ -10,10 +10,12 @@ using OnlyInvalid.ProcGenBuilding.Common;
 public abstract class DataDrawer : PropertyDrawer
 {
     protected VisualElement m_Root;
+    protected SerializedProperty m_Data;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
-        m_Root = new VisualElement() { name = data.boxedValue.GetType().Name + "_Root" };
+        m_Root = new VisualElement();
+        m_Data = data;
         Initialize(data);
         DefineFields();
         BindFields();

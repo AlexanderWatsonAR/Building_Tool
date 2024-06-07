@@ -9,13 +9,11 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     public abstract class Polygon3D : Buildable
     {
         [SerializeField] protected ProBuilderMesh m_ProBuilderMesh;
-        //[SerializeReference] protected Polygon3DData m_Polygon3DData;
 
         private Polygon3DData Polygon3DData => m_Data as Polygon3DData;
 
         public override Buildable Initialize(DirtyData data)
         {
-           // m_Polygon3DData = data as Polygon3DData;
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
             
             AssignDefaultMaterial();
