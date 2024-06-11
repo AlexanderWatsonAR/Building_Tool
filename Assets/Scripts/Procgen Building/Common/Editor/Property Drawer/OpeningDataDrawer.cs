@@ -4,6 +4,7 @@ using UnityEditor.UIElements;
 using UnityEditor;
 using UnityEngine;
 using Unity.VisualScripting;
+using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
@@ -11,6 +12,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     public class OpeningDataDrawer : DataDrawer
     {
         protected PropertyField /*m_Columns, m_Rows,*/ m_Shape, m_Height, m_Width, m_Angle, m_Position;
+
+        InspectorElement m_Polygon3D;
+
+        Foldout m_Polygon3DFoldout;
 
         OpeningDataSerializedProperties m_Props;
         //OpeningData m_PreviousData;
@@ -22,6 +27,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Root.Add(m_Width);
             m_Root.Add(m_Angle);
             m_Root.Add(m_Position);
+            m_Root.Add(m_Polygon3DFoldout);
+            //m_Polygon3DFoldout.Add(m_Polygon3D);
         }
 
         protected override void BindFields()
@@ -44,6 +51,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Width = new PropertyField();
             m_Angle = new PropertyField();
             m_Position = new PropertyField();
+            m_Polygon3DFoldout = new Foldout() { text = "Content"};
+            //m_Polygon3D = new InspectorElement(m_Props.Polygon3D);
         }
 
         protected override void Initialize(SerializedProperty data)

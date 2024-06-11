@@ -37,9 +37,13 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         protected override void DefineFields()
         {
+            SectionData data = m_Data.GetUnderlyingValue() as SectionData;
+
             for(int i = 0; i < m_OpeningsArray.Length; i++)
             {
+                OpeningData opening = data.Openings[i];
                 m_HeaderFoldouts[i] = new HeaderFoldout("Opening " + i.ToString());
+                m_HeaderFoldouts[i].contextMenu.AddItem("Remove", false, () =>  data.RemoveOpening(opening));
                 m_OpeningFields[i] = new PropertyField();
             }
         }

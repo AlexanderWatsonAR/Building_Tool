@@ -8,15 +8,15 @@ using Unity.VisualScripting;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    [CustomEditor(typeof(OpeningSO))]
+    [CustomEditor(typeof(OpeningScriptableObject))]
     public class OpeningSOEditor : Editor
     {
 
         public override VisualElement CreateInspectorGUI()
         {
-            VisualElement root = new VisualElement() { name = nameof(OpeningSO) + " Root" };
+            VisualElement root = new VisualElement() { name = nameof(OpeningScriptableObject) + " Root" };
 
-            OpeningSO openingScriptableObject = target as OpeningSO;
+            OpeningScriptableObject openingScriptableObject = target as OpeningScriptableObject;
 
             #region Properties
             SerializedProperty opening = serializedObject.FindProperty("m_Opening");

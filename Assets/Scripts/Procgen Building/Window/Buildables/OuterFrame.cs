@@ -7,20 +7,16 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 {
     public class OuterFrame : Frame
     {
-        [SerializeReference] OuterFrameData m_OuterFrameData;
-
-        public OuterFrameData OuterFrameData => m_OuterFrameData;
+        public OuterFrameData OuterFrameData => m_Data as OuterFrameData;
 
         public override Buildable Initialize(DirtyData data)
         {
-            base.Initialize(data);
-            m_OuterFrameData = data as OuterFrameData;
-            return this;
+            return base.Initialize(data);
         }
 
         private void OnValidate()
         {
-            m_OnDataChanged.Invoke(m_OuterFrameData);
+            m_OnDataChanged.Invoke(m_Data);
         }
     }
 }

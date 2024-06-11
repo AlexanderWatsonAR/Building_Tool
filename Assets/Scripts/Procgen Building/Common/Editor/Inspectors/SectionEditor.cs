@@ -6,13 +6,16 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using OnlyInvalid.CustomVisualElements;
+using UnityEngine.ProBuilder;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
     [CustomEditor(typeof(Section))]
     public class SectionEditor : BuildableEditor
     {
-     //   [SerializeField] OpeningSO[] m_SavedOpenings;
+        //   [SerializeField] OpeningSO[] m_SavedOpenings;
+
+        [SerializeField] ContentScriptableObject m_Content;
 
         Button m_AddElementButton;
 
@@ -54,11 +57,21 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         }
         private void CreateElementsMenu()
         {
+            SectionData sectionData = m_Data.GetUnderlyingValue() as SectionData;
             m_ElementMenu = new GenericDropdownMenu();
             m_ElementMenu.contentContainer.Add(new Label("Elements") { style = { alignSelf = Align.Center, unityFontStyleAndWeight = FontStyle.Bold } });
             m_ElementMenu.AddSeparator("");
             m_ElementMenu.AddItem("Opening", false, () => m_ShapeMenu.DropDown(m_AddElementButton.worldBound, m_AddElementButton));
+            m_ElementMenu.AddItem("Frame", false, () =>
+            {
+                Section section = target as Section;
+                Polygon3D.Polygon3D polygon3D = m_Content.Create3DPolygon();
+                polygon3D.transform.SetParent(section.transform, true);
+                OpeningData windowOpening = new OpeningData(new NPolygon(4), polygon3D);
+                sectionData.AddOpening(windowOpening);
+            });
         }
+
         private void CreateShapeMenu()
         {
             m_ShapeMenu = new GenericDropdownMenu();

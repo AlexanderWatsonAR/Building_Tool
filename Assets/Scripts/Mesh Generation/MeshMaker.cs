@@ -737,6 +737,16 @@ public static class MeshMaker
         return vertices;
     }
 
+    public static Vector3[] Square()
+    {
+        Vector3[] vertices = new Vector3[4];
+        vertices[0] = new Vector3(-1, -1, 0);
+        vertices[1] = new Vector3(-1, 1, 0);
+        vertices[2] = new Vector3(1, 1, 0);
+        vertices[3] = new Vector3(1, -1, 0);
+        return vertices;
+    }
+
     /// <summary>
     /// Returns the constrained polygon.
     /// </summary>

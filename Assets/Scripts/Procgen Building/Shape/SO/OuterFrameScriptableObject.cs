@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Outer Frame", menuName = "Frame/New Outer Frame")]
-public class OuterFrameSO : FrameSO
+public class OuterFrameScriptableObject : FrameScriptableObject
 {
-    [SerializeField] FrameSO m_InnerFrame;
+    [SerializeField] FrameScriptableObject m_InnerFrame;
 
 }

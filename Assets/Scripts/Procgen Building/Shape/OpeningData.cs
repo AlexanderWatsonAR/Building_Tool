@@ -9,7 +9,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     public class OpeningData
     {
         [SerializeReference] Shape m_Shape;
-        //[SerializeReference] Buildable m_Buildable;
+        [SerializeReference] Polygon3D.Polygon3D m_Polygon3D;
 
         // Perhaps put this in a transform class?
         [SerializeField, Range(0, 1)] float m_Height, m_Width;
@@ -22,7 +22,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public Vector2 Position { get { return m_Position; } set { m_Position = value; } }
         public Shape Shape { get { return m_Shape; } set { m_Shape = value; } }
 
-        //public Buildable Buildable { get { return m_Buildable; } set { m_Buildable = value; } }
+        public Polygon3D.Polygon3D Polygon3D { get { return m_Polygon3D; } set { m_Polygon3D = value; } }
 
         public OpeningData (Shape shape)
         {
@@ -31,6 +31,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Width = 0.5f;
             m_Angle = 0;
             m_Position = new Vector2();
+        }
+        public OpeningData (Shape shape, Polygon3D.Polygon3D buildable) : this (shape)
+        {
+            m_Polygon3D = buildable;
         }
 
     }

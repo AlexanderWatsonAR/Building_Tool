@@ -4,37 +4,51 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using OnlyInvalid.ProcGenBuilding.Common;
+using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     public class Frame : Polygon3D
     {
-        [SerializeReference] FrameData m_FrameData;
+        public FrameData FrameData => m_Data as FrameData;
 
         public override Buildable Initialize(DirtyData data)
         {
-            base.Initialize(data);
-            m_FrameData = data as FrameData;
-            CalculateHole();
-            return this;
+            return base.Initialize(data);
         }
 
         public override void Build()
         {
-            if (!m_FrameData.IsDirty)
+            if (!FrameData.IsDirty)
                 return;
 
-            if(m_FrameData.IsHoleDirty)
-                CalculateHole();
+            if(FrameData.IsHoleDirty)
+                CalculateHoleWithMatrix();
 
             base.Build();
         }
 
         private void CalculateHole()
         {
-            m_FrameData.Holes = new PolygonData[1];
-            m_FrameData.Holes[0] = new PolygonData(m_FrameData.Polygon.ControlPoints.ScalePolygon(m_FrameData.Scale, m_FrameData.Position), m_FrameData.Polygon.Normal);
-            m_FrameData.IsHoleDirty = false;
+            FrameData.Holes = new PolygonData[1];
+            FrameData.Holes[0] = new PolygonData(FrameData.Polygon.ControlPoints.ScalePolygon(FrameData.Scale, FrameData.Position), FrameData.Polygon.Normal);
+            FrameData.IsHoleDirty = false;
+        }
+
+        private void CalculateHoleWithMatrix()
+        {
+            FrameData.Holes = new PolygonData[1];
+            Matrix4x4 scaleMatrix = Matrix4x4.Translate(FrameData.Position) * Matrix4x4.Scale(Vector3.one * FrameData.Scale) * Matrix4x4.Translate(-FrameData.Position);
+
+            Vector3[] controlPoints = new Vector3[FrameData.Polygon.ControlPoints.Length];
+            System.Array.Copy(FrameData.Polygon.ControlPoints, controlPoints, controlPoints.Length);
+
+            for(int i = 0; i < controlPoints.Length; i++)
+            {
+                controlPoints[i] = scaleMatrix.MultiplyPoint3x4(controlPoints[i]);
+            }
+
+            FrameData.Holes[0] = new PolygonData(controlPoints, FrameData.Polygon.Normal);
         }
     }
 }
