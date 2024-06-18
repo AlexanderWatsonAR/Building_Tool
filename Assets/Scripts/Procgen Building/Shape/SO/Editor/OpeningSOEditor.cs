@@ -32,7 +32,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             PropertyField shapeSOField = new PropertyField(shapeSO) { label = "Shape" };
             shapeSOField.RegisterValueChangeCallback(evt =>
             {
-                ShapeSO callbackShapeSO = evt.changedProperty.GetUnderlyingValue() as ShapeSO;
+                ShapeScriptableObject callbackShapeSO = evt.changedProperty.GetUnderlyingValue() as ShapeScriptableObject;
 
                 if (callbackShapeSO == null)
                     return;

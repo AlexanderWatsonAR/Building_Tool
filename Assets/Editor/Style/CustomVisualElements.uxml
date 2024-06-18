@@ -1,4 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <Style src="project://database/Assets/Editor/Style/CustomVisualElements.uss?fileID=7433441132597879392&amp;guid=98eaa105140da42418684c4f9e5e44fa&amp;type=3#CustomVisualElements" />
+    <Style src="project://database/Assets/Editor/Style/CustomVisualElements.uss?fileID=7433441132597879392&amp;guid=fc00e58473b76cf4d9ed6d12d08704d7&amp;type=3#CustomVisualElements" />
     <OnlyInvalid.CustomVisualElements.HeaderFoldout style="margin-top: 0;" />
 </ui:UXML>

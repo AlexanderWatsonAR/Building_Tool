@@ -14,63 +14,45 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     public class SectionDataDrawer : DataDrawer
     {
         SerializedProperty m_Openings;
-        SerializedProperty[] m_OpeningsArray;
-        HeaderFoldout[] m_HeaderFoldouts;
-        PropertyField[] m_OpeningFields;
+        PropertyField m_OpeningsList;
 
         protected override void AddFieldsToRoot()
         {
-            for(int i = 0; i < m_HeaderFoldouts.Length; i++)
-            {
-                m_HeaderFoldouts[i].AddItem(m_OpeningFields[i]);
-                m_Root.Add(m_HeaderFoldouts[i]);
-            }
+            m_Root.Add(m_OpeningsList);
         }
 
         protected override void BindFields()
         {
-            for(int i = 0; i < m_OpeningFields.Length; i++)
-            {
-                m_OpeningFields[i].BindProperty(m_OpeningsArray[i]);
-            }
+            m_OpeningsList.BindProperty(m_Openings);
         }
 
         protected override void DefineFields()
         {
-            SectionData data = m_Data.GetUnderlyingValue() as SectionData;
-
-            for(int i = 0; i < m_OpeningsArray.Length; i++)
-            {
-                OpeningData opening = data.Openings[i];
-                m_HeaderFoldouts[i] = new HeaderFoldout("Opening " + i.ToString());
-                m_HeaderFoldouts[i].contextMenu.AddItem("Remove", false, () =>  data.RemoveOpening(opening));
-                m_OpeningFields[i] = new PropertyField();
-            }
+            m_OpeningsList = new PropertyField();
         }
 
         protected override void Initialize(SerializedProperty data)
         {
             m_Openings = m_Data.FindPropertyRelative("m_Openings");
-            m_OpeningsArray = new SerializedProperty[m_Openings.arraySize];
-            m_HeaderFoldouts = new HeaderFoldout[m_Openings.arraySize];
-            m_OpeningFields = new PropertyField[m_Openings.arraySize];
-
-            for(int i = 0; i < m_OpeningsArray.Length; i++)
-            {
-                m_OpeningsArray[i] = m_Openings.GetArrayElementAtIndex(i);
-            }
         }
 
         protected override void RegisterValueChangeCallbacks()
         {
-            for (int i = 0; i < m_OpeningFields.Length; i++)
+            m_OpeningsList.RegisterValueChangeCallback(evt =>
             {
-                m_OpeningFields[i].RegisterValueChangeCallback(evt =>
-                {
-                    SectionData data = m_Data.GetUnderlyingValue() as SectionData;
-                    data.IsDirty = true;
-                });
-            }
+                OpeningDataList openingList = evt.changedProperty.GetUnderlyingValue() as OpeningDataList;
+
+                //Debug.Log("Open list change");
+
+                if (!openingList.IsDirty)
+                    return;
+
+                SectionData data = m_Data.GetUnderlyingValue() as SectionData;
+
+                data.IsDirty = true;
+                openingList.IsDirty = false;
+            });
+            
         }
     }
 }

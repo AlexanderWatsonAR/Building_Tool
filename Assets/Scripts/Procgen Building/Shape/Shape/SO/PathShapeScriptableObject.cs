@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Path Shape", menuName = "Shape/New Path Shape")]
-public class PathShapeSO : ShapeSO
+public class PathShapeScriptableObject : ShapeScriptableObject
 {
     public PathShape PathShape => m_Shape as PathShape;
 

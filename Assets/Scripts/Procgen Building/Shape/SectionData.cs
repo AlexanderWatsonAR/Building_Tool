@@ -8,14 +8,14 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     public class SectionData : Polygon3D.Polygon3DData
     {
         [SerializeField] int m_ID;
-        [SerializeField] List<OpeningData> m_Openings;
+        [SerializeField] OpeningDataList m_Openings;
 
-        public List<OpeningData> Openings => m_Openings;
+        public OpeningDataList Openings => m_Openings;
         public int ID { get { return m_ID; } set { m_ID = value; } }
 
         public SectionData()
         {
-            m_Openings = new List<OpeningData>();
+            m_Openings = new OpeningDataList();
         }
 
         public SectionData(SectionData sectionData) : base(sectionData)
@@ -26,16 +26,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public void AddOpening(OpeningData opening)
         {
             m_Openings.Add(opening);
-        }
-
-        public void RemoveOpening(OpeningData opening)
-        {
-            m_Openings.Remove(opening);
-        }
-
-        public void RemoveOpeningAt(int index)
-        {
-            m_Openings.RemoveAt(index);
         }
     }
 }

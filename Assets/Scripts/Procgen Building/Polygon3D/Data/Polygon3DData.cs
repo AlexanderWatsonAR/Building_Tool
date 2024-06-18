@@ -74,6 +74,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Polygon ??= new PolygonData(controlPoints, normal);
             m_Polygon.ControlPoints = controlPoints;
             m_Polygon.Normal = normal;
+            m_Normal = normal;
 
             CalcualateInternal();
         }

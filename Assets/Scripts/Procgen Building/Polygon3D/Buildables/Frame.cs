@@ -23,19 +23,12 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 return;
 
             if(FrameData.IsHoleDirty)
-                CalculateHoleWithMatrix();
+                CalculateHole();
 
             base.Build();
         }
 
         private void CalculateHole()
-        {
-            FrameData.Holes = new PolygonData[1];
-            FrameData.Holes[0] = new PolygonData(FrameData.Polygon.ControlPoints.ScalePolygon(FrameData.Scale, FrameData.Position), FrameData.Polygon.Normal);
-            FrameData.IsHoleDirty = false;
-        }
-
-        private void CalculateHoleWithMatrix()
         {
             FrameData.Holes = new PolygonData[1];
             Matrix4x4 scaleMatrix = Matrix4x4.Translate(FrameData.Position) * Matrix4x4.Scale(Vector3.one * FrameData.Scale) * Matrix4x4.Translate(-FrameData.Position);
@@ -49,6 +42,8 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             }
 
             FrameData.Holes[0] = new PolygonData(controlPoints, FrameData.Polygon.Normal);
+
+            FrameData.IsHoleDirty = false;
         }
     }
 }

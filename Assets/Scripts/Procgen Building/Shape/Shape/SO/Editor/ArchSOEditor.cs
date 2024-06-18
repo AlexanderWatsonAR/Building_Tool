@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 
-[CustomEditor(typeof(ArchSO))]
+[CustomEditor(typeof(ArchScriptableObject))]
 public class ArchSOEditor : Editor
 {
     public override VisualElement CreateInspectorGUI()

@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    [CustomPropertyDrawer(typeof(FrameData), useForChildren:true)]
+    [CustomPropertyDrawer(typeof(FrameData))]
     public class FrameDataDrawer : Polygon3DDataDrawer
     {
         FrameData m_PreviousData, m_CurrentData;

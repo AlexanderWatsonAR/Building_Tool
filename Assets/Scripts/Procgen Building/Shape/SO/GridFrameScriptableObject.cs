@@ -1,10 +1,22 @@
+using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.ProBuilder;
 
 [CreateAssetMenu(fileName = "Grid Frame", menuName = "Frame/New Grid Frame")]
-public class GridFrameScriptableObject : FrameScriptableObject
+public class GridFrameScriptableObject : ContentScriptableObject
 {
-    [SerializeField, Range(1, 5)] int m_Columns, m_Rows;
+    [SerializeField] GridFrameData m_GridFrameData;
 
+    public override Polygon3D Create3DPolygon()
+    {
+        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
+        GridFrame gridFrame = frameMesh.gameObject.AddComponent<GridFrame>();
+        gridFrame.name = name;
+        m_GridFrameData.IsDirty = true;
+        m_GridFrameData.IsHoleDirty = true;
+        gridFrame.Initialize(m_GridFrameData);
+        return gridFrame;
+    }
 }

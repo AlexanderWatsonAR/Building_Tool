@@ -5,7 +5,10 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - m_Buildable: {instanceID: 0}
-  - m_Content: {fileID: 11400000, guid: 1ab223d8ae2daa542b2dc1215fbb6e8a, type: 2}
+  - m_ContentMenuSystem: {fileID: 11400000, guid: 09c16e9175336c64ca7e888239c4ec88,
+      type: 2}
+  - m_Frame: {fileID: 11400000, guid: 1ab223d8ae2daa542b2dc1215fbb6e8a, type: 2}
+  - m_GridFrame: {fileID: 11400000, guid: 0163e41f704e3ca4784181df0e725595, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

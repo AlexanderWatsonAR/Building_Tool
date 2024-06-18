@@ -15,7 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     {
         protected SerializedProperty m_Data;
         protected VisualElement m_Root;
-        [SerializeField] protected Buildable m_Buildable;
+        [SerializeField, HideInInspector] protected Buildable m_Buildable;
 
         public override VisualElement CreateInspectorGUI()
         {

@@ -5,12 +5,12 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 
-[CustomEditor(typeof(NPolygonSO))]
+[CustomEditor(typeof(NPolygonScriptableObject))]
 public class NPolygonSOEditor : Editor
 {
     public override VisualElement CreateInspectorGUI()
     {
-        VisualElement root = new VisualElement() { name = nameof(NPolygonSO) + " Root" };
+        VisualElement root = new VisualElement() { name = nameof(NPolygonScriptableObject) + " Root" };
 
         serializedObject.Update();
         SerializedProperty nPolygon = serializedObject.FindProperty("m_Shape");

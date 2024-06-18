@@ -46,6 +46,10 @@
     align-items: flex-end;
 }
 
+.only-invalid-header-foldout__header:hover {
+    background-color: rgba(112, 146, 255, 0.06);
+}
+
 .only-invalid-header-foldout__content {
     padding-top: 10px;
     border-left-color: rgba(0, 0, 0, 0.65);
@@ -66,14 +70,6 @@
     padding-bottom: 10px;
     padding-left: 15px;
     background-color: rgba(255, 255, 255, 0.02);
-}
-
-.only-invalid-header-foldout__content:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.only-invalid-header-foldout__content:disabled {
-    background-color: rgba(255, 255, 255, 0);
 }
 
 .only-invalid-header-foldout__context-menu {

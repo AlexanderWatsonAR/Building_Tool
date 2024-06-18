@@ -8,22 +8,21 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     public class GridFrame : Polygon3D
     {
-        [SerializeReference] GridFrameData m_GridFrameData;
+        public GridFrameData GridFrameData => m_Data as GridFrameData;
 
         public override Buildable Initialize(DirtyData data)
         {
-            base.Initialize(data);
-            m_GridFrameData = data as GridFrameData;
-            CalculateHole();
-            return this;
+            return base.Initialize(data);
         }
 
         public override void Build()
         {
-            if (!m_GridFrameData.IsDirty)
+            if (!GridFrameData.IsDirty)
                 return;
 
-            if (m_GridFrameData.IsHoleDirty)
+            GridFrameData.IsHoleDirty = true;
+
+            if (GridFrameData.IsHoleDirty)
                 CalculateHole();
 
             base.Build();
@@ -31,15 +30,15 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
         private void CalculateHole()
         {
-            Vector3[][] holePoints = MeshMaker.SpiltPolygon(m_GridFrameData.Polygon.ControlPoints, m_GridFrameData.Width, m_GridFrameData.Height, m_GridFrameData.Columns, m_GridFrameData.Rows, m_GridFrameData.Position, m_GridFrameData.Normal).Select(list => list.ToArray()).ToArray();
-            m_GridFrameData.Holes = new PolygonData[holePoints.Length];
+            Vector3[][] holePoints = MeshMaker.SpiltPolygon(GridFrameData.Polygon.ControlPoints, GridFrameData.Width, GridFrameData.Height, GridFrameData.Columns, GridFrameData.Rows, GridFrameData.Position, GridFrameData.Normal).Select(list => list.ToArray()).ToArray();
+            GridFrameData.Holes = new PolygonData[holePoints.Length];
 
             for (int i = 0; i < holePoints.Length; i++)
             {
-                m_GridFrameData.Holes[i] = new PolygonData(holePoints[i].ScalePolygon(m_GridFrameData.Scale).ToArray());
+                GridFrameData.Holes[i] = new PolygonData(holePoints[i].ScalePolygon(GridFrameData.Scale).ToArray());
             }
 
-            m_GridFrameData.IsHoleDirty = false;
+            GridFrameData.IsHoleDirty = false;
         }
     }
 }

@@ -3,17 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
-using UnityEngine.UIElements;
 using System.Linq;
 using Unity.VisualScripting;
 using System;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
-using UnityEditor;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
     public class Section : Polygon3D.Polygon3D
     {
+        [SerializeField] SectionData m_PreviousSectionData;
+
         public SectionData SectionData => m_Data as SectionData;
 
         public override Buildable Initialize(DirtyData data)
@@ -25,28 +24,69 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             if (!m_Data.IsDirty)
                 return;
 
-
-
-            //foreach(OpeningData opening in SectionData.Openings)
-            //{
-            if (SectionData.Openings != null && SectionData.Openings.Count > 0)
-                BuildWithMatrix(SectionData.Openings[0]);
-            //}
+            CalculateOpenings();
 
             base.Build();
-        }
 
-        private void BuildWithMatrix(OpeningData opening)
+            BuildContent();
+        }
+        private void CalculateOpenings()
+        {
+            if (SectionData.Openings == null)
+                return;
+
+            if (SectionData.Openings.Count() == 0)
+                return;
+
+            IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
+
+            List<Vector3[]> sectionGrid = MeshMaker.CreateGridFromControlPoints(SectionData.Polygon.ControlPoints, SectionData.Openings.Count, 1);
+
+            for (int i = 0; i < SectionData.Openings.Count(); i++)
+            {
+                OpeningData opening = SectionData.Openings[i];
+
+                Vector3 bl = sectionGrid[0][i];
+                Vector3 tl = sectionGrid[1][i];
+                Vector3 tr = sectionGrid[1][i + 1];
+                Vector3 br = sectionGrid[0][i + 1];
+
+                IList<Vector3> hole = CalculateOpening(opening, new Vector3[] { bl, tl, tr, br });
+
+                holePoints.Add(hole);
+
+                if (!opening.HasContent)
+                    continue;
+
+                Polygon3D.Polygon3D polygon3D = opening.Polygon3D;
+                Polygon3DData polygon3DData = polygon3D.Data as Polygon3DData;
+                polygon3DData.SetPolygon(hole.ToArray(), SectionData.Normal);
+                polygon3DData.IsDirty = true;
+            }
+
+            SectionData.SetHoles(holePoints);
+        }
+        private void BuildContent()
+        {
+            foreach(OpeningData opening in SectionData.Openings)
+            {
+                if (!opening.HasContent)
+                    continue;
+
+                opening.Polygon3D.Build();
+            }
+        }
+        private IList<Vector3> CalculateOpening(OpeningData opening, Vector3[] controlPoints)
         {
             Vector3[] hole = opening.Shape.ControlPoints();
-            Vector3[] scaledControlPoints = new Vector3[SectionData.Polygon.ControlPoints.Length];
+            Vector3[] scaledControlPoints = new Vector3[controlPoints.Length];
 
-            Array.Copy(SectionData.Polygon.ControlPoints, scaledControlPoints, SectionData.Polygon.ControlPoints.Length);
+            Array.Copy(controlPoints, scaledControlPoints, controlPoints.Length);
 
             float height = SectionData.Height;
-            float width = SectionData.Width;
+            float width = SectionData.Width / SectionData.Openings.Count;
 
-            Vector3 position = SectionData.Position;
+            Vector3 position = controlPoints.Centroid();
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, SectionData.Normal);
             Vector3 sectionScale = new Vector3(width * 0.5f, height * 0.5f);
 
@@ -72,19 +112,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             }
 
             hole = MeshMaker.ClampToQuad(scaledControlPoints, hole);
+            
+            opening.IsDirty = false;
 
-            IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
-            holePoints.Add(hole.ToList());
-
-            SectionData.SetHoles(holePoints);
-
-            Polygon3D.Polygon3D polygon3D = opening.Polygon3D;
-            Polygon3DData polygon3DData = polygon3D.Data as Polygon3DData;
-            polygon3DData.SetPolygon(hole, SectionData.Normal);
-
+            return hole.ToList();
         }
-
-
         public override void Demolish()
         {
             //base.Demolish();

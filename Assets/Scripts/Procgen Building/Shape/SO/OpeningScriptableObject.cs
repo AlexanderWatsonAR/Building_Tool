@@ -10,7 +10,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     [CreateAssetMenu(fileName = "Opening", menuName = "Opening/New Opening")]
     public class OpeningScriptableObject : ScriptableObject
     {
-        [SerializeReference] ShapeSO m_ShapeSO;
+        [SerializeReference] ShapeScriptableObject m_ShapeSO;
         [SerializeField] OpeningData m_Opening;
 
         public OpeningData Opening => m_Opening;

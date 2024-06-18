@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Arch", menuName = "Shape/Calculated Shape/New Arch")]
-public class ArchSO : ShapeSO
+public class ArchScriptableObject : ShapeScriptableObject
 {
     public Arch Arch => m_Shape as Arch;
 

@@ -12,5 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebaf7a99ad5ce1e449a1ebb989b78085, type: 3}
   m_Name: Frame
   m_EditorClassIdentifier: 
-  m_Scale: 0.85
-  m_Depth: 0.679
+  m_FrameData:
+    m_IsDirty: 1
+    m_Polygon:
+      m_ControlPoints:
+      - {x: 5.6904798, y: 0.86399996, z: 8.119676}
+      - {x: 5.6904798, y: 3.1360002, z: 8.119676}
+      - {x: 7.6749415, y: 3.1360002, z: 4.3334093}
+      - {x: 7.6749415, y: 0.86399996, z: 4.3334093}
+      m_Normal: {x: 0.8857181, y: -0, z: 0.46422353}
+    m_Holes:
+    - m_ControlPoints:
+      - {x: 12.009, y: 2.808704, z: 13.826559}
+      - {x: 12.009, y: 4.935296, z: 13.826559}
+      - {x: 13.866456, y: 4.935296, z: 10.282614}
+      - {x: 13.866456, y: 2.808704, z: 10.282614}
+      m_Normal: {x: 0.8857181, y: -0, z: 0.46422353}
+    m_Normal: {x: 0, y: 0, z: 1}
+    m_Up: {x: 0, y: 1, z: 0}
+    m_Depth: 0.335
+    m_Height: 2.2720003
+    m_Width: 5.770728
+    m_Position: {x: 6.6827106, y: 2, z: 6.2265425}
+    m_Scale: 0.936
+    m_IsHoleDirty: 1

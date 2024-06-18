@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Polygon", menuName ="Shape/Calculated Shape/New Polygon")]
-public class NPolygonSO : ShapeSO
+public class NPolygonScriptableObject : ShapeScriptableObject
 {
     public NPolygon NPolygon => m_Shape as NPolygon;
 

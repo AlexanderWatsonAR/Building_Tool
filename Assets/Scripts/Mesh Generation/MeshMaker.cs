@@ -13,6 +13,13 @@ using Vertex = UnityEngine.ProBuilder.Vertex;
 
 public static class MeshMaker
 {
+
+    public static Vector3 Centroid(this IEnumerable<Vector3> controlPoints)
+    {
+        Extensions.MinMax(controlPoints.ToArray(), out Vector3 min, out Vector3 max);
+        return Vector3.Lerp(min, max, 0.5f);
+    }
+
     public static ProBuilderMesh Cube(IEnumerable<Vector3> controlPoints, float height, bool flipFace = false)
     {
         // Control Points: 0 = Bottom Left, 1 = Top Left, 2 = Top Right, 3 = Bottom Right

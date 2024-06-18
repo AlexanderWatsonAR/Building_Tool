@@ -10,6 +10,15 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         public bool IsDirty { get { return m_IsDirty; } set { m_IsDirty = value; } }
 
+        public DirtyData() : this(false)
+        {
+        }
+
+        public DirtyData(bool isDirty)
+        {
+            m_IsDirty = isDirty;
+        }
+
     }
 }
 

@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 
 
-[CustomEditor(typeof(MeshShapeSO))]
+[CustomEditor(typeof(MeshShapeScriptableObject))]
 public class MeshShapeSOEditor : Editor
 {
     public override VisualElement CreateInspectorGUI()
