@@ -9,9 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 386f053b2f2d3124794ed75bf185f6fa, type: 3}
-  m_Name: Elements
+  m_Script: {fileID: 11500000, guid: ac1033996d5003745a5662d3d1154e6d, type: 3}
+  m_Name: Opening Menu
   m_EditorClassIdentifier: 
-  m_Menus:
-  - {fileID: 11400000, guid: 1ccbb1d80fcdac148a8d621d8defe13d, type: 2}
-  - {fileID: 11400000, guid: ebf846f65ea731b4ab805ba25ffb3134, type: 2}
+  m_Openings: []

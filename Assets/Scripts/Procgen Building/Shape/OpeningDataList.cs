@@ -14,9 +14,8 @@ public class OpeningDataList : IList<OpeningData>, ISerializationCallbackReceive
     public bool IsReadOnly => false;
 
     public OpeningData this[int index] { get => m_Openings[index]; set => m_Openings[index] = value; }
-
     public int Count => m_Openings.Count;
-
+    public int ActiveCount => m_Openings.FindAll(x => x.IsActive).Count;
     public bool IsDirty { get => m_IsDirty; set => m_IsDirty = value; }
 
     public OpeningDataList()
@@ -71,6 +70,14 @@ public class OpeningDataList : IList<OpeningData>, ISerializationCallbackReceive
     public void Reverse()
     {
         m_Openings.Reverse();
+    }
+    public void ShiftUp()
+    {
+        m_Openings.ShiftUp();
+    }
+    public void ShiftDown()
+    {
+        m_Openings.ShiftDown();
     }
     public void OnBeforeSerialize()
     {

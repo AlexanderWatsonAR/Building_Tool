@@ -32,15 +32,33 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             for (int i = 0; i < m_InnerList.arraySize; i++)
             {
                 m_OpeningDataFields.Add(new OpeningDataFields(new OpeningDataSerializedProperties(m_InnerList.GetArrayElementAtIndex(i))));
+                m_OpeningDataFields[i].HeaderFoldout.viewDataKey = i.ToString() + m_OpeningDataFields[i].Opening.Name;
             }
 
             foreach (var field in m_OpeningDataFields)
             {
+                field.HeaderFoldout.contextMenu.AddItem("Rename", false, () =>
+                {
+                    field.HeaderFoldout.textField.style.display = DisplayStyle.Flex;
+                    field.HeaderFoldout.label.style.display = DisplayStyle.None;
+                    field.HeaderFoldout.textField.Focus();
+                });
+                field.HeaderFoldout.textField.RegisterCallback<KeyDownEvent>(evt =>
+                {
+                    if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
+                    {
+                        field.HeaderFoldout.text = field.HeaderFoldout.textField.value;
+                        field.HeaderFoldout.textField.style.display = DisplayStyle.None;
+                        field.HeaderFoldout.label.style.display = DisplayStyle.Flex;
+                        field.Opening.Name = field.HeaderFoldout.text;
+                    }
+                });
+                field.HeaderFoldout.contextMenu.AddItem("Move Up", false, () => { m_Openings.ShiftDown(); m_Openings.IsDirty = true; });
+                field.HeaderFoldout.contextMenu.AddItem("Move Down", false, () => { m_Openings.ShiftUp(); m_Openings.IsDirty = true; });
+                field.HeaderFoldout.contextMenu.AddSeparator("");
                 field.HeaderFoldout.contextMenu.AddItem("Remove", false, () => { m_Openings.Remove(field.Opening); m_Openings.IsDirty = true; });
-                //field.Shape.RegisterCallback<GeometryChangedEvent> (evt =>
-                //{
-                //    m_Openings.IsDirty = true;
-                //});
+                field.HeaderFoldout.toggle.RegisterValueChangedCallback(evt => m_Openings.IsDirty = true);
+
                 field.Shape.RegisterValueChangeCallback(evt => { Debug.Log("Shape changed"); });
                 field.Height.RegisterValueChangedCallback(evt =>
                 {
@@ -149,6 +167,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_PreviousShapeControlPoints = Opening.Shape.ControlPoints();
 
             m_HeaderFoldout = new HeaderFoldout(Opening.Name);
+            m_HeaderFoldout.toggle.BindProperty(m_Props.IsActive);
+
             m_ContentFoldout = new Foldout() { text = "Content" };
             m_Container = new VisualElement();
             

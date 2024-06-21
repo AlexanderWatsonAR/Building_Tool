@@ -14,6 +14,51 @@ using OnlyInvalid.ProcGenBuilding.Polygon3D;
 
 public static class Extensions
 {
+    public static IList<T> Reverse<T>(this IList<T> list)
+    {
+        List<T> reverse = new List<T>();
+
+        for(int i = list.Count-1; i > -1; i--)
+        {
+            reverse.Add(list[i]);
+        }
+
+        return reverse;
+    }
+
+    public static void ShiftUp<T>(this List<T> list)
+    {
+        if (list == null || list.Count == 0)
+        {
+            return;
+        }
+
+        T lastElement = list[list.Count - 1];
+
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            list[i] = list[i - 1];
+        }
+
+        list[0] = lastElement;
+    }
+    public static void ShiftDown<T>(this List<T> list)
+    {
+        if (list == null || list.Count == 0)
+        {
+            return;
+        }
+
+        T firstElement = list[0];
+
+        for (int i = 0; i < list.Count - 1; i++)
+        {
+            list[i] = list[i + 1];
+        }
+
+        list[list.Count - 1] = firstElement;
+    }
+
     public static Vector3 CalculateRelativePosition(this Polygon3DData polygon, RelativePosition relativePosition)
     {
         Vector3 position = Vector3.zero;

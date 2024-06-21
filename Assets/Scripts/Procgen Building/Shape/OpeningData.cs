@@ -13,10 +13,12 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         [SerializeReference] Polygon3D.Polygon3D m_Polygon3D;
 
         [SerializeField] string m_Name;
+        [SerializeField] bool m_IsActive;
         [SerializeField, Range(0, 1)] float m_Height, m_Width;
         [SerializeField, Range(0, 180)] float m_Angle;
         [SerializeField] Vector2 m_Position;
         
+        public bool IsActive { get => m_IsActive; set => m_IsActive = value; }
         public string Name { get => m_Name; set => m_Name = value; }
         public float Height { get { return m_Height; } set { m_Height = value; } }
         public float Width { get { return m_Width; } set { m_Width = value; } }
@@ -34,6 +36,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Width = 0.5f;
             m_Angle = 0;
             m_Position = new Vector2();
+            m_IsActive = true;
         }
         public OpeningData (Shape shape, Polygon3D.Polygon3D buildable) : this (shape)
         {

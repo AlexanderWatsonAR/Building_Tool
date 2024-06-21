@@ -1,5 +1,6 @@
 using System.Web;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -100,6 +101,7 @@ namespace OnlyInvalid.CustomVisualElements
         VisualElement m_Arrow;
         Toggle m_Toggle;
         Label m_Label;
+        TextField m_LabelEditField;
         ContextElement m_ContextElement;
         HorizontalContainer m_HeaderContainer, m_LeftHeader, m_RightHeader;
         VerticalContainer m_ContentContainer;
@@ -127,6 +129,9 @@ namespace OnlyInvalid.CustomVisualElements
             }
         }
         public GenericDropdownMenu contextMenu => m_ContextElement.menu;
+        public Toggle toggle => m_Toggle;
+        public Label label => m_Label;
+        public TextField textField => m_LabelEditField;
         #endregion
 
         public HeaderFoldout()
@@ -152,6 +157,7 @@ namespace OnlyInvalid.CustomVisualElements
         public HeaderFoldout(string text) : this()
         {
             m_Label.text = text;
+            m_LabelEditField.value = text;
         }
         private void DefineFields()
         {
@@ -175,6 +181,12 @@ namespace OnlyInvalid.CustomVisualElements
             };
             m_ContextElement = new ContextElement();
             m_ContentContainer = new VerticalContainer() { name = "__content" };
+            m_LabelEditField = new TextField()
+            {
+                value = m_Label.text,
+            };
+            m_LabelEditField.style.display = DisplayStyle.None;
+            m_LabelEditField.style.width = 125;
         }
         private void SetDefaults()
         {
@@ -215,6 +227,7 @@ namespace OnlyInvalid.CustomVisualElements
             m_LeftHeader.Add(m_Arrow);
             m_LeftHeader.Add(m_Toggle);
             m_LeftHeader.Add(m_Label);
+            m_LeftHeader.Add(m_LabelEditField);
             m_RightHeader.Add(m_ContextElement);
             this.Add(m_ContentContainer);
         }

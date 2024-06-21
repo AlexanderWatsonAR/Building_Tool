@@ -15,6 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         const string k_Position = "m_Position";
         const string k_Shape = "m_Shape";
         const string k_Polygon3D = "m_Polygon3D";
+        const string k_IsActive = "m_IsActive";
         #endregion
 
         public SerializedProperty Height => m_Data.FindPropertyRelative(k_Height);
@@ -22,6 +23,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public SerializedProperty Angle => m_Data.FindPropertyRelative(k_Angle);
         public SerializedProperty Position => m_Data.FindPropertyRelative(k_Position);
         public SerializedProperty Shape => m_Data.FindPropertyRelative(k_Shape);
+        public SerializedProperty IsActive => m_Data.FindPropertyRelative(k_IsActive);
         public Object Polygon3D
         {
             get

@@ -6,17 +6,65 @@ using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using System.Linq;
 using Unity.VisualScripting;
 using System;
+using static UnityEngine.Rendering.DebugUI.Table;
+using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
     public class Section : Polygon3D.Polygon3D
     {
-        [SerializeField] SectionData m_PreviousSectionData;
+       // [SerializeField] SectionData m_PreviousSectionData;
 
         public SectionData SectionData => m_Data as SectionData;
 
+        #region Settings
+        [SerializeField] bool m_IsHorizontal, m_IsVertical, m_IsDirectionReversed;
+        private int Columns
+        {
+            get
+            {
+                return m_IsVertical ? 1 : SectionData.Openings.Count;
+            }
+            
+        }
+        private int Rows
+        {
+            get
+            {
+                return m_IsHorizontal ? 1 : SectionData.Openings.Count;
+            }
+
+        }
+        private List<Vector3[]> Grid
+        {
+            get
+            {
+                return MeshMaker.CreateGridFromControlPoints(SectionData.Polygon.ControlPoints, Columns, Rows);
+            }
+        }
+        private float Height
+        {
+            get
+            {
+                return m_IsHorizontal ? SectionData.Height : SectionData.Height / SectionData.Openings.Count;
+            }
+        }
+        private float Width
+        {
+            get
+            {
+                return m_IsVertical ? SectionData.Width : SectionData.Width / SectionData.Openings.Count;
+            }
+        }
+
+        #endregion
+
         public override Buildable Initialize(DirtyData data)
         {
+            m_IsHorizontal = true;
+            m_IsVertical = false;
+            m_IsDirectionReversed = false;
+
             return base.Initialize(data);
         }
         public override void Build()
@@ -33,36 +81,61 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         private void CalculateOpenings()
         {
             if (SectionData.Openings == null)
+            {
+                SectionData.SetHoles(null);
                 return;
+            }
 
             if (SectionData.Openings.Count() == 0)
+            {
+                SectionData.SetHoles(null);
                 return;
+            }
 
             IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
-            List<Vector3[]> sectionGrid = MeshMaker.CreateGridFromControlPoints(SectionData.Polygon.ControlPoints, SectionData.Openings.Count, 1);
+            int index = 0;
 
-            for (int i = 0; i < SectionData.Openings.Count(); i++)
+            int i = m_IsDirectionReversed ? Columns-1 : 0;
+            int j = m_IsDirectionReversed ? Rows-1 : 0;
+            int iterator = m_IsDirectionReversed ? -1 : 1;
+
+            for (; m_IsDirectionReversed ? i > -1 : i < Columns; i += iterator)
             {
-                OpeningData opening = SectionData.Openings[i];
+                j = m_IsDirectionReversed ? Rows - 1 : 0;
 
-                Vector3 bl = sectionGrid[0][i];
-                Vector3 tl = sectionGrid[1][i];
-                Vector3 tr = sectionGrid[1][i + 1];
-                Vector3 br = sectionGrid[0][i + 1];
+                for (; m_IsDirectionReversed ? j > -1 : j < Rows; j += iterator)
+                {
+                    OpeningData opening = SectionData.Openings[index];
 
-                IList<Vector3> hole = CalculateOpening(opening, new Vector3[] { bl, tl, tr, br });
+                    index++;
 
-                holePoints.Add(hole);
+                    if (!opening.IsActive)
+                        continue;
 
-                if (!opening.HasContent)
-                    continue;
+                    Vector3 bl = Grid[j][i];
+                    Vector3 tl = Grid[j + 1][i];
+                    Vector3 tr = Grid[j+ 1][i + 1];
+                    Vector3 br = Grid[j][i + 1];
 
-                Polygon3D.Polygon3D polygon3D = opening.Polygon3D;
-                Polygon3DData polygon3DData = polygon3D.Data as Polygon3DData;
-                polygon3DData.SetPolygon(hole.ToArray(), SectionData.Normal);
-                polygon3DData.IsDirty = true;
+                    IList<Vector3> hole = CalculateOpening(opening, new Vector3[] { bl, tl, tr, br });
+
+                    holePoints.Add(hole);
+
+                    if (!opening.HasContent)
+                        continue;
+
+                    Polygon3D.Polygon3D polygon3D = opening.Polygon3D;
+                    Polygon3DData polygon3DData = polygon3D.Data as Polygon3DData;
+                    polygon3DData.SetPolygon(hole.ToArray(), SectionData.Normal);
+                    polygon3DData.IsDirty = true;
+                }
             }
+            
+            //if(m_IsDirectionReversed)
+            //{
+            //    holePoints = holePoints.Reverse();
+            //}
 
             SectionData.SetHoles(holePoints);
         }
@@ -83,8 +156,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             Array.Copy(controlPoints, scaledControlPoints, controlPoints.Length);
 
-            float height = SectionData.Height;
-            float width = SectionData.Width / SectionData.Openings.Count;
+            float height = Height;
+            float width = Width;
 
             Vector3 position = controlPoints.Centroid();
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, SectionData.Normal);

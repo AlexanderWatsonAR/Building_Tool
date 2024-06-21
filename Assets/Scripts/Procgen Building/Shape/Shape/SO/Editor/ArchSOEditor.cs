@@ -15,13 +15,16 @@ public class ArchSOEditor : Editor
 
         SerializedProperty arch = serializedObject.FindProperty("m_Shape");
 
-        SerializedProperty height = arch.FindPropertyRelative("m_Height");
+        SerializedProperty topHeight = arch.FindPropertyRelative("m_TopHeight");
+        SerializedProperty bottomHeight = arch.FindPropertyRelative("m_BottomHeight");
         SerializedProperty sides = arch.FindPropertyRelative("m_Sides");
 
-        PropertyField heightField = new PropertyField(height);
+        PropertyField topHeightField = new PropertyField(topHeight);
+        PropertyField bottomHeightField = new PropertyField(bottomHeight);
         PropertyField sidesField = new PropertyField(sides);
 
-        root.Add(heightField);
+        root.Add(topHeightField);
+        root.Add(bottomHeightField);
         root.Add(sidesField);
 
 

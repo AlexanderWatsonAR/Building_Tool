@@ -8,15 +8,5 @@ namespace OnlyInvalid.ProcGenBuilding.Window
     public class OuterFrame : Frame
     {
         public OuterFrameData OuterFrameData => m_Data as OuterFrameData;
-
-        public override Buildable Initialize(DirtyData data)
-        {
-            return base.Initialize(data);
-        }
-
-        private void OnValidate()
-        {
-            m_OnDataChanged.Invoke(m_Data);
-        }
     }
 }

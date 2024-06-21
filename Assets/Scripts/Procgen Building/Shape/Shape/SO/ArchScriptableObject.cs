@@ -9,7 +9,7 @@ public class ArchScriptableObject : ShapeScriptableObject
 
     public override void Initialize()
     {
-        m_Shape = new Arch(0.75f, 5);
+        m_Shape = new Arch(0.75f, 0.5f, 5);
     }
 
 }

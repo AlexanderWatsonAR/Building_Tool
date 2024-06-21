@@ -2,20 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using OnlyInvalid.ProcGenBuilding.Common;
-using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     public class Frame : Polygon3D
     {
         public FrameData FrameData => m_Data as FrameData;
-
-        public override Buildable Initialize(DirtyData data)
-        {
-            return base.Initialize(data);
-        }
 
         public override void Build()
         {
