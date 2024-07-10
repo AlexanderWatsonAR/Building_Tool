@@ -80,6 +80,10 @@
     height: 20px;
 }
 
+.only-invalid-header-foldout__context-menu:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
 .only-invalid-header-foldout-__left-header {
 }
 

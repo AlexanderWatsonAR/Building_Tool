@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -18,7 +19,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             m_IsDirty = isDirty;
         }
-
     }
 }
 

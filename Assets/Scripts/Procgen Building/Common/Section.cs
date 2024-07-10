@@ -1,25 +1,18 @@
-using OnlyInvalid.ProcGenBuilding.Common;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
-using System.Linq;
-using Unity.VisualScripting;
 using System;
-using static UnityEngine.Rendering.DebugUI.Table;
-using UnityEngine.UIElements;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
     public class Section : Polygon3D.Polygon3D
     {
-       // [SerializeField] SectionData m_PreviousSectionData;
-
         public SectionData SectionData => m_Data as SectionData;
 
         #region Settings
         [SerializeField] bool m_IsHorizontal, m_IsVertical, m_IsDirectionReversed;
-        private int Columns
+        public int Columns
         {
             get
             {
@@ -27,7 +20,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             }
             
         }
-        private int Rows
+        public int Rows
         {
             get
             {
@@ -35,28 +28,27 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             }
 
         }
-        private List<Vector3[]> Grid
+        public List<Vector3[]> Grid
         {
             get
             {
                 return MeshMaker.CreateGridFromControlPoints(SectionData.Polygon.ControlPoints, Columns, Rows);
             }
         }
-        private float Height
+        public float Height
         {
             get
             {
                 return m_IsHorizontal ? SectionData.Height : SectionData.Height / SectionData.Openings.Count;
             }
         }
-        private float Width
+        public float Width
         {
             get
             {
                 return m_IsVertical ? SectionData.Width : SectionData.Width / SectionData.Openings.Count;
             }
         }
-
         #endregion
 
         public override Buildable Initialize(DirtyData data)
@@ -76,7 +68,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             base.Build();
 
-            BuildContent();
+            //BuildContent();
         }
         private void CalculateOpenings()
         {
@@ -95,14 +87,12 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             IList<IList<Vector3>> holePoints = new List<IList<Vector3>>();
 
             int index = 0;
-
             int i = m_IsDirectionReversed ? Columns-1 : 0;
-            int j = m_IsDirectionReversed ? Rows-1 : 0;
             int iterator = m_IsDirectionReversed ? -1 : 1;
 
             for (; m_IsDirectionReversed ? i > -1 : i < Columns; i += iterator)
             {
-                j = m_IsDirectionReversed ? Rows - 1 : 0;
+                int j = m_IsDirectionReversed ? Rows - 1 : 0;
 
                 for (; m_IsDirectionReversed ? j > -1 : j < Rows; j += iterator)
                 {
@@ -132,11 +122,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 }
             }
             
-            //if(m_IsDirectionReversed)
-            //{
-            //    holePoints = holePoints.Reverse();
-            //}
-
             SectionData.SetHoles(holePoints);
         }
         private void BuildContent()
@@ -160,12 +145,12 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             float width = Width;
 
             Vector3 position = controlPoints.Centroid();
-            Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, SectionData.Normal);
+            Quaternion rotation = Vector3Extensions.Approximately(SectionData.Normal, Vector3.back) ? Quaternion.identity : Quaternion.FromToRotation(Vector3.forward, SectionData.Normal);
             Vector3 sectionScale = new Vector3(width * 0.5f, height * 0.5f);
 
             Vector3 offset = new Vector3(opening.Position.x, opening.Position.y);
             Quaternion openingRotation = Quaternion.Euler(Vector3.forward * opening.Angle);
-            Vector3 openingScale = new Vector3(opening.Width, opening.Height);
+            Vector3 openingScale = new Vector3(opening.Scale.x, opening.Scale.y);
 
             Matrix4x4 sectionTRS = Matrix4x4.TRS(position, rotation, sectionScale);
             Matrix4x4 openingTRS = Matrix4x4.TRS(offset, openingRotation, openingScale);
@@ -189,10 +174,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             opening.IsDirty = false;
 
             return hole.ToList();
-        }
-        public override void Demolish()
-        {
-            //base.Demolish();
         }
     }
 }

@@ -14,6 +14,19 @@ using OnlyInvalid.ProcGenBuilding.Polygon3D;
 
 public static class Extensions
 {
+    public static string GetParentNames(Transform t)
+    {
+        string names = "";
+
+        while (t != null)
+        {
+            names += t.name;
+            t = t.parent;
+        }
+
+        return names;
+    }
+
     public static IList<T> Reverse<T>(this IList<T> list)
     {
         List<T> reverse = new List<T>();

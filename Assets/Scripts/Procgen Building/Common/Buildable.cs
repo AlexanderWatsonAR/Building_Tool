@@ -8,7 +8,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 {
     public abstract class Buildable : MonoBehaviour
     {
-        [SerializeReference] protected DirtyData m_Data;
+        [SerializeReference] protected DirtyData m_Data, m_PreviousData;
+
         [SerializeField] protected DirtyDataEvent m_OnDataChanged = new();
 
         public DirtyData Data => m_Data;

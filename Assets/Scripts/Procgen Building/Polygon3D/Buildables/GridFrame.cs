@@ -6,7 +6,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    public class GridFrame : Polygon3D
+    public class GridFrame : BaseFrame
     {
         public GridFrameData GridFrameData => m_Data as GridFrameData;
 
@@ -23,12 +23,12 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             GridFrameData.IsHoleDirty = true;
 
             if (GridFrameData.IsHoleDirty)
-                CalculateHole();
+                CalculateInside();
 
             base.Build();
         }
 
-        private void CalculateHole()
+        protected override void CalculateInside()
         {
             Vector3[][] holePoints = MeshMaker.SpiltPolygon(GridFrameData.Polygon.ControlPoints, GridFrameData.Width, GridFrameData.Height, GridFrameData.Columns, GridFrameData.Rows, GridFrameData.Position, GridFrameData.Normal).Select(list => list.ToArray()).ToArray();
             GridFrameData.Holes = new PolygonData[holePoints.Length];

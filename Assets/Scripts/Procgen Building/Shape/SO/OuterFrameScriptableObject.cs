@@ -2,15 +2,16 @@ using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using OnlyInvalid.ProcGenBuilding.Window;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.ProBuilder;
 
 [CreateAssetMenu(fileName = "Outer Frame", menuName = "Frame/New Outer Frame")]
-public class OuterFrameScriptableObject : ContentScriptableObject
+public class OuterFrameScriptableObject : BaseFrameScriptableObject
 {
     [SerializeField] OuterFrameData m_OuterFrameData;
-    [SerializeField] FrameScriptableObject m_InnerFrame;
+    [SerializeField] ContentScriptableObject m_Content;
 
     public override Polygon3D Create3DPolygon()
     {
@@ -19,6 +20,8 @@ public class OuterFrameScriptableObject : ContentScriptableObject
         frame.name = name;
         m_OuterFrameData.IsDirty = true;
         m_OuterFrameData.IsHoleDirty = true;
+        m_OuterFrameData.InnerPolygon3D = m_Content.Create3DPolygon();
+        m_OuterFrameData.InnerPolygon3D.transform.SetParent(frame.transform, true);
         frame.Initialize(m_OuterFrameData);
         return frame;
     }

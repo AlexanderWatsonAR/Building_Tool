@@ -9,6 +9,10 @@ public class MeshShapeScriptableObject : ShapeScriptableObject
 
     public override void Initialize()
     {
-        m_Shape = new MeshShape();
+        m_Shape = new MeshShape(new Mesh()
+        {
+            name = "Square",
+            vertices = MeshMaker.Square()
+        });
     }
 }

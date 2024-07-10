@@ -11,7 +11,12 @@ using UnityEngine;
 /// </summary>
 
 [System.Serializable]
-public abstract class Shape
+public abstract class Shape : ICloneable
 {
     public abstract Vector3[] ControlPoints();
+
+    public object Clone()
+    {
+        return MemberwiseClone();
+    }
 }

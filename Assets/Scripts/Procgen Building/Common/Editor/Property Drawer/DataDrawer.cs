@@ -14,9 +14,10 @@ public abstract class DataDrawer : PropertyDrawer
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
-        m_Root = new VisualElement();
+        m_Root ??= new VisualElement();
+        m_Root.Clear();
         m_Data = data;
-        Initialize(data);
+        Initialize(m_Data);
         DefineFields();
         BindFields();
         RegisterValueChangeCallbacks();

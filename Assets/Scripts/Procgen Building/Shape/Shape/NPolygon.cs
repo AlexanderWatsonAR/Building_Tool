@@ -22,7 +22,6 @@ public class NPolygon : CalculatedShape
 
     public override Vector3[] ControlPoints()
     {
-
         return m_Sides == 4 ? MeshMaker.Square() : MeshMaker.CalculateNPolygon(m_Sides, 1, 1);
     }
 

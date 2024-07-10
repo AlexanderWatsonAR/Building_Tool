@@ -15,15 +15,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     {
         protected SerializedProperty m_Data;
         protected VisualElement m_Root;
-        [SerializeField, HideInInspector] protected Buildable m_Buildable;
 
         public override VisualElement CreateInspectorGUI()
         {
             m_Root = new VisualElement();
             serializedObject.Update();
-
-            m_Buildable = target as Buildable;
-            //Type buildableType = target.GetType();
 
             m_Data = serializedObject.FindProperty("m_Data");
 
@@ -37,17 +33,20 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         private void OnEnable()
         {
+           // Debug.Log("On Enable");
             EditorApplication.update += Build;
         }
 
         private void OnDisable()
         {
+          //  Debug.Log("On Disable");
             EditorApplication.update -= Build;
         }
 
         private void Build()
         {
-            m_Buildable.Build();
+            Buildable buildable = target as Buildable;
+            buildable.Build();
         }
 
     }

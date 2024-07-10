@@ -10,7 +10,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     {
         [SerializeField] protected ProBuilderMesh m_ProBuilderMesh;
 
-        private Polygon3DData Polygon3DData => m_Data as Polygon3DData;
+        public Polygon3DData Polygon3DData => m_Data as Polygon3DData;
 
         public override Buildable Initialize(DirtyData data)
         {

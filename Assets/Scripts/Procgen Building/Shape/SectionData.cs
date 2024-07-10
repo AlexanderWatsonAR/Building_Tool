@@ -11,6 +11,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         [SerializeField] OpeningDataList m_Openings;
 
         public OpeningDataList Openings => m_Openings;
+
         public int ID { get { return m_ID; } set { m_ID = value; } }
 
         public SectionData()

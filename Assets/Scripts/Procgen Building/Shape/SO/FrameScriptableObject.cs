@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 
 [CreateAssetMenu(fileName = "Frame", menuName = "Frame/New Frame")]
-public class FrameScriptableObject : ContentScriptableObject
+public class FrameScriptableObject : BaseFrameScriptableObject
 {
     [SerializeField] FrameData m_FrameData;
 

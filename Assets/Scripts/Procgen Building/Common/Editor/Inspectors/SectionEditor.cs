@@ -22,7 +22,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             base.CreateInspectorGUI();
 
-
             DisplayConfig();
             CreateElementsButton();
             m_Root.Insert(0, m_SettingsFoldout);
@@ -32,17 +31,26 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             return m_Root;
         }
-
         private void DisplayConfig()
         {
             m_SettingsFoldout = new Foldout() { text = "Configure" };
+
+            Transform t = (target as Buildable).transform;
+            string viewDataKey = "SettingsFoldout";
+
+            while (t != null)
+            {
+                viewDataKey += t.name;
+                t = t.parent;
+            }
+
+            m_SettingsFoldout.viewDataKey = viewDataKey;
             m_SettingsFoldout.style.marginBottom = 5;
 
             SerializedProperty isHorizontal = serializedObject.FindProperty("m_IsHorizontal");
             SerializedProperty isVertical = serializedObject.FindProperty("m_IsVertical");
             SerializedProperty isReversed = serializedObject.FindProperty("m_IsDirectionReversed");
 
-            Label subdivide = new Label("Subdivide:");
             RadioButtonGroup radioButtonGroup = new RadioButtonGroup();
             RadioButton horizontal = new RadioButton("Horizontally");
             RadioButton vertical = new RadioButton("Vertically");
@@ -56,16 +64,23 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             radioButtonGroup.Add(horizontal);
             radioButtonGroup.Add(vertical);
 
+            SectionData data = m_Data.GetUnderlyingValue() as SectionData;
+
             horizontal.RegisterValueChangedCallback(evt =>
             {
                 isVertical.SetUnderlyingValue(!evt.newValue);
+                data.IsDirty = true;
             });
             vertical.RegisterValueChangedCallback(evt =>
             {
                 isHorizontal.SetUnderlyingValue(!evt.newValue);
+                data.IsDirty = true;
+            });
+            reversed.RegisterValueChangedCallback(evt => 
+            {
+                data.IsDirty = true;
             });
 
-            m_SettingsFoldout.Add(subdivide);
             m_SettingsFoldout.Add(radioButtonGroup);
             m_SettingsFoldout.Add(reversed);
         }

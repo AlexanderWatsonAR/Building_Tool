@@ -9,19 +9,17 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     public class OpeningDataSerializedProperties : SerializedPropertyGroup
     {
         #region Constants
-        const string k_Height = "m_Height";
-        const string k_Width = "m_Width";
-        const string k_Angle = "m_Angle";
         const string k_Position = "m_Position";
+        const string k_Angle = "m_Angle";
+        const string k_Scale = "m_Scale";
         const string k_Shape = "m_Shape";
         const string k_Polygon3D = "m_Polygon3D";
         const string k_IsActive = "m_IsActive";
         #endregion
 
-        public SerializedProperty Height => m_Data.FindPropertyRelative(k_Height);
-        public SerializedProperty Width => m_Data.FindPropertyRelative(k_Width);
-        public SerializedProperty Angle => m_Data.FindPropertyRelative(k_Angle);
         public SerializedProperty Position => m_Data.FindPropertyRelative(k_Position);
+        public SerializedProperty Angle => m_Data.FindPropertyRelative(k_Angle);
+        public SerializedProperty Scale => m_Data.FindPropertyRelative(k_Scale);
         public SerializedProperty Shape => m_Data.FindPropertyRelative(k_Shape);
         public SerializedProperty IsActive => m_Data.FindPropertyRelative(k_IsActive);
         public Object Polygon3D

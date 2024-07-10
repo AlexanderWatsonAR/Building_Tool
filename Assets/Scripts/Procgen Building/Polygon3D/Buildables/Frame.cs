@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    public class Frame : Polygon3D
+    public class Frame : BaseFrame
     {
         public FrameData FrameData => m_Data as FrameData;
 
@@ -14,13 +14,15 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             if (!FrameData.IsDirty)
                 return;
 
+            FrameData.IsHoleDirty = true;
+
             if(FrameData.IsHoleDirty)
-                CalculateHole();
+                CalculateInside();
 
             base.Build();
         }
 
-        private void CalculateHole()
+        protected override void CalculateInside()
         {
             FrameData.Holes = new PolygonData[1];
             Matrix4x4 scaleMatrix = Matrix4x4.Translate(FrameData.Position) * Matrix4x4.Scale(Vector3.one * FrameData.Scale) * Matrix4x4.Translate(-FrameData.Position);

@@ -120,7 +120,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             return false;
         }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();

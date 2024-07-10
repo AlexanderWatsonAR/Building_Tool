@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 
 [CreateAssetMenu(fileName = "Grid Frame", menuName = "Frame/New Grid Frame")]
-public class GridFrameScriptableObject : ContentScriptableObject
+public class GridFrameScriptableObject : BaseFrameScriptableObject
 {
     [SerializeField] GridFrameData m_GridFrameData;
 
