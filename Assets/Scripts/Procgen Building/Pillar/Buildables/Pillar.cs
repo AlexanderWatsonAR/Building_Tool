@@ -40,7 +40,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 
             if (m_PillarData.Sides != 4)
             {
-                controlPoints = MeshMaker.CreateNPolygon(m_PillarData.Sides, halfWidth, halfDepth);
+                controlPoints = MeshMaker.CalculateNPolygon(m_PillarData.Sides, halfWidth, halfDepth);
             }
             // Orientate points to the XZ plane.
             for (int i = 0; i < controlPoints.Length; i++)

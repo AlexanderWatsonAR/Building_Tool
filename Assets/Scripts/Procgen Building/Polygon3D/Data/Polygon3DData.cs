@@ -74,13 +74,18 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Polygon ??= new PolygonData(controlPoints, normal);
             m_Polygon.ControlPoints = controlPoints;
             m_Polygon.Normal = normal;
+            m_Normal = normal;
 
             CalcualateInternal();
         }
-
-
         public void SetHoles(IList<IList<Vector3>> holePoints)
         {
+            if (holePoints == null)
+            {
+                m_Holes = null;
+                return;
+            }
+
             m_Holes = new PolygonData[holePoints.Count];
 
             for (int i = 0; i < holePoints.Count; i++)
@@ -89,7 +94,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 m_Holes[i] = new PolygonData(hole.ToArray());
             }
         }
-
         public IList<IList<Vector3>> GetHoles()
         {
             if (m_Holes == null)
@@ -104,7 +108,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             return holePoints;
         }
-
         public override bool Equals(object obj)
         {
             Polygon3DData other = obj as Polygon3DData;
@@ -117,12 +120,10 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             return false;
         }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
-
         public object Clone()
         {
             Polygon3DData clone = MemberwiseClone() as Polygon3DData;

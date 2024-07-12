@@ -7,6 +7,7 @@ using UnityEditor.UIElements;
 using UnityEditor.Rendering;
 using OnlyInvalid.ProcGenBuilding.Storey;
 using OnlyInvalid.ProcGenBuilding.Wall;
+using System;
 
 namespace OnlyInvalid.ProcGenBuilding.Building
 {
@@ -107,96 +108,97 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         private VisualElement DefineWallSectionsFields(WallDataSerializedProperties wall)
         {
-            VisualElement sections = new VisualElement();
+            throw new NotImplementedException();
+            //VisualElement sections = new VisualElement();
 
-            foreach (var section in wall.Sections)
-            {
-                Foldout sectionFoldout = new Foldout { text = "Wall Section" + section.ID.intValue };
+            //foreach (var section in wall.Sections)
+            //{
+            //    Foldout sectionFoldout = new Foldout { text = "Wall Section" + section.ID.intValue };
 
-                WallElement activeElement = section.WallElement.GetEnumValue<WallElement>();
+            //    WallElement activeElement = section.WallElement.GetEnumValue<WallElement>();
 
-                sectionFoldout.Add(new Label("Wall Element: " + activeElement));
+            //    sectionFoldout.Add(new Label("Wall Element: " + activeElement));
 
-                switch (activeElement)
-                {
-                    case WallElement.Wall:
+            //    switch (activeElement)
+            //    {
+            //        case WallElement.Wall:
 
-                        break;
-                    case WallElement.Doorway:
-                        {
-                            var doorway = section.Doorway;
-                            sectionFoldout.Add(new GridVisualElement(doorway.Columns.intValue, doorway.Rows.intValue));
-                            sectionFoldout.Add(new SizeVisualElement(doorway.Height.floatValue, doorway.Width.floatValue));
-                        }
-                        break;
-                    case WallElement.Archway:
-                        {
-                            var archway = section.Archway;
+            //            break;
+            //        case WallElement.Doorway:
+            //            {
+            //                var doorway = section.Doorway;
+            //                sectionFoldout.Add(new GridVisualElement(doorway.Columns.intValue, doorway.Rows.intValue));
+            //                sectionFoldout.Add(new SizeVisualElement(doorway.Height.floatValue, doorway.Width.floatValue));
+            //            }
+            //            break;
+            //        case WallElement.Archway:
+            //            {
+            //                var archway = section.Archway;
 
-                            PropertyField archwayField = new PropertyField(archway.Data);
+            //                PropertyField archwayField = new PropertyField(archway.Data);
 
-                            foreach (var door in archway.Doors)
-                            {
-                                PropertyField doorField = new PropertyField(door.Data);
-                            }
-                        }
-                        break;
-                    case WallElement.Window:
-                        {
-                            var windowOpening = section.WindowOpening;
-                            sectionFoldout.Add(new GridVisualElement(windowOpening.Columns.intValue, windowOpening.Rows.intValue));
+            //                foreach (var door in archway.Doors)
+            //                {
+            //                    PropertyField doorField = new PropertyField(door.Data);
+            //                }
+            //            }
+            //            break;
+            //        case WallElement.Window:
+            //            {
+            //                var windowOpening = section.WindowOpening;
+            //                sectionFoldout.Add(new GridVisualElement(windowOpening.Columns.intValue, windowOpening.Rows.intValue));
 
-                            SizeVisualElement shape = new SizeVisualElement(windowOpening.Height.floatValue, windowOpening.Width.floatValue);
-                            shape.Add(new Label("Sides: " + windowOpening.Sides.intValue));
-                            shape.Add(new Label("Angle: " + windowOpening.Angle.floatValue));
-                            sectionFoldout.Add(shape);
+            //                SizeVisualElement shape = new SizeVisualElement(windowOpening.Height.floatValue, windowOpening.Width.floatValue);
+            //                shape.Add(new Label("Sides: " + windowOpening.Sides.intValue));
+            //                shape.Add(new Label("Angle: " + windowOpening.Angle.floatValue));
+            //                sectionFoldout.Add(shape);
 
-                            foreach (var window in windowOpening.Windows)
-                            {
-                                Foldout windowFoldout = new Foldout() { text = "Window " + window.ID.intValue };
+            //                foreach (var window in windowOpening.Windows)
+            //                {
+            //                    Foldout windowFoldout = new Foldout() { text = "Window " + window.ID.intValue };
 
-                                HorizontalVisualElement activeElementsCon = new();
+            //                    HorizontalVisualElement activeElementsCon = new();
 
 
-                                HorizontalVisualElement outerFrameCon = new();
+            //                    HorizontalVisualElement outerFrameCon = new();
 
-                                var outerFrame = window.OuterFrame;
+            //                    var outerFrame = window.OuterFrame;
 
-                                outerFrameCon.Add(new Label("Outer Frame"));
-                                outerFrameCon.Add(new Label("Depth: " + outerFrame.Depth.floatValue.ToString()));
-                                outerFrameCon.Add(new Label("Scale: " + outerFrame.Scale.floatValue.ToString()));
+            //                    outerFrameCon.Add(new Label("Outer Frame"));
+            //                    outerFrameCon.Add(new Label("Depth: " + outerFrame.Depth.floatValue.ToString()));
+            //                    outerFrameCon.Add(new Label("Scale: " + outerFrame.Scale.floatValue.ToString()));
 
-                                HorizontalVisualElement innerFrameCon = new();
+            //                    HorizontalVisualElement innerFrameCon = new();
 
-                                var innerFrame = window.InnerFrame;
+            //                    var innerFrame = window.InnerFrame;
 
-                                innerFrameCon.Add(new Label("Inner Frame"));
-                                innerFrameCon.Add(new GridVisualElement(innerFrame.Columns.intValue, innerFrame.Rows.intValue));
-                                innerFrameCon.Add(new Label("Depth: " + innerFrame.Depth.floatValue.ToString()));
-                                innerFrameCon.Add(new Label("Scale: " + innerFrame.Scale.floatValue.ToString()));
+            //                    innerFrameCon.Add(new Label("Inner Frame"));
+            //                    innerFrameCon.Add(new GridVisualElement(innerFrame.Columns.intValue, innerFrame.Rows.intValue));
+            //                    innerFrameCon.Add(new Label("Depth: " + innerFrame.Depth.floatValue.ToString()));
+            //                    innerFrameCon.Add(new Label("Scale: " + innerFrame.Scale.floatValue.ToString()));
 
-                                HorizontalVisualElement paneCon = new();
-                                paneCon.Add(new Label("Pane: "));
-                                paneCon.Add(new Label("Depth: " + window.Pane.Depth.floatValue));
+            //                    HorizontalVisualElement paneCon = new();
+            //                    paneCon.Add(new Label("Pane: "));
+            //                    paneCon.Add(new Label("Depth: " + window.Pane.Depth.floatValue));
 
-                                windowFoldout.Add(outerFrameCon);
-                                windowFoldout.Add(innerFrameCon);
-                                windowFoldout.Add(paneCon);
-                                sectionFoldout.Add(windowFoldout);
+            //                    windowFoldout.Add(outerFrameCon);
+            //                    windowFoldout.Add(innerFrameCon);
+            //                    windowFoldout.Add(paneCon);
+            //                    sectionFoldout.Add(windowFoldout);
 
-                            }
-                        }
-                        break;
-                    case WallElement.Extension:
-                        break;
-                    case WallElement.Empty:
-                        break;
-                }
+            //                }
+            //            }
+            //            break;
+            //        case WallElement.Extension:
+            //            break;
+            //        case WallElement.Empty:
+            //            break;
+            //    }
 
-                sections.Add(sectionFoldout);
-            }
-
-            return sections;
+            //    sections.Add(sectionFoldout);
+          //  }
+        //
+           // return sections;
         }
 
     }

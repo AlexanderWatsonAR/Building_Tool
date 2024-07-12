@@ -18,7 +18,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
     {
         [SerializeReference] WallData m_WallData;
 
-        [SerializeField] List<WallSection> m_Sections;
+        [SerializeField] List<Section> m_Sections;
 
         List<Vector3[]> m_SubPoints; // Grid points, based on control points, columns & rows.
 
@@ -51,12 +51,12 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             //Vector3 right = m_Data.Start.DirectionToTarget(m_Data.End);
             //Vector3 faceNormal = Vector3.Cross(right, Vector3.up);
 
-            m_WallData.SectionData = new WallSectionData
+            m_WallData.SectionData = new SectionData
             {
                 Depth = m_WallData.Depth,
-                Window = DefineWindowDefaults(),
-                Door = DefineDoorDefaults(),
-                DoorFrame = DefineFrameDefaults(),
+                //Window = DefineWindowDefaults(),
+                //Door = DefineDoorDefaults(),
+                //DoorFrame = DefineFrameDefaults(),
                 Normal = m_WallData.Normal
             };
 
@@ -136,17 +136,17 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             m_Sections.BuildCollection();
         }
 
-        private WallSection CreateWallSection(WallSectionData data)
+        private Section CreateWallSection(SectionData data)
         {
             ProBuilderMesh wallSectionMesh = ProBuilderMesh.Create();
             wallSectionMesh.name = "Wall Section " + data.ID.ToString();
             wallSectionMesh.GetComponent<Renderer>().sharedMaterial = m_WallData.Material;
             wallSectionMesh.transform.SetParent(transform, false);
-            WallSection wallSection = wallSectionMesh.AddComponent<WallSection>();
+            Section wallSection = wallSectionMesh.AddComponent<Section>();
             wallSection.Initialize(m_WallData.Sections[data.ID]);
             wallSection.AddListener(dirtyData =>
             {
-                WallSectionData wallSectionData = dirtyData as WallSectionData;
+                SectionData wallSectionData = dirtyData as SectionData;
                 m_WallData.Sections[wallSectionData.ID] = wallSectionData;
                 m_OnDataChanged.Invoke(m_WallData);
             });
@@ -155,11 +155,11 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         private void CreateWallSections()
         {
-            m_Sections ??= new List<WallSection>();
+            m_Sections ??= new List<Section>();
 
             List<Vector3[]> subPoints = SubPoints;
 
-            m_WallData.Sections ??= new WallSectionData[m_WallData.Columns * m_WallData.Rows];
+            m_WallData.Sections ??= new SectionData[m_WallData.Columns * m_WallData.Rows];
 
             int count = 0;
 
@@ -174,7 +174,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
                     Vector3[] points = new Vector3[] { first, second, third, fourth };
 
-                    m_WallData.Sections[count] ??= new WallSectionData(m_WallData.SectionData)
+                    m_WallData.Sections[count] ??= new SectionData(m_WallData.SectionData)
                     {
                         ID = count,
                         Polygon = new PolygonData(points, m_WallData.Normal),
@@ -187,7 +187,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     m_WallData.Sections[count].Polygon.Normal = m_WallData.Normal;
                     m_WallData.Sections[count].Depth = m_WallData.Depth;
 
-                    WallSection section = CreateWallSection(m_WallData.Sections[count]);
+                    Section section = CreateWallSection(m_WallData.Sections[count]);
                     m_Sections.Add(section);
 
                     count++;

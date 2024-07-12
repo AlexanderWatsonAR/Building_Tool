@@ -7,20 +7,30 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 {
     public class OuterFrame : Frame
     {
-        [SerializeReference] OuterFrameData m_OuterFrameData;
+        public OuterFrameData OuterFrameData => m_Data as OuterFrameData;
 
-        public OuterFrameData OuterFrameData => m_OuterFrameData;
-
-        public override Buildable Initialize(DirtyData data)
+        public override void Build()
         {
-            base.Initialize(data);
-            m_OuterFrameData = data as OuterFrameData;
-            return this;
+            if (!OuterFrameData.IsDirty)
+                return;
+
+            base.Build();
+
+            OuterFrameData.InnerPolygon3D.Polygon3DData.SetPolygon(OuterFrameData.Holes[0].ControlPoints, OuterFrameData.Normal);
+            OuterFrameData.InnerPolygon3D.Polygon3DData.IsDirty = true;
+            //BuildInnerPolygon();
         }
 
-        private void OnValidate()
+        private void BuildInnerPolygon()
         {
-            m_OnDataChanged.Invoke(m_OuterFrameData);
+            OuterFrameData.InnerPolygon3D.Build();
         }
+
+        public override void Demolish()
+        {
+            OuterFrameData.InnerPolygon3D.Demolish();
+            base.Demolish();
+        }
+
     }
 }

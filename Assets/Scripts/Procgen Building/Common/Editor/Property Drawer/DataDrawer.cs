@@ -6,15 +6,18 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using OnlyInvalid.ProcGenBuilding.Common;
 
-[CustomPropertyDrawer(typeof(DirtyData), useForChildren:true)]
+[CustomPropertyDrawer(typeof(DirtyData), false)]
 public abstract class DataDrawer : PropertyDrawer
 {
     protected VisualElement m_Root;
+    protected SerializedProperty m_Data;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty data)
     {
-        m_Root = new VisualElement() { name = data.boxedValue.GetType().Name + "_Root" };
-        Initialize(data);
+        m_Root ??= new VisualElement();
+        m_Root.Clear();
+        m_Data = data;
+        Initialize(m_Data);
         DefineFields();
         BindFields();
         RegisterValueChangeCallbacks();

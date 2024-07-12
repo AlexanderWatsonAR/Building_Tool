@@ -59,7 +59,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                     break;
             }
         }
-
         public override void OnWillBeDeactivated()
         {
             m_Cursor = MouseCursor.Arrow;

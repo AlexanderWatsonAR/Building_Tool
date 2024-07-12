@@ -1,0 +1,43 @@
+.FloatingWindow {
+    position: absolute;
+    width: 250px;
+    height: 300px;
+    border-left-color: rgb(0, 0, 0);
+    border-right-color: rgb(0, 0, 0);
+    border-top-color: rgb(0, 0, 0);
+    border-bottom-color: rgb(0, 0, 0);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: rgba(56, 56, 56, 0);
+}
+
+.Title {
+    -unity-font-style: bold;
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    background-color: rgba(0, 0, 0, 0.15);
+    -unity-slice-bottom: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(0, 0, 0);
+}
+
+.CategoryList {
+}
+
+.ElementList {
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    -unity-text-align: middle-left;
+    overflow: hidden;
+}
+
+.ElementSearchField {
+}

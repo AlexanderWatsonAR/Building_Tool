@@ -10,10 +10,10 @@ using Unity.VisualScripting;
 using static PlasticPipe.Server.MonitorStats;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using System;
+using OnlyInvalid.CustomVisualElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
-
     [CustomPropertyDrawer(typeof(WindowData))]
     public class WindowDataDrawer : DataDrawer
     {
@@ -21,7 +21,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         WindowData m_CurrentData;
         WindowData m_PreviousData;
 
-        Foldout m_OuterFrameFoldout, m_InnerFrameFoldout, m_PaneFoldout, m_ShuttersFoldout;
+        CustomVisualElements.HeaderFoldout m_OuterFrameFoldout, m_InnerFrameFoldout, m_PaneFoldout, m_ShuttersFoldout;
         PropertyField m_ActiveElements, m_OuterFrame, m_InnerFrame, m_Pane, m_LeftShutter, m_RightShutter;
 
         protected override void Initialize(SerializedProperty data)
@@ -33,18 +33,17 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         protected override void DefineFields()
         {
             m_ActiveElements = new PropertyField(m_Props.ActiveElements);
-            m_OuterFrameFoldout = new Foldout() { text = "Outer Frame" };
+            m_OuterFrameFoldout = new HeaderFoldout("Outer Frame");
             m_OuterFrame = new PropertyField(m_Props.OuterFrame.Data);
-            m_InnerFrameFoldout = new Foldout() { text = "Inner Frame" };
+            m_InnerFrameFoldout = new HeaderFoldout("Inner Frame");
             m_InnerFrame = new PropertyField(m_Props.InnerFrame.Data);
-            m_PaneFoldout = new Foldout() { text = "Pane" };
+            m_PaneFoldout = new HeaderFoldout("Pane");
             m_Pane = new PropertyField(m_Props.Data);
-            m_ShuttersFoldout = new Foldout() { text = "Shutters" };
+            m_ShuttersFoldout = new HeaderFoldout("Shutters");
             // How did this look before?
             m_LeftShutter = new PropertyField(m_Props.LeftShutter.Data);
             m_RightShutter = new PropertyField(m_Props.RightShutter.Data);
         }
-
         protected override void BindFields()
         {
             m_ActiveElements.BindProperty(m_Props.ActiveElements);
@@ -54,7 +53,6 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             m_LeftShutter.BindProperty(m_Props.LeftShutter.Data);
             m_RightShutter.BindProperty(m_Props.RightShutter.Data);
         }
-
         protected override void RegisterValueChangeCallbacks()
         {
             m_ActiveElements.RegisterValueChangeCallback(evt =>
@@ -112,14 +110,13 @@ namespace OnlyInvalid.ProcGenBuilding.Window
             });
 
         }
-
         protected override void AddFieldsToRoot()
         {
-            m_OuterFrameFoldout.Add(m_OuterFrame);
-            m_InnerFrameFoldout.Add(m_InnerFrame);
-            m_PaneFoldout.Add(m_Pane);
-            m_ShuttersFoldout.Add(m_LeftShutter);
-            m_ShuttersFoldout.Add(m_RightShutter);
+            m_OuterFrameFoldout.AddItem(m_OuterFrame);
+            m_InnerFrameFoldout.AddItem(m_InnerFrame);
+            m_PaneFoldout.AddItem(m_Pane);
+            m_ShuttersFoldout.AddItem(m_LeftShutter);
+            m_ShuttersFoldout.AddItem(m_RightShutter);
             m_Root.Add(m_ActiveElements);
             m_Root.Add(m_OuterFrameFoldout);
             m_Root.Add(m_InnerFrameFoldout);

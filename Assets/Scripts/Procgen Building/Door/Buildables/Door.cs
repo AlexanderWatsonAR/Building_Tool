@@ -82,10 +82,5 @@ namespace OnlyInvalid.ProcGenBuilding.Door
             #endregion
         }
 
-        public override void Demolish()
-        {
-            base.Demolish();
-        }
-
     }
 }

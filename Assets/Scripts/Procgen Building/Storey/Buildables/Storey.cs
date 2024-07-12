@@ -247,7 +247,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         private WallData CalculateWall(int wallIndex)
         {
             WallData wallData = m_StoreyData.WallData;
-            wallData.Sections = new WallSectionData[wallData.Columns * wallData.Rows];
+            wallData.Sections = new SectionData[wallData.Columns * wallData.Rows];
 
             m_StoreyData.WallPoints = new WallPoints[m_StoreyData.ControlPoints.Length];
 

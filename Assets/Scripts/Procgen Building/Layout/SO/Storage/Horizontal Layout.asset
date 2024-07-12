@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b339562b9a5f6468e662c9a519d870, type: 3}
+  m_Name: Horizontal Layout
+  m_EditorClassIdentifier: 
+  m_LayoutGroupData:
+    m_IsDirty: 1
+    m_Polygon:
+      m_ControlPoints:
+      - {x: 3.8871117, y: 0.41999996, z: 0.33668867}
+      - {x: 3.8871117, y: 3.58, z: 0.33668867}
+      - {x: 8.284765, y: 3.58, z: 0.33668867}
+      - {x: 8.284765, y: 0.41999996, z: 0.33668867}
+      m_Normal: {x: 0.00037113868, y: 0, z: -0.99999994}
+    m_Holes: []
+    m_Normal: {x: 0.00037113868, y: 0, z: -0.99999994}
+    m_Up: {x: 0, y: 1, z: 0}
+    m_Depth: 0.1
+    m_Height: 3.1599998
+    m_Width: 4.3976536
+    m_Position: {x: 6.0859385, y: 2, z: 0.33668867}
+    m_Polygons:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+  m_Contents:
+  - {fileID: 11400000, guid: 1ab223d8ae2daa542b2dc1215fbb6e8a, type: 2}
+  - {fileID: 11400000, guid: 0163e41f704e3ca4784181df0e725595, type: 2}
+  - {fileID: 11400000, guid: 294edea6f705d8244b26a8639078b0b0, type: 2}

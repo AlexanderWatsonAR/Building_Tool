@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb9f5968e379bac469e274b9f0d95266, type: 3}
+  m_Name: Polygon
+  m_EditorClassIdentifier: 
+  m_Shapes:
+  - {fileID: 11400000, guid: 6154c00d65f653d43a001551fe85f626, type: 2}
+  - {fileID: 11400000, guid: b29213174f4fde84da32487f066620d5, type: 2}
+  - {fileID: 11400000, guid: b7a3063c53159724cbe3535877bb505d, type: 2}
+  - {fileID: 11400000, guid: 37c40aaf483bb214db71b8a439b3589d, type: 2}
