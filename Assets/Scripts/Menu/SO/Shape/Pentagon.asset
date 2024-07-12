@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a483aab9c047c6b4bb858a71974085e2, type: 3}
+  m_Name: Pentagon
+  m_EditorClassIdentifier: 
+  m_Shape:
+    rid: 454283441815158792
+  references:
+    version: 2
+    RefIds:
+    - rid: 454283441815158792
+      type: {class: NPolygon, ns: , asm: Assembly-CSharp}
+      data:
+        m_Sides: 5

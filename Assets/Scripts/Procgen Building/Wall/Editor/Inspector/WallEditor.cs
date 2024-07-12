@@ -7,15 +7,16 @@ using UnityEngine.UIElements;
 using UnityEngine.Serialization;
 using UnityEditor.Rendering;
 using Unity.VisualScripting;
+using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Wall
 {
     [CustomEditor(typeof(Wall))]
     public class WallEditor : Editor
     {
-        [SerializeField] private SerializedProperty m_ActiveSection;
+        [SerializeField] SerializedProperty m_ActiveSection;
 
-        class Section : VisualElement
+        internal class Section : VisualElement
         {
             private SerializedProperty m_WallSection;
             public SerializedProperty WallSection => m_WallSection;
@@ -60,6 +61,8 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
         public override VisualElement CreateInspectorGUI()
         {
+            return base.CreateInspectorGUI();
+
             VisualElement root = new VisualElement() { name = "Wall Container" };
 
             serializedObject.Update();
@@ -102,7 +105,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     return;
 
                 Debug.Log("Sections have been re-initialized");
-                wall.WallData.Sections = new WallSectionData[wall.WallData.Columns * wall.WallData.Rows];
+                wall.WallData.Sections = new SectionData[wall.WallData.Columns * wall.WallData.Rows];
                 wall.Build();
 
                 data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.WallData.Sections);
@@ -129,7 +132,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     return;
 
                 Debug.Log("Sections have been re-initialized");
-                wall.WallData.Sections = new WallSectionData[wall.WallData.Columns * wall.WallData.Rows];
+                wall.WallData.Sections = new SectionData[wall.WallData.Columns * wall.WallData.Rows];
                 wall.Build();
 
                 data.FindPropertyRelative("m_Sections").SetUnderlyingValue(wall.WallData.Sections);
@@ -166,7 +169,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             if (wall.WallData.Sections.Length == 0)
                 return;
 
-            foreach (WallSectionData sectionData in wall.WallData.Sections)
+            foreach (SectionData sectionData in wall.WallData.Sections)
             {
                 if (sectionData == null)
                     return;
@@ -174,7 +177,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
 
             float gridSpace = 200;
             float spacing = 5f;
-            float borderWidth = 1f;
+            //float borderWidth = 1f;
 
             float boxWidth = (gridSpace / columns) - spacing;
             float boxHeight = (gridSpace / rows) - spacing;

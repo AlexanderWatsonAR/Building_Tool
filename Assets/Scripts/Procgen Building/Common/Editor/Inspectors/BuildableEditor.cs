@@ -14,40 +14,39 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     public class BuildableEditor : Editor
     {
         protected SerializedProperty m_Data;
-        [SerializeField] protected Buildable m_Buildable;
+        protected VisualElement m_Root;
 
         public override VisualElement CreateInspectorGUI()
         {
-            VisualElement root = new VisualElement();
-
+            m_Root = new VisualElement();
             serializedObject.Update();
 
-            m_Buildable = target as Buildable;
-            Type buildableType = target.GetType();
-
-            m_Data = serializedObject.FindProperty("m_" + buildableType.Name + "Data");
+            m_Data = serializedObject.FindProperty("m_Data");
 
             PropertyField dataField = new PropertyField(m_Data);
             dataField.BindProperty(m_Data);
 
-            root.Add(dataField);
+            m_Root.Add(dataField);
 
-            return root;
+            return m_Root;
         }
 
         private void OnEnable()
         {
+           // Debug.Log("On Enable");
             EditorApplication.update += Build;
         }
 
         private void OnDisable()
         {
+          //  Debug.Log("On Disable");
             EditorApplication.update -= Build;
         }
 
         private void Build()
         {
-            m_Buildable.Build();
+            Buildable buildable = target as Buildable;
+            buildable.Build();
         }
 
     }

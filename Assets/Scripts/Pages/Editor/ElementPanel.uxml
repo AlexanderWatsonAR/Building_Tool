@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/Scripts/Pages/Editor/ElementPanel.uss?fileID=7433441132597879392&amp;guid=ca07c71853589084da6c065eb65ebbe8&amp;type=3#ElementPanel" />
+    <ui:VisualElement name="FloatingWindow" class="FloatingWindow">
+        <ui:Label name="Title" text="Element" class="Title" />
+        <uie:ToolbarSearchField focusable="true" name="ElementSearchField" style="width: auto;" />
+        <ui:ListView focusable="true" name="CategoryList" class="CategoryList" />
+        <ui:ListView name="ElementList" class="ElementList" />
+    </ui:VisualElement>
+</ui:UXML>

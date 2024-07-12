@@ -13,6 +13,13 @@ using Vertex = UnityEngine.ProBuilder.Vertex;
 
 public static class MeshMaker
 {
+
+    public static Vector3 Centroid(this IEnumerable<Vector3> controlPoints)
+    {
+        Extensions.MinMax(controlPoints.ToArray(), out Vector3 min, out Vector3 max);
+        return Vector3.Lerp(min, max, 0.5f);
+    }
+
     public static ProBuilderMesh Cube(IEnumerable<Vector3> controlPoints, float height, bool flipFace = false)
     {
         // Control Points: 0 = Bottom Left, 1 = Top Left, 2 = Top Right, 3 = Bottom Right
@@ -549,7 +556,7 @@ public static class MeshMaker
                     quadVerts[k] = v;
                 }
 
-                holeVerts = ConstrainPolygonToQuad(quadVerts, holeVerts.ToArray()).ToList();
+                holeVerts = ClampToQuad(quadVerts, holeVerts.ToArray()).ToList();
                 holePoints.Add(holeVerts.ToList());
             }
         }
@@ -674,7 +681,7 @@ public static class MeshMaker
                 }
                 else
                 {
-                    holeVerts = CreateNPolygon(sides, hWidth, hHeight);
+                    holeVerts = CalculateNPolygon(sides, hWidth, hHeight);
                 }
                 
                 for (int k = 0; k < holeVerts.Length; k++)
@@ -706,7 +713,7 @@ public static class MeshMaker
                     quadVerts[k] = v;
                 }
 
-                holeVerts = ConstrainPolygonToQuad(quadVerts, holeVerts);
+                holeVerts = ClampToQuad(quadVerts, holeVerts);
                 holePoints.Add(holeVerts.ToList());
             }
         }
@@ -720,7 +727,7 @@ public static class MeshMaker
     /// <param name="sides"></param>
     /// <param name="radius"></param>
     /// <returns></returns>
-    public static Vector3[] CreateNPolygon(int sides, float width, float height)
+    public static Vector3[] CalculateNPolygon(int sides, float width, float height)
     {
         float angle = 360f / sides;
 
@@ -737,13 +744,23 @@ public static class MeshMaker
         return vertices;
     }
 
+    public static Vector3[] Square()
+    {
+        Vector3[] vertices = new Vector3[4];
+        vertices[0] = new Vector3(-1, -1, 0);
+        vertices[1] = new Vector3(-1, 1, 0);
+        vertices[2] = new Vector3(1, 1, 0);
+        vertices[3] = new Vector3(1, -1, 0);
+        return vertices;
+    }
+
     /// <summary>
     /// Returns the constrained polygon.
     /// </summary>
     /// <param name="quad"></param>
     /// <param name="polygon"></param>
     /// <returns></returns>
-    private static Vector3[] ConstrainPolygonToQuad(Vector3[] quad, Vector3[] polygon)
+    public static Vector3[] ClampToQuad(Vector3[] quad, Vector3[] polygon)
     {
         Vector3 min, max;
 

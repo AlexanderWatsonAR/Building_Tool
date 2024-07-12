@@ -2,39 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    public class Frame : Polygon3D
+    public class Frame : BaseFrame
     {
-        [SerializeReference] FrameData m_FrameData;
-
-        public override Buildable Initialize(DirtyData data)
-        {
-            base.Initialize(data);
-            m_FrameData = data as FrameData;
-            CalculateHole();
-            return this;
-        }
+        public FrameData FrameData => m_Data as FrameData;
 
         public override void Build()
         {
-            if (!m_FrameData.IsDirty)
+            if (!FrameData.IsDirty)
                 return;
 
-            if(m_FrameData.IsHoleDirty)
-                CalculateHole();
+            FrameData.IsHoleDirty = true;
+
+            if(FrameData.IsHoleDirty)
+                CalculateInside();
 
             base.Build();
         }
 
-        private void CalculateHole()
+        protected override void CalculateInside()
         {
-            m_FrameData.Holes = new PolygonData[1];
-            m_FrameData.Holes[0] = new PolygonData(m_FrameData.Polygon.ControlPoints.ScalePolygon(m_FrameData.Scale, m_FrameData.Position), m_FrameData.Polygon.Normal);
-            m_FrameData.IsHoleDirty = false;
+            FrameData.Holes = new PolygonData[1];
+            Matrix4x4 scaleMatrix = Matrix4x4.Translate(FrameData.Position) * Matrix4x4.Scale(Vector3.one * FrameData.Scale) * Matrix4x4.Translate(-FrameData.Position);
+
+            Vector3[] controlPoints = new Vector3[FrameData.Polygon.ControlPoints.Length];
+            System.Array.Copy(FrameData.Polygon.ControlPoints, controlPoints, controlPoints.Length);
+
+            for(int i = 0; i < controlPoints.Length; i++)
+            {
+                controlPoints[i] = scaleMatrix.MultiplyPoint3x4(controlPoints[i]);
+            }
+
+            FrameData.Holes[0] = new PolygonData(controlPoints, FrameData.Polygon.Normal);
+
+            FrameData.IsHoleDirty = false;
         }
     }
 }

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bde6c93fcdca98b4b864e7faa05142d6, type: 3}
+  m_Name: Grid Frame
+  m_EditorClassIdentifier: 
+  m_GridFrameData:
+    m_IsDirty: 0
+    m_Polygon:
+      m_ControlPoints:
+      - {x: 9.695943, y: 0.79999995, z: 8.79556}
+      - {x: 9.695943, y: 3.2, z: 8.79556}
+      - {x: 9.746251, y: 3.2, z: 4.1362963}
+      - {x: 9.746251, y: 0.79999995, z: 4.1362963}
+      m_Normal: {x: 0.99994177, y: -0, z: 0.010796794}
+    m_Holes:
+    - m_ControlPoints:
+      - {x: 9.720331, y: 1.0216, z: 6.489575}
+      - {x: 9.697967, y: 1.0216, z: 6.489575}
+      - {x: 9.697967, y: 1.0216002, z: 8.560845}
+      - {x: 9.697967, y: 1.9676, z: 6.489575}
+      - {x: 9.720331, y: 1.9676, z: 6.489575}
+      m_Normal: {x: -0.99976695, y: -0.0000006937799, z: -0.021590035}
+    - m_ControlPoints:
+      - {x: 9.720459, y: 2.027, z: 6.465928}
+      - {x: 9.698094, y: 2.027, z: 6.465928}
+      - {x: 9.698094, y: 2.973, z: 6.465928}
+      - {x: 9.720459, y: 2.973, z: 6.465928}
+      m_Normal: {x: -0.000011068171, y: 0, z: -1}
+    - m_ControlPoints:
+      - {x: 9.744227, y: 1.0216, z: 6.4422812}
+      - {x: 9.744227, y: 1.0215999, z: 4.371011}
+      - {x: 9.721863, y: 1.0216, z: 6.4422812}
+      - {x: 9.721863, y: 1.9676, z: 6.4422812}
+      - {x: 9.744227, y: 1.9676, z: 6.4422812}
+      m_Normal: {x: -0.0000029272676, y: 0.73832977, z: -0.6744398}
+    - m_ControlPoints:
+      - {x: 9.7441, y: 2.027, z: 6.465928}
+      - {x: 9.721735, y: 2.027, z: 6.465928}
+      - {x: 9.721735, y: 2.973, z: 6.465928}
+      - {x: 9.7441, y: 2.973, z: 6.465928}
+      m_Normal: {x: -0.000011068171, y: 0, z: -1}
+    m_Normal: {x: 0, y: 0, z: 1}
+    m_Up: {x: 0, y: 1, z: 0}
+    m_Depth: 0.018
+    m_Height: 2.4
+    m_Width: 4.709572
+    m_Position: {x: 9.721097, y: 2, z: 6.465928}
+    m_Scale: 0.946
+    m_IsHoleDirty: 0
+    m_Columns: 2
+    m_Rows: 2

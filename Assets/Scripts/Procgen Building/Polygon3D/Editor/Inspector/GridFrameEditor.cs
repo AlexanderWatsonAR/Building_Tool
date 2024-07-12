@@ -10,9 +10,5 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     [CustomEditor(typeof(GridFrame))]
     public class GridFrameEditor : BuildableEditor
     {
-        public override VisualElement CreateInspectorGUI()
-        {
-            return base.CreateInspectorGUI();
-        }
     }
 }

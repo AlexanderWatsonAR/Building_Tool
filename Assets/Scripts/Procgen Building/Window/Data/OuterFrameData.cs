@@ -1,15 +1,21 @@
-using NUnit.Framework;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.UIElements;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     [System.Serializable]
     public class OuterFrameData : FrameData
     {
+        [SerializeReference] Polygon3D m_InnerPolygon3D;
+
+        public Polygon3D InnerPolygon3D
+        {
+            get => m_InnerPolygon3D;
+            set 
+            {
+                m_InnerPolygon3D = value;
+            }
+        }
+
         public OuterFrameData() : base() {}
         public OuterFrameData(float scale) : base(scale) {}
         public OuterFrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth, float scale) : base(polygon, holes, normal, up, depth, scale) {}

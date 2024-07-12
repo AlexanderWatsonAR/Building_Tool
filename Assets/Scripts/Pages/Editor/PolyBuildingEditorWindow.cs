@@ -42,6 +42,38 @@ public class PolyBuildingEditorWindow : EditorWindow
 
         newPolyBuilding_btn.text = "New Poly Building";
 
+
+        Button newSection_btn = new Button
+        (
+            () =>
+            {
+                ProBuilderMesh sectionMesh = ProBuilderMesh.Create();
+                sectionMesh.name = "Section";
+                sectionMesh.AddComponent<Section>();
+
+                Vector3[] points = new Vector3[]
+                {
+                    new Vector3(-0.5f, -0.5f),
+                    new Vector3(-0.5f, 0.5f),
+                    new Vector3(0.5f, 0.5f),
+                    new Vector3(0.5f, -0.5f)
+                };
+
+                SectionData data = new SectionData()
+                {
+                    Polygon = new OnlyInvalid.ProcGenBuilding.Polygon3D.PolygonData(points, Vector3.forward),
+                    Normal = Vector3.forward,
+                    Depth = 0.2f,
+                    IsDirty = false
+                    
+                };
+
+                Section section = sectionMesh.GetComponent<Section>();
+                section.Initialize(data);
+            }
+        )
+        { text = "New Section"};
+
         Button save_btn = new Button
         (
             () =>
@@ -52,6 +84,7 @@ public class PolyBuildingEditorWindow : EditorWindow
 
 
         rootVisualElement.Add(newPolyBuilding_btn);
+        rootVisualElement.Add(newSection_btn);
         rootVisualElement.Add(save_btn);
     }
 

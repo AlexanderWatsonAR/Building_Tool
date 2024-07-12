@@ -23,6 +23,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
 
         public override VisualElement CreateInspectorGUI()
         {
+           // return base.CreateInspectorGUI();
+
             m_Root = new VisualElement() { name = nameof(Building) + "_Inspector"};
 
             DisplayMessages(DrawState.Hide);
@@ -144,8 +146,8 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                         m_Root.Add(edit_btn);
                         m_Root.Add(new HelpBox("Editing the path will erase changes made to the building", HelpBoxMessageType.Warning));
 
-                        m_Storeys = new PropertyField(m_Props.Storeys.Data);
-                        m_Storeys.BindProperty(m_Props.Storeys.Data);
+                        //m_Storeys = new PropertyField(m_Props.Storeys.Data);
+                        //m_Storeys.BindProperty(m_Props.Storeys.Data);
 
                         m_Roof = new PropertyField(m_Props.Roof.Data);
                         m_Roof.BindProperty(m_Props.Roof.Data);
@@ -154,7 +156,7 @@ namespace OnlyInvalid.ProcGenBuilding.Building
                         m_RoofFoldout.Add(m_Roof);
 
                         m_Root.Add(container);
-                        m_Root.Add(m_Storeys);
+                        //m_Root.Add(m_Storeys);
                         m_Root.Add(m_RoofFoldout);
                     }
                     break;

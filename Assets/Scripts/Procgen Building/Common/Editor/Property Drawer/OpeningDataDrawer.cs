@@ -4,80 +4,87 @@ using UnityEditor.UIElements;
 using UnityEditor;
 using UnityEngine;
 using Unity.VisualScripting;
+using UnityEngine.UIElements;
 
-[CustomPropertyDrawer(typeof(OpeningData), useForChildren: true)]
-public abstract class OpeningDataDrawer : DataDrawer
+namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    protected PropertyField m_Columns, m_Rows, m_Height, m_Width;
-
-    OpeningDataSerializedProperties m_Props;
-    OpeningData m_PreviousData;
-
-    protected override void AddFieldsToRoot()
+    [CustomPropertyDrawer(typeof(OpeningData), useForChildren: true)]
+    public class OpeningDataDrawer : DataDrawer
     {
-    }
+        const string k_UssAligned = "unity-base-field__aligned";
+        protected PropertyField m_Shape;
 
-    protected override void BindFields()
-    {
-        m_Columns.BindProperty(m_Props.Columns);
-        m_Rows.BindProperty(m_Props.Rows);
-        m_Height.BindProperty(m_Props.Height);
-        m_Width.BindProperty(m_Props.Width);
-    }
+        protected Slider m_Angle;
 
-    protected override void DefineFields()
-    {
-        m_Columns = new PropertyField();
-        m_Rows = new PropertyField();
-        m_Height = new PropertyField();
-        m_Width = new PropertyField();
-    }
+        Vector2Field m_Position;
 
-    protected override void Initialize(SerializedProperty data)
-    {
-        m_Props = new OpeningDataSerializedProperties(data);
-        OpeningData currentData = data.GetUnderlyingValue() as OpeningData;
-        m_PreviousData = currentData.Clone() as OpeningData;
-    }
+        InspectorElement m_Polygon3D;
 
-    protected override void RegisterValueChangeCallbacks()
-    {
-        m_Columns.RegisterValueChangeCallback(evt =>
+        Foldout m_Polygon3DFoldout;
+
+        OpeningDataSerializedProperties m_Props;
+
+        protected override void AddFieldsToRoot()
         {
-            int columns = evt.changedProperty.intValue;
+            m_Root.Add(m_Shape);
+            m_Root.Add(m_Angle);
+            m_Root.Add(m_Position);
 
-            if (columns == m_PreviousData.Columns)
-                return;
+            if(m_Props.Polygon3D != null)
+            {
+                m_Root.Add(m_Polygon3DFoldout);
+                m_Polygon3DFoldout.Add(m_Polygon3D);
+            }
+        }
 
-            m_PreviousData.Columns = columns;
-        });
-        m_Rows.RegisterValueChangeCallback(evt =>
+        protected override void BindFields()
         {
-            int rows = evt.changedProperty.intValue;
+            m_Shape.BindProperty(m_Props.Shape);
+            m_Angle.BindProperty(m_Props.Angle);
+            m_Position.BindProperty(m_Props.Position);
+        }
 
-            if (rows == m_PreviousData.Rows)
-                return;
-
-            m_PreviousData.Rows = rows;
-        });
-        m_Height.RegisterValueChangeCallback(evt =>
+        protected override void DefineFields()
         {
-            float height = evt.changedProperty.floatValue;
+            m_Shape = new PropertyField();
+            m_Angle = new Slider()
+            {
+                label = m_Props.Angle.displayName,
+                lowValue = 0,
+                highValue = 180,
+                showInputField = true
+            };
+            m_Position = new Vector2Field()
+            {
+                label = m_Props.Position.displayName
+            };
 
-            if (height == m_PreviousData.Height)
-                return;
+            if (m_Props.Polygon3D != null)
+            {
+                m_Polygon3DFoldout = new Foldout() { text = "Content" };
+                m_Polygon3D = new InspectorElement(m_Props.Polygon3D);
+            }
+            
+            AddToClassList(); 
+        }
 
-            m_PreviousData.Height = height;
-
-        });
-        m_Width.RegisterValueChangeCallback(evt =>
+        private void AddToClassList()
         {
-            float width = evt.changedProperty.floatValue;
+            m_Angle.AddToClassList(k_UssAligned);
+            m_Position.AddToClassList(k_UssAligned);
+        }
 
-            if (width == m_PreviousData.Width)
-                return;
+        protected override void Initialize(SerializedProperty data)
+        {
+            m_Props = new OpeningDataSerializedProperties(data);
+            //m_CurrentData = data.GetUnderlyingValue() as OpeningData;
+            //m_PreviousData = m_CurrentData.Clone() as OpeningData;
+            //m_ShapeHashCode = m_CurrentData.Shape.GetHashCode();
+        }
 
-            m_PreviousData.Width = width;
-        });
+        protected override void RegisterValueChangeCallbacks()
+        {
+
+        }
     }
 }

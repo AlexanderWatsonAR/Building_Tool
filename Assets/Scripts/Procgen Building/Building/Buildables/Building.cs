@@ -28,7 +28,6 @@ namespace OnlyInvalid.ProcGenBuilding.Building
             m_BuildingData = data as BuildingData;
             m_DataAccessor = BuildingScriptableObject.Create(m_BuildingData);
 
-
             return this;
         }
 

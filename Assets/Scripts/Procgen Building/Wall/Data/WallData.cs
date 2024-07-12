@@ -21,12 +21,12 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         [SerializeField, Range(0, 1)] float m_Depth;
         [SerializeField, HideInInspector] bool m_IsTriangle;
         [SerializeField, HideInInspector] Material m_Material;
-        [SerializeField] WallSectionData m_SectionData;
-        [SerializeField] WallSectionData[] m_Sections;
+        [SerializeField] SectionData m_SectionData;
+        [SerializeField] SectionData[] m_Sections;
         #endregion
 
         #region Accessors
-        public WallSectionData SectionData { get { return m_SectionData; } set { m_SectionData = value; } }
+        public SectionData SectionData { get { return m_SectionData; } set { m_SectionData = value; } }
         public int ID { get { return m_ID; } set { m_ID = value; } }
         public Vector3 StartPosition
         {
@@ -55,10 +55,10 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         public int Columns { get { return m_Columns; } set { m_Columns = value; } }
         public int Rows => m_Rows;
         public bool IsTriangle { get { return m_IsTriangle; } set { m_IsTriangle = value; } }
-        public WallSectionData[] Sections { get { return m_Sections; } set { m_Sections = value; } }
+        public SectionData[] Sections { get { return m_Sections; } set { m_Sections = value; } }
         #endregion
 
-        public WallData() : this(new ControlPoint(), new ControlPoint(), Vector3.zero, 1, 1, 4, 0.25f, new WallSectionData[1], null)
+        public WallData() : this(new ControlPoint(), new ControlPoint(), Vector3.zero, 1, 1, 4, 0.25f, new SectionData[1], null)
         {
 
         }
@@ -66,7 +66,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
 
         }
-        public WallData(ControlPoint wallStart, ControlPoint wallEnd, Vector3 normal, int columns, int rows, float height, float depth, WallSectionData[] sections, Material material)
+        public WallData(ControlPoint wallStart, ControlPoint wallEnd, Vector3 normal, int columns, int rows, float height, float depth, SectionData[] sections, Material material)
         {
             m_Start = wallStart;
             m_End = wallEnd;

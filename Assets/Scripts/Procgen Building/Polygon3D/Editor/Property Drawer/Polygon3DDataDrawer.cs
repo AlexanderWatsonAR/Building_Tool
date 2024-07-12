@@ -11,22 +11,16 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
 
-    [CustomPropertyDrawer(typeof(Polygon3DData), useForChildren:true)]
+    [CustomPropertyDrawer(typeof(Polygon3DData))]
     public class Polygon3DDataDrawer : DataDrawer
     {
-        Buildable m_Buildable;
-
-        [SerializeField] Polygon3DData m_CurrentData;
-        [SerializeField] Polygon3DData m_PreviousData;
-
+        Polygon3DData m_CurrentData, m_PreviousData;
         Polygon3DDataSerializedProperties m_Props;
-        PropertyField m_Depth;
+        protected PropertyField m_Depth;
 
         protected override void Initialize(SerializedProperty data)
         {
             m_Props = new Polygon3DDataSerializedProperties(data);
-            m_Buildable = data.serializedObject.targetObject as Buildable;
-            m_Root.name = nameof(FrameData) + "_Root";
             m_CurrentData = data.GetUnderlyingValue() as Polygon3DData;
             m_PreviousData = m_CurrentData.Clone() as Polygon3DData;
         }
