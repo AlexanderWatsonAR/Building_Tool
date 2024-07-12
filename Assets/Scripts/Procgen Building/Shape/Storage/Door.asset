@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b03076fc229444eb8a393b0cd08b7a, type: 3}
+  m_Name: Door
+  m_EditorClassIdentifier: 
+  m_DoorData:
+    m_IsDirty: 0
+    m_Polygon:
+      m_ControlPoints:
+      - {x: 7.225581, y: 0.15339899, z: 0.33755824}
+      - {x: 7.225581, y: 1.9496009, z: 0.33755824}
+      - {x: 7.8249135, y: 2.623851, z: 0.33755824}
+      - {x: 8.424246, y: 2.8486009, z: 0.33755824}
+      - {x: 9.023579, y: 2.623851, z: 0.33755824}
+      - {x: 9.6229105, y: 1.9496009, z: 0.33755824}
+      - {x: 9.6229105, y: 0.15339899, z: 0.33755824}
+      m_Normal: {x: 0.00037113868, y: 0, z: -0.99999994}
+    m_Holes: []
+    m_Normal: {x: 0.00037113868, y: 0, z: -0.99999994}
+    m_Up: {x: 1, y: 0, z: 0}
+    m_Depth: 1
+    m_Height: 2.6952019
+    m_Width: 2.3973293
+    m_Position: {x: 8.424246, y: 1.5009999, z: 0.33755824}
+    m_ID: 0
+    m_ActiveElements: -1
+    m_HingeData:
+      m_RelativePosition: 4
+      m_AbsolutePosition: {x: 8.424246, y: 2.6996646, z: 0.33755824}
+      m_PositionOffset: {x: 0, y: 0, z: 0}
+      m_EulerAngle: {x: 0, y: 0, z: 0}
+      m_Scale: {x: 0.96, y: 0.94, z: 0.09}
+    m_HandleSize: 0
+    m_HandleScale: 0
+    m_HandlePosition: {x: 0, y: 0, z: 0}
+    m_HandlePoint: 0
+    m_Material: {fileID: 0}

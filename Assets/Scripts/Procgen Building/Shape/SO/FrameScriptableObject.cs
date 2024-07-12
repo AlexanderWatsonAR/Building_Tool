@@ -8,7 +8,7 @@ public class FrameScriptableObject : BaseFrameScriptableObject
 {
     [SerializeField] FrameData m_FrameData;
 
-    public override Polygon3D Create3DPolygon()
+    public override Polygon3D CreateContent()
     {
         ProBuilderMesh frameMesh = ProBuilderMesh.Create();
         Frame frame = frameMesh.gameObject.AddComponent<Frame>();

@@ -55,7 +55,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 if (!openingList.IsDirty)
                     return;
 
-                Debug.Log("Opening Data List Change");
+              //  Debug.Log("Opening Data List Change");
 
                 SectionData data = m_Data.GetUnderlyingValue() as SectionData;
 

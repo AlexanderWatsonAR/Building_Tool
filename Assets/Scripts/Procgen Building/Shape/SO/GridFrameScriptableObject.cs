@@ -9,7 +9,7 @@ public class GridFrameScriptableObject : BaseFrameScriptableObject
 {
     [SerializeField] GridFrameData m_GridFrameData;
 
-    public override Polygon3D Create3DPolygon()
+    public override Polygon3D CreateContent()
     {
         ProBuilderMesh frameMesh = ProBuilderMesh.Create();
         GridFrame gridFrame = frameMesh.gameObject.AddComponent<GridFrame>();

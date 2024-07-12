@@ -124,7 +124,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         {
             return base.GetHashCode();
         }
-
         public object Clone()
         {
             Polygon3DData clone = MemberwiseClone() as Polygon3DData;

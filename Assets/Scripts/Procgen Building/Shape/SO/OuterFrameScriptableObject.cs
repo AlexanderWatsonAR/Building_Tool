@@ -13,14 +13,14 @@ public class OuterFrameScriptableObject : BaseFrameScriptableObject
     [SerializeField] OuterFrameData m_OuterFrameData;
     [SerializeField] ContentScriptableObject m_Content;
 
-    public override Polygon3D Create3DPolygon()
+    public override Polygon3D CreateContent()
     {
         ProBuilderMesh frameMesh = ProBuilderMesh.Create();
         OuterFrame frame = frameMesh.gameObject.AddComponent<OuterFrame>();
         frame.name = name;
         m_OuterFrameData.IsDirty = true;
         m_OuterFrameData.IsHoleDirty = true;
-        m_OuterFrameData.InnerPolygon3D = m_Content.Create3DPolygon();
+        m_OuterFrameData.InnerPolygon3D = m_Content.CreateContent();
         m_OuterFrameData.InnerPolygon3D.transform.SetParent(frame.transform, true);
         frame.Initialize(m_OuterFrameData);
         return frame;

@@ -10,10 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e2aa3abbc7f8f74a9e9bc8c974af778, type: 3}
-  m_Name: Frame
+  m_Name: Layout
   m_EditorClassIdentifier: 
   m_Content:
-  - {fileID: 11400000, guid: 1ab223d8ae2daa542b2dc1215fbb6e8a, type: 2}
-  - {fileID: 11400000, guid: 0163e41f704e3ca4784181df0e725595, type: 2}
-  - {fileID: 11400000, guid: 6440ebe0ea144044aafc32f384b9d689, type: 2}
-  - {fileID: 11400000, guid: 316c13d5126027245ac690bb38d07d8d, type: 2}
+  - {fileID: 11400000, guid: cedb812ebe5a91b4f8ca43f31e2326d0, type: 2}

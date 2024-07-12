@@ -25,7 +25,7 @@ public class ContentMenu : BaseMenu
     private void AddToSection(ContentScriptableObject content)
     {
         Section section = Selection.activeGameObject.GetComponent<Section>();
-        Polygon3D polygon3D = content.Create3DPolygon();
+        Polygon3D polygon3D = content.CreateContent();
         polygon3D.transform.SetParent(section.transform, true);
         OpeningData windowOpening = new OpeningData(new NPolygon(4), polygon3D);
         section.SectionData.AddOpening(windowOpening);

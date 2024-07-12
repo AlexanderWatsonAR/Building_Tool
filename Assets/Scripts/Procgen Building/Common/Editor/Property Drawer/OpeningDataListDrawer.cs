@@ -35,7 +35,8 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             m_Root.RegisterCallback<OpeningAddEvent>(evt => 
             {
-                AddField(m_OpeningDataFields.Count);
+                Debug.Log("Add Event Received");
+                EditorApplication.delayCall += () => AddField(m_OpeningDataFields.Count);
             });
 
             m_Openings.OnAdd.RemoveListener(SendAddEvent);
@@ -44,11 +45,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         private void Create()
         {
-            //CreateFields();
-            //CreateContextMenu();
-            //RegisterCallbacks();
-            //AddToRoot();
-            
             for(int i = 0; i < m_InnerList.arraySize; i++)
             {
                 AddField(i);
@@ -62,9 +58,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             {
                 openingAddEvent.target = m_Root;
 
-                EditorApplication.delayCall += () => m_Root.SendEvent(openingAddEvent);
-
-                //m_Root.SendEvent(openingAddEvent);
+                //EditorApplication.delayCall += () => m_Root.SendEvent(openingAddEvent);
+                Debug.Log("Send Add Event");
+                m_Root.SendEvent(openingAddEvent);
+                Debug.Log("Add Event Sent");
             }
         }
 
@@ -101,10 +98,16 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             field.HeaderFoldout.contextMenu.AddItem("Move Up", false, () =>
             {
                 m_Openings.ShiftDown();
+                m_OpeningDataFields.ShiftDown();
+                m_Root.Clear();
+                AddToRoot();
             });
             field.HeaderFoldout.contextMenu.AddItem("Move Down", false, () =>
             {
                 m_Openings.ShiftUp();
+                m_OpeningDataFields.ShiftUp();
+                m_Root.Clear();
+                AddToRoot();
             });
             field.HeaderFoldout.contextMenu.AddSeparator("");
             field.HeaderFoldout.contextMenu.AddItem("Remove", false, () =>

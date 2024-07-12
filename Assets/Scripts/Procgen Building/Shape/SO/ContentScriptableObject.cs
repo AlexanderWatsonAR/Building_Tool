@@ -6,5 +6,5 @@ using UnityEngine;
 
 public abstract class ContentScriptableObject : ScriptableObject
 {
-    public abstract Polygon3D Create3DPolygon();
+    public abstract Polygon3D CreateContent();
 }
