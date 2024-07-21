@@ -9,54 +9,50 @@ using UnityEngine.UIElements;
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     [CustomPropertyDrawer(typeof(FrameData))]
-    public class FrameDataDrawer : Polygon3DDataDrawer
+    public class FrameDataDrawer : DataDrawer
     {
-        FrameData m_PreviousData, m_CurrentData;
-
         FrameDataSerializedProperties m_Props;
-        protected PropertyField m_Scale;
+        Slider m_Depth, m_Scale;
 
         protected override void Initialize(SerializedProperty data)
         {
-            base.Initialize(data);
             m_Props = new FrameDataSerializedProperties(data);
-            m_CurrentData = data.GetUnderlyingValue() as FrameData;
-            m_PreviousData = m_CurrentData.Clone() as FrameData;
         }
         protected override void DefineFields()
         {
-            base.DefineFields();
-            m_Scale = new PropertyField(m_Props.Scale);
+            var displayData = DisplayDataSettings.Data.Frame;
 
-            //m_Scale.SetEnabled(m_Buildable is not Frame);
+            m_Scale = new Slider() 
+            {
+                label = displayData.Scale.label,
+                lowValue = displayData.Scale.range.lower,
+                highValue = displayData.Scale.range.upper,
+                direction = displayData.Scale.direction,
+                showInputField = displayData.Scale.showInputField,
+                inverted = displayData.Scale.inverted
+            };
+            m_Depth = new Slider()
+            {
+                label = displayData.Depth.label,
+                lowValue = displayData.Depth.range.lower,
+                highValue = displayData.Depth.range.upper,
+                direction = displayData.Depth.direction,
+                showInputField = displayData.Depth.showInputField,
+                inverted = displayData.Depth.inverted
+            };
         }
         protected override void BindFields()
         {
-            base.BindFields();
             m_Scale.BindProperty(m_Props.Scale);
+            m_Depth.BindProperty(m_Props.Depth);
         }
         protected override void RegisterValueChangeCallbacks()
         {
-            base.RegisterValueChangeCallbacks();
-
-            m_Scale.RegisterValueChangeCallback(evt =>
-            {
-                float scale = evt.changedProperty.floatValue;
-
-                if (scale == m_PreviousData.Scale)
-                    return;
-
-                m_PreviousData.Scale = scale;
-
-                m_CurrentData.IsHoleDirty = true;
-                m_CurrentData.IsDirty = true;
-            });
         }
         protected override void AddFieldsToRoot()
         {
             m_Root.Add(m_Scale);
-
-            base.AddFieldsToRoot();
+            m_Root.Add(m_Depth);
         }
 
     }

@@ -8,9 +8,5 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
     [CustomEditor(typeof(Pillar))]
     public class PillarEditor : BuildableEditor
     {
-        public override VisualElement CreateInspectorGUI()
-        {
-            return base.CreateInspectorGUI();
-        }
     }
 }

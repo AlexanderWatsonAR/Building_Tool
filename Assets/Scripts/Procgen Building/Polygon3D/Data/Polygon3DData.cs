@@ -15,11 +15,10 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         [SerializeField] PolygonData m_Polygon;
         [SerializeField] PolygonData[] m_Holes;
         [SerializeField] Vector3 m_Normal, m_Up;
-        [SerializeField, Range(0, 0.999f)] float m_Depth;
-
-        [SerializeField] float m_Height, m_Width;
+        [SerializeField] float m_Height, m_Width, m_Depth;
         [SerializeField] Vector3 m_Position;
 
+        #region Accessors
         public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; if (m_Polygon != null) { CalcualateInternal(); } } }
         public PolygonData[] Holes { get { return m_Holes; } set { m_Holes = value; } }
         public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
@@ -29,12 +28,13 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         public float Width { get { return m_Width; } set { m_Width = value; } }
         public float Depth { get { return m_Depth; } set { m_Depth = value; } }
         public Vector3 Position { get { return m_Position; } set { m_Position = value; } }
+        #endregion
 
+        #region Constructors
         public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0.1f)
         {
 
         }
-
         public Polygon3DData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth)
         {
             m_Polygon = polygon;
@@ -45,8 +45,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             CalcualateInternal();
         }
-
-
         public Polygon3DData(Polygon3DData data)
         {
             m_Polygon = data.Polygon;
@@ -57,6 +55,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Depth = data.Depth;
             m_Position = data.Position;
         }
+        #endregion
 
         private void CalcualateInternal()
         {
@@ -68,7 +67,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Width = max.x - min.x + (max.z - min.z);
             m_Position = Vector3.Lerp(min, max, 0.5f);
         }
-
         public void SetPolygon(Vector3[] controlPoints, Vector3 normal)
         {
             m_Polygon ??= new PolygonData(controlPoints, normal);

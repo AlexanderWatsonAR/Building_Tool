@@ -29,7 +29,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         }
         public GridFrameData(GridFrameData data) : this(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth, data.Scale, data.Columns, data.Rows)
         {
-
+            int a = DisplayDataSettings.Data.NPolygon.Sides.range.lower ;
         }
 
         public override bool Equals(object obj)

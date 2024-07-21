@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [System.Serializable]
 public struct WallPoints
@@ -34,3 +35,42 @@ public struct LerpPoint
         this.T = 0;
     }
 }
+[System.Serializable]
+public struct RangeValues<T>
+{
+    public T lower, upper;
+
+    public RangeValues(T lower, T upper)
+    {
+        this.lower = lower;
+        this.upper = upper;
+    }
+}
+
+[System.Serializable]
+public struct SliderDisplayData<T>
+{
+    public string label;
+    public RangeValues<T> range;
+    public bool showInputField;
+    public SliderDirection direction;
+    public bool inverted;
+
+    public SliderDisplayData(string label, RangeValues<T> range, bool showInputField, SliderDirection direction, bool inverted)
+    {
+        this.label = label;
+        this.range = range;
+        this.showInputField = showInputField;
+        this.direction = direction;
+        this.inverted = inverted;
+    }
+    public SliderDisplayData(SliderDisplayData<T> data)
+    {
+        this.label = data.label;
+        this.range = data.range;
+        this.showInputField = data.showInputField;
+        this.direction = data.direction;
+        this.inverted = data.inverted;    
+    }
+}
+

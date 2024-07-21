@@ -32,7 +32,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_OpeningDataFields = new List<OpeningDataField>();
 
             m_Root = new VisualElement() { name = nameof(OpeningDataList) + "_Root" };
-
             m_Root.RegisterCallback<OpeningAddEvent>(evt => 
             {
                 Debug.Log("Add Event Received");
@@ -42,7 +41,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Openings.OnAdd.RemoveListener(SendAddEvent);
             m_Openings.OnAdd.AddListener(SendAddEvent);
         }
-
         private void Create()
         {
             for(int i = 0; i < m_InnerList.arraySize; i++)
@@ -51,7 +49,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             }
             m_Openings.IsDirty = true;
         }
-
         private void SendAddEvent()
         {
             using (OpeningAddEvent openingAddEvent = OpeningAddEvent.GetPooled())
@@ -64,7 +61,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 Debug.Log("Add Event Sent");
             }
         }
-
         private void CreateFields()
         {
             Object target = m_Data.serializedObject.targetObject;
@@ -78,7 +74,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 m_OpeningDataFields.Add(field);
             }
         }
-
         private void AddField(int index)
         {
             Object target = m_Data.serializedObject.targetObject;
@@ -189,7 +184,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Root.Add(field);
 
         }
-
         private void CreateContextMenu()
         {
             foreach(var field in m_OpeningDataFields)

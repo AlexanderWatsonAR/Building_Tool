@@ -10,69 +10,46 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Pillar
 {
-    public class Pillar : Buildable
+    public class Pillar : Polygon3D.Polygon3D
     {
-        [SerializeField] ProBuilderMesh m_ProBuilderMesh;
-        [SerializeReference] PillarData m_PillarData;
-
-        public override Buildable Initialize(DirtyData data)
-        {
-            base.Initialize(data);
-            m_PillarData = new PillarData(data as PillarData);
-            m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-            return this;
-        }
+        PillarData PillarData => m_Data as PillarData;
 
         private void CreateControlPoints()
         {
-            float halfWidth = m_PillarData.Width * 0.5f;
-            float halfDepth = m_PillarData.Depth * 0.5f;
-
-            Vector3[] controlPoints = new Vector3[]
-            {
-            new Vector3(-halfWidth, -halfDepth),
-            new Vector3(-halfWidth, halfDepth),
-            new Vector3(halfWidth, halfDepth),
-            new Vector3(halfWidth, -halfDepth)
-            };
+            Vector3[] controlPoints = PillarData.Sides == 4 ? MeshMaker.Square() : MeshMaker.CalculateNPolygon(PillarData.Sides, 1, 1);
 
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
+            //Vector3 scale = new Vector3(PillarData.Height * 0.5f, PillarData.Width * 0.5f, 1);
 
-            if (m_PillarData.Sides != 4)
-            {
-                controlPoints = MeshMaker.CalculateNPolygon(m_PillarData.Sides, halfWidth, halfDepth);
-            }
+            Matrix4x4 trs = Matrix4x4.TRS(Vector3.zero, rotation, Vector3.one);
+
             // Orientate points to the XZ plane.
             for (int i = 0; i < controlPoints.Length; i++)
             {
-                Vector3 euler = rotation.eulerAngles;
-                Vector3 v = Quaternion.Euler(euler) * controlPoints[i];
-                controlPoints[i] = v;
+                controlPoints[i] = trs.MultiplyPoint3x4(controlPoints[i]);
             }
 
-            m_PillarData.ControlPoints = controlPoints;
+            PillarData.SetPolygon(controlPoints, PillarData.Up);
+
+            // Issues with using polygon3d as a base:
+            // 1. Extrude is using depth, we want to extrude by height.
         }
 
         public override void Build()
         {
+            if (!PillarData.IsDirty)
+                return;
+
             CreateControlPoints();
-            m_ProBuilderMesh.CreateShapeFromPolygon(m_PillarData.ControlPoints, 0, false);
-            m_ProBuilderMesh.ToMesh();
-            Face[] faces = m_ProBuilderMesh.Extrude(m_ProBuilderMesh.faces, ExtrudeMethod.FaceNormal, m_PillarData.Height);
-            m_ProBuilderMesh.ToMesh();
 
-            if (m_PillarData.IsSmooth)
-            {
-                Smoothing.ApplySmoothingGroups(m_ProBuilderMesh, faces, 360f / m_PillarData.Sides);
-                m_ProBuilderMesh.ToMesh();
-            }
+            base.Build();
 
-            GetComponent<Renderer>().material = m_PillarData.Material;
-            m_ProBuilderMesh.Refresh();
-        }
 
-        public override void Demolish()
-        {
+            //if (PillarData.IsSmooth)
+            //{
+            //    Smoothing.ApplySmoothingGroups(m_ProBuilderMesh, faces, 360f / PillarData.Sides);
+            //    m_ProBuilderMesh.ToMesh();
+            //}
 
         }
     }
