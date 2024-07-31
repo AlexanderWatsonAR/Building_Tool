@@ -20,7 +20,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             return base.Initialize(data);
         }
-
         private void AssignDefaultMaterial()
         {
             Renderer renderer = GetComponent<Renderer>();
@@ -30,7 +29,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 renderer.sharedMaterial = BuiltinMaterials.defaultMaterial;
             }
         }
-
         public override void Build()
         {
             if (!m_Data.IsDirty)
@@ -39,10 +37,8 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             IList<IList<Vector3>> holePoints = Polygon3DData.GetHoles();
             m_ProBuilderMesh.CreateShapeFromPolygon(Polygon3DData.Polygon.ControlPoints, Polygon3DData.Polygon.Normal, holePoints);
             m_ProBuilderMesh.Solidify(Polygon3DData.Depth);
-
             Polygon3DData.IsDirty = false;
         }
-
         public override void Demolish()
         {
             DestroyImmediate(gameObject);

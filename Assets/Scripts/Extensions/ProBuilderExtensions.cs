@@ -48,7 +48,7 @@ public static class ProBuilderExtensions
     /// </summary>
     /// <param name="polygon"></param>
     /// <param name="extrude"></param>
-    public static void Solidify(this ProBuilderMesh polygon, float extrude)
+    public static void Solidify(this ProBuilderMesh polygon, float extrude = 1)
     {
         ProBuilderMesh lid = UnityEngine.Object.Instantiate(polygon);
         lid.faces[0].Reverse();

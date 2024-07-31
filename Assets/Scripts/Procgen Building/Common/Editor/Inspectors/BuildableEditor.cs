@@ -26,6 +26,13 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             PropertyField dataField = new PropertyField(m_Data);
             dataField.BindProperty(m_Data);
 
+            dataField.RegisterValueChangeCallback(evt =>
+            {
+                DirtyData dirtyData = evt.changedProperty.GetUnderlyingValue() as DirtyData;
+
+                dirtyData.IsDirty = true;
+            });
+
             m_Root.Add(dataField);
 
             return m_Root;

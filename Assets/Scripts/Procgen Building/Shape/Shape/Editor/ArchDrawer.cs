@@ -23,7 +23,6 @@ public class ArchDrawer : PropertyDrawer
             label = "Sides",
             lowValue = 3,
             highValue = 16,
-            showInputField = true
         };
 
         archHeightField.BindProperty(archHeight);

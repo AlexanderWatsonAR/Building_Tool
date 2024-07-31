@@ -1,4 +1,7 @@
+using System;
+using System.Runtime.CompilerServices;
 using System.Web;
+using Unity.Plastic.Newtonsoft.Json.Bson;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -114,14 +117,14 @@ namespace OnlyInvalid.CustomVisualElements
         public string text { get { return m_Label.text; } set { m_Label.text = value; } }
         public bool active
         {
-            get 
+            get
             {
                 return m_Toggle.value;
             }
             set
             {
                 m_Toggle.value = value;
-                
+
             }
         }
         public bool value
@@ -268,7 +271,7 @@ namespace OnlyInvalid.CustomVisualElements
             {
                 m_ContentContainer.style.display = DisplayStyle.Flex;
                 m_Arrow.style.rotate = new StyleRotate(new Rotate(90));
-                
+
             }
             else
             {
@@ -299,14 +302,16 @@ namespace OnlyInvalid.CustomVisualElements
                         NPolygon nPolygon = shape as NPolygon;
                         SliderInt sides = new SliderInt()
                         {
-                            label = "Sides",
+                            label = DisplayDataSettings.Data.NPolygon.Sides.label,
                             value = nPolygon.Sides,
-                            lowValue = 3,
-                            highValue = 18,
-                            showInputField = true,
+                            lowValue = DisplayDataSettings.Data.NPolygon.Sides.range.lower,
+                            highValue = DisplayDataSettings.Data.NPolygon.Sides.range.upper,
+                            showInputField = DisplayDataSettings.Data.NPolygon.Sides.showInputField,
+                            direction = DisplayDataSettings.Data.NPolygon.Sides.direction,
+                            inverted = DisplayDataSettings.Data.NPolygon.Sides.inverted
                         };
 
-                        sides.RegisterValueChangedCallback(evt => 
+                        sides.RegisterValueChangedCallback(evt =>
                         {
                             nPolygon.Sides = evt.newValue;
 
@@ -315,7 +320,7 @@ namespace OnlyInvalid.CustomVisualElements
                                 changeEvent.target = this;
                                 this.SendEvent(changeEvent);
                             }
-                            
+
                         });
 
                         this.Add(sides);
@@ -328,11 +333,13 @@ namespace OnlyInvalid.CustomVisualElements
                         FloatField baseHeight = new FloatField("Base Height") { value = arch.BaseHeight };
                         SliderInt sides = new SliderInt()
                         {
-                            label = "Sides",
+                            label = DisplayDataSettings.Data.Arch.Sides.label,
                             value = arch.Sides,
-                            lowValue = 3,
-                            highValue = 18,
-                            showInputField = true
+                            lowValue = DisplayDataSettings.Data.Arch.Sides.range.lower,
+                            highValue = DisplayDataSettings.Data.Arch.Sides.range.upper,
+                            showInputField = DisplayDataSettings.Data.Arch.Sides.showInputField,
+                            direction = DisplayDataSettings.Data.Arch.Sides.direction,
+                            inverted = DisplayDataSettings.Data.Arch.Sides.inverted,
                         };
 
                         sides.RegisterValueChangedCallback(evt =>
@@ -345,7 +352,6 @@ namespace OnlyInvalid.CustomVisualElements
                                 this.SendEvent(changeEvent);
                             }
                         });
-
                         archHeight.RegisterValueChangedCallback(evt =>
                         {
                             arch.ArchHeight = evt.newValue;
@@ -356,7 +362,6 @@ namespace OnlyInvalid.CustomVisualElements
                                 this.SendEvent(changeEvent);
                             }
                         });
-
                         baseHeight.RegisterValueChangedCallback(evt =>
                         {
                             arch.BaseHeight = evt.newValue;
@@ -368,77 +373,218 @@ namespace OnlyInvalid.CustomVisualElements
                             }
                         });
 
-
                         this.Add(archHeight);
                         this.Add(baseHeight);
                         this.Add(sides);
                     }
                     break;
                 case MeshShape:
-
-                    MeshShape meshShape = shape as MeshShape;
-
-                    ObjectField meshPicker = new ObjectField()
                     {
-                        label = "Mesh",
-                        value = meshShape.Mesh,
-                        objectType = typeof(Mesh),
-                    };
+                        MeshShape meshShape = shape as MeshShape;
 
-                    meshPicker.RegisterValueChangedCallback(evt => 
-                    {
-                        meshShape.Mesh = evt.newValue as Mesh;
-
-                        using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new MeshShape(evt.previousValue as Mesh), meshShape))
+                        ObjectField meshPicker = new ObjectField()
                         {
-                            changeEvent.target = this;
-                            this.SendEvent(changeEvent);
-                        }
-                    });
+                            label = "Mesh",
+                            value = meshShape.Mesh,
+                            objectType = typeof(Mesh),
+                        };
 
-                    this.Add(meshPicker);
+                        meshPicker.RegisterValueChangedCallback(evt =>
+                        {
+                            meshShape.Mesh = evt.newValue as Mesh;
 
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new MeshShape(evt.previousValue as Mesh), meshShape))
+                            {
+                                changeEvent.target = this;
+                                this.SendEvent(changeEvent);
+                            }
+                        });
+
+                        this.Add(meshPicker);
+                    }
                     break;
             }
         }
     }
 
-    //public class ArchField : ShapeField
-    //{
-    //    public ArchField(Arch arch) : base(arch)
-    //    {
-    //        FloatField archHeightField = new FloatField("Arch Height") { value = arch.TopHeight};
-    //        FloatField baseHeightField = new FloatField("Base Height") { value = arch.BottomHeight};
-    //        SliderInt sidesField = new SliderInt()
-    //        {
-    //            label = "Sides",
-    //            value = arch.Sides,
-    //            lowValue = 3,
-    //            highValue = 18,
-    //            showInputField = true
-    //        };
+    public class SliderDisplayDataField : BaseSliderDisplayDataField<float>
+    {
+        public SliderDisplayDataField(SliderDisplayData<float> data) : base(data)
+        {
+            Initalize();
+            RegisterValueChangedCallbacks();
+            AddToRoot();
+        }
+        protected override void Initalize()
+        {
+            base.Initalize();
 
-    //        this.Add(archHeightField);
-    //        this.Add(baseHeightField);
-    //        this.Add(sidesField);
-    //    }
-    //}
+            m_Lower = new FloatField("Lower")
+            {
+                value = m_Data.range.lower
+            };
+            m_Upper = new FloatField("Upper")
+            {
+                value = m_Data.range.upper
+            };
+        }
+        protected override void RegisterValueChangedCallbacks()
+        {
+            base.RegisterValueChangedCallbacks();
 
-    //public class NPolygonField : ShapeField
-    //{
-    //    public NPolygonField(NPolygon nPolygon) : base(nPolygon)
-    //    {
-    //        SliderInt sides = new SliderInt()
-    //        {
-    //            label = "Sides",
-    //            value = nPolygon.Sides,
-    //            lowValue = 3,
-    //            highValue = 18,
-    //            showInputField = true,
-    //        };
+            m_Lower.RegisterValueChangedCallback(evt =>
+            {
+                value = new SliderDisplayData<float>(m_Data)
+                {
+                    range = new RangeValues<float>(evt.newValue, m_Data.range.upper),
+                };
+            });
+            m_Upper.RegisterValueChangedCallback(evt =>
+            {
+                value = new SliderDisplayData<float>(m_Data)
+                {
+                    range = new RangeValues<float>(m_Data.range.lower, evt.newValue),
+                };
+            });
+        }
+    }
 
-    //        this.Add(sides);
-    //    }
-    //}
-    
+    public class SliderIntDisplayDataField : BaseSliderDisplayDataField<int>
+    {
+        public SliderIntDisplayDataField(SliderDisplayData<int> data) : base(data)
+        {
+            Initalize();
+            RegisterValueChangedCallbacks();
+            AddToRoot();
+        }
+        protected override void Initalize()
+        {
+            base.Initalize();
+
+            m_Lower = new IntegerField("Lower")
+            {
+                value = m_Data.range.lower
+            };
+            m_Upper = new IntegerField("Upper")
+            {
+                value = m_Data.range.upper
+            };
+        }
+        protected override void RegisterValueChangedCallbacks()
+        {
+            base.RegisterValueChangedCallbacks();
+
+            m_Lower.RegisterValueChangedCallback(evt =>
+            {
+                value = new SliderDisplayData<int>(m_Data)
+                {
+                    range = new RangeValues<int>(evt.newValue, m_Data.range.upper),
+                };
+            });
+            m_Upper.RegisterValueChangedCallback(evt =>
+            {
+                value = new SliderDisplayData<int>(m_Data)
+                {
+                    range = new RangeValues<int>(m_Data.range.lower, evt.newValue),
+                };
+            });
+        }
+    }
+
+    public abstract class BaseSliderDisplayDataField<T> : VisualElement
+    {
+        protected SliderDisplayData<T> m_Data;
+
+        protected Label m_Name;
+        protected TextField m_Label;
+        protected TextValueField<T> m_Lower, m_Upper;
+        protected EnumField m_Direction;
+        protected Toggle m_ShowInputField, m_Inverted;
+
+        public SliderDisplayData<T> value
+        {
+            get { return m_Data; }
+
+            set
+            {
+                SliderDisplayData<T> previous = new SliderDisplayData<T>(m_Data);
+
+                using (ChangeEvent<SliderDisplayData<T>> evt = ChangeEvent<SliderDisplayData<T>>.GetPooled(previous, value))
+                {
+                    m_Data = value;
+                    evt.target = this;
+                    this.SendEvent(evt);
+                }
+            }
+        }
+
+        public BaseSliderDisplayDataField(SliderDisplayData<T> data) : base()
+        {
+            m_Data = data;
+        }
+
+        protected virtual void Initalize()
+        {
+            m_Name = new Label(name);
+            m_Label = new TextField("Label")
+            {
+                value = m_Data.label
+            };
+            m_Direction = new EnumField("Direction", m_Data.direction)
+            {
+                value = m_Data.direction
+            };
+            m_ShowInputField = new Toggle("Show Input Field")
+            {
+                value = m_Data.showInputField
+            };
+            m_Inverted = new Toggle("Inverted")
+            {
+                value = m_Data.inverted
+            };
+        }
+
+        protected virtual void RegisterValueChangedCallbacks()
+        {
+            m_Label.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                value = new SliderDisplayData<T>(m_Data)
+                {
+                    label = m_Label.text
+                };
+            });
+            m_Direction.RegisterValueChangedCallback(evt => 
+            {
+                value = new SliderDisplayData<T>(m_Data)
+                {
+                    direction = (SliderDirection)m_Direction.value
+                };
+            });
+            m_ShowInputField.RegisterValueChangedCallback(evt => 
+            {
+                value = new SliderDisplayData<T>(m_Data)
+                {
+                    showInputField = m_ShowInputField.value
+                };
+            });
+            m_Inverted.RegisterValueChangedCallback(evt =>
+            {
+                value = new SliderDisplayData<T>(m_Data)
+                {
+                    inverted = m_Inverted.value
+                };
+            });
+        }
+
+        protected virtual void AddToRoot()
+        {
+            this.Add(m_Name);
+            this.Add(m_Label);
+            this.Add(m_Lower);
+            this.Add(m_Upper);
+            this.Add(m_Direction);
+            this.Add(m_ShowInputField);
+            this.Add(m_Inverted);
+        }
+    }
 }
