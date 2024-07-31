@@ -23,7 +23,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             Create();
             return m_Root;
         }
-
         private void Initialize(SerializedProperty data)
         {
             m_Data = data;

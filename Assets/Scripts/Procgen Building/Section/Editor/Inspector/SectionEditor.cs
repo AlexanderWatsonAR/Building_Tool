@@ -102,6 +102,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 m_ContentMenuSystem.Menu.DropDown(m_AddElementButton.worldBound, m_AddElementButton);
             };
         }
+
+        private void AddContentButton()
+        {
+
+        }
     }
 
 

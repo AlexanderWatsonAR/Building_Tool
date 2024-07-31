@@ -124,7 +124,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 }
             });
 
-
             m_Shape = new ShapeField(Opening.Shape);
 
             m_Position = new Vector2Field(m_Props.Position.displayName);
@@ -149,11 +148,19 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
             m_Container.Add(m_ShapeFoldout);
             m_Container.Add(m_TransformFoldout);
-            m_Container.Add(m_ContentFoldout);
 
             if (m_Props.Polygon3D != m_Props.Data.exposedReferenceValue)
             {
+                m_Container.Add(m_ContentFoldout);
                 m_ContentFoldout.Add(m_Content);
+            }
+            else
+            {
+                Button contentButton = new Button()
+                {
+                    text = "Add Content"
+                };
+                m_Container.Add(contentButton);
             }
 
             m_HeaderFoldout.AddItem(m_Container);

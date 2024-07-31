@@ -12,18 +12,24 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
     [System.Serializable]
     public class PillarData : Polygon3D.Polygon3DData
     {
-        [SerializeField, HideInInspector] int m_ID;
-        [SerializeField, Range(3, 32)] int m_Sides;
+        [SerializeField] int m_ID;
+        [SerializeField] int m_Sides;
         [SerializeField] bool m_IsSmooth;
+        [SerializeField] Vector2 m_Scale;
 
         public int ID { get { return m_ID; } set { m_ID = value; } }
         public int Sides { get { return m_Sides; } set { m_Sides = value; } }
         public bool IsSmooth { get { return m_IsSmooth; } set { m_IsSmooth = value; } }
+        public Vector2 Scale { get { return m_Scale; } set { m_Scale = value; } }
 
         public PillarData() : base()
         {
             m_Sides = 4;
+            m_Scale = Vector2.one;
             m_IsSmooth = false;
+            Depth = 4;
+            Up = Vector3.up;
+
         }
         public PillarData(PillarData data) : base(data)
         {

@@ -16,23 +16,17 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 
         private void CreateControlPoints()
         {
-            Vector3[] controlPoints = PillarData.Sides == 4 ? MeshMaker.Square() : MeshMaker.CalculateNPolygon(PillarData.Sides, 1, 1);
+            Vector3[] controlPoints = PillarData.Sides == 4 ? MeshMaker.Square() : MeshMaker.CalculateNPolygon(PillarData.Sides);
 
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
-            //Vector3 scale = new Vector3(PillarData.Height * 0.5f, PillarData.Width * 0.5f, 1);
 
-            Matrix4x4 trs = Matrix4x4.TRS(Vector3.zero, rotation, Vector3.one);
-
-            // Orientate points to the XZ plane.
+            Matrix4x4 trs = Matrix4x4.TRS(Vector3.zero, rotation, Vector3.one * 0.25f);
             for (int i = 0; i < controlPoints.Length; i++)
             {
                 controlPoints[i] = trs.MultiplyPoint3x4(controlPoints[i]);
             }
 
-            PillarData.SetPolygon(controlPoints, PillarData.Up);
-
-            // Issues with using polygon3d as a base:
-            // 1. Extrude is using depth, we want to extrude by height.
+            PillarData.SetPolygon(controlPoints, Vector3.up);
         }
 
         public override void Build()

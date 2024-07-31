@@ -12,11 +12,13 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     [System.Serializable]
     public class Polygon3DData : DirtyData, ICloneable
     {
+        #region Members
         [SerializeField] PolygonData m_Polygon;
         [SerializeField] PolygonData[] m_Holes;
         [SerializeField] Vector3 m_Normal, m_Up;
         [SerializeField] float m_Height, m_Width, m_Depth;
         [SerializeField] Vector3 m_Position;
+        #endregion
 
         #region Accessors
         public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; if (m_Polygon != null) { CalcualateInternal(); } } }

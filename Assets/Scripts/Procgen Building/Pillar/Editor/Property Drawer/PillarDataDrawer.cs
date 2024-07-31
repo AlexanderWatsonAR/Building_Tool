@@ -14,7 +14,8 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
     {
         PillarDataSerializedProperties m_Props;
 
-        FloatField m_Height, m_Width, m_Depth;
+        FloatField m_Depth;
+        Vector2Field m_Scale;
         SliderInt m_Sides;
         Toggle m_IsSmooth;
 
@@ -26,9 +27,9 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 
         protected override void DefineFields()
         {
-            m_Height = new FloatField("Height");
-            m_Width = new FloatField("Width");
-            m_Depth = new FloatField("Depth");
+            m_Scale = new Vector2Field("Scale") { value = Vector2.one};
+
+            m_Depth = new FloatField("Height");
             m_Sides = new SliderInt()
             {
                 label = DisplayDataSettings.Data.Pillar.Sides.label,
@@ -42,8 +43,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
         }
         protected override void BindFields()
         {
-            m_Height.BindProperty(m_Props.Height);
-            m_Width.BindProperty(m_Props.Width);
+            m_Scale.BindProperty(m_Props.Scale);
             m_Depth.BindProperty(m_Props.Depth);
             m_Sides.BindProperty(m_Props.Sides);
             m_IsSmooth.BindProperty(m_Props.IsSmooth);
@@ -100,8 +100,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 
         protected override void AddFieldsToRoot()
         {
-            m_Root.Add(m_Height);
-            m_Root.Add(m_Width);
+            m_Root.Add(m_Scale);
             m_Root.Add(m_Depth);
             m_Root.Add(m_Sides);
             m_Root.Add(m_IsSmooth);

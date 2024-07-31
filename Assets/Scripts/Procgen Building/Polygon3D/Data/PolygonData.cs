@@ -14,6 +14,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         public Vector3[] ControlPoints { get { return m_ControlPoints; } set { m_ControlPoints = value; } }
         public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
 
+
         public PolygonData(Vector3[] controlPoints, Vector3 normal)
         {
             m_ControlPoints = controlPoints;

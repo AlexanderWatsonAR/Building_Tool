@@ -16,7 +16,7 @@ public class ArchDisplayData : ScriptableObject
         m_Sides = new SliderDisplayData<int>()
         {
             label = "Sides",
-            range = new RangeValues<int>(3, 18),
+            range = new RangeValues<int>(2, 18),
             direction = UnityEngine.UIElements.SliderDirection.Horizontal,
             inverted = false,
             showInputField = true

@@ -92,11 +92,6 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
 
         }
 
-        public override void Demolish()
-        {
-
-        }
-
         private void OnDrawGizmosSelected()
         {
             //if (m_Data.ControlPoints == null)

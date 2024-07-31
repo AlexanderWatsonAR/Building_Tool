@@ -727,7 +727,7 @@ public static class MeshMaker
     /// <param name="sides"></param>
     /// <param name="radius"></param>
     /// <returns></returns>
-    public static Vector3[] CalculateNPolygon(int sides, float width, float height)
+    public static Vector3[] CalculateNPolygon(int sides, float width = 1, float height = 1)
     {
         float angle = 360f / sides;
 
