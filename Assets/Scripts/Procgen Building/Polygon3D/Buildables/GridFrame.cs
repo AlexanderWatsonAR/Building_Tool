@@ -10,11 +10,6 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     {
         public GridFrameData GridFrameData => m_Data as GridFrameData;
 
-        public override Buildable Initialize(DirtyData data)
-        {
-            return base.Initialize(data);
-        }
-
         public override void Build()
         {
             if (!GridFrameData.IsDirty)

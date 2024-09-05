@@ -20,6 +20,15 @@ public class PolyBuildingEditorWindow : EditorWindow
 
     public void CreateGUI()
     {
+        Button pointsButton = new Button
+        (
+            () =>
+            {
+                GameObject whatever = new GameObject("Shape", typeof(Whatever));
+            }
+        );
+        pointsButton.text = "Create Shape";
+
         Button newPolyBuilding_btn = new Button
         (
             () =>
@@ -82,7 +91,7 @@ public class PolyBuildingEditorWindow : EditorWindow
             }
         ){ text = "Save Building"};
 
-
+        rootVisualElement.Add(pointsButton);
         rootVisualElement.Add(newPolyBuilding_btn);
         rootVisualElement.Add(newSection_btn);
         rootVisualElement.Add(save_btn);

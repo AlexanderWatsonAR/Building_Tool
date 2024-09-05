@@ -13,7 +13,10 @@ namespace OnlyInvalid.ProcGenBuilding.Layout
 
         public List<Polygon3D.Polygon3D> Polygons => m_Polygons;
 
-        public LayoutGroupData() : base() { }
+        public LayoutGroupData() : base() 
+        {
+            m_Polygons = new List<Polygon3D.Polygon3D>();
+        }
 
     }
 }

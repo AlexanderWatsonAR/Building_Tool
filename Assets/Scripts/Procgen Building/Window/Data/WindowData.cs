@@ -109,7 +109,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         public object Clone()
         {
             WindowData clone = this.MemberwiseClone() as WindowData;
-            clone.Polygon = this.Polygon.Clone() as PolygonData;
+            clone.Polygon = new PolygonData(Polygon);
             clone.OuterFrame = this.OuterFrame.Clone() as OuterFrameData;
             clone.InnerFrame = this.InnerFrame.Clone() as InnerFrameData;
             clone.Pane = this.Pane.Clone() as PaneData;

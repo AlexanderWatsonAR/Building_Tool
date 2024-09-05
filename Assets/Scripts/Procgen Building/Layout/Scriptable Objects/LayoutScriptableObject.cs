@@ -7,6 +7,4 @@ public abstract class LayoutScriptableObject : ContentScriptableObject
 {
     [SerializeField, HideInInspector] protected LayoutGroupData m_LayoutGroupData;
     [SerializeField] protected List<ContentScriptableObject> m_Contents;
-
-
 }

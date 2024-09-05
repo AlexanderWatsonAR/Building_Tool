@@ -71,6 +71,30 @@ public static class Vector3Extensions
         return samplePoints;
     }
 
+    public static Vector3[] Concat(this Vector3[] collection, params Vector3[][] other)
+    {
+        List<Vector3> result = new List<Vector3>();
+
+        result.AddRange(collection);
+
+        foreach(var item in other)
+        {
+            result.AddRange(item);
+        }
+
+        return result.ToArray();
+    }
+
+    public static IEnumerable<Vector3> ApplyTransform(this IEnumerable<Vector3> points, Matrix4x4 matrix)
+    {
+        return points.Select(point => point = matrix.MultiplyPoint3x4(point));
+    }
+
+    public static Vector3[] Curve(int numberOfPoints)
+    {
+        return QuadraticLerpCollection(Vector3.zero, Vector3.right, Vector3.right + Vector3.up, numberOfPoints);
+    }
+
     public static Vector3[] QuadraticLerpCollection(Vector3 a, Vector3 b, Vector3 c, int numberOfSamples)
     {
         Vector3[] ab = LerpCollection(a, b, numberOfSamples);

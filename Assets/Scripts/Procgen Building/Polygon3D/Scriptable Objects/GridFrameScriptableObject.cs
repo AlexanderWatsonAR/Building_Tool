@@ -11,12 +11,14 @@ public class GridFrameScriptableObject : BaseFrameScriptableObject
 
     public override Polygon3D CreateContent()
     {
-        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
-        GridFrame gridFrame = frameMesh.gameObject.AddComponent<GridFrame>();
+        GridFrame gridFrame = ProBuilderMesh.Create().gameObject.AddComponent<GridFrame>();
         gridFrame.name = name;
-        m_GridFrameData.IsDirty = true;
-        m_GridFrameData.IsHoleDirty = true;
-        gridFrame.Initialize(m_GridFrameData);
+
+        GridFrameData data = new GridFrameData(m_GridFrameData);
+        data.IsDirty = true;
+        data.IsHoleDirty = true;
+
+        gridFrame.Initialize(data);
         return gridFrame;
     }
 }

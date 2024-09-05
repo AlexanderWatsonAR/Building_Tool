@@ -183,8 +183,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                         IsDirty = true
                     };
 
-                    m_WallData.Sections[count].Polygon.ControlPoints = points;
-                    m_WallData.Sections[count].Polygon.Normal = m_WallData.Normal;
+                    m_WallData.Sections[count].Polygon = new PolygonData(points, m_WallData.Normal);
                     m_WallData.Sections[count].Depth = m_WallData.Depth;
 
                     Section section = CreateWallSection(m_WallData.Sections[count]);

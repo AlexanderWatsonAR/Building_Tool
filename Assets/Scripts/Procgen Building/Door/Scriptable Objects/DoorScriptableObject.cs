@@ -13,10 +13,12 @@ public class DoorScriptableObject : ContentScriptableObject
 
     public override Polygon3D CreateContent()
     {
-        ProBuilderMesh doorMesh = ProBuilderMesh.Create();
-        Door door = doorMesh.gameObject.AddComponent<Door>();
+        Door door = ProBuilderMesh.Create().gameObject.AddComponent<Door>();
         door.name = name;
-        m_DoorData.IsDirty = true;
+
+        DoorData data = new DoorData(m_DoorData);
+        data.IsDirty = true;
+
         door.Initialize(m_DoorData);
         return door;
     }

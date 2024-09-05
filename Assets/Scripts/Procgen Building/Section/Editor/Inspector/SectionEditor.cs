@@ -26,7 +26,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             CreateElementsButton();
             m_Root.Insert(0, m_SettingsFoldout);
             m_Root.Insert(0, m_AddElementButton);
-            
+
             m_ContentMenuSystem.Initialize(m_AddElementButton);
 
             return m_Root;
@@ -84,7 +84,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_SettingsFoldout.Add(radioButtonGroup);
             m_SettingsFoldout.Add(reversed);
         }
-
         private void CreateElementsButton()
         {
             m_AddElementButton = new Button()
@@ -101,11 +100,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 m_ContentMenuSystem.CreateMenu();
                 m_ContentMenuSystem.Menu.DropDown(m_AddElementButton.worldBound, m_AddElementButton);
             };
-        }
-
-        private void AddContentButton()
-        {
-
         }
     }
 

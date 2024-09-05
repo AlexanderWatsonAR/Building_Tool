@@ -7,11 +7,17 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UIElements;
+using System.Text.RegularExpressions;
+
 
 namespace OnlyInvalid.CustomVisualElements
 {
     public class HorizontalContainer : VisualElement
     {
+        /// <summary>
+        /// If reverse is true, the direction of the row goes from right to left
+        /// </summary>
+        /// <param name="reverse"></param>
         public HorizontalContainer(bool reverse = false) : base()
         {
             this.style.flexDirection = reverse ? FlexDirection.RowReverse : FlexDirection.Row;
@@ -280,10 +286,138 @@ namespace OnlyInvalid.CustomVisualElements
             }
         }
     }
+    public class BorderBox : VisualElement
+    {
+        Color m_Colour = Color.black;
+        float m_Thickness, m_Radius;
+
+        public Color Colour { get => m_Colour; set => m_Colour = value; }
+        public float Thickness { get => m_Thickness; set => m_Thickness = value; }
+        public float Radius { get => m_Radius; set => m_Radius = value; }
+
+        public BorderBox(float thickness = 1, float radius = 0) : base()
+        {
+            m_Thickness = thickness;
+            m_Radius = radius;
+
+            this.style.borderRightWidth = m_Thickness;
+            this.style.borderLeftWidth = m_Thickness;
+            this.style.borderTopWidth = m_Thickness;
+            this.style.borderBottomWidth = m_Thickness;
+
+            this.style.borderBottomLeftRadius = m_Radius;
+            this.style.borderTopLeftRadius = m_Radius;
+            this.style.borderTopRightRadius = m_Radius;
+            this.style.borderBottomRightRadius = m_Radius;
+
+            this.style.borderRightColor = m_Colour;
+            this.style.borderLeftColor = m_Colour;
+            this.style.borderTopColor = m_Colour;
+            this.style.borderBottomColor = m_Colour;
+
+
+        }
+    }
+    public class WindowHeader : HorizontalContainer
+    {
+        HorizontalContainer m_TitleContainer, m_RemoveContainer;
+
+        Label m_Title;
+        Button m_Remove;
+
+        public Button RemoveButton => m_Remove;
+
+        public WindowHeader(string name) : base()
+        {
+            string displayName = Regex.Replace(name, "(?<!^)([A-Z])", " $1");
+
+            this.name = displayName;
+            this.style.flexGrow = 1;
+
+            this.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.1f));
+
+            m_TitleContainer = new HorizontalContainer();
+            m_TitleContainer.style.marginLeft = 5;
+            m_TitleContainer.style.flexGrow = 1;
+            m_RemoveContainer = new HorizontalContainer(true);
+            m_RemoveContainer.style.flexGrow = 1;
+
+            m_Title = new Label(this.name)
+            {
+                style =
+                {
+                    unityFontStyleAndWeight = FontStyle.Bold
+                }
+            };
+            m_Remove = new Button();
+            m_Remove.text = "X";
+
+            m_TitleContainer.Add(m_Title);
+            m_RemoveContainer.Add(m_Remove);
+
+            this.Add(m_TitleContainer);
+            this.Add(m_RemoveContainer);
+        }
+    }
+    public class Window : BorderBox
+    {
+        WindowHeader m_Header;
+
+        public Window(string name) : base ()
+        {
+            this.name = name;
+            m_Header = new WindowHeader(this.name);
+
+            this.style.flexDirection = FlexDirection.Column;
+
+            this.Add(m_Header);
+
+        }
+    }
+
+    public class PercentageField : BindableElement
+    {
+        Label m_Symbol;
+        FloatField m_Input;
+
+        public PercentageField()
+        {
+            m_Symbol = new Label("%");
+            m_Input = new FloatField()
+            {             
+             //   showMixedValue = true,
+            };
+
+            m_Input.AddToClassList("unity-base-field__aligned");
+
+            this.Add(m_Input);
+            this.Add(m_Symbol);
+        }
+        public PercentageField(string label) : this()
+        {
+            m_Input.label = label;
+        }
+    }
 
     public class ShapeField : VisualElement
     {
         protected Shape m_Shape;
+
+        private Shape Shape
+        {
+            get => m_Shape;
+
+            set
+            {
+                using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(m_Shape, value))
+                {
+                    changeEvent.target = this;
+                    this.SendEvent(changeEvent);
+                }
+
+                m_Shape = value;
+            }
+        }
 
         public ShapeField(Shape shape)
         {
@@ -300,27 +434,21 @@ namespace OnlyInvalid.CustomVisualElements
                 case NPolygon:
                     {
                         NPolygon nPolygon = shape as NPolygon;
+                        var settings = DisplayDataSettings.Data.NPolygon.Sides;
                         SliderInt sides = new SliderInt()
                         {
-                            label = DisplayDataSettings.Data.NPolygon.Sides.label,
+                            label = settings.label,
                             value = nPolygon.Sides,
-                            lowValue = DisplayDataSettings.Data.NPolygon.Sides.range.lower,
-                            highValue = DisplayDataSettings.Data.NPolygon.Sides.range.upper,
-                            showInputField = DisplayDataSettings.Data.NPolygon.Sides.showInputField,
-                            direction = DisplayDataSettings.Data.NPolygon.Sides.direction,
-                            inverted = DisplayDataSettings.Data.NPolygon.Sides.inverted
+                            lowValue = settings.range.lower,
+                            highValue = settings.range.upper,
+                            showInputField = settings.showInputField,
+                            direction = settings.direction,
+                            inverted = settings.inverted
                         };
 
                         sides.RegisterValueChangedCallback(evt =>
                         {
-                            nPolygon.Sides = evt.newValue;
-
-                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new NPolygon(evt.previousValue), nPolygon))
-                            {
-                                changeEvent.target = this;
-                                this.SendEvent(changeEvent);
-                            }
-
+                            Shape = new NPolygon(evt.newValue);
                         });
 
                         this.Add(sides);
@@ -329,24 +457,25 @@ namespace OnlyInvalid.CustomVisualElements
                 case Arch:
                     {
                         Arch arch = shape as Arch;
+                        var settings = DisplayDataSettings.Data.Arch.Sides;
                         FloatField archHeight = new FloatField("Arch Height") { value = arch.ArchHeight };
                         FloatField baseHeight = new FloatField("Base Height") { value = arch.BaseHeight };
                         SliderInt sides = new SliderInt()
                         {
-                            label = DisplayDataSettings.Data.Arch.Sides.label,
+                            label = settings.label,
                             value = arch.Sides,
-                            lowValue = DisplayDataSettings.Data.Arch.Sides.range.lower,
-                            highValue = DisplayDataSettings.Data.Arch.Sides.range.upper,
-                            showInputField = DisplayDataSettings.Data.Arch.Sides.showInputField,
-                            direction = DisplayDataSettings.Data.Arch.Sides.direction,
-                            inverted = DisplayDataSettings.Data.Arch.Sides.inverted,
+                            lowValue = settings.range.lower,
+                            highValue = settings.range.upper,
+                            showInputField = settings.showInputField,
+                            direction = settings.direction,
+                            inverted = settings.inverted,
                         };
 
                         sides.RegisterValueChangedCallback(evt =>
                         {
                             arch.Sides = evt.newValue;
 
-                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new Arch(arch.ArchHeight, arch.BaseHeight, evt.previousValue), arch))
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new Arch(arch.ArchHeight, arch.BaseHeight, evt.previousValue), m_Shape))
                             {
                                 changeEvent.target = this;
                                 this.SendEvent(changeEvent);
@@ -356,17 +485,18 @@ namespace OnlyInvalid.CustomVisualElements
                         {
                             arch.ArchHeight = evt.newValue;
 
-                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new Arch(evt.previousValue, arch.BaseHeight, arch.Sides), arch))
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new Arch(evt.previousValue, arch.BaseHeight, arch.Sides), m_Shape))
                             {
                                 changeEvent.target = this;
                                 this.SendEvent(changeEvent);
                             }
+
                         });
                         baseHeight.RegisterValueChangedCallback(evt =>
                         {
                             arch.BaseHeight = evt.newValue;
 
-                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new Arch(arch.ArchHeight, evt.previousValue, arch.Sides), arch))
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new Arch(arch.ArchHeight, evt.previousValue, arch.Sides), m_Shape))
                             {
                                 changeEvent.target = this;
                                 this.SendEvent(changeEvent);
@@ -391,9 +521,9 @@ namespace OnlyInvalid.CustomVisualElements
 
                         meshPicker.RegisterValueChangedCallback(evt =>
                         {
-                            meshShape.Mesh = evt.newValue as Mesh;
+                            meshShape.Mesh = evt.previousValue as Mesh;
 
-                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new MeshShape(evt.previousValue as Mesh), meshShape))
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new MeshShape(evt.previousValue as Mesh), m_Shape))
                             {
                                 changeEvent.target = this;
                                 this.SendEvent(changeEvent);
@@ -401,6 +531,60 @@ namespace OnlyInvalid.CustomVisualElements
                         });
 
                         this.Add(meshPicker);
+                    }
+                    break;
+                case RoundedSquare:
+                    {
+                        RoundedSquare roundedSquare = shape as RoundedSquare;
+                        var settings = DisplayDataSettings.Data.RoundedSquare;
+
+                        SliderInt sides = new SliderInt()
+                        {
+                            label = settings.Sides.label,
+                            value = roundedSquare.Sides,
+                            lowValue = settings.Sides.range.lower,
+                            highValue = settings.Sides.range.upper,
+                            showInputField = settings.Sides.showInputField,
+                            direction = settings.Sides.direction,
+                            inverted = settings.Sides.inverted,
+                        };
+                        Slider curveSize = new Slider()
+                        {
+                            label = settings.CurveSize.label,
+                            value = roundedSquare.CurveSize,
+                            lowValue = settings.CurveSize.range.lower,
+                            highValue = settings.CurveSize.range.upper,
+                            showInputField = settings.CurveSize.showInputField,
+                            direction = settings.CurveSize.direction,
+                            inverted = settings.CurveSize.inverted,
+                        };
+
+                        sides.RegisterValueChangedCallback(evt =>
+                        {
+                            roundedSquare.Sides = evt.newValue;
+
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new RoundedSquare(evt.newValue, roundedSquare.CurveSize), m_Shape))
+                            {
+                                changeEvent.target = this;
+                                this.SendEvent(changeEvent);
+                            }
+
+                        });
+
+                        curveSize.RegisterValueChangedCallback(evt =>
+                        {
+                            roundedSquare.CurveSize = evt.newValue;
+
+                            using (ChangeEvent<Shape> changeEvent = ChangeEvent<Shape>.GetPooled(new RoundedSquare(roundedSquare.Sides, evt.newValue), m_Shape))
+                            {
+                                changeEvent.target = this;
+                                this.SendEvent(changeEvent);
+                            }
+                        });
+
+
+                        this.Add(sides);
+                        this.Add(curveSize);
                     }
                     break;
             }
