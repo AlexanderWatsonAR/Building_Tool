@@ -23,7 +23,9 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         public virtual void Build() { }
 
-        public virtual void Demolish() { }
+        public virtual void Demolish()
+        {
+        }
 
         public void AddListener(UnityAction<DirtyData> call)
         {

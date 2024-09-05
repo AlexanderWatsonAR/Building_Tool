@@ -5,7 +5,9 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using OnlyInvalid.ProcGenBuilding.Common;
-
+/// <summary>
+/// Execution order: Initailize, DefineFields, BindFields, RegisterValueChangedCallbacks, AddFieldsToRoot
+/// </summary>
 [CustomPropertyDrawer(typeof(DirtyData), false)]
 public abstract class DataDrawer : PropertyDrawer
 {

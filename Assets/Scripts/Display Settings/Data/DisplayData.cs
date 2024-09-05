@@ -8,6 +8,8 @@ public class DisplayData : ScriptableObject
     [SerializeField] FrameDisplayData m_Frame;
     [SerializeField] GridFrameDisplayData m_GridFrame;
     [SerializeField] PillarDisplayData m_Pillar;
+    [SerializeField] RoundedSquareDisplayData m_RoundedSquare;
+    [SerializeField] CornerDisplayData m_Corner;
 
     public NPolygonDisplayData NPolygon
     {
@@ -44,7 +46,20 @@ public class DisplayData : ScriptableObject
             return m_Pillar = m_Pillar != null ? m_Pillar : CreateInstance<PillarDisplayData>().Initialize();
         }
     }
-
+    public RoundedSquareDisplayData RoundedSquare
+    {
+        get
+        {
+            return m_RoundedSquare = m_RoundedSquare != null ? m_RoundedSquare : CreateInstance<RoundedSquareDisplayData>().Initialize() as RoundedSquareDisplayData;
+        }
+    }
+    public CornerDisplayData Corner
+    {
+        get
+        {
+            return m_Corner = m_Corner != null ? m_Corner : CreateInstance<CornerDisplayData>().Initialize() as CornerDisplayData;
+        }
+    }
 
     public DisplayData Initialize()
     {
@@ -52,6 +67,8 @@ public class DisplayData : ScriptableObject
         m_Arch = Arch;
         m_Frame = Frame;
         m_GridFrame = GridFrame;
+        m_RoundedSquare = RoundedSquare;
+        m_Corner = Corner;
         return this;
     }
 }

@@ -10,12 +10,14 @@ public class FrameScriptableObject : BaseFrameScriptableObject
 
     public override Polygon3D CreateContent()
     {
-        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
-        Frame frame = frameMesh.gameObject.AddComponent<Frame>();
+        Frame frame = ProBuilderMesh.Create().gameObject.AddComponent<Frame>();
         frame.name = name;
-        m_FrameData.IsDirty = true;
-        m_FrameData.IsHoleDirty = true;
-        frame.Initialize(m_FrameData);
+
+        FrameData data = new FrameData(m_FrameData);
+        data.IsDirty = true;
+        data.IsHoleDirty = true;
+
+        frame.Initialize(data);
         return frame;
     }
 

@@ -29,4 +29,5 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Openings.Add(opening);
         }
     }
+
 }

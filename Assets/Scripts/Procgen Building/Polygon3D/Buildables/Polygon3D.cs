@@ -15,7 +15,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         public override Buildable Initialize(DirtyData data)
         {
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-            
+
             AssignDefaultMaterial();
 
             return base.Initialize(data);
@@ -26,7 +26,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             if (renderer.sharedMaterials.Length == 1 && renderer.sharedMaterials[0] == null)
             {
-                renderer.sharedMaterial = BuiltinMaterials.defaultMaterial;
+                renderer.sharedMaterial = Rendering.BuiltInMaterials.Defualt;
             }
         }
         public override void Build()
@@ -39,6 +39,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_ProBuilderMesh.Solidify(Polygon3DData.Depth);
             Polygon3DData.IsDirty = false;
         }
+
         public override void Demolish()
         {
             DestroyImmediate(gameObject);

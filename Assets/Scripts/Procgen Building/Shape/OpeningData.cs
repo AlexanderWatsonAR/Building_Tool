@@ -10,6 +10,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
     [System.Serializable]
     public class OpeningData : DirtyData, ICloneable
     {
+        #region Members
         [SerializeReference] Shape m_Shape;
         [SerializeReference] Polygon3D.Polygon3D m_Polygon3D;
 
@@ -19,7 +20,9 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         [SerializeField] Vector2 m_Position;
         [SerializeField] float m_Angle;
         [SerializeField] Vector2 m_Scale;
-        
+        #endregion
+
+        #region Accessors
         public bool IsActive { get => m_IsActive; set => m_IsActive = value; }
         public string Name { get => m_Name; set => m_Name = value; }
         public Vector2 Position { get { return m_Position; } set { m_Position = value; } }
@@ -28,6 +31,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public Shape Shape { get { return m_Shape; } set { m_Shape = value; } }
         public bool HasContent => m_Polygon3D != null;
         public Polygon3D.Polygon3D Polygon3D { get { return m_Polygon3D; } set { m_Polygon3D = value; } }
+        #endregion
 
         public OpeningData (Shape shape)
         {
@@ -41,6 +45,12 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public OpeningData (Shape shape, Polygon3D.Polygon3D buildable) : this (shape)
         {
             m_Polygon3D = buildable;
+        }
+
+        public void RemoveContent()
+        {
+            m_Polygon3D.Demolish();
+            m_Polygon3D = null;
         }
 
         /// <summary>

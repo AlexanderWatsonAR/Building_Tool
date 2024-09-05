@@ -10,19 +10,20 @@ public class HorizontalLayoutScriptableObject : LayoutScriptableObject
 {
     public override Polygon3D CreateContent()
     {
-        ProBuilderMesh layoutMesh = ProBuilderMesh.Create();
-        layoutMesh.name = name;
-        HorizontalLayoutGroup layout = layoutMesh.gameObject.AddComponent<HorizontalLayoutGroup>();
-        m_LayoutGroupData.IsDirty = true;
+        HorizontalLayoutGroup layout = ProBuilderMesh.Create().gameObject.AddComponent<HorizontalLayoutGroup>();
+        layout.name = name;
+
+        LayoutGroupData data = new LayoutGroupData();
+        data.IsDirty = true;
 
         foreach(ContentScriptableObject content in m_Contents)
         {
             Polygon3D polygon = content.CreateContent();
             polygon.transform.SetParent(layout.transform, true);
-            m_LayoutGroupData.Polygons.Add(polygon);
+            data.Polygons.Add(polygon);
         }
 
-        layout.Initialize(m_LayoutGroupData);
+        layout.Initialize(data);
 
         return layout;
 

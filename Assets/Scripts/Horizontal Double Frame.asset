@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93b339562b9a5f6468e662c9a519d870, type: 3}
+  m_Name: Horizontal Double Frame
+  m_EditorClassIdentifier: 
+  m_LayoutGroupData:
+    m_IsDirty: 0
+    m_Polygon:
+      m_ControlPoints: []
+      m_Normal: {x: 0, y: 0, z: 0}
+    m_Holes: []
+    m_Normal: {x: 0, y: 0, z: 1}
+    m_Up: {x: 0, y: 1, z: 0}
+    m_Height: 0
+    m_Width: 0
+    m_Depth: 0.1
+    m_Position: {x: 0, y: 0, z: 0}
+    m_Polygons: []
+  m_Contents:
+  - {fileID: 11400000, guid: 1ab223d8ae2daa542b2dc1215fbb6e8a, type: 2}
+  - {fileID: 11400000, guid: 1ab223d8ae2daa542b2dc1215fbb6e8a, type: 2}

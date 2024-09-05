@@ -1,11 +1,10 @@
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(fileName = "Content Menu", menuName = "Menu/New Content Menu")]
 public class ContentMenu : BaseMenu
@@ -31,3 +30,4 @@ public class ContentMenu : BaseMenu
         section.SectionData.AddOpening(windowOpening);
     }
 }
+

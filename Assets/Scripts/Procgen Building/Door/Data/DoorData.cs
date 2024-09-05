@@ -38,7 +38,7 @@ namespace OnlyInvalid.ProcGenBuilding.Door
         // I don't care for these empty constructors that use dummy data.
         public DoorData() : this
         (
-            DoorElement.Everything, null, null, Vector3.forward,
+            DoorElement.Everything, new PolygonData(), null, Vector3.forward,
             Vector3.right, 1, null, null
         )
         {

@@ -8,7 +8,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     [System.Serializable]
     public class FrameData : Polygon3DData
     {
-        [SerializeField, Range(0, 0.999f)] float m_Scale;
+        [SerializeField] float m_Scale;
         [SerializeField] bool m_IsHoleDirty;
         public float Scale { get { return m_Scale; } set { m_Scale = value; } }
         public bool IsHoleDirty { get { return m_IsHoleDirty; } set { m_IsHoleDirty = value; } }
@@ -32,6 +32,15 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         public FrameData(FrameData data) : this(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth, data.Scale)
         {
             m_IsHoleDirty = false;
+        }
+
+        public new object Clone()
+        {
+            FrameData clone = base.Clone() as FrameData;
+            clone.Scale = m_Scale;
+            clone.IsDirty = m_IsHoleDirty;
+            clone.IsHoleDirty = m_IsHoleDirty;
+            return clone;
         }
 
         public override bool Equals(object obj)

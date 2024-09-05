@@ -11,9 +11,22 @@ using UnityEngine.UIElements;
 using ProMaths = UnityEngine.ProBuilder.Math;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using UnityEditor;
 
 public static class Extensions
 {
+    /// <summary>
+    /// Deselects the selected game object then re-selects it.
+    /// </summary>
+    public static void Reselect()
+    {
+        GameObject selection = Selection.activeGameObject;
+
+        Selection.activeGameObject = null;
+
+        EditorApplication.delayCall += () => { Selection.activeGameObject = selection; };
+    }
+
     public static string GetParentNames(Transform t)
     {
         string names = "";

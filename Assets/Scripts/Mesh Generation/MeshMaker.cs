@@ -775,6 +775,59 @@ public static class MeshMaker
         return polygon;
     }
 
+    /// <summary>
+    /// Returns a section of a polygon
+    /// Asumptions
+    /// - Polygon is on the XY plane
+    /// - Polygon centre is 0,0,0
+    /// </summary>
+    /// <param name="controlPoints"></param>
+    /// <returns></returns>
+    public static Vector3[] Snapshot(this Shape shape, Bounds bounds)
+    {
+        Vector3[] controlPoints = shape.ControlPoints();
+
+        List<Vector3> result = new List<Vector3>();
+
+        foreach(Vector3 point in controlPoints)
+        {
+            if(bounds.Contains(point))
+            {
+                result.Add(point);
+            }
+        }
+
+        if(result.Count < 4)
+        {
+            foreach(Vector3 point in result)
+            {
+                Vector3 closest = bounds.ClosestPoint(point);
+
+
+            }
+        }
+
+        // TODO:
+        // We need to find all the points from the control points, that exist within the bounds of the rectangle.
+        // Also we need to add in rectangle points that can exist in the polygon.
+
+        // SUDO: 
+        // if number of result points is less than 2
+        // add in points to "Square" the polygon.
+
+        return result.ToArray();
+    }
+
+    public static bool IsOnTheEdge(this Rect rect, Vector3 point)
+    {
+        if(point.x == rect.xMin)
+        {
+
+        }
+
+        return false;
+    }
+
     public static IList<IList<Vector3>> SpiltPolygon(IEnumerable<Vector3> polygon, float polygonWidth, float polygonHeight, int columns, int rows, Vector3? polygonPosition = null, Vector3? polygonNormal = null)
     {
         IList<IList<Vector3>> polygons = new List<IList<Vector3>>();
@@ -904,7 +957,6 @@ public static class MeshMaker
         return polygons;
 
     }
-
     private static float CalculateAngle(Vector3 origin, Vector3 point)
     {
         Vector3 toPoint = origin.DirectionToTarget(point);
@@ -916,7 +968,6 @@ public static class MeshMaker
         
         return angle;
     }
-
     public static ProBuilderMesh PolyFrameGrid(IEnumerable<Vector3> polyPoints, float polyHeight, float polyWidth, float scale, int columns, int rows, Vector3? position = null, Vector3? normal = null)
     {
         IList<Vector3> points = polyPoints.ToList();
@@ -979,7 +1030,6 @@ public static class MeshMaker
 
         return anyIntersectionsFound;
     }
-
     public static ProBuilderMesh HoleGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, out List<Vector3[]> holeGridControlPoints, bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();
@@ -1153,8 +1203,6 @@ public static class MeshMaker
 
         return proBuilderMesh;
     }
-
-
     public static ProBuilderMesh DoorGrid(IEnumerable<Vector3> controlPoints, Vector3 scale, int columns, int rows, float sideOffset, out List<Vector3[]> doorGridControlPoints, bool flipFace = false)
     {
         Vector3[] cps = controlPoints.ToArray();

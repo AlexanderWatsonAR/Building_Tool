@@ -17,26 +17,16 @@ public class Arch : CalculatedShape
 
     }
 
-    public Arch(float archHeight, float bottomHeight, int archSides)
+    public Arch(float archHeight, float baseHeight, int archSides)
     {
         m_ArchHeight = archHeight;
-        m_BaseHeight = bottomHeight;
+        m_BaseHeight = baseHeight;
         m_Sides = archSides;
     }
 
     public override Vector3[] ControlPoints()
     {
-        List<Vector3> controlPoints = new List<Vector3>();
-
-        // TODO: apply height
-
-        controlPoints.Add(new Vector3(-1, -1)); // bl
-        controlPoints.AddRange(Vector3Extensions.QuadraticLerpCollection(new Vector3(-1, -1 + m_BaseHeight), new Vector3(0, -1 + m_BaseHeight + m_ArchHeight), new Vector3(1, -1 + m_BaseHeight), m_Sides + 1));
-        controlPoints.Add(new Vector3(1, -1)); // br
-
-        //Vector3[] points = m_Height == 0 ? MeshMaker.Square() : controlPoints.ToArray();
-
-        return controlPoints.ToArray();
+        return PolygonMaker.Arch(m_BaseHeight, m_ArchHeight, m_Sides);
     }
 }
 

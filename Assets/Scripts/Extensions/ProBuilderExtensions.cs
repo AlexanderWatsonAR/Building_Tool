@@ -33,6 +33,7 @@ public static class ProBuilderExtensions
         if (!Vector3Extensions.Approximately(aveNormal, normal, 0.1f))
         {
             proBuilderMesh.faces[0].Reverse();
+            
         }
 
         proBuilderMesh.SetVertices(vertices);

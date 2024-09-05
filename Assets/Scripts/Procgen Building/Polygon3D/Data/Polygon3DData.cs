@@ -21,7 +21,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         #endregion
 
         #region Accessors
-        public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; if (m_Polygon != null) { CalcualateInternal(); } } }
+        public PolygonData Polygon { get { return m_Polygon; } set { m_Polygon = value; if (m_Polygon.IsEmpty) { CalcualateInternal(); } } }
         public PolygonData[] Holes { get { return m_Holes; } set { m_Holes = value; } }
         public Vector3 Normal { get { return m_Normal; } set { m_Normal = value; } }
         public Vector3 Up { get { return m_Up; } set { m_Up = value; } }
@@ -33,7 +33,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         #endregion
 
         #region Constructors
-        public Polygon3DData() : this(null, null, Vector3.forward, Vector3.up, 0.1f)
+        public Polygon3DData() : this(new PolygonData(), null, Vector3.forward, Vector3.up, 0.1f)
         {
 
         }
@@ -61,7 +61,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
         private void CalcualateInternal()
         {
-            if (m_Polygon == null || m_Polygon.ControlPoints == null || m_Polygon.ControlPoints.Length == 0)
+            if (m_Polygon.IsEmpty)
                 return;
 
             m_Polygon.ControlPoints.MinMax(out Vector3 min, out Vector3 max);
@@ -71,9 +71,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         }
         public void SetPolygon(Vector3[] controlPoints, Vector3 normal)
         {
-            m_Polygon ??= new PolygonData(controlPoints, normal);
-            m_Polygon.ControlPoints = controlPoints;
-            m_Polygon.Normal = normal;
+            m_Polygon = new PolygonData(controlPoints, normal);
             m_Normal = normal;
 
             CalcualateInternal();
@@ -127,7 +125,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         public object Clone()
         {
             Polygon3DData clone = MemberwiseClone() as Polygon3DData;
-            clone.Polygon = this.Polygon.Clone() as PolygonData;
+            clone.Polygon = new PolygonData(this.Polygon);
             if (Holes != null)
                 clone.Holes = this.Holes.Clone() as PolygonData[];
             return clone;

@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace OnlyInvalid.ProcGenBuilding.Layout
 {
-
     public class HorizontalLayoutGroup : LayoutGroup
     {
         public override void Layout()
@@ -14,7 +13,12 @@ namespace OnlyInvalid.ProcGenBuilding.Layout
             if (!LayoutGroupData.IsDirty)
                 return;
 
-            var polygons = MeshMaker.SpiltPolygon(LayoutGroupData.Polygon.ControlPoints, LayoutGroupData.Width, LayoutGroupData.Height, LayoutGroupData.Polygons.Count, 1);
+            var polygons = MeshMaker.SpiltPolygon(LayoutGroupData.Polygon.ControlPoints, LayoutGroupData.Width, LayoutGroupData.Height, LayoutGroupData.Polygons.Count, 1, LayoutGroupData.Position, LayoutGroupData.Normal);
+
+            float xPos = 0;
+            float xSize = 0.5f;
+
+            Rect r = new Rect(xPos,0, xSize, 1);
 
             for(int i = 0; i < polygons.Count; i++)
             {
@@ -27,9 +31,5 @@ namespace OnlyInvalid.ProcGenBuilding.Layout
             LayoutGroupData.IsDirty = false;
         }
     }
-
-
-
-
 }
 
