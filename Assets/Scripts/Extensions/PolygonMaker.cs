@@ -7,34 +7,92 @@ using System.Collections.Generic;
 
 public static class PolygonMaker
 {
-    public static Vector3[] NPolygon(int sides, float width = 0.5f, float height = 0.5f)
+    public enum PivotPoint
+    {
+        Centre, BottomLeft
+    }
+
+    public static Vector3[] NPolygon(int sides, float width = 1, float height = 1)
     {
         float angle = 360f / sides;
 
-        Vector3[] vertices = new Vector3[sides];
+        Vector3[] polygon = new Vector3[sides];
+
+        float hWidth = width * 0.5f;
+        float hHeight = height * 0.5f;
 
         for (int i = 0; i < sides; i++)
         {
-            float x = Mathf.Sin(Mathf.Deg2Rad * (angle * i)) * width;
-            float y = Mathf.Cos(Mathf.Deg2Rad * (angle * i)) * height;
+            float x = Mathf.Sin(Mathf.Deg2Rad * (angle * i)) * hWidth;
+            float y = Mathf.Cos(Mathf.Deg2Rad * (angle * i)) * hHeight;
 
-            vertices[i] = new Vector3(x, y, 0);
+            polygon[i] = new Vector3(x, y);
         }
 
-        return vertices;
+        return polygon;
     }
-
-    public static Vector3[] Square(float height = 1, float width = 1)
+    public static Vector3[] Square(PivotPoint pivot = PivotPoint.Centre, float height = 1, float width = 1)
     {
-        return new Vector3[]
-        {
-            new Vector3(width * -0.5f, height * -0.5f),
-            new Vector3(width * -0.5f, height *  0.5f),
-            new Vector3(width *  0.5f, height *  0.5f),
-            new Vector3(width *  0.5f, height * -0.5f)
-        };
-    }
+        float hWidth = width * 0.5f;
+        float hHeight = height * 0.5f;
 
+        switch (pivot)
+        {
+            case PivotPoint.Centre:
+                return new Vector3[]
+                {
+                    new Vector3(-hWidth, -hHeight),
+                    new Vector3(-hWidth, hHeight),
+                    new Vector3(hWidth, hHeight),
+                    new Vector3(hWidth, -hHeight)
+                };
+            case PivotPoint.BottomLeft:
+                return new Vector3[]
+                {
+                    new Vector3(0, 0),
+                    new Vector3(0, height),
+                    new Vector3(width, height),
+                    new Vector3(width, 0)
+                };
+        }
+
+        return null;
+    }
+    public static IList<Vector3[]> Grid(Vector2Int dimensions)
+    {
+        return Grid(dimensions.x, dimensions.y);
+    }
+    public static IList<Vector3[]> Grid(int columns, int rows)
+    {
+        IList<Vector3[]> squares = new List<Vector3[]>();
+
+        float xSize = 1 / (float)columns;
+        float ySize = 1 / (float)rows;
+
+        Vector3 offset = new Vector3(-0.5f, -0.5f);
+
+        for (float x = 0; x < columns; x++)
+        {
+            for (float y = 0; y < rows; y++)
+            {
+                float xPos = x * xSize;
+                float yPos = y * ySize;
+
+                Vector3[] square = Square(PivotPoint.BottomLeft, xSize, ySize);
+
+                Matrix4x4 translation = Matrix4x4.Translate(new Vector3(xPos, yPos)) * Matrix4x4.Translate(offset);
+
+                for (int i = 0; i < square.Length; i++)
+                {
+                    square[i] = translation.MultiplyPoint3x4(square[i]);
+                }
+
+                squares.Add(square);
+            }
+        }
+
+        return squares;
+    }
     public static Vector3[] L()
     {
         return new Vector3[]
@@ -47,7 +105,6 @@ public static class PolygonMaker
             new Vector3(1, 0)
         };
     }
-
     public static Vector3[] RoundedSquare(float curveSize = 0.1f, int numberOfCurvePoints = 5, float height = 1, float width = 1)
     {
         Vector3[] controlPoints = MeshMaker.Square();
@@ -74,7 +131,6 @@ public static class PolygonMaker
 
         return bl.Concat(tl, tr, br).ApplyTransform(scale).ToArray();
     }
-
     public static Vector3[] Arch(float baseHeight, float archHeight, int sides)
     {
         Vector3[] square = Square();
@@ -95,12 +151,10 @@ public static class PolygonMaker
 
         return controlPoints.ToArray();
     }
-
     public static Vector3[] Semicircle()
     {
         return Vector3Extensions.QuadraticLerpCollection(new Vector3(-0.5f, 0), new Vector3(0, 0.5f), new Vector3(0, 0.5f), 10);
     }
-
     public static Vector3[] Quatercircle()
     {
         Vector3[] square = Square();
