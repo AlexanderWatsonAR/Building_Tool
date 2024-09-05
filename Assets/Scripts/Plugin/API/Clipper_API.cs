@@ -15,6 +15,34 @@ namespace OnlyInvalid.Polygon.Clipper_API
     public static class Clipper
     {
         #region Intersection
+        /// <summary>
+        /// Applys a square grid intersection to a polygon
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <param name="dimensions"></param>
+        /// <param name="scaler"></param>
+        /// <returns></returns>
+        public static IList<IList<Vector3>> Split(this IEnumerable<Vector3> polygon, Vector2Int dimensions, Vector2 scale)
+        {
+            IList<Vector3[]> grid = PolygonMaker.Grid(dimensions);
+
+            foreach (var square in grid)
+            {
+                Vector3 pos = square.Centroid();
+
+                Matrix4x4 position = Matrix4x4.Translate(pos) * Matrix4x4.Scale(scale) * Matrix4x4.Translate(-pos);
+
+                for (int i = 0; i < square.Length; i++)
+                {
+                    square[i] = position.MultiplyPoint3x4(square[i]);
+                }
+            }
+
+            IList<IList<Vector3>> clips = grid.Select(x => (IList<Vector3>)x.ToList()).ToList();
+
+            return Intersect(polygon, clips);
+        }
+
         public static IList<IList<Vector3>> Intersect(IEnumerable<Vector3> subject, IList<IList<Vector3>> clips, int precision = 7)
         {
             return Clipper2.Intersect(subject.ToPathsD(), clips.ToPathsD(), FillRule.NonZero, precision).ToPolygons();
