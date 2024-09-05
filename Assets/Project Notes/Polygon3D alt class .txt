@@ -1,0 +1,15 @@
+Polygon3D alt class 
+
+
+Idea: Presently, the control points of a shape, although represent a polygon,
+
+have differing size, position & rotation. This is a result of how the points were generated.
+
+Consequently, when we want to apply functions to a polygon, such as detection or splitting a polygon,
+
+we are required to "undo" those transformations. 
+
+Alternatively, we can store those transformations separately & only apply them when constructing a mesh.
+
+
+
