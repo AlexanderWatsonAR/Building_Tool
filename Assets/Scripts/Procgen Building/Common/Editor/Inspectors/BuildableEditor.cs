@@ -40,16 +40,13 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
         private void OnEnable()
         {
-           // Debug.Log("On Enable");
             EditorApplication.update += Build;
         }
 
         private void OnDisable()
         {
-          //  Debug.Log("On Disable");
             EditorApplication.update -= Build;
         }
-
         private void Build()
         {
             Buildable buildable = target as Buildable;

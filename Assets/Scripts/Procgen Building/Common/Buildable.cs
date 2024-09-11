@@ -17,7 +17,6 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public virtual Buildable Initialize(DirtyData data)
         {
             m_Data = data;
-            //m_Data.IsDirty = true;
             return this;
         }
 

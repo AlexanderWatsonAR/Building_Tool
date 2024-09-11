@@ -31,7 +31,7 @@ public static class PolygonMaker
 
         return polygon;
     }
-    public static Vector3[] Square(PivotPoint pivot = PivotPoint.Centre, float height = 1, float width = 1)
+    public static Vector3[] Square(PivotPoint pivot = PivotPoint.Centre, float width = 1, float height = 1)
     {
         float hWidth = width * 0.5f;
         float hHeight = height * 0.5f;

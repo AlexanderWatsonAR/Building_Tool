@@ -6,6 +6,6 @@ public class Square : Shape
 {
     public override Vector3[] ControlPoints()
     {
-        return MeshMaker.Square();
+        return PolygonMaker.Square();
     }
 }
