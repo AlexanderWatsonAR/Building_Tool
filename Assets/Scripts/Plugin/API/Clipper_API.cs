@@ -15,6 +15,11 @@ namespace OnlyInvalid.Polygon.Clipper_API
     public static class Clipper
     {
         #region Intersection
+
+        public static IList<IList<Vector3>> Split(this IEnumerable<Vector3> polygon, int columns, int rows, Vector2 scale)
+        {
+            return Split(polygon, new Vector2Int(columns, rows), scale);
+        }
         /// <summary>
         /// Applys a square grid intersection to a polygon
         /// </summary>

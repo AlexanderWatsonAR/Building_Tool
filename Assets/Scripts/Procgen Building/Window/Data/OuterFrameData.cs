@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
@@ -18,8 +19,8 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
         public OuterFrameData() : base() {}
         public OuterFrameData(float scale) : base(scale) {}
-        public OuterFrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth, float scale) : base(polygon, holes, normal, up, depth, scale) {}
-        public OuterFrameData(OuterFrameData data) : base(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth, data.Scale) { }
+        public OuterFrameData(Shape exteriorShape, List<Shape> interiorShapes, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(exteriorShape, interiorShapes, frameScale, depth, position, eulerAngle, scale) {}
+        public OuterFrameData(OuterFrameData data) : base(data.ExteriorShape, data.InteriorShapes, data.FrameScale, data.Depth, data.Position, data.EulerAngle, data.Scale) { }
 
     }
 }

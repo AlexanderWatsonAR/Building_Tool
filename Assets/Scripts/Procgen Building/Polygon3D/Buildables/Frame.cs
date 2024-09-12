@@ -25,20 +25,18 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
         protected override void CalculateInside()
         {
-            FrameData.Holes = new PolygonData[1];
-            Matrix4x4 scaleMatrix = Matrix4x4.Translate(FrameData.Position) * Matrix4x4.Scale(Vector3.one * FrameData.Scale) * Matrix4x4.Translate(-FrameData.Position);
+            FrameData.ClearInterior();
 
-            Vector3[] controlPoints = new Vector3[FrameData.Polygon.ControlPoints.Length];
-            System.Array.Copy(FrameData.Polygon.ControlPoints, controlPoints, controlPoints.Length);
+            Vector3[] controlPoints = FrameData.ExteriorShape.ControlPoints();
 
-            for(int i = 0; i < controlPoints.Length; i++)
+            Matrix4x4 scale = Matrix4x4.Scale(Vector3.one * FrameData.FrameScale);
+
+            for (int i = 0; i < controlPoints.Length; i++)
             {
-                controlPoints[i] = scaleMatrix.MultiplyPoint3x4(controlPoints[i]);
+                controlPoints[i] = scale.MultiplyPoint3x4(controlPoints[i]);
             }
 
-            FrameData.Holes[0] = new PolygonData(controlPoints, FrameData.Polygon.Normal);
-
-            FrameData.IsHoleDirty = false;
+            FrameData.AddInteriorShape(new PathShape(controlPoints));
         }
     }
 }

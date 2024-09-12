@@ -10,12 +10,6 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
         public PaneData PaneData => m_PaneData;
 
-        public override Buildable Initialize(DirtyData data)
-        {
-            m_PaneData = data as PaneData;
-            return base.Initialize(data);
-        }
-
         private void OnValidate()
         {
             m_OnDataChanged.Invoke(m_PaneData);

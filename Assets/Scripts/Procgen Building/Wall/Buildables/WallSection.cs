@@ -87,10 +87,10 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             FrameData frameData = new FrameData()
             {
-                Polygon = new PolygonData(controlPoints.ToArray(), m_WallSectionData.Normal),
-                Scale = insideScale,
+                FrameScale = insideScale,
                 Depth = depth
             };
+            frameData.SetExteriorShape(new PathShape(controlPoints));
             return frameData;
         }
         private IList<IList<Vector3>> CalculateDoorway(WallSectionData data)

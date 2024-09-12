@@ -81,7 +81,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
                 if (frameData.Equals(m_PreviousData.OuterFrame))
                     return;
 
-                if (frameData.Scale != m_PreviousData.OuterFrame.Scale)
+                if (frameData.FrameScale != m_PreviousData.OuterFrame.FrameScale)
                 {
                     m_CurrentData.IsDirty = true;
                 }

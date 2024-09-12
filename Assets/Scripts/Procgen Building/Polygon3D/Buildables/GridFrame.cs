@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Common;
+using OnlyInvalid.Polygon.Clipper_API;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
@@ -25,12 +26,13 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
         protected override void CalculateInside()
         {
-            Vector3[][] holePoints = MeshMaker.SpiltPolygon(GridFrameData.Polygon.ControlPoints, GridFrameData.Width, GridFrameData.Height, GridFrameData.Columns, GridFrameData.Rows, GridFrameData.Position, GridFrameData.Normal).Select(list => list.ToArray()).ToArray();
-            GridFrameData.Holes = new PolygonData[holePoints.Length];
+            GridFrameData.ClearInterior();
 
-            for (int i = 0; i < holePoints.Length; i++)
+            var split = Clipper.Split(GridFrameData.ExteriorShape.ControlPoints(), GridFrameData.Columns, GridFrameData.Rows, GridFrameData.Scale);
+
+            foreach (var square in split)
             {
-                GridFrameData.Holes[i] = new PolygonData(holePoints[i].ScalePolygon(GridFrameData.Scale).ToArray());
+                GridFrameData.AddInteriorShape(new PathShape(square));
             }
 
             GridFrameData.IsHoleDirty = false;

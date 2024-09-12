@@ -22,12 +22,12 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Columns = columns;
             m_Rows = rows;
         }
-        public GridFrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth, float scale, int columns, int rows) : base(polygon, holes, normal, up, depth, scale)
+        public GridFrameData(Shape exteriorShape, List<Shape> interiorShapes, int columns, int rows, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(exteriorShape, interiorShapes, frameScale, depth, position, eulerAngle, scale)
         {
             m_Columns = columns;
             m_Rows = rows;
         }
-        public GridFrameData(GridFrameData data) : this(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth, data.Scale, data.Columns, data.Rows)
+        public GridFrameData(GridFrameData data) : this(data.ExteriorShape, data.InteriorShapes, data.Columns, data.Rows, data.FrameScale, data.Depth, data.Position, data.EulerAngle, data.Scale)
         {
             int a = DisplayDataSettings.Data.NPolygon.Sides.range.lower ;
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using OnlyInvalid.Polygon.Clipper_API;
 
 namespace OnlyInvalid.ProcGenBuilding.Layout
 {
@@ -13,18 +14,13 @@ namespace OnlyInvalid.ProcGenBuilding.Layout
             if (!LayoutGroupData.IsDirty)
                 return;
 
-            var polygons = MeshMaker.SpiltPolygon(LayoutGroupData.Polygon.ControlPoints, LayoutGroupData.Width, LayoutGroupData.Height, LayoutGroupData.Polygons.Count, 1, LayoutGroupData.Position, LayoutGroupData.Normal);
+            var polygons = Clipper.Split(LayoutGroupData.ControlPoints, new Vector2Int(LayoutGroupData.Polygons.Count, 1), Vector3.one);
 
-            float xPos = 0;
-            float xSize = 0.5f;
-
-            Rect r = new Rect(xPos,0, xSize, 1);
-
-            for(int i = 0; i < polygons.Count; i++)
+            for (int i = 0; i < polygons.Count; i++)
             {
                 Vector3[] controlPoints = polygons[i].ToArray();
 
-                LayoutGroupData.Polygons[i].Polygon3DData.SetPolygon(controlPoints, LayoutGroupData.Normal);
+                LayoutGroupData.Polygons[i].Polygon3DData.SetExteriorShape(new PathShape(controlPoints));
                 LayoutGroupData.Polygons[i].Polygon3DData.IsDirty = true;
             }
 

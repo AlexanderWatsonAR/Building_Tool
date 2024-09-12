@@ -7,7 +7,7 @@ using OnlyInvalid.ProcGenBuilding.Polygon3D;
 namespace OnlyInvalid.ProcGenBuilding.Layout
 {
     [System.Serializable]
-    public class LayoutGroupData : Polygon3DData
+    public class LayoutGroupData : Polygon3DAData
     {
         [SerializeField] protected List<Polygon3D.Polygon3D> m_Polygons;
 

@@ -8,11 +8,11 @@ using UnityEngine.ProBuilder;
 namespace OnlyInvalid.ProcGenBuilding.Window
 {
     [System.Serializable]
-    public class PaneData : Polygon3DData
+    public class PaneData : Polygon3DAData
     {
         public PaneData() : base() { }
-        public PaneData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth) : base(polygon, holes, normal, up, depth) { }
-        public PaneData(PaneData data) : base(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth) { }
+        public PaneData(Shape exteriorShape, List<Shape> interiorShapes, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, exteriorShape, interiorShapes, depth) { }
+        public PaneData(PaneData data) : this(data.ExteriorShape, data.InteriorShapes, data.Depth, data.Position, data.EulerAngle, data.Scale) { }
 
     }
 }

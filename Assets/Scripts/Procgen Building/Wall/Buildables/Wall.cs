@@ -63,68 +63,68 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
             return this;
         }
 
-        private WindowData DefineWindowDefaults()
-        {
-            OuterFrameData outerFrame = new OuterFrameData()
-            {
-                Depth = m_WallData.Depth,
-                Normal = m_WallData.Normal
+        //private WindowData DefineWindowDefaults()
+        //{
+        //    OuterFrameData outerFrame = new OuterFrameData()
+        //    {
+        //        Depth = m_WallData.Depth,
+        //        Normal = m_WallData.Normal
 
-            };
-            InnerFrameData innerFrame = new InnerFrameData()
-            {
-                Depth = m_WallData.Depth * 0.5f,
-                Normal = m_WallData.Normal
+        //    };
+        //    InnerFrameData innerFrame = new InnerFrameData()
+        //    {
+        //        Depth = m_WallData.Depth * 0.5f,
+        //        Normal = m_WallData.Normal
 
-            };
-            PaneData pane = new PaneData()
-            {
-                Depth = m_WallData.Depth * 0.25f,
-                Holes = new PolygonData[0],
-                Normal = m_WallData.Normal
-            };
-            DoorData leftShutter = new DoorData()
-            {
-                Depth = m_WallData.Depth * 0.5f,
-                Normal = m_WallData.Normal
+        //    };
+        //    PaneData pane = new PaneData()
+        //    {
+        //        Depth = m_WallData.Depth * 0.25f,
+        //        Holes = new PolygonData[0],
+        //        Normal = m_WallData.Normal
+        //    };
+        //    DoorData leftShutter = new DoorData()
+        //    {
+        //        Depth = m_WallData.Depth * 0.5f,
+        //        Normal = m_WallData.Normal
 
-            };
-            DoorData rightShutter = new DoorData()
-            {
-                Depth = m_WallData.Depth * 0.5f,
-                Normal = m_WallData.Normal
-            };
-            WindowData winData = new WindowData()
-            {
-                OuterFrame = outerFrame,
-                InnerFrame = innerFrame,
-                Pane = pane,
-                LeftShutter = leftShutter,
-                RightShutter = rightShutter
-            };
-            return winData;
-        }
-        private DoorData DefineDoorDefaults()
-        {
-            DoorData doorData = new DoorData()
-            {
-                Normal = m_WallData.Normal,
-                Hinge = new TransformData()
-                {
-                    RelativePosition = RelativePosition.Left
-                }
-            };
-            return doorData;
-        }
-        private FrameData DefineFrameDefaults()
-        {
-            FrameData frameData = new FrameData()
-            {
-                Depth = m_WallData.Depth * 1.1f,
-                Normal = m_WallData.Normal
-            };
-            return frameData;
-        }
+        //    };
+        //    DoorData rightShutter = new DoorData()
+        //    {
+        //        Depth = m_WallData.Depth * 0.5f,
+        //        Normal = m_WallData.Normal
+        //    };
+        //    WindowData winData = new WindowData()
+        //    {
+        //        OuterFrame = outerFrame,
+        //        InnerFrame = innerFrame,
+        //        Pane = pane,
+        //        LeftShutter = leftShutter,
+        //        RightShutter = rightShutter
+        //    };
+        //    return winData;
+        //}
+        //private DoorData DefineDoorDefaults()
+        //{
+        //    DoorData doorData = new DoorData()
+        //    {
+        //        Normal = m_WallData.Normal,
+        //        Hinge = new TransformData()
+        //        {
+        //            RelativePosition = RelativePosition.Left
+        //        }
+        //    };
+        //    return doorData;
+        //}
+        //private FrameData DefineFrameDefaults()
+        //{
+        //    FrameData frameData = new FrameData()
+        //    {
+        //        Depth = m_WallData.Depth * 1.1f,
+        //        Normal = m_WallData.Normal
+        //    };
+        //    return frameData;
+        //}
 
         public override void Build()
         {

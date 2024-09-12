@@ -9,8 +9,8 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     {
         public InnerFrameData() : base() { }
         public InnerFrameData(int columns, int rows) : base(columns, rows) { }
-        public InnerFrameData(PolygonData polygon, PolygonData[] holes, Vector3 normal, Vector3 up, float depth, float scale, int columns, int rows) : base(polygon, holes, normal, up, depth, scale, columns, rows) { }
-        public InnerFrameData(GridFrameData data) : base(data.Polygon, data.Holes, data.Normal, data.Up, data.Depth, data.Scale, data.Columns, data.Rows) { }
+        public InnerFrameData(Shape exteriorShape, List<Shape> interiorShapes, int columns, int rows, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(exteriorShape, interiorShapes, columns, rows, frameScale, depth, position, eulerAngle, scale) { }
+        public InnerFrameData(GridFrameData data) : base(data.ExteriorShape, data.InteriorShapes, data.Columns, data.Rows, data.FrameScale, data.Depth, data.Position, data.EulerAngle, data.Scale) { }
 
     }
 }

@@ -10,13 +10,6 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
         public InnerFrameData InnerFrameData => m_InnerFrameData;
 
-        public override Buildable Initialize(DirtyData data)
-        {
-            base.Initialize(data);
-            m_InnerFrameData = data as InnerFrameData;
-            return this;
-        }
-
         private void OnValidate()
         {
             m_OnDataChanged.Invoke(m_InnerFrameData);

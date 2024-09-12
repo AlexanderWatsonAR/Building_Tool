@@ -16,7 +16,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
             base.Build();
 
-            OuterFrameData.InnerPolygon3D.Polygon3DData.SetPolygon(OuterFrameData.Holes[0].ControlPoints, OuterFrameData.Normal);
+            OuterFrameData.InnerPolygon3D.Polygon3DData.SetExteriorShape(new PathShape(OuterFrameData.InteriorShapes[0].ControlPoints()));
             OuterFrameData.InnerPolygon3D.Polygon3DData.IsDirty = true;
             //BuildInnerPolygon();
         }

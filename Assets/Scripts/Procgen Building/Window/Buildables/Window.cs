@@ -117,25 +117,25 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         private OuterFrameData CalculateOuterFrame()
         {
             OuterFrameData frameData = m_WindowData.OuterFrame.Clone() as OuterFrameData;
-            frameData.SetPolygon(m_WindowData.Polygon.ControlPoints, m_WindowData.Polygon.Normal);
+            frameData.SetExteriorShape(new PathShape(m_WindowData.Polygon.ControlPoints));
             frameData.IsDirty = true;
             return frameData;
         }
         private InnerFrameData CalculateInnerFrame()
         {
             InnerFrameData frameData = m_WindowData.InnerFrame.Clone() as InnerFrameData;
-            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.Holes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
+            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints() : m_WindowData.Polygon.ControlPoints;
             Vector3 normal = m_WindowData.Polygon.Normal;
-            frameData.SetPolygon(controlPoints, normal);
+            frameData.SetExteriorShape(new PathShape(controlPoints));
             frameData.IsDirty = true;
             return frameData;
         }
         private PaneData CalculatePane()
         {
             PaneData pane = m_WindowData.Pane.Clone() as PaneData;
-            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.Holes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
+            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints() : m_WindowData.Polygon.ControlPoints;
             Vector3 normal = m_WindowData.Polygon.Normal;
-            pane.SetPolygon(controlPoints, normal);
+            pane.SetExteriorShape(new PathShape(controlPoints));
             pane.IsDirty = true;
             return pane;
         }
@@ -220,32 +220,32 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
             IList<IList<Vector3>> shutterControlPoints;
 
-            Vector3[] points = m_WindowData.IsOuterFrameActive ? m_OuterFrame.OuterFrameData.Holes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
+            Vector3[] points = m_WindowData.IsOuterFrameActive ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints() : m_WindowData.Polygon.ControlPoints;
 
-            float height = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Height : m_OuterFrame.OuterFrameData.Height;
-            float width = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Width : m_OuterFrame.OuterFrameData.Width;
-            float depth = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Depth : m_OuterFrame.OuterFrameData.Depth;
-            Vector3 position = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Position : m_OuterFrame.OuterFrameData.Position;
+            //float height = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Height : m_OuterFrame.OuterFrameData.Height;
+            //float width = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Width : m_OuterFrame.OuterFrameData.Width;
+            //float depth = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Depth : m_OuterFrame.OuterFrameData.Depth;
+            //Vector3 position = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Position : m_OuterFrame.OuterFrameData.Position;
 
-            for (int i = 0; i < points.Length; i++)
-            {
-                points[i] += m_WindowData.Polygon.Normal * depth;
-            }
+            //for (int i = 0; i < points.Length; i++)
+            //{
+            //    points[i] += m_WindowData.Polygon.Normal * depth;
+            //}
 
-            position += m_WindowData.Polygon.Normal * depth;
+            //position += m_WindowData.Polygon.Normal * depth;
 
-            shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_WindowData.Polygon.Normal);
+            //shutterControlPoints = MeshMaker.SpiltPolygon(points, width, height, 2, 1, position, m_WindowData.Polygon.Normal);
 
-            Vector3[] leftPoints = shutterControlPoints[1].ToArray();
-            Vector3[] rightPoints = shutterControlPoints[0].ToArray();
+            //Vector3[] leftPoints = shutterControlPoints[1].ToArray();
+            //Vector3[] rightPoints = shutterControlPoints[0].ToArray();
 
-            m_LeftShutter = m_LeftShutter == null ? CreateLeftShutter(leftPoints) : m_LeftShutter;
-            m_LeftShutter.Initialize(CalculateShutter(leftPoints)).Build();
-            m_WindowData.LeftShutter.IsDirty = false;
+            //m_LeftShutter = m_LeftShutter == null ? CreateLeftShutter(leftPoints) : m_LeftShutter;
+            //m_LeftShutter.Initialize(CalculateShutter(leftPoints)).Build();
+            //m_WindowData.LeftShutter.IsDirty = false;
 
-            m_RightShutter = m_RightShutter == null ? CreateRightShutter(rightPoints) : m_RightShutter;
-            m_RightShutter.Initialize(CalculateShutter(rightPoints)).Build();
-            m_WindowData.RightShutter.IsDirty = false;
+            //m_RightShutter = m_RightShutter == null ? CreateRightShutter(rightPoints) : m_RightShutter;
+            //m_RightShutter.Initialize(CalculateShutter(rightPoints)).Build();
+            //m_WindowData.RightShutter.IsDirty = false;
 
 
         }

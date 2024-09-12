@@ -14,6 +14,7 @@ public class PathShape : Shape, IPolygon
     {
         m_Path = new PlanarPath(Vector3.forward, 0.01f);
     }
+
     /// <summary>
     /// Assumes points are on the XY plane.
     /// </summary>
