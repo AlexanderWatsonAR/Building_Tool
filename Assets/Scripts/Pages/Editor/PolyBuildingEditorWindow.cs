@@ -70,8 +70,8 @@ public class PolyBuildingEditorWindow : EditorWindow
 
                 SectionData data = new SectionData()
                 {
-                    Polygon = new OnlyInvalid.ProcGenBuilding.Polygon3D.PolygonData(points, Vector3.forward),
-                    Normal = Vector3.forward,
+                    //Polygon = new OnlyInvalid.ProcGenBuilding.Polygon3D.PolygonData(points, Vector3.forward),
+                    //Normal = Vector3.forward,
                     Depth = 0.2f,
                     IsDirty = false
                     

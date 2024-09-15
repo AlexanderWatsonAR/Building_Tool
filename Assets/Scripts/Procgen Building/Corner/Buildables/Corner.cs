@@ -19,10 +19,8 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
 
         public override Buildable Initialize(DirtyData data)
         {
-            base.Initialize(data);
-            m_CornerData = data as CornerData;
             m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-            return this;
+            return base.Initialize(data);
         }
 
         public override void Build()

@@ -32,21 +32,23 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             get
             {
-                return MeshMaker.CreateGridFromControlPoints(SectionData.Polygon.ControlPoints, Columns, Rows);
+                return MeshMaker.CreateGridFromControlPoints(SectionData.ControlPoints, Columns, Rows);
             }
         }
         public float Height
         {
             get
             {
-                return m_IsHorizontal ? SectionData.Height : SectionData.Height / SectionData.Openings.Count;
+                return 1;
+                //return m_IsHorizontal ? SectionData.Height : SectionData.Height / SectionData.Openings.Count;
             }
         }
         public float Width
         {
             get
             {
-                return m_IsVertical ? SectionData.Width : SectionData.Width / SectionData.Openings.Count;
+                return 1;
+                //return m_IsVertical ? SectionData.Width : SectionData.Width / SectionData.Openings.Count;
             }
         }
         #endregion
@@ -74,13 +76,13 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         {
             if (SectionData.Openings == null)
             {
-                SectionData.SetHoles(null);
+                SectionData.ClearInterior();
                 return;
             }
 
             if (SectionData.Openings.Count() == 0)
             {
-                SectionData.SetHoles(null);
+                SectionData.ClearInterior();
                 return;
             }
 
@@ -122,7 +124,10 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                 }
             }
             
-            SectionData.SetHoles(holePoints);
+            foreach(var hole in holePoints)
+            {
+                SectionData.AddInteriorShape(new PathShape(hole));
+            }
         }
         private void BuildContent()
         {

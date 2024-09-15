@@ -57,7 +57,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                 //Window = DefineWindowDefaults(),
                 //Door = DefineDoorDefaults(),
                 //DoorFrame = DefineFrameDefaults(),
-                Normal = m_WallData.Normal
+                //Normal = m_WallData.Normal
             };
 
             return this;
@@ -177,13 +177,13 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                     m_WallData.Sections[count] ??= new SectionData(m_WallData.SectionData)
                     {
                         ID = count,
-                        Polygon = new PolygonData(points, m_WallData.Normal),
-                        Normal = m_WallData.Normal,
+                        //Polygon = new PolygonData(points, m_WallData.Normal),
+                        //Normal = m_WallData.Normal,
                         Depth = m_WallData.Depth,
                         IsDirty = true
                     };
 
-                    m_WallData.Sections[count].Polygon = new PolygonData(points, m_WallData.Normal);
+                    //m_WallData.Sections[count].Polygon = new PolygonData(points, m_WallData.Normal);
                     m_WallData.Sections[count].Depth = m_WallData.Depth;
 
                     Section section = CreateWallSection(m_WallData.Sections[count]);

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
     [System.Serializable]
-    public class SectionData : Polygon3D.Polygon3DData
+    public class SectionData : Polygon3DAData
     {
         [SerializeField] int m_ID;
         [SerializeField] OpeningDataList m_Openings;
@@ -17,6 +17,11 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         public SectionData()
         {
             m_Openings = new OpeningDataList();
+        }
+
+        public SectionData(Shape exteriorShape, List<Shape> interiorShapes, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base (position, eulerAngle, scale, exteriorShape, interiorShapes, depth)
+        {
+
         }
 
         public SectionData(SectionData sectionData) : base(sectionData)

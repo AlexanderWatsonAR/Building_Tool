@@ -21,12 +21,6 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
         [SerializeField] List<Pillar.Pillar> m_Pillars;
         [SerializeField] Floor.Floor m_Floor;
 
-        public override Buildable Initialize(DirtyData data)
-        {
-            m_StoreyData = data as StoreyData;
-            return base.Initialize(data);
-        }
-
         public override void Build()
         {
             Demolish();
