@@ -140,23 +140,23 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             });
             m_Pillar.RegisterValueChangeCallback(evt =>
             {
-                PillarData pillar = evt.changedProperty.GetUnderlyingValue() as PillarData;
+                //PillarData pillar = evt.changedProperty.GetUnderlyingValue() as PillarData;
 
-                if (m_PreviousData.Pillar.Equals(pillar))
-                {
-                    return;
-                }
+                //if (m_PreviousData.Pillar.Equals(pillar))
+                //{
+                //    return;
+                //}
 
-                m_PreviousData.Pillar.Height = pillar.Height;
-                m_PreviousData.Pillar.Width = pillar.Width;
-                m_PreviousData.Pillar.Depth = pillar.Depth;
-                m_PreviousData.Pillar.Sides = pillar.Sides;
-                m_PreviousData.Pillar.IsSmooth = pillar.IsSmooth;
+                //m_PreviousData.Pillar.Height = pillar.Height;
+                //m_PreviousData.Pillar.Width = pillar.Width;
+                //m_PreviousData.Pillar.Depth = pillar.Depth;
+                //m_PreviousData.Pillar.Sides = pillar.Sides;
+                //m_PreviousData.Pillar.IsSmooth = pillar.IsSmooth;
 
-                for (int i = 0; i < m_CurrentData.Pillars.Length; i++)
-                {
-                    m_CurrentData.Pillars[i] = new PillarData(pillar);
-                }
+                //for (int i = 0; i < m_CurrentData.Pillars.Length; i++)
+                //{
+                //    m_CurrentData.Pillars[i] = new PillarData(pillar);
+                //}
             });
         }
         protected override void AddFieldsToRoot()

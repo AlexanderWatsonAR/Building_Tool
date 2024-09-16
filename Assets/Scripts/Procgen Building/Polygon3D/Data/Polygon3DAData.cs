@@ -12,11 +12,11 @@ public class Polygon3DAData : DirtyData, ICloneable
     #region Transform
     // These transforms may not be needed. Could we just use the transform component?
 
-    [SerializeField] Vector3 m_Position, m_EulerAngle, m_Scale;
+    [SerializeField] protected Vector3 m_Position, m_EulerAngle, m_Scale;
     #endregion
     // Here we are assuming the exterior shape has a size of 1 and are polygons orientated on the xy plane (normal 0,0,1)
-    [SerializeReference] Shape m_ExteriorShape;
-    [SerializeReference] List<Shape> m_InteriorShapes;
+    [SerializeReference] protected Shape m_ExteriorShape;
+    [SerializeReference] protected List<Shape> m_InteriorShapes;
 
     [SerializeField] float m_Depth;
     #endregion

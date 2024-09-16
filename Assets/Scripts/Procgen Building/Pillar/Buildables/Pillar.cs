@@ -12,29 +12,12 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
 {
     public class Pillar : Polygon3D.Polygon3D
     {
-        PillarData PillarData => m_Data as PillarData;
-
-        private void CreateControlPoints()
-        {
-            Vector3[] controlPoints = PillarData.Sides == 4 ? MeshMaker.Square() : MeshMaker.CalculateNPolygon(PillarData.Sides);
-
-            Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
-
-            Matrix4x4 trs = Matrix4x4.TRS(Vector3.zero, rotation, Vector3.one * 0.25f);
-            for (int i = 0; i < controlPoints.Length; i++)
-            {
-                controlPoints[i] = trs.MultiplyPoint3x4(controlPoints[i]);
-            }
-
-            PillarData.SetPolygon(controlPoints, Vector3.up);
-        }
+        public PillarData PillarData => m_Data as PillarData;
 
         public override void Build()
         {
-            if (!PillarData.IsDirty)
-                return;
-
-            CreateControlPoints();
+            //if (!PillarData.IsDirty)
+            //    return;
 
             base.Build();
 

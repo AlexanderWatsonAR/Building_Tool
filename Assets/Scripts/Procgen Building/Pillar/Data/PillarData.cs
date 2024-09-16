@@ -10,48 +10,59 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Pillar
 {
     [System.Serializable]
-    public class PillarData : Polygon3D.Polygon3DData
+    public class PillarData : Polygon3DAData
     {
+        #region Members
         [SerializeField] int m_ID;
-        [SerializeField] int m_Sides;
         [SerializeField] bool m_IsSmooth;
-        [SerializeField] Vector2 m_Scale;
+        #endregion
 
+        #region Accessors
         public int ID { get { return m_ID; } set { m_ID = value; } }
-        public int Sides { get { return m_Sides; } set { m_Sides = value; } }
         public bool IsSmooth { get { return m_IsSmooth; } set { m_IsSmooth = value; } }
-        public Vector2 Scale { get { return m_Scale; } set { m_Scale = value; } }
+        #endregion
 
+        #region Constructors
         public PillarData() : base()
         {
-            m_Sides = 4;
-            m_Scale = Vector2.one;
-            m_IsSmooth = false;
-            Depth = 4;
-            Up = Vector3.up;
+            m_ExteriorShape = new NPolygon(4);
+            m_InteriorShapes = null;
 
+        }
+        public PillarData(Vector3 position, Vector3 eulerAngle, Vector3 scale, float height, int sides = 4) : base(position, Vector3.zero, scale, new NPolygon(sides), null, height)
+        {
+            Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
+
+            m_EulerAngle = (Quaternion.Euler(eulerAngle) * upRotation).eulerAngles;
         }
         public PillarData(PillarData data) : base(data)
         {
-            m_Sides = data.Sides;
             m_IsSmooth = data.IsSmooth;
+        }
+        #endregion
+
+        public void SetDirection(Vector3 direction)
+        {
+            Quaternion eulerAngle = Quaternion.FromToRotation(Vector3.forward, direction);
+            Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
+
+            m_EulerAngle = (eulerAngle * upRotation).eulerAngles;
+        }
+
+        public void SetEulerAngle(Vector3 angle)
+        {
+            Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
+            m_EulerAngle = (Quaternion.Euler(angle) * upRotation).eulerAngles;
+        }
+
+        public void SetPosition(Vector3 position)
+        {
+            m_Position = position;
         }
 
         public override bool Equals(object obj)
         {
             if (obj is not PillarData) return false;
-
-            //PillarData pillar = obj as PillarData;
-
-            //if (pillar.Height == m_Height &&
-            //    pillar.Width == m_Width &&
-            //    pillar.Depth == m_Depth &&
-            //    pillar.Sides == m_Sides &&
-            //    pillar.IsSmooth == m_IsSmooth)
-            //{
-            //    return true;
-            //}
-
             return true;
         }
 

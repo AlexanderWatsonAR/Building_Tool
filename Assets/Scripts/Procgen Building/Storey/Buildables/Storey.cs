@@ -58,13 +58,18 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
             for (int i = 0; i < m_StoreyData.ControlPoints.Length; i++)
             {
+                int next = m_StoreyData.ControlPoints.GetNext(i);
+
                 m_StoreyData.Pillars[i] ??= CalculatePillar(i);
 
                 Pillar.Pillar pillar = CreatePillar(m_StoreyData.Pillars[i]);
                 pillar.transform.SetParent(pillars.transform, false);
-                pillar.transform.localPosition = m_StoreyData.ControlPoints[i].Position;
-                int index = m_StoreyData.ControlPoints.GetNext(i);
-                pillar.transform.forward = pillar.transform.localPosition.DirectionToTarget(m_StoreyData.ControlPoints[index].Position);
+
+                Vector3 position = m_StoreyData.ControlPoints[i].Position;
+                Vector3 nextPosition = m_StoreyData.ControlPoints[next].Position;
+
+                pillar.PillarData.SetPosition(m_StoreyData.ControlPoints[i].Position);
+                pillar.PillarData.SetDirection(position.DirectionToTarget(nextPosition));
 
                 m_Pillars.Add(pillar);
             }

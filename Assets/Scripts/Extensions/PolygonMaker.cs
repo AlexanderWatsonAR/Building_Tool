@@ -99,9 +99,9 @@ public static class PolygonMaker
         {
             new Vector3(0, 0),
             new Vector3(0, 1),
-            new Vector3(0.1f, 1),
-            new Vector3(0.1f, 0.1f),
-            new Vector3(1, 0.1f),
+            new Vector3(0.3333f, 1),
+            new Vector3(0.3333f, 0.3333f),
+            new Vector3(1, 0.3333f),
             new Vector3(1, 0)
         };
     }
