@@ -5,8 +5,9 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using OnlyInvalid.ProcGenBuilding.Pillar;
 using Unity.VisualScripting;
+using OnlyInvalid.ProcGenBuilding.Corner;
 
-public class PillarTest : MonoBehaviour
+public class CornerTest : MonoBehaviour
 {
     
     void Start()
@@ -22,20 +23,19 @@ public class PillarTest : MonoBehaviour
 
         for(int i = 0; i < positions.Length; i++)
         {
-            ProBuilderMesh pillarMesh = ProBuilderMesh.Create();
-            pillarMesh.name = "Pillar " + i.ToString();
+            ProBuilderMesh cornerMesh = ProBuilderMesh.Create();
+            cornerMesh.name = "Corner " + i.ToString();
 
             int next = positions.GetNextControlPoint(i);
             Vector3 dir = positions[i].DirectionToTarget(positions[next]) == Vector3.back ? Vector3.forward : positions[i].DirectionToTarget(positions[next]);
 
-            Vector3 eulerAngle = Quaternion.FromToRotation(Vector3.forward, dir).eulerAngles;
 
-            PillarData pillarData = new PillarData(positions[i], eulerAngle, Vector3.one * 0.1f, 4);
+            CornerData cornerData = new CornerData(CornerType.Point, 4, positions[i], Vector3.zero, Vector3.one * 0.1f);
 
-            Pillar pillar = pillarMesh.AddComponent<Pillar>();
-            pillar.Initialize(pillarData);
-            pillar.Polygon3DData.IsDirty = true;
-            pillar.Build();
+            Corner corner = cornerMesh.AddComponent<Corner>();
+            corner.Initialize(cornerData);
+            corner.Polygon3DData.IsDirty = true;
+            corner.Build();
 
         }
 

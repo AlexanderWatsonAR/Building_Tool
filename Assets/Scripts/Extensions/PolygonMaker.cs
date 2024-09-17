@@ -155,7 +155,7 @@ public static class PolygonMaker
     {
         return Vector3Extensions.QuadraticLerpCollection(new Vector3(-0.5f, 0), new Vector3(0, 0.5f), new Vector3(0, 0.5f), 10);
     }
-    public static Vector3[] Quatercircle()
+    public static Vector3[] Quatercircle(int sides = 10)
     {
         Vector3[] square = Square();
 
@@ -165,7 +165,7 @@ public static class PolygonMaker
         int br = 3;
 
         List<Vector3> controlPoints = new List<Vector3>();
-        controlPoints.AddRange(Vector3Extensions.QuadraticLerpCollection(square[bl], square[tl], square[tr], 10));
+        controlPoints.AddRange(Vector3Extensions.QuadraticLerpCollection(square[bl], square[tl], square[tr], sides));
         controlPoints.Add(square[br]);
 
         return controlPoints.ToArray();

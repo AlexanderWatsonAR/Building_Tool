@@ -6,7 +6,7 @@ using OnlyInvalid.ProcGenBuilding.Common;
 namespace OnlyInvalid.ProcGenBuilding.Corner
 {
     [System.Serializable]
-    public class CornerData : DirtyData
+    public class CornerData : Polygon3DAData
     {
         [SerializeField, HideInInspector] int m_ID;
         [SerializeField, HideInInspector] Vector3[] m_CornerPoints;
@@ -24,20 +24,32 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
         public CornerType Type { get { return m_Type; } set { m_Type = value; } }
         public int Sides { get { return m_Sides; } set { m_Sides = value; } }
 
-        public CornerData() : this(new Vector3[0], new Vector3[0], CornerType.Point, 4)
+        public CornerData() : this(CornerType.Point, 4, Vector3.zero, Vector3.zero, Vector3.zero)
         {
 
         }
 
-        public CornerData(Vector3[] controlPoints, Vector3[] flatPoints, CornerType type, int sides)
+        public CornerData(CornerType type, float height, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, null, null, height)
         {
-            m_CornerPoints = controlPoints;
-            m_FlatPoints = flatPoints;
+            // TODO: Like with the pillar, we need to rotate the shape so it faces up.
+
             m_Type = type;
-            m_Sides = sides;
+
+            switch(m_Type)
+            {
+                case CornerType.Point:
+                    m_ExteriorShape = new Square();
+                    break;
+                case CornerType.Round:
+                    m_ExteriorShape = new PathShape(PolygonMaker.Quatercircle(m_Sides));
+                    break;
+                case CornerType.Flat:
+                    m_ExteriorShape = new NPolygon(3);
+                    break;
+            }
         }
 
-        public CornerData(CornerData data) : this(data.CornerPoints, data.FlatPoints, data.Type, data.Sides)
+        public CornerData(CornerData data) : this(data.Type, data.Height, data.Position, data.EulerAngle, data.Scale)
         {
 
         }

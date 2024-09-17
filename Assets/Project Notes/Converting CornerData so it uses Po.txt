@@ -1,0 +1,20 @@
+Converting CornerData so it uses Polygon3dAData as a base.
+
+Functions of Corner Buildable
+
+- Generates different corner types:
+	- Curves Curve + triangle
+	- flat - Triangle
+	- pointy - Square
+
+Issues.
+
+- The shape will likely be warped.
+So a uniform square may not line up correctly with the walls of the building.
+How could I create a non-uniform shape?
+Perspective Transformation?
+A perspective transformation could provide a non- uniform shape,
+but how do we get the values to distort the shape?
+
+
+- 
