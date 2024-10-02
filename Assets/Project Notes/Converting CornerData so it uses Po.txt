@@ -17,4 +17,12 @@ A perspective transformation could provide a non- uniform shape,
 but how do we get the values to distort the shape?
 
 
-- 
+- Skew
+
+How do I apply a skew transformation within the current data structure?
+
+We have a skew / shear transformation applied. 
+
+Now we need to apply a rotation
+
+

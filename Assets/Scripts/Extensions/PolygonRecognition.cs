@@ -1099,7 +1099,7 @@ public static class PolygonRecognition
 
         Vector3 normal = points.CalculatePolygonFaceNormal();
 
-        if(normal != Vector3.up || normal != Vector3.down)
+        if(normal != Vector3.up && normal != Vector3.down)
         {
             Vector3 position = ProMaths.Average(points);
             Quaternion rotation = Quaternion.FromToRotation(normal, Vector3.up);
@@ -1114,6 +1114,8 @@ public static class PolygonRecognition
 
         List<int> indices = new List<int>();
 
+        float step = 0.1f;
+
         for (int i = 0; i < points.Length; i++)
         {
             int previousPoint = points.GetPreviousControlPoint(i);
@@ -1123,7 +1125,7 @@ public static class PolygonRecognition
             Vector3 previousForward = Vector3Extensions.DirectionToTarget(points[i], points[previousPoint]);
             Vector3 inbetweenForward = Vector3.Lerp(nextForward, previousForward, 0.5f);
 
-            Vector3 a = points[i] + inbetweenForward;
+            Vector3 a = points[i] + (inbetweenForward * step);
 
             if (!points.IsPointInsidePolygon(a))
             {
@@ -1385,7 +1387,7 @@ public static class PolygonRecognition
                     oneLine[0] = Vector3.Lerp(points[relativeIndices[8]], points[relativeIndices[7]], 0.5f);
                     oneLine[1] = Vector3.Lerp(points[relativeIndices[1]], points[relativeIndices[2]], 0.5f);
                     oneLine[2] = Vector3.Lerp(points[relativeIndices[4]], points[relativeIndices[5]], 0.5f);
-                    Extensions.DoLinesIntersect(oneLine[0], points[relativeIndices[3]], oneLine[1], Vector3.Lerp(points[relativeIndices[0]], points[relativeIndices[3]], 0.5f), out oneLine[3]);
+                    Extensions.DoLinesIntersectXZ(oneLine[0], points[relativeIndices[3]], oneLine[1], Vector3.Lerp(points[relativeIndices[0]], points[relativeIndices[3]], 0.5f), out oneLine[3]);
                     shape = OneLineShape.Arrow;
                     shapeIndex = arrowPointIndices[0];
                     return true;
@@ -1451,7 +1453,7 @@ public static class PolygonRecognition
                     Vector3 targetDirection = Vector3.Cross(dir, Vector3.up);
                     Vector3 line2End = line2Start + targetDirection * points.PolygonLength();
 
-                    if(Extensions.DoLinesIntersect(oneLine[0], oneLine[3], line2Start, line2End, out Vector3 intersection))
+                    if(Extensions.DoLinesIntersectXZ(oneLine[0], oneLine[3], line2Start, line2End, out Vector3 intersection))
                     {
                         oneLine[1] = intersection;
                     }
@@ -1478,7 +1480,7 @@ public static class PolygonRecognition
                     oneLine[2] = Vector3.Lerp(points[eIndices[5]], points[eIndices[8]], 0.5f);
                     oneLine[3] = Vector3.Lerp(points[eIndices[6]], points[eIndices[7]], 0.5f);
 
-                    if(Extensions.DoLinesIntersect(oneLine[1], oneLine[2], line2Start, line2End, out Vector3 intersection))
+                    if(Extensions.DoLinesIntersectXZ(oneLine[1], oneLine[2], line2Start, line2End, out Vector3 intersection))
                     {
                         oneLine[4] = intersection;
                     }
@@ -1507,7 +1509,7 @@ public static class PolygonRecognition
 
                     Vector3 intersection;
 
-                    if (Extensions.DoLinesIntersect(oneLine[0], oneLine[2], line2Start, line2End, out intersection))
+                    if (Extensions.DoLinesIntersectXZ(oneLine[0], oneLine[2], line2Start, line2End, out intersection))
                     {
                         oneLine[1] = intersection;
                     }
@@ -1518,7 +1520,7 @@ public static class PolygonRecognition
                     line2Start = mid + targetDirection * polygonLength;
                     line2End = mid + ((-targetDirection) * polygonLength);
 
-                    if (Extensions.DoLinesIntersect(oneLine[3], oneLine[5], line2Start, line2End, out intersection))
+                    if (Extensions.DoLinesIntersectXZ(oneLine[3], oneLine[5], line2Start, line2End, out intersection))
                     {
                         oneLine[4] = intersection;
                     }
@@ -1556,11 +1558,11 @@ public static class PolygonRecognition
 
                     Vector3 line2End = Vector3.Lerp(points[kIndices[0]], points[kIndices[7]], 0.5f);
 
-                    Extensions.DoLinesIntersect(oneLine[0], oneLine[2], oneLine[3], line2End, out oneLine[1]);
+                    Extensions.DoLinesIntersectXZ(oneLine[0], oneLine[2], oneLine[3], line2End, out oneLine[1]);
 
                     Vector3 line1End = Vector3.Lerp(points[kIndices[1]], points[kIndices[4]], 0.5f);
 
-                    Extensions.DoLinesIntersect(oneLine[4], line1End, oneLine[3], line2End, out oneLine[5]);
+                    Extensions.DoLinesIntersectXZ(oneLine[4], line1End, oneLine[3], line2End, out oneLine[5]);
                     shape = OneLineShape.K;
                     shapeIndex = kPointIndices[0];
                     return true;
@@ -1659,7 +1661,7 @@ public static class PolygonRecognition
                 Vector3 targetDirection = Vector3.Cross(dir, Vector3.up);
                 Vector3 line2End = line2Start + targetDirection * polygonLength;
 
-                if(Extensions.DoLinesIntersect(oneLine[1], oneLine[^2], line2Start, line2End, out Vector3 intersection))
+                if(Extensions.DoLinesIntersectXZ(oneLine[1], oneLine[^2], line2Start, line2End, out Vector3 intersection))
                 {
                     oneLine[i] = intersection;
                 }
@@ -1745,7 +1747,7 @@ public static class PolygonRecognition
                     Vector3 line2End = Vector3.Lerp(points[current], points[nextFive], 0.5f);
 
                     j++;
-                    Extensions.DoLinesIntersect(unsortedPoints[j - 1], next, line2Start, line2End,  out unsortedPoints[j]);
+                    Extensions.DoLinesIntersectXZ(unsortedPoints[j - 1], next, line2Start, line2End,  out unsortedPoints[j]);
                     j++;
                     unsortedPoints[j] = next;
                 }

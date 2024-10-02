@@ -21,7 +21,15 @@ public class PathShape : Shape, IPolygon
     /// <param name="points"></param>
     public PathShape(IEnumerable<Vector3> points) : this()
     {
-        foreach(var point in points)
+        foreach (var point in points)
+        {
+            m_Path.AddPointToPath(point);
+        }
+    }
+
+    public PathShape(params Vector3[] points) : this()
+    {
+        foreach (var point in points)
         {
             m_Path.AddPointToPath(point);
         }

@@ -458,7 +458,7 @@ public static class Extensions
     /// <param name="line2End"></param>
     /// <param name="intersection"></param>
     /// <returns></returns>
-    public static bool DoLinesIntersect(Vector3 line1Start, Vector3 line1End, Vector3 line2Start, Vector3 line2End, out Vector3 intersection, bool isInfinite = true)
+    public static bool DoLinesIntersectXZ(Vector3 line1Start, Vector3 line1End, Vector3 line2Start, Vector3 line2End, out Vector3 intersection, bool isInfinite = true)
     {
         intersection = Vector3.zero;
         float denominator = ((line1End.x - line1Start.x) * (line2End.z - line2Start.z)) - ((line1End.z - line1Start.z) * (line2End.x - line2Start.x));
@@ -492,6 +492,41 @@ public static class Extensions
         // The intersection point is outside the range of at least one of the line segments
         return false;
     }
+    public static bool DoLinesIntersectXY(Vector3 line1Start, Vector3 line1End, Vector3 line2Start, Vector3 line2End, out Vector3 intersection, bool isInfinite = true)
+    {
+        intersection = Vector3.zero;
+        float denominator = ((line1End.x - line1Start.x) * (line2End.y - line2Start.y)) - ((line1End.y - line1Start.y) * (line2End.x - line2Start.x));
+
+        if (denominator == 0f)
+        {
+            // The lines are parallel or coincident, so no intersection point exists
+            return false;
+        }
+
+        float ua = (((line2End.x - line2Start.x) * (line1Start.y - line2Start.y)) - ((line2End.y - line2Start.y) * (line1Start.x - line2Start.x))) / denominator;
+        float ub = (((line1End.x - line1Start.x) * (line1Start.y - line2Start.y)) - ((line1End.y - line1Start.y) * (line1Start.x - line2Start.x))) / denominator;
+
+        float intersectionX = line1Start.x + (ua * (line1End.x - line1Start.x));
+        float intersectionY = line1Start.y + (ua * (line1End.y - line1Start.y));
+        intersection = new Vector3(intersectionX, intersectionY);
+
+        if (isInfinite)
+        {
+            return true;
+        }
+        else if (ua >= 0f && ua <= 1f && ub >= 0f && ub <= 1f) // Does the intersection point lies within both line segments?
+        {
+            return true;
+        }
+        else
+        {
+            intersection = Vector3.zero;
+        }
+
+        // The intersection point is outside the range of at least one of the line segments
+        return false;
+    }
+
 
     public static void DeleteChildren(this Transform transform)
     {

@@ -70,12 +70,9 @@ public class Polygon3DAData : DirtyData, ICloneable
             return holes;
         }
     }
-    public Vector3 Normal
+    public virtual Vector3 Normal()
     {
-        get
-        {
-            return Quaternion.Euler(m_EulerAngle) * Vector3.forward;
-        }
+        return Quaternion.Euler(m_EulerAngle) * Vector3.forward;
     }
     public float Depth { get => m_Depth; set => m_Depth = value; }
     public Quaternion Rotation

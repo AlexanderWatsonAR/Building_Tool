@@ -1019,7 +1019,7 @@ public static class MeshMaker
             int next = points.GetNextControlPoint(i);
 
             // Fix: This may intersect multiple lines of the polygon.
-            if (Extensions.DoLinesIntersect(lineStart, lineEnd, points[i], points[next], out Vector3 intersection, false))
+            if (Extensions.DoLinesIntersectXZ(lineStart, lineEnd, points[i], points[next], out Vector3 intersection, false))
             {
                 listOfIntersections.Add(intersection);
                 anyIntersectionsFound = true;

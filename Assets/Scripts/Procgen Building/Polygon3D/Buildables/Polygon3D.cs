@@ -35,7 +35,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 return;
 
             IList<IList<Vector3>> holePoints = Polygon3DData.Holes;
-            m_ProBuilderMesh.CreateShapeFromPolygon(Polygon3DData.ControlPoints, Polygon3DData.Normal, holePoints);
+            m_ProBuilderMesh.CreateShapeFromPolygon(Polygon3DData.ControlPoints, Polygon3DData.Normal(), holePoints);
             m_ProBuilderMesh.Solidify(Polygon3DData.Depth);
             Polygon3DData.IsDirty = false;
         }

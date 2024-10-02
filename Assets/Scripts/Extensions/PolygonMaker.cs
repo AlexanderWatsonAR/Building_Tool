@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public static class PolygonMaker
 {
@@ -105,6 +106,21 @@ public static class PolygonMaker
             new Vector3(1, 0)
         };
     }
+    public static Vector3[] U()
+    {
+        return new Vector3[]
+        {
+            new Vector3(0,0),
+            new Vector3(-0.5f,1),
+            new Vector3(0.3333f, 1),
+            new Vector3(0.3333f, 0.3333f),
+            new Vector3(0.6666f, 0.3333f),
+            new Vector3(0.6666f, 1),
+            new Vector3(1, 1),
+            new Vector3(1, 0)
+        };
+    }
+
     public static Vector3[] RoundedSquare(float curveSize = 0.1f, int numberOfCurvePoints = 5, float height = 1, float width = 1)
     {
         Vector3[] controlPoints = MeshMaker.Square();
@@ -155,7 +171,7 @@ public static class PolygonMaker
     {
         return Vector3Extensions.QuadraticLerpCollection(new Vector3(-0.5f, 0), new Vector3(0, 0.5f), new Vector3(0, 0.5f), 10);
     }
-    public static Vector3[] Quatercircle(int sides = 10)
+    public static Vector3[] Quartercircle(int sides = 10)
     {
         Vector3[] square = Square();
 
@@ -171,6 +187,51 @@ public static class PolygonMaker
         return controlPoints.ToArray();
     }
 
+    public static Vector3[] WallCorner(float angle)
+    {
+        Vector3 line1Dir = Vector3.right;
+        Vector3 line2Dir = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle), 0);
+
+        Vector3 line1Cross = Vector3.Cross(Vector3.forward, line1Dir);
+        Vector3 line2Cross = Vector3.Cross(Vector3.back, line2Dir);
+
+        Vector3 line1Start = line1Dir;
+        Vector3 line1End = line1Dir + line1Cross;
+
+        Vector3 line2Start = line2Dir;
+        Vector3 line2End = line2Dir + line2Cross;
+
+        Vector3 intersection = new Vector3(1, 1);
+
+        if (angle > 90)
+        {
+            if (Extensions.DoLinesIntersectXY(line1End, line1End + -line1Dir, line2End, line2End + -line2Dir, out intersection))
+            {
+                float dis = Vector3.Distance(line1End, intersection);
+
+                line1Start -= (line1Dir * dis);
+                line2Start -= (line2Dir * dis);
+            }
+        }
+        else if (angle < 90)
+        {
+            if (Extensions.DoLinesIntersectXY(line1End, line1End + line1Dir, line2End, line2End + line2Dir, out intersection))
+            {
+                float dis = Vector3.Distance(line1End, intersection);
+
+                line1Start += (line1Dir * dis);
+                line2Start += (line2Dir * dis);
+            }
+        }
+
+        return new Vector3[]
+        {
+                Vector3.zero,
+                line1Start,
+                intersection,
+                line2Start,
+        };
+    }
     
 
 }

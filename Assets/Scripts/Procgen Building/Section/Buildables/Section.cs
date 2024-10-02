@@ -119,7 +119,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
 
                     Polygon3D.Polygon3D polygon3D = opening.Polygon3D;
                     Polygon3DData polygon3DData = polygon3D.Data as Polygon3DData;
-                    polygon3DData.SetPolygon(hole.ToArray(), SectionData.Normal);
+                    polygon3DData.SetPolygon(hole.ToArray(), SectionData.Normal());
                     polygon3DData.IsDirty = true;
                 }
             }
@@ -150,7 +150,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             float width = Width;
 
             Vector3 position = controlPoints.Centroid();
-            Quaternion rotation = Vector3Extensions.Approximately(SectionData.Normal, Vector3.back) ? Quaternion.identity : Quaternion.FromToRotation(Vector3.forward, SectionData.Normal);
+            Quaternion rotation = Vector3Extensions.Approximately(SectionData.Normal(), Vector3.back) ? Quaternion.identity : Quaternion.FromToRotation(Vector3.forward, SectionData.Normal());
             Vector3 sectionScale = new Vector3(width * 0.5f, height * 0.5f);
 
             Vector3 offset = new Vector3(opening.Position.x, opening.Position.y);

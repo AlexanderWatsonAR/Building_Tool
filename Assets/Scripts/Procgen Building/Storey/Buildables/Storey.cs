@@ -216,7 +216,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
             Vector3 intersection;
 
-            Extensions.DoLinesIntersect(m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[current].EndPosition + crossA, m_StoreyData.Walls[previous].StartPosition + crossB, m_StoreyData.Walls[previous].EndPosition + crossB, out intersection);
+            Extensions.DoLinesIntersectXZ(m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[current].EndPosition + crossA, m_StoreyData.Walls[previous].StartPosition + crossB, m_StoreyData.Walls[previous].EndPosition + crossB, out intersection);
 
             int numberOfSamples = m_StoreyData.CornerData.Sides + 1;
 
@@ -227,17 +227,14 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
 
             if (isInside)
             {
-                Extensions.DoLinesIntersect(m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].EndPosition, m_StoreyData.Walls[previous].StartPosition, m_StoreyData.Walls[previous].EndPosition, out intersection);
+                Extensions.DoLinesIntersectXZ(m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].EndPosition, m_StoreyData.Walls[previous].StartPosition, m_StoreyData.Walls[previous].EndPosition, out intersection);
                 cornerPoints = new Vector3[] { m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[previous].EndPosition, intersection };
                 flatPoints = new Vector3[] { m_StoreyData.Walls[current].StartPosition, m_StoreyData.Walls[current].StartPosition + crossA, m_StoreyData.Walls[previous].EndPosition };
             }
 
             CornerData cornerData = new CornerData(m_StoreyData.CornerData)
             {
-                CornerPoints = cornerPoints,
-                FlatPoints = flatPoints.SortPointsClockwise().ToArray(),
                 ID = current,
-                IsInside = isInside,
                 Height = m_StoreyData.WallData.Height
             };
 

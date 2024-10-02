@@ -55,7 +55,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             {
                 int next = (i + 1) % count;
 
-                if (Extensions.DoLinesIntersect(line1Start: GetLastPosition(),
+                if (Extensions.DoLinesIntersectXZ(line1Start: GetLastPosition(),
                     line1End: point, line2Start: GetPositionAt(i),
                     line2End: GetPositionAt(next),
                     out Vector3 intersection, false))
@@ -191,7 +191,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
                     Vector3 line2Start = GetPositionAt(j);
                     Vector3 line2End = GetPositionAt(next);
 
-                    if (Extensions.DoLinesIntersect(line1Start, line1End, line2Start, line2End, out Vector3 intersection, false))
+                    if (Extensions.DoLinesIntersectXZ(line1Start, line1End, line2Start, line2End, out Vector3 intersection, false))
                     {
                         float mag = intersection.magnitude;
 
