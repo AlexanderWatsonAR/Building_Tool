@@ -12,14 +12,11 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
     {
         #region Members
         [SerializeField, HideInInspector] int m_ID;
-        [SerializeField, HideInInspector] Vector3[] m_CornerPoints;
-        [SerializeField, HideInInspector] Vector3[] m_FlatPoints;
         [SerializeField, HideInInspector] float m_Height;
-        [SerializeField, HideInInspector] bool m_IsInside;
         [SerializeField] CornerType m_Type;
         [SerializeField, Range(3, 18)] int m_Sides;
-        [SerializeField] float m_ShearX, m_ShearRadians;
         [SerializeField] float m_Angle;
+        [SerializeField] Vector3 m_Forward;
         #endregion
 
         #region Accessors
@@ -42,11 +39,27 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
         public CornerData(CornerType type, float angle, float height, Vector3 forward, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, null, null, height)
         {
             m_Angle = angle;
+            m_Forward = forward;
+            SetCornerType(type);
+
+
+        }
+        public CornerData(CornerData data) : this(data.Type, data.Angle, data.Height, Vector3.forward, data.Position, data.EulerAngle, data.Scale)
+        {
+
+        }
+        #endregion
+
+
+        // Something to think about.
+        // What are the pros / cons of calculating the mesh shape in corner data vs corner buildable?
+        private void SetCornerType(CornerType type)
+        {
             m_Type = type;
 
-            Vector3[] cornerPoints = PolygonMaker.WallCorner(angle);
+            Vector3[] cornerPoints = PolygonMaker.WallCorner(m_Angle);
 
-            switch(m_Type)
+            switch (m_Type)
             {
                 case CornerType.Point:
                     {
@@ -63,17 +76,15 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
 
                         m_ExteriorShape = new PathShape(points);
                     }
-                    
                     break;
                 case CornerType.Flat:
                     {
                         m_ExteriorShape = new PathShape(cornerPoints[1], cornerPoints[2], cornerPoints[3]);
                     }
-                    
                     break;
             }
 
-            forward.Normalize();
+            m_Forward.Normalize();
 
             Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
 
@@ -83,15 +94,9 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
             from = rotate.MultiplyPoint3x4(from);
 
 
-            Quaternion rotation = Quaternion.FromToRotation(from, forward) * upRotation;
+            Quaternion rotation = Quaternion.FromToRotation(from, m_Forward) * upRotation;
             m_EulerAngle = rotation.eulerAngles;
-
         }
-        public CornerData(CornerData data) : this(data.Type, data.Angle, data.Height, Vector3.forward, data.Position, data.EulerAngle, data.Scale)
-        {
-
-        }
-        #endregion
 
         public override bool Equals(object obj)
         {

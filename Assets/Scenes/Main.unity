@@ -171,43 +171,7 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 3144867378852528147
-      type: {class: AGridData, ns: , asm: Assembly-CSharp}
-      data:
-        m_IsDirty: 0
-        m_Position: {x: 0, y: 0, z: 0}
-        m_EulerAngle: {x: 0, y: 0, z: 0}
-        m_Scale: {x: 1, y: 1, z: 0}
-        m_ExteriorShape:
-          rid: 3144867378852528148
-        m_InteriorShapes:
-        - rid: 3144867514273759232
-        - rid: 3144867514273759233
-        - rid: 3144867514273759234
-        - rid: 3144867514273759235
-        - rid: 3144867514273759236
-        - rid: 3144867514273759237
-        - rid: 3144867514273759238
-        - rid: 3144867514273759239
-        - rid: 3144867514273759240
-        - rid: 3144867514273759241
-        - rid: 3144867514273759242
-        - rid: 3144867514273759243
-        - rid: 3144867514273759244
-        - rid: 3144867514273759245
-        - rid: 3144867514273759246
-        - rid: 3144867514273759247
-        - rid: 3144867514273759248
-        - rid: 3144867514273759249
-        - rid: 3144867514273759250
-        - rid: 3144867514273759251
-        m_Depth: 1
-        m_Dimensions: {x: 5, y: 4}
-        m_GridScale: {x: 0.65, y: 0.86}
-    - rid: 3144867378852528148
-      type: {class: Square, ns: , asm: Assembly-CSharp}
-      data: 
-    - rid: 3144867514273759232
+    - rid: 1524811579608268800
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -239,7 +203,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759233
+    - rid: 1524811579608268801
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -271,7 +235,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759234
+    - rid: 1524811579608268802
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -303,7 +267,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759235
+    - rid: 1524811579608268803
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -335,7 +299,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759236
+    - rid: 1524811579608268804
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -367,7 +331,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759237
+    - rid: 1524811579608268805
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -399,7 +363,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759238
+    - rid: 1524811579608268806
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -431,7 +395,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759239
+    - rid: 1524811579608268807
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -463,7 +427,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759240
+    - rid: 1524811579608268808
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -495,7 +459,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759241
+    - rid: 1524811579608268809
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -527,7 +491,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759242
+    - rid: 1524811579608268810
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -559,7 +523,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759243
+    - rid: 1524811579608268811
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -591,7 +555,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759244
+    - rid: 1524811579608268812
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -623,7 +587,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759245
+    - rid: 1524811579608268813
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -655,7 +619,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759246
+    - rid: 1524811579608268814
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -687,7 +651,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759247
+    - rid: 1524811579608268815
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -719,7 +683,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759248
+    - rid: 1524811579608268816
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -751,7 +715,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759249
+    - rid: 1524811579608268817
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -783,7 +747,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759250
+    - rid: 1524811579608268818
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -815,7 +779,7 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
-    - rid: 3144867514273759251
+    - rid: 1524811579608268819
       type: {class: PathShape, ns: , asm: Assembly-CSharp}
       data:
         m_Path:
@@ -847,6 +811,42 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
+    - rid: 3144867378852528147
+      type: {class: AGridData, ns: , asm: Assembly-CSharp}
+      data:
+        m_IsDirty: 0
+        m_Position: {x: 0, y: 0, z: 0}
+        m_EulerAngle: {x: 0, y: 0, z: 0}
+        m_Scale: {x: 1, y: 1, z: 0}
+        m_ExteriorShape:
+          rid: 3144867378852528148
+        m_InteriorShapes:
+        - rid: 1524811579608268800
+        - rid: 1524811579608268801
+        - rid: 1524811579608268802
+        - rid: 1524811579608268803
+        - rid: 1524811579608268804
+        - rid: 1524811579608268805
+        - rid: 1524811579608268806
+        - rid: 1524811579608268807
+        - rid: 1524811579608268808
+        - rid: 1524811579608268809
+        - rid: 1524811579608268810
+        - rid: 1524811579608268811
+        - rid: 1524811579608268812
+        - rid: 1524811579608268813
+        - rid: 1524811579608268814
+        - rid: 1524811579608268815
+        - rid: 1524811579608268816
+        - rid: 1524811579608268817
+        - rid: 1524811579608268818
+        - rid: 1524811579608268819
+        m_Depth: 1
+        m_Dimensions: {x: 5, y: 4}
+        m_GridScale: {x: 0.65, y: 0.86}
+    - rid: 3144867378852528148
+      type: {class: Square, ns: , asm: Assembly-CSharp}
+      data: 
 --- !u!33 &374569369
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -4153,7 +4153,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1407395316}
-  m_VersionIndex: 64076
+  m_VersionIndex: 64098
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

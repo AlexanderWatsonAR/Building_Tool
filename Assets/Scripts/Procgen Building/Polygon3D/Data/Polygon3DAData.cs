@@ -18,7 +18,7 @@ public class Polygon3DAData : DirtyData, ICloneable
     [SerializeReference] protected Shape m_ExteriorShape;
     [SerializeReference] protected List<Shape> m_InteriorShapes;
 
-    [SerializeField] float m_Depth;
+    [SerializeField] protected float m_Depth;
     #endregion
 
     #region Accessors
@@ -88,7 +88,6 @@ public class Polygon3DAData : DirtyData, ICloneable
     public Polygon3DAData() : this(Vector3.zero, Vector3.zero, Vector3.one, new Square(), new List<Shape>(), 1)
     {
     }
-
     public Polygon3DAData(Vector3 position, Vector3 eulerAngle, Vector3 scale, Shape exteriorShape, List<Shape> interiorShapes, float depth)
     {
         m_Position = position;

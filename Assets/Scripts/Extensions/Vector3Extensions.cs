@@ -27,6 +27,10 @@ public static class Vector3Extensions
         return sqrMagnitudeDifference <= sqrTolerance;
     }
 
+    public static float DistanceToTarget(this Vector3 point, Vector3 target)
+    {
+        return Vector3.Distance(point, target);
+    }
     /// <summary>
     /// Returns a normalized vector to the target.
     /// </summary>

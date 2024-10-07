@@ -111,7 +111,7 @@ public static class PolygonMaker
         return new Vector3[]
         {
             new Vector3(0,0),
-            new Vector3(-0.5f,1),
+            new Vector3(0,1),
             new Vector3(0.3333f, 1),
             new Vector3(0.3333f, 0.3333f),
             new Vector3(0.6666f, 0.3333f),

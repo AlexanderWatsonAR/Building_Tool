@@ -22,15 +22,18 @@ public class CornerTest : MonoBehaviour
         System.Array.Copy(m_Polygon, positions, m_Polygon.Length);
 
         Matrix4x4 rotation = Matrix4x4.Rotate(Quaternion.FromToRotation(Vector3.forward, Vector3.up));
+        Matrix4x4 scale = Matrix4x4.Scale(Vector3.one * 3);
+
+        Matrix4x4 rs = rotation * scale;
 
         for(int i = 0; i < positions.Length; i++)
         {
-            positions[i] = rotation.MultiplyPoint3x4(positions[i]);
+            positions[i] = rs.MultiplyPoint3x4(positions[i]);
         }
 
-        float angle = 0;
-
         int[] concavePoints = PolygonRecognition.GetConcaveIndexPoints(positions);
+
+        List<Corner> corners = new List<Corner>();
 
         for (int i = 0; i < positions.Length; i++)
         {
@@ -55,15 +58,27 @@ public class CornerTest : MonoBehaviour
 
             CornerData cornerData = new CornerData(CornerType.Point, theta, 1, to, positions[i], Vector3.zero, Vector3.one * 0.05f);
 
-
-
-            angle += theta;
-
             Corner corner = cornerMesh.AddComponent<Corner>();
             corner.Initialize(cornerData);
             corner.Polygon3DData.IsDirty = true;
             corner.Build();
+            corners.Add(corner);
+        }
 
+        for(int i = 0; i < corners.Count; i++)
+        {
+            ProBuilderMesh wallMesh = ProBuilderMesh.Create();
+            wallMesh.name = "Wall " + i.ToString();
+
+            int next = positions.GetNextControlPoint(i);
+
+            WallAData wallData = new WallAData(corners[i].CornerData, corners[next].CornerData);
+
+            WallA wall = wallMesh.AddComponent<WallA>();
+            wall.Initialize(wallData);
+            wall.WallAData.IsDirty = true;
+            wall.Build();
+            
         }
 
     }
