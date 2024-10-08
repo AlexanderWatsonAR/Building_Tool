@@ -235,7 +235,7 @@ namespace OnlyInvalid.ProcGenBuilding.Storey
             CornerData cornerData = new CornerData(m_StoreyData.CornerData)
             {
                 ID = current,
-                Height = m_StoreyData.WallData.Height
+                Depth = m_StoreyData.WallData.Height
             };
 
             return cornerData;

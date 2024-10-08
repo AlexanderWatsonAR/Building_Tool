@@ -189,6 +189,9 @@ public static class PolygonMaker
 
     public static Vector3[] WallCorner(float angle)
     {
+        if (angle == 90)
+            return Square(PivotPoint.BottomLeft, 1, 1);
+
         Vector3 line1Dir = Vector3.right;
         Vector3 line2Dir = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle), 0);
 
@@ -226,10 +229,10 @@ public static class PolygonMaker
 
         return new Vector3[]
         {
-                Vector3.zero,
-                line1Start,
-                intersection,
-                line2Start,
+            Vector3.zero,
+            line1Start,
+            intersection,
+            line2Start,
         };
     }
     

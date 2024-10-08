@@ -1,0 +1,12 @@
+Wall
+
+Wall can have a panel with entry points.
+Wall can also have a frame.
+Wall can have some kind of decorations
+
+
+Wall
+
+- Panel foldout
+- Frame drop down or foldout.
+- Decoration list

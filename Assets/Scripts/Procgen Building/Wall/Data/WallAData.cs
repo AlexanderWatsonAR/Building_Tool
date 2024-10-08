@@ -8,17 +8,21 @@ using OnlyInvalid.ProcGenBuilding.Corner;
 [System.Serializable]
 public class WallAData : Polygon3DAData
 {
-    #region Members
-    [SerializeField] float m_Height;
+    [SerializeField] OpeningDataList m_Openings;
+
+    #region Accessors
+    public OpeningDataList Openings => m_Openings;
     #endregion
 
+
     #region Constructors
-    public WallAData(Vector3 position, Vector3 eulerAngle, Vector3 scale, float height, float depth) : base(position, eulerAngle, scale, new Square(), null, depth)
+    public WallAData(Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, new Square(), null, 1)
     {
-        m_Height = height;
+        m_Openings = new OpeningDataList();
     }
     public WallAData (CornerData cornerA, CornerData cornerB)
     {
+        m_Openings = new OpeningDataList();
         m_ExteriorShape = new Square();
         m_InteriorShapes = null;
 
@@ -59,7 +63,7 @@ public class WallAData : Polygon3DAData
         m_Position = Vector3.Lerp(cornerAPoints[cornerAIndex], cornerBPoints[cornerBIndex], 0.5f) + (Vector3.up * 0.5f);
         m_EulerAngle = Quaternion.FromToRotation(Vector3.forward, forward).eulerAngles;
         m_Scale = new Vector3(length, 1);
-        m_Depth = cornerA.Scale.x;
+        m_Depth = cornerA.Scale.z;
 
     }
     #endregion

@@ -12,19 +12,18 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
     {
         #region Members
         [SerializeField, HideInInspector] int m_ID;
-        [SerializeField, HideInInspector] float m_Height;
         [SerializeField] CornerType m_Type;
-        [SerializeField, Range(3, 18)] int m_Sides;
+        [SerializeField] int m_Sides;
         [SerializeField] float m_Angle;
         [SerializeField] Vector3 m_Forward;
         #endregion
 
         #region Accessors
-        public int ID { get { return m_ID; } set { m_ID = value; } }
-        public float Height { get { return m_Height; } set { m_Height = value; } }
-        public CornerType Type { get { return m_Type; } set { m_Type = value; } }
-        public int Sides { get { return m_Sides; } set { m_Sides = value; } }
-        public float Angle => m_Angle;
+        public int ID { get => m_ID; set => m_ID = value; }
+        public CornerType Type { get => m_Type;  set => m_Type = value; }
+        public int Sides { get => m_Sides;  set => m_Sides = value; }
+        public float Angle { get => m_Angle; set => m_Angle = value; }
+        public Vector3 Forward { get => m_Forward; set => m_Forward = value; }
         public override Vector3 Normal()
         {
             return Vector3.up;
@@ -32,71 +31,22 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
         #endregion
 
         #region Constructors
-        public CornerData() : this(CornerType.Point, 90, 4, Vector3.forward, Vector3.zero, Vector3.zero, Vector3.zero)
+        public CornerData() : this(CornerType.Point, 90, 5, Vector3.forward, Vector3.zero, Vector3.zero, Vector3.zero)
         {
 
         }
-        public CornerData(CornerType type, float angle, float height, Vector3 forward, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, null, null, height)
+        public CornerData(CornerType type, float angle, int sides, Vector3 forward, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, null, null, 1)
         {
             m_Angle = angle;
             m_Forward = forward;
-            SetCornerType(type);
-
-
+            m_Type = type;
+            m_Sides = sides;
         }
-        public CornerData(CornerData data) : this(data.Type, data.Angle, data.Height, Vector3.forward, data.Position, data.EulerAngle, data.Scale)
+        public CornerData(CornerData data) : this(data.Type, data.Angle, data.Sides, data.Forward, data.Position, data.EulerAngle, data.Scale)
         {
 
         }
         #endregion
-
-
-        // Something to think about.
-        // What are the pros / cons of calculating the mesh shape in corner data vs corner buildable?
-        private void SetCornerType(CornerType type)
-        {
-            m_Type = type;
-
-            Vector3[] cornerPoints = PolygonMaker.WallCorner(m_Angle);
-
-            switch (m_Type)
-            {
-                case CornerType.Point:
-                    {
-                        m_ExteriorShape = new PathShape(cornerPoints);
-                    }
-                    break;
-                case CornerType.Round:
-                    {
-                        Vector3[] curveyPoints = Vector3Extensions.QuadraticLerpCollection(cornerPoints[^1], cornerPoints[0], cornerPoints[1], 8);
-
-                        List<Vector3> points = new List<Vector3>();
-                        points.Add(cornerPoints[2]);
-                        points.AddRange(curveyPoints);
-
-                        m_ExteriorShape = new PathShape(points);
-                    }
-                    break;
-                case CornerType.Flat:
-                    {
-                        m_ExteriorShape = new PathShape(cornerPoints[1], cornerPoints[2], cornerPoints[3]);
-                    }
-                    break;
-            }
-
-            m_Forward.Normalize();
-
-            Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
-
-            Matrix4x4 rotate = Matrix4x4.Rotate(upRotation);
-            Vector3 from = Vector3.zero.DirectionToTarget(cornerPoints[2]);
-
-            from = rotate.MultiplyPoint3x4(from);
-
-
-            Quaternion rotation = Quaternion.FromToRotation(from, m_Forward) * upRotation;
-            m_EulerAngle = rotation.eulerAngles;
-        }
 
         public override bool Equals(object obj)
         {

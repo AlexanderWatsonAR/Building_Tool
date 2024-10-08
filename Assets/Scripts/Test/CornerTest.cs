@@ -46,17 +46,15 @@ public class CornerTest : MonoBehaviour
             Vector3 dirA = positions[i].DirectionToTarget(positions[previous]);
             Vector3 dirB = positions[i].DirectionToTarget(positions[next]);
 
-            Vector3 forward = Vector3.Lerp(dirA, dirB, 0.5f);
+            Vector3 forward = Vector3.Lerp(dirA, dirB, 0.5f).normalized;
 
             float theta = Vector3.Angle(dirA, dirB);
-
-            //double thetaRad = Mathf.Deg2Rad * theta;
 
             bool isConvexPoint = concavePoints.Any(x => x == i);
 
             Vector3 to = concavePoints.Any(x => x == i) ? -forward : forward;
 
-            CornerData cornerData = new CornerData(CornerType.Point, theta, 1, to, positions[i], Vector3.zero, Vector3.one * 0.05f);
+            CornerData cornerData = new CornerData(CornerType.Point, theta, 5, to, positions[i], Vector3.zero, Vector3.one * 0.05f);
 
             Corner corner = cornerMesh.AddComponent<Corner>();
             corner.Initialize(cornerData);

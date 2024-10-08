@@ -6,43 +6,18 @@ using OnlyInvalid.ProcGenBuilding.Common;
 
 namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
-    public abstract class Polygon3D : Buildable
+    public abstract class Polygon3D : Polygon2D
     {
-        [SerializeField] protected ProBuilderMesh m_ProBuilderMesh;
-
         public Polygon3DAData Polygon3DData => m_Data as Polygon3DAData;
 
-        public override Buildable Initialize(DirtyData data)
-        {
-            m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-
-            AssignDefaultMaterial();
-
-            return base.Initialize(data);
-        }
-        private void AssignDefaultMaterial()
-        {
-            Renderer renderer = GetComponent<Renderer>();
-
-            if (renderer.sharedMaterials.Length == 1 && renderer.sharedMaterials[0] == null)
-            {
-                renderer.sharedMaterial = Rendering.BuiltInMaterials.Defualt;
-            }
-        }
         public override void Build()
         {
             if (!m_Data.IsDirty)
                 return;
 
-            IList<IList<Vector3>> holePoints = Polygon3DData.Holes;
-            m_ProBuilderMesh.CreateShapeFromPolygon(Polygon3DData.ControlPoints, Polygon3DData.Normal(), holePoints);
-            m_ProBuilderMesh.Solidify(Polygon3DData.Depth);
-            Polygon3DData.IsDirty = false;
-        }
+            base.Build();
 
-        public override void Demolish()
-        {
-            DestroyImmediate(gameObject);
+            m_ProBuilderMesh.Solidify(Polygon3DData.Depth);
         }
     }
 }

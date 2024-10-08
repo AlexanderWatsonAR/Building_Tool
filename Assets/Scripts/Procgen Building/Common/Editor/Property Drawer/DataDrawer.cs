@@ -29,7 +29,7 @@ public abstract class DataDrawer : PropertyDrawer
     protected abstract void Initialize(SerializedProperty data);
     protected abstract void DefineFields();
     protected abstract void BindFields();
-    protected abstract void RegisterValueChangeCallbacks();
+    protected virtual void RegisterValueChangeCallbacks() { }
     protected abstract void AddFieldsToRoot();
 
 }
