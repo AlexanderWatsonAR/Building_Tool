@@ -15,28 +15,28 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             if (!FrameData.IsDirty)
                 return;
 
-            FrameData.IsHoleDirty = true;
+            //FrameData.IsHoleDirty = true;
 
-            if(FrameData.IsHoleDirty)
-                CalculateInside();
+            //if(FrameData.IsHoleDirty)
+            //    CalculateInside();
 
             base.Build();
         }
 
         protected override void CalculateInside()
         {
-            FrameData.ClearInterior();
+            //    FrameData.ClearInterior();
 
-            Vector3[] controlPoints = FrameData.ExteriorShape.ControlPoints();
+            //    Vector3[] controlPoints = FrameData.ExteriorShape.ControlPoints();
 
-            Matrix4x4 scale = Matrix4x4.Scale(Vector3.one * FrameData.FrameScale);
+            //    Matrix4x4 scale = Matrix4x4.Scale(Vector3.one * FrameData.FrameScale);
 
-            for (int i = 0; i < controlPoints.Length; i++)
-            {
-                controlPoints[i] = scale.MultiplyPoint3x4(controlPoints[i]);
-            }
+            //    for (int i = 0; i < controlPoints.Length; i++)
+            //    {
+            //        controlPoints[i] = scale.MultiplyPoint3x4(controlPoints[i]);
+            //    }
 
-            FrameData.AddInteriorShape(new PathShape(controlPoints));
+            //    FrameData.AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one, new PathShape(controlPoints), null));
         }
     }
 }

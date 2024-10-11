@@ -186,7 +186,6 @@ public static class PolygonMaker
 
         return controlPoints.ToArray();
     }
-
     public static Vector3[] WallCorner(float angle)
     {
         if (angle == 90)
@@ -235,6 +234,5 @@ public static class PolygonMaker
             line2Start,
         };
     }
-    
-
+   
 }

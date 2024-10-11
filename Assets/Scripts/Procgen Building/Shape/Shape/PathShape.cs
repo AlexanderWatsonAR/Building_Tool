@@ -7,7 +7,6 @@ using UnityEngine;
 public class PathShape : Shape, IPolygon
 {
     [SerializeField] PlanarPath m_Path;
-
     public Path Path => m_Path;
 
     public PathShape()
@@ -19,7 +18,7 @@ public class PathShape : Shape, IPolygon
     /// Assumes points are on the XY plane.
     /// </summary>
     /// <param name="points"></param>
-    public PathShape(IEnumerable<Vector3> points) : this()
+    public PathShape(IEnumerable<Vector3> points, float minDistance = 0.001f) : this()
     {
         foreach (var point in points)
         {

@@ -22,11 +22,15 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         {
             m_FrameScale = scale;
             m_IsHoleDirty = false;
+
+            AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one * m_FrameScale, m_Shape, null));
         }
 
-        public FrameData(Shape exteriorShape, List<Shape> interiorShapes, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, exteriorShape, interiorShapes, depth)
+        public FrameData(Shape exteriorShape, List<Polygon2DData> interiorShapes, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, exteriorShape, interiorShapes, depth)
         {
             m_FrameScale = frameScale;
+
+            AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one * m_FrameScale, m_Shape, null));
         }
 
         public FrameData(FrameData data) : this(data.ExteriorShape, data.InteriorShapes, data.FrameScale, data.Depth, data.Position, data.EulerAngle, data.Scale)

@@ -4,27 +4,29 @@ using UnityEngine;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using OnlyInvalid.ProcGenBuilding.Wall;
 using OnlyInvalid.ProcGenBuilding.Corner;
+using Unity.VisualScripting;
+using UnityEngine.ProBuilder;
 
 [System.Serializable]
 public class WallAData : Polygon3DAData
 {
-    [SerializeField] OpeningDataList m_Openings;
-
     #region Accessors
-    public OpeningDataList Openings => m_Openings;
+    public List<OpeningAData> Openings => m_InteriorShapes.ConvertAll(x => x as OpeningAData);
     #endregion
 
 
     #region Constructors
     public WallAData(Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, new Square(), null, 1)
     {
-        m_Openings = new OpeningDataList();
     }
     public WallAData (CornerData cornerA, CornerData cornerB)
     {
-        m_Openings = new OpeningDataList();
-        m_ExteriorShape = new Square();
-        m_InteriorShapes = null;
+        m_Shape = new Square();
+        m_InteriorShapes = new List<Polygon2DData>();
+
+        OpeningAData opening = new OpeningAData(new Square(), Vector3.zero, Vector3.zero, Vector3.one * 0.5f);
+
+        m_InteriorShapes.Add(opening);
 
         Vector3[] cornerAPoints = cornerA.ControlPoints;
         Vector3[] cornerBPoints = cornerB.ControlPoints;
@@ -53,8 +55,6 @@ public class WallAData : Polygon3DAData
                     cornerBIndex = j;
 
                 length = distance < length ? distance : length;
-
- 
             }
         }
 
@@ -64,6 +64,24 @@ public class WallAData : Polygon3DAData
         m_EulerAngle = Quaternion.FromToRotation(Vector3.forward, forward).eulerAngles;
         m_Scale = new Vector3(length, 1);
         m_Depth = cornerA.Scale.z;
+
+        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
+        Frame frame = frameMesh.AddComponent<Frame>();
+
+        Vector3 pos = this.Position + opening.Position + Vector3.zero;
+        Vector3 eulerAngle = (this.Rotation * opening.Rotation * Quaternion.identity).eulerAngles;
+        Vector3 scale = Vector3.Scale(Vector3.Scale(this.Scale, opening.Scale), Vector3.one);
+
+        //frame.transform.position = pos;
+        //frame.transform.eulerAngles = eulerAngle;
+        //frame.transform.localScale = scale;
+
+        FrameData data = new FrameData(new Square(), new List<Polygon2DData>(), 0.95f, 0.05f, pos, eulerAngle, scale);
+        data.IsDirty = true;
+        frame.Initialize(data);
+
+        opening.Content = frame;
+
 
     }
     #endregion

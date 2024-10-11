@@ -26,7 +26,7 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
             {
                 case CornerType.Point:
                     {
-                        CornerData.SetExteriorShape(new PathShape(cornerPoints));
+                        CornerData.SetShape(new PathShape(cornerPoints));
                     }
                     break;
                 case CornerType.Round:
@@ -37,12 +37,12 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
                         points.Add(cornerPoints[2]);
                         points.AddRange(curveyPoints);
 
-                        CornerData.SetExteriorShape(new PathShape(points));
+                        CornerData.SetShape(new PathShape(points));
                     }
                     break;
                 case CornerType.Flat:
                     {
-                        CornerData.SetExteriorShape(new PathShape(cornerPoints[1], cornerPoints[2], cornerPoints[3]));
+                        CornerData.SetShape(new PathShape(cornerPoints[1], cornerPoints[2], cornerPoints[3]));
                     }
                     break;
             }

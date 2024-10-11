@@ -27,7 +27,6 @@ public class WallTest : MonoBehaviour
         }
 
         float height = 1;
-        float depth = 0.05f;
 
         for (int i = 0; i < positions.Length; i++)
         {
@@ -49,7 +48,7 @@ public class WallTest : MonoBehaviour
 
             Vector3 scale = new Vector3(distance, height);
 
-            WallAData wallData = new WallAData(position, rotation1.eulerAngles, scale, height, depth);
+            WallAData wallData = new WallAData(position, rotation1.eulerAngles, scale);
 
             WallA wall = wallMesh.AddComponent<WallA>();
             wall.Initialize(wallData);

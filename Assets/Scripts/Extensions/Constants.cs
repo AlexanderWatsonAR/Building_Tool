@@ -57,4 +57,5 @@ public static class Constants
     public const string Pane = "m_Pane";
     public const string LeftShutter = "m_LeftShutter";
     public const string RightShutter = "m_RightShutter";
+
 }

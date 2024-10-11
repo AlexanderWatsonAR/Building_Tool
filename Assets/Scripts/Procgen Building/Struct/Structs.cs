@@ -3,6 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+//public struct TransformData
+//{
+//    public Vector3 position, eulerAngle, scale;
+
+//    public TransformData(Vector3 position, Vector3 eulerAngle, Vector3 scale)
+//    {
+//        this.position = position;
+//        this.eulerAngle = eulerAngle;
+//        this.scale = scale;
+//    }
+//}
+
 [System.Serializable]
 public struct WallPoints
 {

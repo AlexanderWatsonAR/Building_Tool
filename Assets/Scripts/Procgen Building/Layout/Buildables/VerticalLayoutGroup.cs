@@ -21,7 +21,7 @@ namespace OnlyInvalid.ProcGenBuilding.Layout
                 Vector3[] controlPoints = polygons[i].ToArray();
 
 
-                LayoutGroupData.Polygons[i].Polygon3DData.SetExteriorShape(new PathShape(controlPoints));
+                LayoutGroupData.Polygons[i].Polygon3DData.SetShape(new PathShape(controlPoints));
                 //LayoutGroupData.Polygons[i].Polygon3DData.SetTransform()
                 LayoutGroupData.Polygons[i].Polygon3DData.IsDirty = true;
             }

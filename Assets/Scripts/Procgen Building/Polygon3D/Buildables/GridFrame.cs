@@ -32,7 +32,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             foreach (var square in split)
             {
-                GridFrameData.AddInteriorShape(new PathShape(square));
+                GridFrameData.AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one, new PathShape(square), null));
             }
 
             GridFrameData.IsHoleDirty = false;

@@ -17,11 +17,11 @@ public class Polygon3DAData : Polygon2DData, ICloneable
     #endregion
 
     #region Constructors
-    public Polygon3DAData() : base(Vector3.zero, Vector3.zero, Vector3.one, new Square(), new List<Shape>())
+    public Polygon3DAData() : base(Vector3.zero, Vector3.zero, Vector3.one, new Square(), new List<Polygon2DData>())
     {
         m_Depth = 1;
     }
-    public Polygon3DAData(Vector3 position, Vector3 eulerAngle, Vector3 scale, Shape exteriorShape, List<Shape> interiorShapes, float depth): base(position, eulerAngle, scale, exteriorShape, interiorShapes)
+    public Polygon3DAData(Vector3 position, Vector3 eulerAngle, Vector3 scale, Shape exteriorShape, List<Polygon2DData> interiorShapes, float depth): base(position, eulerAngle, scale, exteriorShape, interiorShapes)
     {
         m_Depth = depth;
     }
@@ -34,12 +34,12 @@ public class Polygon3DAData : Polygon2DData, ICloneable
     public object Clone()
     {
         Polygon3DAData clone = MemberwiseClone() as Polygon3DAData;
-        clone.SetExteriorShape(m_ExteriorShape);
+        clone.SetShape(m_Shape);
 
-        foreach(Shape shape in m_InteriorShapes)
-        {
-            clone.AddInteriorShape(shape);
-        }
+        //foreach(Shape shape in m_InteriorShapes)
+        //{
+        //    clone.AddToInterior(shape);
+        //}
 
         return clone;
     }

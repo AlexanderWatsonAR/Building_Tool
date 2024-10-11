@@ -126,7 +126,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             
             foreach(var hole in holePoints)
             {
-                SectionData.AddInteriorShape(new PathShape(hole));
+                SectionData.AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one, new PathShape(hole), null));
             }
         }
         private void BuildContent()

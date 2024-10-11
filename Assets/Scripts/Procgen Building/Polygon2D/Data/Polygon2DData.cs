@@ -9,22 +9,22 @@ public class Polygon2DData : DirtyData
 {
     #region Members
     [SerializeField] protected Vector3 m_Position, m_EulerAngle, m_Scale;
-    [SerializeReference] protected Shape m_ExteriorShape;
-    [SerializeReference] protected List<Shape> m_InteriorShapes;
+    [SerializeReference] protected Shape m_Shape;
+    [SerializeReference] protected List<Polygon2DData> m_InteriorShapes;
     #endregion
 
     #region Accessors
     public Vector3 Position => m_Position;
     public Vector3 EulerAngle => m_EulerAngle;
     public Vector3 Scale => m_Scale;
-    public Shape ExteriorShape => m_ExteriorShape;
-    public List<Shape> InteriorShapes => m_InteriorShapes;
-    public Vector3[] LocalControlPoints => m_ExteriorShape.ControlPoints();
+    public Shape ExteriorShape => m_Shape;
+    public List<Polygon2DData> InteriorShapes => m_InteriorShapes;
+    public Vector3[] LocalControlPoints => m_Shape.ControlPoints();
     public Vector3[] ControlPoints
     {
         get
         {
-            Vector3[] controlPoints = m_ExteriorShape.ControlPoints();
+            Vector3[] controlPoints = m_Shape.ControlPoints();
             Matrix4x4 trs = Matrix4x4.TRS(m_Position, Rotation, m_Scale);
 
             for (int i = 0; i < controlPoints.Length; i++)
@@ -35,7 +35,7 @@ public class Polygon2DData : DirtyData
             return controlPoints;
         }
     }
-    public IList<IList<Vector3>> LocalHoles => (IList<IList<Vector3>>)m_InteriorShapes.Select(hole => hole.ControlPoints().ToList());
+    public IList<IList<Vector3>> LocalHoles => (IList<IList<Vector3>>)m_InteriorShapes.Select(hole => hole.ControlPoints.ToList());
     public IList<IList<Vector3>> Holes
     {
         get
@@ -49,7 +49,7 @@ public class Polygon2DData : DirtyData
 
             foreach (var shape in m_InteriorShapes)
             {
-                IList<Vector3> hole = shape.ControlPoints();
+                IList<Vector3> hole = shape.ControlPoints;
 
                 for (int i = 0; i < hole.Count; i++)
                 {
@@ -73,18 +73,25 @@ public class Polygon2DData : DirtyData
             return Quaternion.Euler(m_EulerAngle);
         }
     }
+    public Matrix4x4 TRS
+    {
+        get
+        {
+            return Matrix4x4.TRS(m_Position, Rotation, m_Scale);
+        }
+    }
     #endregion
 
     #region Constructors
-    public Polygon2DData() : this(Vector3.zero, Vector3.zero, Vector3.one, new Square(), new List<Shape>())
+    public Polygon2DData() : this(Vector3.zero, Vector3.zero, Vector3.one, new Square(), new List<Polygon2DData>())
     {
     }
-    public Polygon2DData(Vector3 position, Vector3 eulerAngle, Vector3 scale, Shape exteriorShape, List<Shape> interiorShapes)
+    public Polygon2DData(Vector3 position, Vector3 eulerAngle, Vector3 scale, Shape exteriorShape, List<Polygon2DData> interiorShapes)
     {
         m_Position = position;
         m_EulerAngle = eulerAngle;
         m_Scale = scale;
-        m_ExteriorShape = exteriorShape;
+        m_Shape = exteriorShape;
         m_InteriorShapes = interiorShapes;
     }
     public Polygon2DData(Polygon3DAData data) : this(data.Position, data.EulerAngle, data.Scale, data.ExteriorShape, data.InteriorShapes)
@@ -94,17 +101,17 @@ public class Polygon2DData : DirtyData
     #endregion
 
     #region Other Functions
-    public void AddInteriorShape(Shape shape)
+    public void AddToInterior(Polygon2DData polygon)
     {
-        m_InteriorShapes.Add(shape);
+        m_InteriorShapes.Add(polygon);
     }
     public void ClearInterior()
     {
         m_InteriorShapes?.Clear();
     }
-    public void SetExteriorShape(Shape shape)
+    public void SetShape(Shape shape)
     {
-        m_ExteriorShape = shape;
+        m_Shape = shape;
     }
     public void SetTransform(Vector3 position, Vector3 eulerAngle, Vector3 scale)
     {

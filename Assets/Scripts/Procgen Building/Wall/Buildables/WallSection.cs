@@ -90,7 +90,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
                 FrameScale = insideScale,
                 Depth = depth
             };
-            frameData.SetExteriorShape(new PathShape(controlPoints));
+            frameData.SetShape(new PathShape(controlPoints));
             return frameData;
         }
         private IList<IList<Vector3>> CalculateDoorway(WallSectionData data)

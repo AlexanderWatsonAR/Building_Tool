@@ -35,7 +35,7 @@ public class AGrid : Polygon3DA
 
         foreach (var square in split)
         {
-            GridData.AddInteriorShape(new PathShape(square));
+            GridData.AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one, new PathShape(square), null));
         }
     }
 }

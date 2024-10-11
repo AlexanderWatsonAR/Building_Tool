@@ -19,7 +19,7 @@ namespace OnlyInvalid.ProcGenBuilding.Common
             m_Openings = new OpeningDataList();
         }
 
-        public SectionData(Shape exteriorShape, List<Shape> interiorShapes, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base (position, eulerAngle, scale, exteriorShape, interiorShapes, depth)
+        public SectionData(Shape exteriorShape, List<Polygon2DData> interiorShapes, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base (position, eulerAngle, scale, exteriorShape, interiorShapes, depth)
         {
 
         }

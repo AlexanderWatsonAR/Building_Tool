@@ -22,7 +22,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Columns = columns;
             m_Rows = rows;
         }
-        public GridFrameData(Shape exteriorShape, List<Shape> interiorShapes, int columns, int rows, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(exteriorShape, interiorShapes, frameScale, depth, position, eulerAngle, scale)
+        public GridFrameData(Shape exteriorShape, List<Polygon2DData> interiorShapes, int columns, int rows, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(exteriorShape, interiorShapes, frameScale, depth, position, eulerAngle, scale)
         {
             m_Columns = columns;
             m_Rows = rows;

@@ -117,25 +117,25 @@ namespace OnlyInvalid.ProcGenBuilding.Window
         private OuterFrameData CalculateOuterFrame()
         {
             OuterFrameData frameData = m_WindowData.OuterFrame.Clone() as OuterFrameData;
-            frameData.SetExteriorShape(new PathShape(m_WindowData.Polygon.ControlPoints));
+            frameData.SetShape(new PathShape(m_WindowData.Polygon.ControlPoints));
             frameData.IsDirty = true;
             return frameData;
         }
         private InnerFrameData CalculateInnerFrame()
         {
             InnerFrameData frameData = m_WindowData.InnerFrame.Clone() as InnerFrameData;
-            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints() : m_WindowData.Polygon.ControlPoints;
+            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
             Vector3 normal = m_WindowData.Polygon.Normal;
-            frameData.SetExteriorShape(new PathShape(controlPoints));
+            frameData.SetShape(new PathShape(controlPoints));
             frameData.IsDirty = true;
             return frameData;
         }
         private PaneData CalculatePane()
         {
             PaneData pane = m_WindowData.Pane.Clone() as PaneData;
-            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints() : m_WindowData.Polygon.ControlPoints;
+            Vector3[] controlPoints = m_WindowData.IsOuterFrameActive && m_OuterFrame != null ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
             Vector3 normal = m_WindowData.Polygon.Normal;
-            pane.SetExteriorShape(new PathShape(controlPoints));
+            pane.SetShape(new PathShape(controlPoints));
             pane.IsDirty = true;
             return pane;
         }
@@ -220,7 +220,7 @@ namespace OnlyInvalid.ProcGenBuilding.Window
 
             IList<IList<Vector3>> shutterControlPoints;
 
-            Vector3[] points = m_WindowData.IsOuterFrameActive ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints() : m_WindowData.Polygon.ControlPoints;
+            Vector3[] points = m_WindowData.IsOuterFrameActive ? m_OuterFrame.OuterFrameData.InteriorShapes[0].ControlPoints : m_WindowData.Polygon.ControlPoints;
 
             //float height = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Height : m_OuterFrame.OuterFrameData.Height;
             //float width = m_WindowData.IsOuterFrameActive ? m_InnerFrame.InnerFrameData.Width : m_OuterFrame.OuterFrameData.Width;

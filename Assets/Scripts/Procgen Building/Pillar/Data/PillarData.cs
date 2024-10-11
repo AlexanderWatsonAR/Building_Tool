@@ -25,7 +25,7 @@ namespace OnlyInvalid.ProcGenBuilding.Pillar
         #region Constructors
         public PillarData() : base()
         {
-            m_ExteriorShape = new NPolygon(4);
+            m_Shape = new NPolygon(4);
             m_InteriorShapes = null;
 
         }
