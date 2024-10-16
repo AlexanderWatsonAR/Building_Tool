@@ -10,7 +10,7 @@ public static class PolygonMaker
 {
     public enum PivotPoint
     {
-        Centre, BottomLeft
+        Centre, BottomLeft, BottomCentre
     }
 
     public static Vector3[] NPolygon(int sides, float width = 1, float height = 1)
@@ -54,6 +54,14 @@ public static class PolygonMaker
                     new Vector3(0, height),
                     new Vector3(width, height),
                     new Vector3(width, 0)
+                };
+            case PivotPoint.BottomCentre:
+                return new Vector3[]
+                {
+                    new Vector3(-hWidth, 0),
+                    new Vector3(-hWidth, height),
+                    new Vector3(hWidth, height),
+                    new Vector3(hWidth, 0)
                 };
         }
 
@@ -111,7 +119,7 @@ public static class PolygonMaker
         return new Vector3[]
         {
             new Vector3(0,0),
-            new Vector3(0,1),
+            new Vector3(0,0.75f),
             new Vector3(0.3333f, 1),
             new Vector3(0.3333f, 0.3333f),
             new Vector3(0.6666f, 0.3333f),
@@ -120,7 +128,6 @@ public static class PolygonMaker
             new Vector3(1, 0)
         };
     }
-
     public static Vector3[] RoundedSquare(float curveSize = 0.1f, int numberOfCurvePoints = 5, float height = 1, float width = 1)
     {
         Vector3[] controlPoints = MeshMaker.Square();
@@ -189,7 +196,7 @@ public static class PolygonMaker
     public static Vector3[] WallCorner(float angle)
     {
         if (angle == 90)
-            return Square(PivotPoint.BottomLeft, 1, 1);
+            return Square(PivotPoint.Centre, 1, 1);
 
         Vector3 line1Dir = Vector3.right;
         Vector3 line2Dir = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle), 0);
@@ -226,12 +233,14 @@ public static class PolygonMaker
             }
         }
 
+        Vector3 centre = Vector3.Lerp(Vector3.zero, intersection, 0.5f);
+
         return new Vector3[]
         {
-            Vector3.zero,
-            line1Start,
-            intersection,
-            line2Start,
+            Vector3.zero - centre,
+            line1Start - centre,
+            intersection - centre,
+            line2Start - centre,
         };
     }
    

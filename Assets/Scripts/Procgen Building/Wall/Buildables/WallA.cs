@@ -16,16 +16,16 @@ public class WallA : Polygon3D
 
         //WallAData.Openings[0].Content.Build();
 
-        if (WallAData.Openings == null)
-            return;
+        //if (WallAData.Openings == null)
+        //    return;
 
-        foreach (OpeningAData opening in WallAData.Openings)
-        {
-            if (opening.Content == null)
-                continue;
+        //foreach (OpeningAData opening in WallAData.Openings)
+        //{
+        //    if (opening.Content == null)
+        //        continue;
 
-            opening.Content.Build();
-        }
+        //    opening.Content.Build();
+        //}
     }
 
 }

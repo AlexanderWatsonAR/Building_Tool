@@ -1,0 +1,10 @@
+Polygon 2D Thoughts
+
+- Instead of having internal transform data, use the transform component.
+
+- None game objects, like openings, can store there own transform data.
+
+
+Wall
+
+- We want the closest distance between 2 corners.

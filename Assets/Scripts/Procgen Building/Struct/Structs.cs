@@ -15,6 +15,17 @@ using UnityEngine.UIElements;
 //    }
 //}
 
+//public struct Edge
+//{
+//    public Vector3 a, b;
+
+//    public Edge(Vector3 a, Vector3 b)
+//    {
+//        this.a = a;
+//        this.b = b;
+//    }
+//}
+
 [System.Serializable]
 public struct WallPoints
 {

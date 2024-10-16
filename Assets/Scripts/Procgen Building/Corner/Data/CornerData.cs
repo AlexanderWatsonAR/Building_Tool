@@ -31,18 +31,17 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
         #endregion
 
         #region Constructors
-        public CornerData() : this(CornerType.Point, 90, 5, Vector3.forward, Vector3.zero, Vector3.zero, Vector3.zero)
+        public CornerData() : this(CornerType.Point, 90, 5)
         {
 
         }
-        public CornerData(CornerType type, float angle, int sides, Vector3 forward, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, null, null, 1)
+        public CornerData(CornerType type, float angle, int sides) : base(Vector3.zero, Quaternion.FromToRotation(Vector3.forward, Vector3.up).eulerAngles, Vector3.one, null, null, 1)
         {
             m_Angle = angle;
-            m_Forward = forward;
             m_Type = type;
             m_Sides = sides;
         }
-        public CornerData(CornerData data) : this(data.Type, data.Angle, data.Sides, data.Forward, data.Position, data.EulerAngle, data.Scale)
+        public CornerData(CornerData data) : this(data.Type, data.Angle, data.Sides)
         {
 
         }

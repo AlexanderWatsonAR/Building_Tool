@@ -12,9 +12,123 @@ using ProMaths = UnityEngine.ProBuilder.Math;
 using OnlyInvalid.ProcGenBuilding.Common;
 using OnlyInvalid.ProcGenBuilding.Polygon3D;
 using UnityEditor;
+using UnityEngine.Experimental.AI;
 
 public static class Extensions
 {
+    public static float Diameter(this Polygon2D polygon)
+    {
+        Vector3[] controlPoints = polygon.Polygon2DData.ControlPoints;
+
+        controlPoints = controlPoints.ApplyTransform(polygon.transform).ToArray();
+
+        float diameter = 0;
+
+        for(int i = 0; i < controlPoints.Length -1; i++)
+        {
+            int next = i + 1;
+
+            float distance = Vector3.Distance(controlPoints[i], controlPoints[next]);
+            
+            diameter = distance > diameter ? distance : diameter;
+        }
+        
+        return diameter;
+    }
+
+    /// <summary>
+    /// Here the closest edge is measured by the mid point of each edge.
+    /// </summary>
+    /// <param name="polygon"></param>
+    /// <param name="other"></param>
+    /// <param name="edge1Start"></param>
+    /// <param name="edge1End"></param>
+    /// <param name="edge2Start"></param>
+    /// <param name="edge2End"></param>
+    public static void FindClosestEdge(this Polygon2D polygon, Polygon2D other, out Vector3 edge1Start, out Vector3 edge1End, out Vector3 edge2Start, out Vector3 edge2End)
+    {
+        edge1Start = Vector3.zero;
+        edge1End = Vector3.zero;
+        edge2Start = Vector3.zero;
+        edge2End = Vector3.zero;
+
+        Vector3[] controlPointsA = polygon.Polygon2DData.ControlPoints;
+        Vector3[] controlPointsB = other.Polygon2DData.ControlPoints;
+
+        controlPointsA = controlPointsA.ApplyTransform(polygon.transform).ToArray();
+        controlPointsB = controlPointsB.ApplyTransform(other.transform).ToArray();
+
+        float distance = float.MaxValue;
+
+        for(int i = 0; i < controlPointsA.Length; i++)
+        {
+            Vector3 line1Start = controlPointsA[i];
+            Vector3 line1End = controlPointsA[(i + 1) % controlPointsA.Length];
+            Vector3 line1Mid = Vector3.Lerp(line1Start, line1End, 0.5f);
+
+            for (int j = 0; j < controlPointsB.Length; j++)
+            {
+                Vector3 line2Start = controlPointsB[j];
+                Vector3 line2End = controlPointsB[(j + 1) % controlPointsB.Length];
+                Vector3 line2Mid = Vector3.Lerp(line2Start, line2End, 0.5f);
+
+                float d = Vector3.Distance(line1Mid, line2Mid);
+
+                if(d < distance)
+                {
+                    distance = d;
+
+                    edge1Start = line1Start;
+                    edge1End = line1End;
+                    edge2Start = line2Start;
+                    edge2End = line2End;
+                }
+            }
+        }
+    }
+
+    public static float FindClosestPoints(this Polygon2D polygon, Polygon2D other, out Vector3 pointA, out Vector3 pointB)
+    {
+        Vector3[] controlPointsA = polygon.Polygon2DData.ControlPoints;
+        Vector3[] controlPointsB = other.Polygon2DData.ControlPoints;
+
+        controlPointsA = controlPointsA.ApplyTransform(polygon.transform).ToArray();
+        controlPointsB = controlPointsB.ApplyTransform(other.transform).ToArray();
+
+        pointA = controlPointsA[0];
+        pointB = controlPointsB[0];
+
+        float distance = controlPointsA[0].DistanceToTarget(controlPointsB[0]);
+
+        for(int i = 0; i < controlPointsA.Length; i++)
+        {
+            for(int j = 0; j < controlPointsB.Length; j++)
+            {
+                float length = controlPointsA[i].DistanceToTarget(controlPointsB[j]);
+
+                if(length < distance)
+                {
+                    distance = length;
+                    pointA = controlPointsA[i];
+                    pointB = controlPointsB[j];
+                }
+            }
+        }
+
+        return distance;
+    }
+
+    public static IEnumerable<Vector3> ApplyTransform(this IEnumerable<Vector3> points, Transform t)
+    {
+        Matrix4x4 trs = Matrix4x4.TRS(t.position, t.rotation, t.localScale);
+
+        return points.Select(point => point = trs.MultiplyPoint3x4(point));
+    }
+    public static IEnumerable<Vector3> ApplyTransform(this IEnumerable<Vector3> points, Matrix4x4 matrix)
+    {
+        return points.Select(point => point = matrix.MultiplyPoint3x4(point));
+    }
+
     /// <summary>
     /// Deselects the selected game object then re-selects it.
     /// </summary>

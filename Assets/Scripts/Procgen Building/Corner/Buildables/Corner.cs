@@ -47,16 +47,16 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
                     break;
             }
 
-            Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
+            //Quaternion upRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.up);
 
-            Matrix4x4 rotate = Matrix4x4.Rotate(upRotation);
-            Vector3 from = Vector3.zero.DirectionToTarget(cornerPoints[2]);
+            //Matrix4x4 rotate = Matrix4x4.Rotate(upRotation);
+            //Vector3 from = Vector3.zero.DirectionToTarget(cornerPoints[2]);
 
-            from = rotate.MultiplyPoint3x4(from);
+            //from = rotate.MultiplyPoint3x4(from);
 
-            Quaternion rotation = Quaternion.FromToRotation(from, CornerData.Forward) * upRotation;
+            //Quaternion rotation = Quaternion.FromToRotation(from, CornerData.Forward) * upRotation;
 
-            CornerData.SetTransform(CornerData.Position, rotation.eulerAngles, CornerData.Scale);
+            //CornerData.SetTransform(CornerData.Position, rotation.eulerAngles, CornerData.Scale);
 
             base.Build();
         }

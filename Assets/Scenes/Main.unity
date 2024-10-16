@@ -811,6 +811,9 @@ MonoBehaviour:
           OnPointMoved:
             m_PersistentCalls:
               m_Calls: []
+    - rid: 1524811878072320000
+      type: {class: Square, ns: , asm: Assembly-CSharp}
+      data: 
     - rid: 3144867378852528147
       type: {class: AGridData, ns: , asm: Assembly-CSharp}
       data:
@@ -818,8 +821,8 @@ MonoBehaviour:
         m_Position: {x: 0, y: 0, z: 0}
         m_EulerAngle: {x: 0, y: 0, z: 0}
         m_Scale: {x: 1, y: 1, z: 0}
-        m_ExteriorShape:
-          rid: 3144867378852528148
+        m_Shape:
+          rid: 1524811878072320000
         m_InteriorShapes:
         - rid: 1524811579608268800
         - rid: 1524811579608268801
@@ -844,9 +847,6 @@ MonoBehaviour:
         m_Depth: 1
         m_Dimensions: {x: 5, y: 4}
         m_GridScale: {x: 0.65, y: 0.86}
-    - rid: 3144867378852528148
-      type: {class: Square, ns: , asm: Assembly-CSharp}
-      data: 
 --- !u!33 &374569369
 MeshFilter:
   m_ObjectHideFlags: 10

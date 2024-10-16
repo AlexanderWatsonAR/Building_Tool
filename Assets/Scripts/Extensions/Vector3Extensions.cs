@@ -89,11 +89,6 @@ public static class Vector3Extensions
         return result.ToArray();
     }
 
-    public static IEnumerable<Vector3> ApplyTransform(this IEnumerable<Vector3> points, Matrix4x4 matrix)
-    {
-        return points.Select(point => point = matrix.MultiplyPoint3x4(point));
-    }
-
     public static Vector3[] Curve(int numberOfPoints)
     {
         return QuadraticLerpCollection(Vector3.zero, Vector3.right, Vector3.right + Vector3.up, numberOfPoints);

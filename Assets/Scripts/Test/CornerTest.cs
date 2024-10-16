@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.ProBuilder;
+using UnityEngine.ProBuilder.MeshOperations;
 using OnlyInvalid.ProcGenBuilding.Pillar;
 using Unity.VisualScripting;
 using OnlyInvalid.ProcGenBuilding.Corner;
@@ -22,7 +23,7 @@ public class CornerTest : MonoBehaviour
         System.Array.Copy(m_Polygon, positions, m_Polygon.Length);
 
         Matrix4x4 rotation = Matrix4x4.Rotate(Quaternion.FromToRotation(Vector3.forward, Vector3.up));
-        Matrix4x4 scale = Matrix4x4.Scale(Vector3.one * 3);
+        Matrix4x4 scale = Matrix4x4.Scale(Vector3.one);
 
         Matrix4x4 rs = rotation * scale;
 
@@ -54,29 +55,57 @@ public class CornerTest : MonoBehaviour
 
             Vector3 to = concavePoints.Any(x => x == i) ? -forward : forward;
 
-            CornerData cornerData = new CornerData(CornerType.Point, theta, 5, to, positions[i], Vector3.zero, Vector3.one * 0.05f);
+            CornerData cornerData = new CornerData(CornerType.Point, theta, 5);
 
             Corner corner = cornerMesh.AddComponent<Corner>();
+
+            Vector3 dirC = positions[i].DirectionToTarget(positions[previous]);
+            Vector3 dirD = positions[i].DirectionToTarget(positions[next]);
+
+            corner.transform.position = positions[i];
+            corner.transform.right = isConvexPoint ? dirD : dirC;
+            corner.transform.localScale = new Vector3(0.05f, 1, 0.05f);
+
             corner.Initialize(cornerData);
             corner.Polygon3DData.IsDirty = true;
             corner.Build();
             corners.Add(corner);
         }
 
-        for(int i = 0; i < corners.Count; i++)
+        for (int i = 0; i < corners.Count; i++)
         {
             ProBuilderMesh wallMesh = ProBuilderMesh.Create();
             wallMesh.name = "Wall " + i.ToString();
 
             int next = positions.GetNextControlPoint(i);
 
-            WallAData wallData = new WallAData(corners[i].CornerData, corners[next].CornerData);
+            Extensions.FindClosestEdge(corners[i], corners[next], out Vector3 line1Start, out Vector3 line1End, out Vector3 line2Start, out Vector3 line2End);           
+
+            Vector3 start = Vector3.Lerp(line1Start, line1End, 0.5f);
+            Vector3 end = Vector3.Lerp(line2Start, line2End, 0.5f);
+
+            Vector3 dir = start.DirectionToTarget(end);
+            float dis = start.DistanceToTarget(end);
+
+            Vector3 wallFaceNormal = Vector3.Cross(dir, Vector3.up);
+
+            start += -wallFaceNormal * (Vector3.Distance(line1Start, line1End) * 0.5f);
+            end += -wallFaceNormal * (Vector3.Distance(line2Start, line2End) * 0.5f);
+
+            Vector3 pos = Vector3.Lerp(start, end, 0.5f);
+
+            WallAData wallData = new WallAData();
 
             WallA wall = wallMesh.AddComponent<WallA>();
+
             wall.Initialize(wallData);
             wall.WallAData.IsDirty = true;
             wall.Build();
-            
+
+            wall.transform.right = dir;
+            wall.transform.localScale = new Vector3(dis, 1, 0.05f);
+            wall.transform.position = pos;
+
         }
 
     }
