@@ -32,9 +32,19 @@ public class CornerTest : MonoBehaviour
             positions[i] = rs.MultiplyPoint3x4(positions[i]);
         }
 
+        Vector3 centroid = positions.Average();
+
         int[] concavePoints = PolygonRecognition.GetConcaveIndexPoints(positions);
 
-        List<Corner> corners = new List<Corner>();
+        List<Corner> cornersList = new List<Corner>();
+
+        GameObject storey = new GameObject("Storey");
+        storey.transform.position = centroid;
+        GameObject corners = new GameObject("Corners");
+        corners.transform.SetParent(storey.transform, false);
+        GameObject walls = new GameObject("Walls");
+        walls.transform.SetParent(storey.transform, false);
+
 
         for (int i = 0; i < positions.Length; i++)
         {
@@ -69,17 +79,21 @@ public class CornerTest : MonoBehaviour
             corner.Initialize(cornerData);
             corner.Polygon3DData.IsDirty = true;
             corner.Build();
-            corners.Add(corner);
+            cornersList.Add(corner);
+
+            corner.transform.SetParent(corners.transform, true);
         }
 
-        for (int i = 0; i < corners.Count; i++)
+        
+
+        for (int i = 0; i < cornersList.Count; i++)
         {
             ProBuilderMesh wallMesh = ProBuilderMesh.Create();
             wallMesh.name = "Wall " + i.ToString();
 
             int next = positions.GetNextControlPoint(i);
 
-            Extensions.FindClosestEdge(corners[i], corners[next], out Vector3 line1Start, out Vector3 line1End, out Vector3 line2Start, out Vector3 line2End);           
+            Extensions.FindClosestEdge(cornersList[i], cornersList[next], out Vector3 line1Start, out Vector3 line1End, out Vector3 line2Start, out Vector3 line2End);           
 
             Vector3 start = Vector3.Lerp(line1Start, line1End, 0.5f);
             Vector3 end = Vector3.Lerp(line2Start, line2End, 0.5f);
@@ -87,24 +101,23 @@ public class CornerTest : MonoBehaviour
             Vector3 dir = start.DirectionToTarget(end);
             float dis = start.DistanceToTarget(end);
 
-            Vector3 wallFaceNormal = Vector3.Cross(dir, Vector3.up);
+            wallMesh.transform.right = -dir;
+            Vector3 wallFaceNormal = wallMesh.transform.forward;
+            float depth = Vector3.Distance(line1Start, line1End);
+            float hDepth = depth * 0.5f;
 
-            start += -wallFaceNormal * (Vector3.Distance(line1Start, line1End) * 0.5f);
-            end += -wallFaceNormal * (Vector3.Distance(line2Start, line2End) * 0.5f);
-
-            Vector3 pos = Vector3.Lerp(start, end, 0.5f);
+            Vector3 pos = Vector3.Lerp(start, end, 0.5f) + (-wallFaceNormal * hDepth);
 
             WallAData wallData = new WallAData();
 
             WallA wall = wallMesh.AddComponent<WallA>();
-
             wall.Initialize(wallData);
             wall.WallAData.IsDirty = true;
             wall.Build();
 
-            wall.transform.right = dir;
             wall.transform.localScale = new Vector3(dis, 1, 0.05f);
             wall.transform.position = pos;
+            wall.transform.SetParent(walls.transform, true);
 
         }
 
@@ -123,8 +136,6 @@ public class CornerTest : MonoBehaviour
         for (int i = 0; i < positions.Length; i++)
         {
             positions[i] = rotation.MultiplyPoint3x4(positions[i]);
-
-
         }
 
         //for(int i = 0; i < positions.Length; i++)

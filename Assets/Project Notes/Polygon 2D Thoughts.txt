@@ -8,3 +8,8 @@ Polygon 2D Thoughts
 Wall
 
 - We want the closest distance between 2 corners.
+
+
+Wall & corner are using transformation component.
+
+Con - Inside of the Polygon2D data class we don't have access to the corner transformation component

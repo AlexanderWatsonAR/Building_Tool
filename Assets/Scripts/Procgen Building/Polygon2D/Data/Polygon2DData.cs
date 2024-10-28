@@ -19,6 +19,15 @@ public class Polygon2DData : DirtyData
     public Vector3 Scale => m_Scale;
     public Shape ExteriorShape => m_Shape;
     public List<Polygon2DData> InteriorShapes => m_InteriorShapes;
+    public bool HasInterior 
+    {
+        get
+        {
+            if (m_InteriorShapes == null || m_InteriorShapes.Count == 0)
+                return false;
+            return true;
+        }
+    }
     public Vector3[] LocalControlPoints => m_Shape.ControlPoints();
     public Vector3[] ControlPoints
     {

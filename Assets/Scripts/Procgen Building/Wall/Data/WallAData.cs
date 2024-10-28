@@ -15,7 +15,7 @@ public class WallAData : Polygon3DAData
 
     public override Vector3 Normal()
     {
-        return Vector3.up;
+        return Vector3.forward;
     }
 
     #endregion
@@ -27,6 +27,19 @@ public class WallAData : Polygon3DAData
 
         OpeningAData opening = new OpeningAData(new Square(), Vector3.up * 0.5f, Vector3.zero, Vector3.one * 0.5f);
 
+        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
+        Frame frame = frameMesh.AddComponent<Frame>();
+
+        //Vector3 pos = this.Position + opening.Position + Vector3.zero;
+        //Vector3 eulerAngle = (this.Rotation * opening.Rotation * Quaternion.identity).eulerAngles;
+        //Vector3 scale = Vector3.Scale(Vector3.Scale(this.Scale, opening.Scale), Vector3.one);
+
+        FrameData data = new FrameData(new Square(), new List<Polygon2DData>(), 0.95f, 0.05f, Vector3.zero, Vector3.zero, Vector3.one);
+        data.IsDirty = true;
+        frame.Initialize(data);
+
+        opening.SetContent(frame);
+
         m_InteriorShapes.Add(opening);
 
     }
@@ -35,6 +48,9 @@ public class WallAData : Polygon3DAData
     }
     public WallAData (CornerData cornerA, CornerData cornerB)
     {
+        // TODO: FIX or remove.
+        // this doesn't take into account the transform component of cornerdata.
+
         m_Shape = new Square();
         m_InteriorShapes = new List<Polygon2DData>();
 

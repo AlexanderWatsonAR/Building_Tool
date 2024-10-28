@@ -10,18 +10,18 @@ using System;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    [CustomEditor(typeof(Buildable), editorForChildClasses : true)]
+    [CustomEditor(typeof(Buildable), editorForChildClasses : true), CanEditMultipleObjects]
     public class BuildableEditor : Editor
     {
-        protected SerializedProperty m_Data;
+        //protected SerializedProperty m_Data;
         protected VisualElement m_Root;
+        protected SerializedProperty m_Data => serializedObject.FindProperty("m_Data");
 
         public override VisualElement CreateInspectorGUI()
         {
-            m_Root = new VisualElement();
             serializedObject.Update();
 
-            m_Data = serializedObject.FindProperty("m_Data");
+            m_Root = new VisualElement();
 
             PropertyField dataField = new PropertyField(m_Data);
             dataField.BindProperty(m_Data);
@@ -49,8 +49,19 @@ namespace OnlyInvalid.ProcGenBuilding.Common
         }
         private void Build()
         {
-            Buildable buildable = target as Buildable;
-            buildable.Build();
+            if(serializedObject.isEditingMultipleObjects)
+            {
+                foreach(Buildable b in targets)
+                {
+                    b.Build();
+                }
+            }    
+            else
+            {
+                Buildable buildable = target as Buildable;
+                buildable.Build();
+            }
+
         }
 
     }

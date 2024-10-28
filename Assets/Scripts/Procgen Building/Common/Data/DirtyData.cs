@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace OnlyInvalid.ProcGenBuilding.Common
 {
-    [System.Serializable]
+    [Serializable]
     public class DirtyData
     {
         [SerializeField] bool m_IsDirty;

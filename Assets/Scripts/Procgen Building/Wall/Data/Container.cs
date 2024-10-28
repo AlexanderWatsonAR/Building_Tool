@@ -1,4 +1,5 @@
 ﻿using OnlyInvalid.ProcGenBuilding.Polygon3D;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class Container : Polygon2DData
     #endregion
 
     #region Accessors
-    public Polygon2D Content { get => m_Content; set => m_Content = value; }
+    public Polygon2D Content { get => m_Content;}
     #endregion
 
     #region Constructors
@@ -26,4 +27,13 @@ public class Container : Polygon2DData
     }
     #endregion
 
+    public void SetContent(Polygon2D content)
+    {
+        m_Content = content;
+        m_Content.Polygon2DData.SetShape(this.ExteriorShape);
+        m_Content.transform.localPosition = this.Position;
+        m_Content.transform.localEulerAngles = this.m_EulerAngle;
+        m_Content.transform.localScale = new Vector3(this.m_Scale.x, this.Scale.y, 1);
+       // m_Content.Polygon2DData.SetTransform(this.Position, this.EulerAngle, this.Scale);
+    }
 }

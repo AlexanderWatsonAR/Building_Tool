@@ -15,7 +15,6 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
         [SerializeField] CornerType m_Type;
         [SerializeField] int m_Sides;
         [SerializeField] float m_Angle;
-        [SerializeField] Vector3 m_Forward;
         #endregion
 
         #region Accessors
@@ -23,7 +22,6 @@ namespace OnlyInvalid.ProcGenBuilding.Corner
         public CornerType Type { get => m_Type;  set => m_Type = value; }
         public int Sides { get => m_Sides;  set => m_Sides = value; }
         public float Angle { get => m_Angle; set => m_Angle = value; }
-        public Vector3 Forward { get => m_Forward; set => m_Forward = value; }
         public override Vector3 Normal()
         {
             return Vector3.up;

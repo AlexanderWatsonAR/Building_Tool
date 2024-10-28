@@ -52,6 +52,7 @@ public static class ProBuilderExtensions
     public static void Solidify(this ProBuilderMesh polygon, float extrude = 1)
     {
         ProBuilderMesh lid = UnityEngine.Object.Instantiate(polygon);
+        lid.transform.SetParent(polygon.transform.parent, false);
         lid.faces[0].Reverse();
         polygon.Extrude(polygon.faces, ExtrudeMethod.FaceNormal, extrude);
         polygon.ToMesh();

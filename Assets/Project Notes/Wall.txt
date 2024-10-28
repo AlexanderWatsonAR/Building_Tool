@@ -11,4 +11,6 @@ Wall
 - Frame drop down or foldout.
 - Decoration list
 
+wall transform point should be on the inside of the polygon, not the outside.
+
 
