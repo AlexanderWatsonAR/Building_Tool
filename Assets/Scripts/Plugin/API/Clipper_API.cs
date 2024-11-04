@@ -15,10 +15,19 @@ namespace OnlyInvalid.Polygon.Clipper_API
     public static class Clipper
     {
         #region Intersection
+        public static IList<IList<Vector3>> Split(this IEnumerable<Vector3> polygon, int columns, int rows, float scaler)
+        {
+            scaler = Mathf.Clamp(scaler, 0, 0.9999f);
 
+            return Split(polygon, columns, rows, new Vector2(scaler, scaler));
+        }
+        public static IList<IList<Vector3>> Split(this IEnumerable<Vector3> polygon, int columns, int rows, Vector3 scale)
+        {
+            return Split(polygon, columns, rows, new Vector2(Mathf.Clamp(scale.x, 0, 0.9999f), Mathf.Clamp(scale.y, 0, 0.9999f)));
+        }
         public static IList<IList<Vector3>> Split(this IEnumerable<Vector3> polygon, int columns, int rows, Vector2 scale)
         {
-            return Split(polygon, new Vector2Int(columns, rows), scale);
+            return Split(polygon, new Vector2Int(columns, rows), new Vector2(Mathf.Clamp(scale.x, 0, 0.9999f), Mathf.Clamp(scale.y, 0, 0.9999f)));
         }
         /// <summary>
         /// Applys a square grid intersection to a polygon
@@ -29,6 +38,8 @@ namespace OnlyInvalid.Polygon.Clipper_API
         /// <returns></returns>
         public static IList<IList<Vector3>> Split(this IEnumerable<Vector3> polygon, Vector2Int dimensions, Vector2 scale)
         {
+            scale = new Vector2(Mathf.Clamp(scale.x, 0, 0.9999f), Mathf.Clamp(scale.y, 0, 0.9999f));
+
             IList<Vector3[]> grid = PolygonMaker.Grid(dimensions);
 
             foreach (var square in grid)

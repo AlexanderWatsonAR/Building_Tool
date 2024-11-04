@@ -12,40 +12,6 @@ public class WallA : Polygon3D
 {
     public WallAData WallAData => m_Data as WallAData;
 
-    public override Buildable Initialize(DirtyData data)
-    {
-        base.Initialize(data);
-
-        //OpeningAData opening = new OpeningAData(new Square(PolygonMaker.PivotPoint.BottomCentre), Vector3.up * 0.25f, Vector3.zero, Vector3.one * 0.5f);
-
-        //ProBuilderMesh frameMesh = ProBuilderMesh.Create();
-        //Frame frame = frameMesh.AddComponent<Frame>();
-        //frame.transform.SetParent(transform, false);
-        //FrameData frameData = new FrameData(new Square(), new List<Polygon2DData>(), 0.95f, 0.05f, Vector3.zero, Vector3.zero, Vector3.one);
-        //frame.Initialize(frameData);
-        //frame.FrameData.IsDirty = true;
-        //frame.Build();
-
-
-
-
-        //Vector3 pos = this.Position + opening.Position + Vector3.zero;
-        //Vector3 eulerAngle = (this.Rotation * opening.Rotation * Quaternion.identity).eulerAngles;
-        //Vector3 scale = Vector3.Scale(Vector3.Scale(this.Scale, opening.Scale), Vector3.one);
-
-        //frame.transform.SetParent()
-
-        //FrameData data = new FrameData(new Square(), new List<Polygon2DData>(), 0.95f, 0.05f, pos, eulerAngle, scale);
-        //data.IsDirty = true;
-        //frame.Initialize(data);
-
-        //opening.Content = frame;
-
-        //WallAData.AddToInterior(opening);
-
-        return this;
-    }
-
     public override void Build()
     {
         if (!WallAData.IsDirty)

@@ -25,23 +25,6 @@ public class WallAData : Polygon3DAData
     {
         m_InteriorShapes = new List<Polygon2DData>();
 
-        OpeningAData opening = new OpeningAData(new Square(), Vector3.up * 0.5f, Vector3.zero, Vector3.one * 0.5f);
-
-        ProBuilderMesh frameMesh = ProBuilderMesh.Create();
-        Frame frame = frameMesh.AddComponent<Frame>();
-
-        //Vector3 pos = this.Position + opening.Position + Vector3.zero;
-        //Vector3 eulerAngle = (this.Rotation * opening.Rotation * Quaternion.identity).eulerAngles;
-        //Vector3 scale = Vector3.Scale(Vector3.Scale(this.Scale, opening.Scale), Vector3.one);
-
-        FrameData data = new FrameData(new Square(), new List<Polygon2DData>(), 0.95f, 0.05f, Vector3.zero, Vector3.zero, Vector3.one);
-        data.IsDirty = true;
-        frame.Initialize(data);
-
-        opening.SetContent(frame);
-
-        m_InteriorShapes.Add(opening);
-
     }
     public WallAData(Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(position, eulerAngle, scale, new Square(PolygonMaker.PivotPoint.BottomCentre), null, 1)
     {

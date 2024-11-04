@@ -7,6 +7,5 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 {
     public abstract class BaseFrame : Polygon3D
     {
-        protected abstract void CalculateInside();
     }
 }

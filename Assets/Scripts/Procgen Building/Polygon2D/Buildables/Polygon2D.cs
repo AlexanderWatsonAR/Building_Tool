@@ -13,9 +13,6 @@ public abstract class Polygon2D : Buildable
     public override Buildable Initialize(DirtyData data)
     {
         m_ProBuilderMesh = GetComponent<ProBuilderMesh>();
-        //m_ProBuilderMesh.transform.position = Polygon2DData.Position;
-        //m_ProBuilderMesh.transform.eulerAngles = Polygon2DData.EulerAngle;
-        //m_ProBuilderMesh.transform.localScale = Polygon2DData.Scale;
 
         AssignDefaultMaterial();
 

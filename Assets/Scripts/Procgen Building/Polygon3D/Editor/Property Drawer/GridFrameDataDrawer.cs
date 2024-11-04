@@ -55,22 +55,22 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 showInputField = displayData.Scale.showInputField,
                 inverted = displayData.Scale.inverted
             };
-            m_Depth = new Slider()
-            {
-                label = displayData.Depth.label,
-                lowValue = displayData.Depth.range.lower,
-                highValue = displayData.Depth.range.upper,
-                direction = displayData.Depth.direction,
-                showInputField = displayData.Depth.showInputField,
-                inverted = displayData.Depth.inverted
-            };
+            //m_Depth = new Slider()
+            //{
+            //    label = displayData.Depth.label,
+            //    lowValue = displayData.Depth.range.lower,
+            //    highValue = displayData.Depth.range.upper,
+            //    direction = displayData.Depth.direction,
+            //    showInputField = displayData.Depth.showInputField,
+            //    inverted = displayData.Depth.inverted
+            //};
         }
         protected override void BindFields()
         {
             m_Columns.BindProperty(m_Props.Columns);
             m_Rows.BindProperty(m_Props.Rows);
-            m_Depth.BindProperty(m_Props.Depth);
-            m_Scale.BindProperty(m_Props.Scale);
+            //m_Depth.BindProperty(m_Props.Depth);
+            m_Scale.BindProperty(m_Props.InsideScale);
         }
 
         protected override void RegisterValueChangeCallbacks()
@@ -82,7 +82,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Grid.Add(m_Rows);
             m_Root.Add(m_Grid);
             m_Root.Add(m_Scale);
-            m_Root.Add(m_Depth);
+            //m_Root.Add(m_Depth);
         }
 
     }

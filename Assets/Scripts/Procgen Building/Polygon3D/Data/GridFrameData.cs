@@ -8,12 +8,17 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     [System.Serializable]
     public class GridFrameData : FrameData
     {
-        [SerializeField, Range(1, 5)] int m_Columns, m_Rows;
+        #region Members
+        [SerializeField] int m_Columns, m_Rows;
+        #endregion
 
+        #region Accessors
         public int Columns { get { return m_Columns; } set { m_Columns = value; } }
         public int Rows { get { return m_Rows; } set { m_Rows = value; } }
+        #endregion
 
-        public GridFrameData() : this(1, 1)
+        #region Constructors
+        public GridFrameData() : this(2, 2, 0.95f)
         {
 
         }
@@ -22,16 +27,21 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             m_Columns = columns;
             m_Rows = rows;
         }
+        public GridFrameData(int columns, int rows, float insideScale) : this(columns, rows)
+        {
+            m_InsideScale = insideScale;
+        }
         public GridFrameData(Shape exteriorShape, List<Polygon2DData> interiorShapes, int columns, int rows, float frameScale, float depth, Vector3 position, Vector3 eulerAngle, Vector3 scale) : base(exteriorShape, interiorShapes, frameScale, depth, position, eulerAngle, scale)
         {
             m_Columns = columns;
             m_Rows = rows;
         }
-        public GridFrameData(GridFrameData data) : this(data.ExteriorShape, data.InteriorShapes, data.Columns, data.Rows, data.FrameScale, data.Depth, data.Position, data.EulerAngle, data.Scale)
+        public GridFrameData(GridFrameData data) : this(data.ExteriorShape, data.InteriorShapes, data.Columns, data.Rows, data.InsideScale, data.Depth, data.Position, data.EulerAngle, data.Scale)
         {
-            int a = DisplayDataSettings.Data.NPolygon.Sides.range.lower ;
         }
+        #endregion
 
+        #region Overrides
         public override bool Equals(object obj)
         {
             GridFrameData other = obj as GridFrameData;
@@ -48,11 +58,11 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
 
             return false;
         }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
+        #endregion
 
     }
 }

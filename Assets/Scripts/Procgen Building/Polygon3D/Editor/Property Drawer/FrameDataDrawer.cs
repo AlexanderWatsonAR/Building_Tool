@@ -12,7 +12,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
     public class FrameDataDrawer : DataDrawer
     {
         FrameDataSerializedProperties m_Props;
-        Slider m_Depth, m_Scale;
+        Slider /*m_Depth,*/ m_InsideScale;
 
         protected override void Initialize(SerializedProperty data)
         {
@@ -22,7 +22,7 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
         {
             var displayData = DisplayDataSettings.Data.Frame;
 
-            m_Scale = new Slider() 
+            m_InsideScale = new Slider() 
             {
                 label = displayData.Scale.label,
                 lowValue = displayData.Scale.range.lower,
@@ -31,28 +31,28 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
                 showInputField = displayData.Scale.showInputField,
                 inverted = displayData.Scale.inverted
             };
-            m_Depth = new Slider()
-            {
-                label = displayData.Depth.label,
-                lowValue = displayData.Depth.range.lower,
-                highValue = displayData.Depth.range.upper,
-                direction = displayData.Depth.direction,
-                showInputField = displayData.Depth.showInputField,
-                inverted = displayData.Depth.inverted
-            };
+            //m_Depth = new Slider()
+            //{
+            //    label = displayData.Depth.label,
+            //    lowValue = displayData.Depth.range.lower,
+            //    highValue = displayData.Depth.range.upper,
+            //    direction = displayData.Depth.direction,
+            //    showInputField = displayData.Depth.showInputField,
+            //    inverted = displayData.Depth.inverted
+            //};
         }
         protected override void BindFields()
         {
-            m_Scale.BindProperty(m_Props.Scale);
-            m_Depth.BindProperty(m_Props.Depth);
+            m_InsideScale.BindProperty(m_Props.InsideScale);
+           // m_Depth.BindProperty(m_Props.Depth);
         }
         protected override void RegisterValueChangeCallbacks()
         {
         }
         protected override void AddFieldsToRoot()
         {
-            m_Root.Add(m_Scale);
-            m_Root.Add(m_Depth);
+            m_Root.Add(m_InsideScale);
+            //m_Root.Add(m_Depth);
         }
 
     }

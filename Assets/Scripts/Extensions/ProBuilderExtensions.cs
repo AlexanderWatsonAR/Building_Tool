@@ -67,27 +67,36 @@ public static class ProBuilderExtensions
         return proBuilderMesh.CreateShapeFromPolygon(controlPoints.GetPositions(), extrude, flipNormals);
     }
 
-    public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IList<Vector3> points, Vector3 normal, IList<IList<Vector3>> holePoints = null)
+    public static ActionResult CreateShapeFromPolygon(this ProBuilderMesh proBuilderMesh, IList<Vector3> controlPoints, Vector3? normal = null, IList<IList<Vector3>> holes = null)
     {
        if (proBuilderMesh == null)
             throw new NullReferenceException();
 
+        Vector3 forward = normal.HasValue ? normal.Value : Vector3.forward;
+
         ActionResult result = ActionResult.NoSelection;
 
-        if (holePoints != null && holePoints.Count > 0)
+        if (holes != null && holes.Count > 0)
         {
-            result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false, holePoints);
+            result = proBuilderMesh.CreateShapeFromPolygon(controlPoints, 0, false, holes);
         }
         else
         {
-            result = proBuilderMesh.CreateShapeFromPolygon(points, 0, false);
+            result = proBuilderMesh.CreateShapeFromPolygon(controlPoints, 0, false);
         }
 
         proBuilderMesh.ToMesh();
         proBuilderMesh.Refresh();
-        proBuilderMesh.AlignPolygonNormals(normal);
+        proBuilderMesh.AlignPolygonNormals(forward);
 
         return result;
+    }
+
+    public static ProBuilderMesh CreateShapeFromPolygon(this IList<Vector3> controlPoints, Vector3? normal = null, IList<IList<Vector3>> holes = null)
+    {
+        ProBuilderMesh probuilderMesh = ProBuilderMesh.Create();
+        probuilderMesh.CreateShapeFromPolygon(controlPoints, normal, holes);
+        return probuilderMesh;
     }
 
     public static IEnumerable<int> GetCoincidentVerticesFromPosition(this ProBuilderMesh proBuilderMesh, Vector3 position, float marginForError = 0.001f)

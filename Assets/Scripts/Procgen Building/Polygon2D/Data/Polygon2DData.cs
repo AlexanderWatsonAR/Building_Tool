@@ -19,7 +19,7 @@ public class Polygon2DData : DirtyData
     public Vector3 Scale => m_Scale;
     public Shape ExteriorShape => m_Shape;
     public List<Polygon2DData> InteriorShapes => m_InteriorShapes;
-    public bool HasInterior 
+    public bool HasInterior
     {
         get
         {
@@ -52,6 +52,9 @@ public class Polygon2DData : DirtyData
             IList<IList<Vector3>> holes = new List<IList<Vector3>>();
 
             if (m_InteriorShapes == null)
+                return null;
+
+            if (m_Scale == Vector3.zero)
                 return null;
 
             Matrix4x4 trs = Matrix4x4.TRS(m_Position, Rotation, m_Scale);
@@ -95,6 +98,11 @@ public class Polygon2DData : DirtyData
     public Polygon2DData() : this(Vector3.zero, Vector3.zero, Vector3.one, new Square(), new List<Polygon2DData>())
     {
     }
+    public Polygon2DData(Shape shape) :this(Vector3.zero, Vector3.zero, Vector3.one, shape, new List<Polygon2DData>())
+    {
+
+    }
+
     public Polygon2DData(Vector3 position, Vector3 eulerAngle, Vector3 scale, Shape exteriorShape, List<Polygon2DData> interiorShapes)
     {
         m_Position = position;
@@ -102,6 +110,18 @@ public class Polygon2DData : DirtyData
         m_Scale = scale;
         m_Shape = exteriorShape;
         m_InteriorShapes = interiorShapes;
+    }
+    public Polygon2DData(IEnumerable<Vector3> polygon, IList<IList<Vector3>> interiorPolygons = null) : this(Vector3.zero, Vector3.zero, Vector3.one, new PathShape(polygon), new List<Polygon2DData>())
+    {
+        if(interiorPolygons == null)
+            return;
+
+        m_InteriorShapes = new List<Polygon2DData>();
+
+        foreach(var interiorPolygon in interiorPolygons)
+        {
+            m_InteriorShapes.Add(new Polygon2DData(interiorPolygon));
+        }
     }
     public Polygon2DData(Polygon3DAData data) : this(data.Position, data.EulerAngle, data.Scale, data.ExteriorShape, data.InteriorShapes)
     {
@@ -127,6 +147,10 @@ public class Polygon2DData : DirtyData
         m_Position = position;
         m_EulerAngle = eulerAngle;
         m_Scale = scale;
+    }
+    public void SetScale(float scale)
+    {
+        m_Scale = Vector3.one * scale;
     }
     #endregion
 

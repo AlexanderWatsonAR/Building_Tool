@@ -24,15 +24,15 @@ namespace OnlyInvalid.ProcGenBuilding.Polygon3D
             base.Build();
         }
 
-        protected override void CalculateInside()
+        protected void CalculateInside()
         {
             GridFrameData.ClearInterior();
 
-            var split = Clipper.Split(GridFrameData.ExteriorShape.ControlPoints(), GridFrameData.Columns, GridFrameData.Rows, GridFrameData.Scale);
+            var split = Clipper.Split(GridFrameData.ExteriorShape.ControlPoints(), GridFrameData.Columns, GridFrameData.Rows, GridFrameData.InsideScale);
 
-            foreach (var square in split)
+            foreach (var section in split)
             {
-                GridFrameData.AddToInterior(new Polygon2DData(Vector3.zero, Vector3.zero, Vector3.one, new PathShape(square), null));
+                GridFrameData.AddToInterior(new Polygon2DData(section));
             }
 
             GridFrameData.IsHoleDirty = false;

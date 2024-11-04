@@ -69,6 +69,12 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
             m_Material = material;
         }
 
+        private void Projection()
+        {
+            Matrix4x4.Frustum(1, 1, 1, 1, 0, 1);
+            Matrix4x4.Perspective(90, 1, 0, 1);
+        }
+
         private Vector3[] ExtendPoints()
         {
             Vector3[] extendedPoints = new Vector3[] { m_ControlPoints[0].Start, TopLeft, TopRight, m_ControlPoints[3].Start };

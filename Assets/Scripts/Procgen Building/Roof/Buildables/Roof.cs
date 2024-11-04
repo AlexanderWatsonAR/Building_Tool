@@ -275,9 +275,5 @@ namespace OnlyInvalid.ProcGenBuilding.Roof
             return tile;
         }
 
-        public override void Demolish()
-        {
-
-        }
     }
 }

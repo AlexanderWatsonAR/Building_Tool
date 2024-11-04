@@ -87,7 +87,7 @@ namespace OnlyInvalid.ProcGenBuilding.Wall
         {
             FrameData frameData = new FrameData()
             {
-                FrameScale = insideScale,
+                InsideScale = insideScale,
                 Depth = depth
             };
             frameData.SetShape(new PathShape(controlPoints));
